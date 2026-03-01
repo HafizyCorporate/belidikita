@@ -142,7 +142,18 @@
             <button id="verifyOtpBtn">Verifikasi</button>
         </div>
     </div>
+    
+       <div id="resetPasswordModal" class="modal">
+        <div class="modal-content">
+            <h2>Reset Password</h2>
+            <p>Masukkan kode OTP dari email dan password barumu.</p>
+            <input type="hidden" id="resetEmail" />
+            <input type="text" id="resetOtpCode" placeholder="Kode 6 Digit OTP" maxlength="6" required />
+            <input type="password" id="resetNewPassword" placeholder="Password Baru" required />
+            <button id="submitResetBtn">Simpan Password Baru</button>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
-</html>
+                                                   </html>
