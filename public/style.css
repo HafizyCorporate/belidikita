@@ -11,11 +11,11 @@ body {
 .hidden { display: none !important; }
 
 /* === =========================================== === */
-/* === 1. UPDATE: FULL SVG SPLASH SCREEN ANIMATION === */
+/* === 1. UPDATE: FULL SVG SPLASH SCREEN (JUMBO)   === */
 /* === =========================================== === */
 .splash-screen {
     position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-    /* ✅ UPDATE WARNA: Biru Muda Cerah */
+    /* ✅ UPDATE WARNA: Biru Muda Sky Cerah */
     background: linear-gradient(180deg, #ADD8E6 0%, #E0F7FA 100%);
     display: flex; flex-direction: column; justify-content: center; 
     align-items: center; z-index: 9999; 
@@ -25,21 +25,23 @@ body {
 /* Wrapper Jalanan & Animasi */
 .loop-wrapper {
     margin: 0 auto; position: relative; display: block;
-    width: 600px; height: 250px; overflow: hidden;
+    /* ✅ Meningkatkan ukuran wadah agar muat visual Jumbo */
+    width: 600px; height: 300px; overflow: hidden;
     border-bottom: 4px solid #fff; color: #fff;
-    /* ✅ Mengangkat wrapper sedikit agar sejajar */
-    margin-bottom: -50px; 
+    /* ✅ Posisi disesuaikan agar teks di bawahnya terlihat seimbang */
+    margin-bottom: -30px; 
 }
 
-/* ✅ DITAMBAHKAN: Matahari */
+/* ✅ ✅ UPDATE JUMBO: Matahari Emas Besar */
 .sun {
-    position: absolute; top: 20px; right: 50px;
-    width: 60px; height: 60px; background: #FFD700;
-    border-radius: 50%; box-shadow: 0 0 20px #FFD700;
+    position: absolute; top: 15px; right: 40px;
+    /* Meningkatkan ukuran matahari */
+    width: 90px; height: 90px; background: #FFD700;
+    border-radius: 50%; box-shadow: 0 0 30px #FFD700;
     z-index: 1;
 }
 
-/* Gunung & Bukit (✅ Warna disesuaikan jadi biru) */
+/* Gunung & Bukit (Warna Biru Tua Awan) */
 .mountain {
   position: absolute; right: -900px; bottom: -20px;
   width: 2px; height: 2px;
@@ -66,30 +68,49 @@ body {
   animation: hill 4s 2s linear infinite;
 }
 
-/* Pohon, Batu, Truk SVG (Referensi Eksternal) */
+/* ✅ ✅ ✅ UPDATE JUMBO: Pohon Besar */
 .tree, .tree:nth-child(2), .tree:nth-child(3) {
-  position: absolute; height: 100px; width: 35px; bottom: 0;
+  position: absolute; 
+  /* Meningkatkan tinggi pohon */
+  height: 150px; 
+  /* Meningkatkan lebar pohon */
+  width: 55px; 
+  /* Menyesuaikan posisi bawah agar batang terlihat seimbang */
+  bottom: 10px;
   background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/tree.svg) no-repeat;
+  background-size: contain; /* Memastikan SVG menyesuaikan ukuran wadah */
 }
 .rock {
   margin-top: -17%; height: 2%; width: 2%; bottom: -2px;
   border-radius: 20px; position: absolute; background: #ddd;
 }
+
+/* ✅ ✅ ✅ ✅ UPDATE JUMBO: Truk Besar Gagah */
 .truck, .wheels {
-  transition: all ease; width: 85px; margin-right: -60px;
+  transition: all ease; 
+  /* Meningkatkan lebar total truk */
+  width: 130px; 
+  margin-right: -60px;
   bottom: 0px; right: 50%; position: absolute;
 }
 .truck {
   background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/truck.svg) no-repeat;
-  background-size: contain; height: 60px;
+  background-size: contain; 
+  /* Meningkatkan tinggi truk agar gagah */
+  height: 90px;
 }
 .truck:before {
-  content: " "; position: absolute; width: 25px;
-  box-shadow: -30px 28px 0 1.5px #fff, -35px 18px 0 1.5px #fff;
+  content: " "; position: absolute; 
+  /* Menyesuaikan asap agar jumbo juga */
+  width: 35px;
+  box-shadow: -35px 35px 0 2px #fff, -40px 25px 0 2px #fff;
 }
 .wheels {
   background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/wheels.svg) no-repeat;
-  height: 15px; margin-bottom: 0;
+  /* Menyesuaikan ukuran roda agar pas dengan truk jumbo */
+  height: 20px;
+  background-size: contain; 
+  margin-bottom: 0;
 }
 
 /* Penugasan Animasi */
@@ -102,32 +123,39 @@ body {
 .truck:before { animation: wind 1.5s 0.000s ease infinite; }
 
 /* Teks Mewah & Megah (Tetap Dipertahankan) */
-.splash-text-container { text-align: center; margin-top: 20px; z-index: 2; }
+.splash-text-container { text-align: center; margin-top: 15px; z-index: 2; }
 .megah-title {
-    font-size: clamp(2.5rem, 8vw, 4.5rem); 
-    font-weight: 800; color: #fff; text-transform: uppercase;
-    letter-spacing: 8px; 
-    /* ✅ Update Bayangan: Jadi Biru Tua */
+    font-size: clamp(2.8rem, 9vw, 5rem); 
+    font-weight: 800; color: #fff; 
+    /* ✅ UPDATE: Menghilangkan text-transform uppercase agar sesuai CamelCase Belidikita */
+    letter-spacing: 6px; 
+    /* Update Bayangan: Jadi Biru Tua Merek Belidikita */
     text-shadow: 4px 4px 0 #1976D2, 8px 8px 20px rgba(0,0,0,0.4);
     opacity: 0; transform: scale(0.5);
     animation: textZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1s;
 }
-.megah-title span { color: #FFD700; } /* Warna Emas */
+/* Menghilangkan selektor span emas karena tidak digunakan lagi */
+.megah-title span { color: inherit; } 
+
 .brand-slogan {
-    font-size: 1.1rem; color: #E0F2F1; margin-top: 10px;
+    font-size: 1.2rem; 
+    /* ✅ UPDATE WARNA: Biru Tua Merek Belidikita agar terbaca jelas di langit cerah */
+    color: #0D47A1; 
+    margin-top: 5px;
+    font-weight: 600;
     opacity: 0; animation: fadeIn 1s ease forwards 1.8s;
 }
 
-/* Keyframes Animasi (✅ Diperbarui Full) */
-@keyframes tree { 0% { transform: translate(1350px); } 100% { transform: translate(-50px); } }
-@keyframes tree2 { 0% { transform: translate(650px); } 100% { transform: translate(-50px); } }
-@keyframes tree3 { 0% { transform: translate(2750px); } 100% { transform: translate(-50px); } }
-@keyframes rock { 0% { right: -200px; } 100% { right: 2000px; } }
+/* Keyframes Animasi (Diperbarui Full agar visual Jumbo tidak tumpang tindih) */
+@keyframes tree { 0% { transform: translate(1500px); } 100% { transform: translate(-100px); } }
+@keyframes tree2 { 0% { transform: translate(800px); } 100% { transform: translate(-100px); } }
+@keyframes tree3 { 0% { transform: translate(3000px); } 100% { transform: translate(-100px); } }
+@keyframes rock { 0% { right: -250px; } 100% { right: 2500px; } }
 @keyframes truck {
-  0% {} 6% { transform: translateY(0px); } 7% { transform: translateY(-6px); } 9% { transform: translateY(0px); }
-  10% { transform: translateY(-1px); } 11% { transform: translateY(0px); } 100% {}
+  0% {} 6% { transform: translateY(0px); } 7% { transform: translateY(-8px); } 9% { transform: translateY(0px); }
+  10% { transform: translateY(-2px); } 11% { transform: translateY(0px); } 100% {}
 }
-@keyframes wind { 0% {} 50% { transform: translateY(3px) } 100% {} }
+@keyframes wind { 0% {} 50% { transform: translateY(4px) } 100% {} }
 @keyframes mtn { 100% { transform: translateX(-2000px) rotate(130deg); } }
 @keyframes hill { 100% { transform: translateX(-2000px); } }
 @keyframes textZoom { to { opacity: 1; transform: scale(1); } }
@@ -147,8 +175,8 @@ nav {
 .nav-logo span { color: #5f3cf5; }
 .nav-links { list-style: none; display: flex; gap: 15px; align-items: center; }
 .nav-links a { color: #fff; text-decoration: none; font-size: 14px; }
-.upload-btn { background-color: #28a745; border-color: #28a745; padding: 8px 15px; font-size: 12px; border-radius: 20px; color: #fff; font-weight: bold; cursor: pointer;}
-.logout-btn { background-color: #dc3545; border-color: #dc3545; padding: 8px 15px; font-size: 12px; border-radius: 20px; color: #fff; font-weight: bold; cursor: pointer;}
+.upload-btn { background-color: #28a745; border-color: #28a745; padding: 8px 15px; font-size: 12px; border-radius: 20px; color: #fff; font-weight: bold; cursor: pointer; border:none; text-transform: uppercase;}
+.logout-btn { background-color: #dc3545; border-color: #dc3545; padding: 8px 15px; font-size: 12px; border-radius: 20px; color: #fff; font-weight: bold; cursor: pointer; border:none; text-transform: uppercase;}
 
 /* === GLOBAL BUTTON & INPUT === */
 button {
@@ -247,6 +275,11 @@ a.forgot-text { color: #5f3cf5; font-size: 12px; text-decoration: none; margin: 
     form { padding: 0 30px; }
     nav { padding: 10px 20px; }
     .dashboard { width: 100%; padding: 10px; margin-top: 60px; }
-    /* Menyesuaikan wrapper animasi di HP */
-    .loop-wrapper { width: 100%; transform: scale(0.6); margin-top: -50px;}
+    /* Menyesuaikan wrapper animasi Jumbo di HP */
+    .loop-wrapper { 
+        width: 100%; 
+        transform: scale(0.5); /* Skala visual di HP agar muat */
+        margin-top: -60px; 
+        margin-bottom: -100px; /* Menyesuaikan jarak teks */
+    }
 }
