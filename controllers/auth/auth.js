@@ -1,4 +1,4 @@
-const { pool } = require('../../config/db');
+const { pool } = require('../../config/db'); // ✅ Import database sudah diperbaiki
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
@@ -26,7 +26,7 @@ const register = async (req, res) => {
         await sendEmail(email, "Kode OTP belidikita", `Kode OTP Registrasi Anda adalah: ${otp}`);
         res.json({ success: true, message: "Cek email Anda untuk kode OTP!" });
     } catch (err) {
-        console.error(err.message);
+        console.error("Register Error:", err.message);
         res.status(500).json({ success: false, message: "Server Error" });
     }
 };
@@ -40,24 +40,39 @@ const verifyOTP = async (req, res) => {
         await pool.query('UPDATE users SET is_verified = true, otp = null WHERE email = $1', [email]);
         res.json({ success: true, message: "Akun terverifikasi! Silakan login." });
     } catch (err) {
+        console.error("Verify OTP Error:", err.message);
         res.status(500).json({ success: false, message: "Server Error" });
     }
 };
 
-// 2. Login Reguler & Google
+// 2. Login Reguler & Google (✅ Sudah Aman dari Crash)
 const login = async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        
+        // Cek apakah email ada
         if (user.rows.length === 0) return res.status(400).json({ success: false, message: 'Email tidak ditemukan!' });
+        
+        // Cek apakah akun sudah diverifikasi
         if (!user.rows[0].is_verified) return res.status(400).json({ success: false, message: 'Akun belum diverifikasi OTP!' });
 
+        // --- CEGAH CRASH: Cek apakah user mendaftar via Google (tidak punya password) ---
+        if (!user.rows[0].password) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Akun ini terdaftar via Google. Silakan klik tombol "Sign in with Google".' 
+            });
+        }
+
+        // Jika aman, baru lakukan komparasi password
         const validPassword = await bcrypt.compare(password, user.rows[0].password);
         if (!validPassword) return res.status(400).json({ success: false, message: 'Password salah!' });
 
         const token = jwt.sign({ id: user.rows[0].id, role: user.rows[0].role }, process.env.JWT_SECRET, { expiresIn: '7d' });
         res.json({ success: true, message: "Login berhasil!", token });
     } catch (err) {
+        console.error("Login Error:", err);
         res.status(500).json({ success: false, message: "Server Error" });
     }
 };
@@ -79,6 +94,7 @@ const googleLogin = async (req, res) => {
         const token = jwt.sign({ id: user.rows[0].id, role: user.rows[0].role }, process.env.JWT_SECRET, { expiresIn: '7d' });
         res.json({ success: true, message: "Login Google berhasil!", token });
     } catch (err) {
+        console.error("Google Login Error:", err.message);
         res.status(500).json({ success: false, message: "Verifikasi Google Gagal" });
     }
 };
@@ -91,6 +107,7 @@ const forgotPassword = async (req, res) => {
         if (user.rows.length === 0) return res.status(400).json({ success: false, message: 'Email tidak terdaftar.' });
         res.json({ success: true, message: "Instruksi reset password berhasil dikirim!" });
     } catch (err) {
+        console.error("Forgot Password Error:", err.message);
         res.status(500).json({ success: false, message: "Server Error" });
     }
 };
