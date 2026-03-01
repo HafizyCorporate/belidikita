@@ -11,17 +11,23 @@
 <body>
 
     <div id="splashScreen" class="splash-screen">
+        
+        <div class="sun"></div>
+
         <div class="loop-wrapper">
-            <div class="sun"></div>
-            
-            <div class="mountain"></div>
-            <div class="hill"></div>
-            <div class="tree"></div>
-            <div class="tree"></div>
-            <div class="tree"></div>
-            <div class="rock"></div>
-            <div class="truck"></div>
-            <div class="wheels"></div>
+            <div class="anim-scaler">
+                <div class="mountain"></div>
+                <div class="hill"></div>
+                <div class="tree"></div>
+                <div class="tree"></div>
+                <div class="tree"></div>
+                <div class="rock"></div>
+                
+                <div class="truck-wrapper">
+                    <div class="truck"></div>
+                    <div class="wheels"></div>
+                </div>
+            </div>
         </div>
         
         <div class="splash-text-container">
@@ -62,13 +68,11 @@
 
         <div id="forumSection" class="section-box hidden">
             <h3>Forum Diskusi 💬</h3>
-            
             <form id="forumForm" style="margin-bottom: 20px;">
                 <input type="text" id="forumTitle" placeholder="Judul Topik Diskusi" required>
                 <textarea id="forumContent" placeholder="Tulis isi diskusimu di sini..." rows="3" required></textarea>
                 <button type="submit">Posting Topik</button>
             </form>
-            
             <div id="forumList" class="forum-container">
                 <p style="color: #666; font-size: 14px;">Memuat diskusi...</p>
             </div>
@@ -88,7 +92,6 @@
     </div>
 
     <div class="container" id="authContainer">
-        
         <div class="form-container sign-up-container">
             <form id="registerForm">
                 <h2>Buat Akun</h2>
@@ -98,11 +101,9 @@
                 <button type="submit">SIGN UP</button>
             </form>
         </div>
-
         <div class="form-container sign-in-container">
             <form id="loginForm">
                 <h2>Sign In</h2>
-                
                 <div id="g_id_onload"
                      data-client_id="MASUKKAN_GOOGLE_CLIENT_ID_DISINI"
                      data-context="signin"
@@ -111,7 +112,6 @@
                      data-auto_prompt="false">
                 </div>
                 <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
-                
                 <span>atau gunakan email</span>
                 <input type="email" id="loginEmail" placeholder="Email" required />
                 <input type="password" id="loginPassword" placeholder="Password" required />
@@ -119,7 +119,6 @@
                 <button type="submit">LOGIN</button>
             </form>
         </div>
-
         <div class="overlay-container">
             <div class="overlay">
                 <div class="overlay-panel overlay-left">
