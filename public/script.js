@@ -100,6 +100,26 @@ document.addEventListener("DOMContentLoaded", () => {
             checkLoginStatus(); // Masuk ke dashboard
         }
     });
+    
+        // 5B. LUPA PASSWORD LOGIC
+    document.getElementById('forgotPasswordBtn').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        
+        if (!email) {
+            alert("Tulis email kamu dulu di kolom atas, lalu klik Lupa Password.");
+            return;
+        }
+
+        const res = await fetch('/api/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        alert(data.message);
+    });
+
 
     // 6. TOGGLE MENU UPLOAD
     const uploadSection = document.getElementById('uploadSection');
