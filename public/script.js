@@ -31,6 +31,9 @@ document.addEventListener("DOMContentLoaded", () => {
             authContainer.classList.add('hidden');
             navbar.classList.remove('hidden');
             dashboardContainer.classList.remove('hidden');
+            
+            // ✅ BARANG LANGSUNG MUNCUL SAAT LOGIN
+            loadProducts(); 
         }
     }
 
@@ -101,7 +104,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     
-            // 5B. LUPA PASSWORD LOGIC
+    // 5B. LUPA PASSWORD LOGIC
     document.getElementById('forgotPasswordBtn').addEventListener('click', async (e) => {
         e.preventDefault();
         const email = document.getElementById('loginEmail').value;
@@ -161,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
         uploadSection.classList.toggle('hidden');
     });
 
-        // 6B. NAVIGASI BERANDA & FORUM LOGIC
+    // 6B. NAVIGASI BERANDA & FORUM LOGIC
     const navHome = document.getElementById('navHome');
     const navForum = document.getElementById('navForum');
     const aiSearchSection = document.getElementById('aiSearchSection');
@@ -189,6 +192,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const aiResponseBox = document.getElementById('aiResponseBox');
         const aiBtn = document.getElementById('aiBtn');
         
+        // ✅ EMOJI DIPERBAIKI
         aiResponseBox.innerHTML = "<em>AI sedang berpikir... ⏳</em>";
         aiBtn.disabled = true;
 
@@ -236,6 +240,9 @@ document.addEventListener("DOMContentLoaded", () => {
             if(data.success) {
                 document.getElementById('uploadForm').reset();
                 uploadSection.classList.add('hidden');
+                
+                // ✅ BARANG LANGSUNG MUNCUL SETELAH UPLOAD
+                loadProducts();
             }
         } catch (error) {
             console.error("Upload error:", error);
@@ -283,6 +290,7 @@ async function loadProducts() {
                 // Buat kartu produk HTML
                 const card = document.createElement('div');
                 card.className = 'product-card';
+                // ✅ EMOJI DIPERBAIKI
                 card.innerHTML = `
                     ${product.media_url ? mediaTag : '<div class="product-media" style="display:flex; align-items:center; justify-content:center; font-size:10px; color:#aaa;">No Media</div>'}
                     <div class="product-info">
@@ -303,72 +311,72 @@ async function loadProducts() {
     }
 }
 
-    // 11. FUNGSI MEMUAT FORUM DISKUSI
-    async function loadForumPosts() {
-        const forumList = document.getElementById('forumList');
-        forumList.innerHTML = '<p style="color: #666; font-size: 14px;">Memuat diskusi...</p>';
+// 11. FUNGSI MEMUAT FORUM DISKUSI
+async function loadForumPosts() {
+    const forumList = document.getElementById('forumList');
+    forumList.innerHTML = '<p style="color: #666; font-size: 14px;">Memuat diskusi...</p>';
+    
+    try {
+        const res = await fetch('/api/forum');
+        const result = await res.json();
         
-        try {
-            const res = await fetch('/api/forum');
-            const result = await res.json();
+        if (result.success && result.data.length > 0) {
+            forumList.innerHTML = ''; 
             
-            if (result.success && result.data.length > 0) {
-                forumList.innerHTML = ''; 
+            result.data.forEach(post => {
+                // Bikin tanggal jadi rapi
+                const date = new Date(post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
                 
-                result.data.forEach(post => {
-                    // Bikin tanggal jadi rapi
-                    const date = new Date(post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-                    
-                    const card = document.createElement('div');
-                    card.className = 'forum-card';
-                    card.innerHTML = `
-                        <div class="forum-title">${post.title}</div>
-                        <div class="forum-author">👤 ${post.author_name} • 🕒 ${date}</div>
-                        <div class="forum-content">${post.content.replace(/\n/g, '<br>')}</div>
-                    `;
-                    forumList.appendChild(card);
-                });
-            } else {
-                forumList.innerHTML = '<p style="color: #666; font-size: 14px;">Belum ada diskusi. Jadilah yang pertama memulai topik!</p>';
-            }
-        } catch (error) {
-            console.error("Error loading forum:", error);
-            forumList.innerHTML = '<p style="color: red; font-size: 14px;">Gagal memuat forum dari server.</p>';
+                const card = document.createElement('div');
+                card.className = 'forum-card';
+                // ✅ EMOJI DIPERBAIKI
+                card.innerHTML = `
+                    <div class="forum-title">${post.title}</div>
+                    <div class="forum-author">👤 ${post.author_name} • 🕒 ${date}</div>
+                    <div class="forum-content">${post.content.replace(/\n/g, '<br>')}</div>
+                `;
+                forumList.appendChild(card);
+            });
+        } else {
+            forumList.innerHTML = '<p style="color: #666; font-size: 14px;">Belum ada diskusi. Jadilah yang pertama memulai topik!</p>';
         }
+    } catch (error) {
+        console.error("Error loading forum:", error);
+        forumList.innerHTML = '<p style="color: red; font-size: 14px;">Gagal memuat forum dari server.</p>';
+    }
+}
+
+// 12. LOGIC POSTING FORUM BARU
+document.getElementById('forumForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('forumTitle').value;
+    const content = document.getElementById('forumContent').value;
+    const token = localStorage.getItem('token'); 
+
+    // Satpam pengecek login
+    if (!token) {
+        alert("Kamu harus login dulu untuk membuat diskusi!");
+        return;
     }
 
-    // 12. LOGIC POSTING FORUM BARU
-    document.getElementById('forumForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const title = document.getElementById('forumTitle').value;
-        const content = document.getElementById('forumContent').value;
-        const token = localStorage.getItem('token'); 
-
-        // Satpam pengecek login
-        if (!token) {
-            alert("Kamu harus login dulu untuk membuat diskusi!");
-            return;
+    try {
+        const res = await fetch('/api/forum', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            },
+            body: JSON.stringify({ title, content })
+        });
+        const data = await res.json();
+        alert(data.message);
+        
+        if(data.success) {
+            document.getElementById('forumForm').reset();
+            loadForumPosts(); // Langsung refresh daftar forum tanpa perlu reload web
         }
-
-        try {
-            const res = await fetch('/api/forum', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
-                },
-                body: JSON.stringify({ title, content })
-            });
-            const data = await res.json();
-            alert(data.message);
-            
-            if(data.success) {
-                document.getElementById('forumForm').reset();
-                loadForumPosts(); // Langsung refresh daftar forum tanpa perlu reload web
-            }
-        } catch (error) {
-            console.error("Forum post error:", error);
-            alert("Terjadi kesalahan saat memposting diskusi.");
-        }
-    });
-
+    } catch (error) {
+        console.error("Forum post error:", error);
+        alert("Terjadi kesalahan saat memposting diskusi.");
+    }
+});
