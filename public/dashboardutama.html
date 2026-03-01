@@ -39,7 +39,7 @@
 
     <div id="dashboardContainer" class="hidden dashboard">
         
-                <div id="aiSearchSection" class="section-box">
+        <div id="aiSearchSection" class="section-box">
             <h3>Tanya AI / Cari Barang Pintar 🤖</h3>
             <div class="ai-chat-container">
                 <div id="aiResponseBox" class="ai-response-box">Halo! Aku Asisten AI belidikita. Mau cari barang apa hari ini?</div>
@@ -55,13 +55,20 @@
                     <p style="color: #666; font-size: 14px;">Memuat barang...</p>
                 </div>
             </div>
-            </div>
-
-        
+        </div>
 
         <div id="forumSection" class="section-box hidden">
             <h3>Forum Diskusi 💬</h3>
-            <p>Fitur forum sedang dibangun. Nanti list diskusi akan muncul di sini!</p>
+            
+            <form id="forumForm" style="margin-bottom: 20px;">
+                <input type="text" id="forumTitle" placeholder="Judul Topik Diskusi" required>
+                <textarea id="forumContent" placeholder="Tulis isi diskusimu di sini..." rows="3" required></textarea>
+                <button type="submit">Posting Topik</button>
+            </form>
+            
+            <div id="forumList" class="forum-container">
+                <p style="color: #666; font-size: 14px;">Memuat diskusi...</p>
+            </div>
         </div>
 
         <div id="uploadSection" class="section-box hidden">
@@ -78,6 +85,7 @@
     </div>
 
     <div class="container" id="authContainer">
+        
         <div class="form-container sign-up-container">
             <form id="registerForm">
                 <h2>Buat Akun</h2>
