@@ -10,59 +10,105 @@ body {
 
 .hidden { display: none !important; }
 
-/* === UPDATE: SPLASH SCREEN (TRUK & TEKS MEGAH) === */
+/* === =========================================== === */
+/* === 1. UPDATE: FULL SVG SPLASH SCREEN ANIMATION === */
+/* === =========================================== === */
 .splash-screen {
     position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-    background: #009688; /* Warna hijau toska sesuai referensi */
+    /* ✅ UPDATE WARNA: Biru Muda Cerah */
+    background: linear-gradient(180deg, #ADD8E6 0%, #E0F7FA 100%);
     display: flex; flex-direction: column; justify-content: center; 
     align-items: center; z-index: 9999; 
-    transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
 }
-.splash-screen.hide { opacity: 0; visibility: hidden; }
+.splash-screen.hide { opacity: 0; visibility: hidden; transition: opacity 1s ease, visibility 1s ease; }
 
 /* Wrapper Jalanan & Animasi */
 .loop-wrapper {
     margin: 0 auto; position: relative; display: block;
     width: 600px; height: 250px; overflow: hidden;
     border-bottom: 4px solid #fff; color: #fff;
+    /* ✅ Mengangkat wrapper sedikit agar sejajar */
+    margin-bottom: -50px; 
 }
 
-/* Gunung Bergerak */
+/* ✅ DITAMBAHKAN: Matahari */
+.sun {
+    position: absolute; top: 20px; right: 50px;
+    width: 60px; height: 60px; background: #FFD700;
+    border-radius: 50%; box-shadow: 0 0 20px #FFD700;
+    z-index: 1;
+}
+
+/* Gunung & Bukit (✅ Warna disesuaikan jadi biru) */
 .mountain {
-    position: absolute; right: -900px; bottom: -20px;
-    width: 2px; height: 2px;
-    box-shadow: 
-        0 0 0 50px #4DB6AC, 60px 50px 0 70px #4DB6AC, 
-        90px 90px 0 50px #4DB6AC, 250px 250px 0 50px #4DB6AC, 
-        290px 320px 0 50px #4DB6AC, 320px 400px 0 50px #4DB6AC;
-    transform: rotate(130deg); 
-    animation: mtn 15s linear infinite;
+  position: absolute; right: -900px; bottom: -20px;
+  width: 2px; height: 2px;
+  box-shadow: 
+    0 0 0 50px #64B5F6,
+    60px 50px 0 70px #64B5F6,
+    90px 90px 0 50px #64B5F6,
+    250px 250px 0 50px #64B5F6,
+    290px 320px 0 50px #64B5F6,
+    320px 400px 0 50px #64B5F6;
+  transform: rotate(130deg);
+  animation: mtn 20s linear infinite;
+}
+.hill {
+  position: absolute; right: -900px; bottom: -50px;
+  width: 400px; border-radius: 50%; height: 20px;
+  box-shadow: 
+    0 0 0 50px #64B5F6,
+    -20px 0 0 20px #64B5F6,
+    -90px 0 0 50px #64B5F6,
+    250px 0 0 50px #64B5F6,
+    290px 0 0 50px #64B5F6,
+    620px 0 0 50px #64B5F6;
+  animation: hill 4s 2s linear infinite;
 }
 
-/* Truk Belidikita */
+/* Pohon, Batu, Truk SVG (Referensi Eksternal) */
+.tree, .tree:nth-child(2), .tree:nth-child(3) {
+  position: absolute; height: 100px; width: 35px; bottom: 0;
+  background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/tree.svg) no-repeat;
+}
+.rock {
+  margin-top: -17%; height: 2%; width: 2%; bottom: -2px;
+  border-radius: 20px; position: absolute; background: #ddd;
+}
+.truck, .wheels {
+  transition: all ease; width: 85px; margin-right: -60px;
+  bottom: 0px; right: 50%; position: absolute;
+}
 .truck {
-    width: 120px; height: 60px; background: #fff;
-    position: absolute; bottom: 12px; left: 50%;
-    transform: translateX(-50%); border-radius: 5px;
-    animation: truckShake 0.2s infinite alternate;
+  background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/truck.svg) no-repeat;
+  background-size: contain; height: 60px;
 }
-.truck::before { /* Kepala Truk */
-    content: ''; position: absolute; width: 50px; height: 45px;
-    background: #fff; right: -45px; bottom: 0; 
-    border-radius: 0 15px 5px 0; border-left: 2px solid #ccc;
+.truck:before {
+  content: " "; position: absolute; width: 25px;
+  box-shadow: -30px 28px 0 1.5px #fff, -35px 18px 0 1.5px #fff;
 }
-.truck::after { /* Jendela */
-    content: ''; position: absolute; width: 25px; height: 18px;
-    background: #009688; right: -35px; top: 5px; border-radius: 3px;
+.wheels {
+  background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/wheels.svg) no-repeat;
+  height: 15px; margin-bottom: 0;
 }
 
-/* Teks Mewah & Megah */
-.splash-text-container { text-align: center; margin-top: 30px; }
+/* Penugasan Animasi */
+.tree  { animation: tree 3s 0.000s linear infinite; }
+.tree:nth-child(2)  { animation: tree2 2s 0.150s linear infinite; }
+.tree:nth-child(3)  { animation: tree3 8s 0.050s linear infinite; }
+.rock  { animation: rock 4s -0.530s linear infinite; }
+.truck  { animation: truck 4s 0.080s ease infinite; }
+.wheels  { animation: truck 4s 0.001s ease infinite; }
+.truck:before { animation: wind 1.5s 0.000s ease infinite; }
+
+/* Teks Mewah & Megah (Tetap Dipertahankan) */
+.splash-text-container { text-align: center; margin-top: 20px; z-index: 2; }
 .megah-title {
     font-size: clamp(2.5rem, 8vw, 4.5rem); 
     font-weight: 800; color: #fff; text-transform: uppercase;
     letter-spacing: 8px; 
-    text-shadow: 4px 4px 0 #00796B, 8px 8px 20px rgba(0,0,0,0.4);
+    /* ✅ Update Bayangan: Jadi Biru Tua */
+    text-shadow: 4px 4px 0 #1976D2, 8px 8px 20px rgba(0,0,0,0.4);
     opacity: 0; transform: scale(0.5);
     animation: textZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1s;
 }
@@ -72,16 +118,24 @@ body {
     opacity: 0; animation: fadeIn 1s ease forwards 1.8s;
 }
 
-/* Keyframes Animasi Splash */
-@keyframes mtn { 100% { right: 100%; } }
-@keyframes truckShake { 
-    from { transform: translateX(-50%) translateY(0); } 
-    to { transform: translateX(-50%) translateY(-3px); } 
+/* Keyframes Animasi (✅ Diperbarui Full) */
+@keyframes tree { 0% { transform: translate(1350px); } 100% { transform: translate(-50px); } }
+@keyframes tree2 { 0% { transform: translate(650px); } 100% { transform: translate(-50px); } }
+@keyframes tree3 { 0% { transform: translate(2750px); } 100% { transform: translate(-50px); } }
+@keyframes rock { 0% { right: -200px; } 100% { right: 2000px; } }
+@keyframes truck {
+  0% {} 6% { transform: translateY(0px); } 7% { transform: translateY(-6px); } 9% { transform: translateY(0px); }
+  10% { transform: translateY(-1px); } 11% { transform: translateY(0px); } 100% {}
 }
-@keyframes textZoom { 
-    to { opacity: 1; transform: scale(1); } 
-}
+@keyframes wind { 0% {} 50% { transform: translateY(3px) } 100% {} }
+@keyframes mtn { 100% { transform: translateX(-2000px) rotate(130deg); } }
+@keyframes hill { 100% { transform: translateX(-2000px); } }
+@keyframes textZoom { to { opacity: 1; transform: scale(1); } }
 @keyframes fadeIn { to { opacity: 1; } }
+
+/* === =========================================== === */
+/* === SISA CSS ASLI (NAVBAR, CONTAINER, DASHBOARD) === */
+/* === =========================================== === */
 
 /* === NAVBAR === */
 nav {
@@ -93,8 +147,8 @@ nav {
 .nav-logo span { color: #5f3cf5; }
 .nav-links { list-style: none; display: flex; gap: 15px; align-items: center; }
 .nav-links a { color: #fff; text-decoration: none; font-size: 14px; }
-.upload-btn { background-color: #28a745; border-color: #28a745; padding: 8px 15px; font-size: 12px; }
-.logout-btn { background-color: #dc3545; border-color: #dc3545; padding: 8px 15px; font-size: 12px; }
+.upload-btn { background-color: #28a745; border-color: #28a745; padding: 8px 15px; font-size: 12px; border-radius: 20px; color: #fff; font-weight: bold; cursor: pointer;}
+.logout-btn { background-color: #dc3545; border-color: #dc3545; padding: 8px 15px; font-size: 12px; border-radius: 20px; color: #fff; font-weight: bold; cursor: pointer;}
 
 /* === GLOBAL BUTTON & INPUT === */
 button {
@@ -167,125 +221,32 @@ a.forgot-text { color: #5f3cf5; font-size: 12px; text-decoration: none; margin: 
     gap: 20px;
     margin-top: 15px;
 }
-
 .product-card {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
-    transition: transform 0.3s ease;
-    display: flex;
-    flex-direction: column;
+    background: #fff; border: 1px solid #eee; border-radius: 10px;
+    overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease; display: flex; flex-direction: column;
 }
-
-.product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(95, 60, 245, 0.15);
-}
-
-.product-media {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    background-color: #f1f1f1;
-}
-
-.product-info {
-    padding: 15px;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.product-title {
-    font-size: 14px;
-    font-weight: 800;
-    color: #333;
-    margin-bottom: 5px;
-}
-
-.product-price {
-    color: #28a745;
-    font-weight: bold;
-    font-size: 16px;
-    margin-bottom: 8px;
-}
-
-.product-desc {
-    font-size: 12px;
-    color: #666;
-    margin-bottom: 10px;
-    flex-grow: 1;
-}
-
-.product-seller {
-    font-size: 11px;
-    color: #999;
-    border-top: 1px solid #eee;
-    padding-top: 10px;
-}
-
+.product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(95, 60, 245, 0.15); }
+.product-media { width: 100%; height: 150px; object-fit: cover; background-color: #f1f1f1; }
+.product-info { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
+.product-title { font-size: 14px; font-weight: 800; color: #333; margin-bottom: 5px; }
+.product-price { color: #28a745; font-weight: bold; font-size: 16px; margin-bottom: 8px; }
+.product-desc { font-size: 12px; color: #666; margin-bottom: 10px; flex-grow: 1; }
+.product-seller { font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 10px; }
 
 /* === FORUM DISKUSI === */
-.forum-container {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 20px;
-    border-top: 1px solid #eee;
-    padding-top: 20px;
-}
-.forum-card {
-    background: #f8f9fa;
-    border-left: 4px solid #009688; /* Warna hijau toska senada splash screen */
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-.forum-title {
-    font-size: 16px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 5px;
-}
-.forum-author {
-    font-size: 11px;
-    color: #666;
-    margin-bottom: 10px;
-    font-style: italic;
-}
-.forum-content {
-    font-size: 13px;
-    color: #444;
-    line-height: 1.5;
-}
+.forum-container { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px; }
+.forum-card { background: #f8f9fa; border-left: 4px solid #009688; padding: 15px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.forum-title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 5px; }
+.forum-author { font-size: 11px; color: #666; margin-bottom: 10px; font-style: italic; }
+.forum-content { font-size: 13px; color: #444; line-height: 1.5; }
 
-
-/* Update khusus agar di HP benar-benar terasa FULL */
+/* Responsif HP */
 @media (max-width: 600px) {
-    /* Auth Container jadi Full Layar */
-    .container {
-        width: 100vw;
-        height: 100vh;
-        border-radius: 0; /* Hilangkan lengkungan pojok agar nempel layar */
-        box-shadow: none;
-    }
-
-    /* Form di dalamnya juga Full */
-    form {
-        padding: 0 30px;
-    }
-
-    /* Navbar agar tidak terlalu besar di HP */
-    nav {
-        padding: 10px 20px;
-    }
-
-    /* Dashboard agar nempel ke pinggir tapi tetap ada nafas sedikit */
-    .dashboard {
-        width: 100%;
-        padding: 10px;
-        margin-top: 60px;
-    }
+    .container { width: 100vw; height: 100vh; border-radius: 0; box-shadow: none; }
+    form { padding: 0 30px; }
+    nav { padding: 10px 20px; }
+    .dashboard { width: 100%; padding: 10px; margin-top: 60px; }
+    /* Menyesuaikan wrapper animasi di HP */
+    .loop-wrapper { width: 100%; transform: scale(0.6); margin-top: -50px;}
 }
