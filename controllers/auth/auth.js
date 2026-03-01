@@ -122,5 +122,31 @@ const forgotPassword = async (req, res) => {
     }
 };
 
+// 4. Reset Password (Baru)
+const resetPassword = async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+    try {
+        // Cari user yang email dan OTP-nya cocok
+        const user = await pool.query('SELECT * FROM users WHERE email = $1 AND otp = $2', [email, otp]);
+        
+        if (user.rows.length === 0) {
+            return res.status(400).json({ success: false, message: 'OTP salah atau email tidak valid!' });
+        }
+
+        // Enkripsi (Hash) password yang baru
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // Timpa password lama dengan yang baru, lalu kosongkan OTP-nya agar tidak bisa dipakai 2x
+        await pool.query('UPDATE users SET password = $1, otp = null WHERE email = $2', [hashedPassword, email]);
+
+        res.json({ success: true, message: "Password berhasil diubah! Silakan login dengan password barumu." });
+    } catch (err) {
+        console.error("Reset Password Error:", err.message);
+        res.status(500).json({ success: false, message: "Server Error" });
+    }
+};
+
+
 
 module.exports = { register, verifyOTP, login, googleLogin, forgotPassword };
