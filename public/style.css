@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,600,800');
 
+/* RESET & DASAR */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
     background: #f6f5f7; display: flex; justify-content: center;
@@ -9,24 +10,78 @@ body {
 
 .hidden { display: none !important; }
 
-/* === SPLASH SCREEN === */
+/* === UPDATE: SPLASH SCREEN (TRUK & TEKS MEGAH) === */
 .splash-screen {
     position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-    background: linear-gradient(135deg, #1e1e1e, #0a0a0a);
-    display: flex; justify-content: center; align-items: center;
-    z-index: 9999; transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+    background: #009688; /* Warna hijau toska sesuai referensi */
+    display: flex; flex-direction: column; justify-content: center; 
+    align-items: center; z-index: 9999; 
+    transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
 }
 .splash-screen.hide { opacity: 0; visibility: hidden; }
-.splash-content { text-align: center; color: #fff; }
-.brand-title { font-size: 3rem; font-weight: 800; opacity: 0; animation: slideUpFade 1s ease forwards 0.3s; }
-.brand-title span { color: #5f3cf5; }
-.brand-slogan { font-size: 1rem; color: #ccc; margin-top: 10px; opacity: 0; animation: slideUpFade 1s ease forwards 0.6s; }
-.loading-bar { width: 200px; height: 4px; background: #333; border-radius: 4px; margin: 30px auto 0; overflow: hidden; opacity: 0; animation: fadeIn 1s ease forwards 1s; }
-.loading-progress { width: 0%; height: 100%; background: #5f3cf5; animation: loadingBar 2s ease forwards 1s; }
 
-@keyframes slideUpFade { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+/* Wrapper Jalanan & Animasi */
+.loop-wrapper {
+    margin: 0 auto; position: relative; display: block;
+    width: 600px; height: 250px; overflow: hidden;
+    border-bottom: 4px solid #fff; color: #fff;
+}
+
+/* Gunung Bergerak */
+.mountain {
+    position: absolute; right: -900px; bottom: -20px;
+    width: 2px; height: 2px;
+    box-shadow: 
+        0 0 0 50px #4DB6AC, 60px 50px 0 70px #4DB6AC, 
+        90px 90px 0 50px #4DB6AC, 250px 250px 0 50px #4DB6AC, 
+        290px 320px 0 50px #4DB6AC, 320px 400px 0 50px #4DB6AC;
+    transform: rotate(130deg); 
+    animation: mtn 15s linear infinite;
+}
+
+/* Truk Belidikita */
+.truck {
+    width: 120px; height: 60px; background: #fff;
+    position: absolute; bottom: 12px; left: 50%;
+    transform: translateX(-50%); border-radius: 5px;
+    animation: truckShake 0.2s infinite alternate;
+}
+.truck::before { /* Kepala Truk */
+    content: ''; position: absolute; width: 50px; height: 45px;
+    background: #fff; right: -45px; bottom: 0; 
+    border-radius: 0 15px 5px 0; border-left: 2px solid #ccc;
+}
+.truck::after { /* Jendela */
+    content: ''; position: absolute; width: 25px; height: 18px;
+    background: #009688; right: -35px; top: 5px; border-radius: 3px;
+}
+
+/* Teks Mewah & Megah */
+.splash-text-container { text-align: center; margin-top: 30px; }
+.megah-title {
+    font-size: clamp(2.5rem, 8vw, 4.5rem); 
+    font-weight: 800; color: #fff; text-transform: uppercase;
+    letter-spacing: 8px; 
+    text-shadow: 4px 4px 0 #00796B, 8px 8px 20px rgba(0,0,0,0.4);
+    opacity: 0; transform: scale(0.5);
+    animation: textZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1s;
+}
+.megah-title span { color: #FFD700; } /* Warna Emas */
+.brand-slogan {
+    font-size: 1.1rem; color: #E0F2F1; margin-top: 10px;
+    opacity: 0; animation: fadeIn 1s ease forwards 1.8s;
+}
+
+/* Keyframes Animasi Splash */
+@keyframes mtn { 100% { right: 100%; } }
+@keyframes truckShake { 
+    from { transform: translateX(-50%) translateY(0); } 
+    to { transform: translateX(-50%) translateY(-3px); } 
+}
+@keyframes textZoom { 
+    to { opacity: 1; transform: scale(1); } 
+}
 @keyframes fadeIn { to { opacity: 1; } }
-@keyframes loadingBar { to { width: 100%; } }
 
 /* === NAVBAR === */
 nav {
@@ -105,10 +160,30 @@ a.forgot-text { color: #5f3cf5; font-size: 12px; text-decoration: none; margin: 
 .modal-content h2 { margin-bottom: 10px; }
 .modal-content p { font-size: 12px; margin-bottom: 20px; color: #ccc; }
 
-/* RESPONSIVE MOBILE TWEAKS */
+/* Update khusus agar di HP benar-benar terasa FULL */
 @media (max-width: 600px) {
-    .container { min-height: 550px; }
-    form { padding: 0 20px; }
-    .nav-links { gap: 10px; }
-    .upload-btn, .logout-btn { padding: 8px 10px; font-size: 10px; }
+    /* Auth Container jadi Full Layar */
+    .container {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0; /* Hilangkan lengkungan pojok agar nempel layar */
+        box-shadow: none;
+    }
+
+    /* Form di dalamnya juga Full */
+    form {
+        padding: 0 30px;
+    }
+
+    /* Navbar agar tidak terlalu besar di HP */
+    nav {
+        padding: 10px 20px;
+    }
+
+    /* Dashboard agar nempel ke pinggir tapi tetap ada nafas sedikit */
+    .dashboard {
+        width: 100%;
+        padding: 10px;
+        margin-top: 60px;
+    }
 }
