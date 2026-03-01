@@ -147,6 +147,4 @@ const resetPassword = async (req, res) => {
     }
 };
 
-
-
-module.exports = { register, verifyOTP, login, googleLogin, forgotPassword };
+module.exports = { register, verifyOTP, login, googleLogin, forgotPassword, resetPassword };
