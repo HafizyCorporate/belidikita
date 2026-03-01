@@ -3,56 +3,55 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
-// Import Controllers & Middleware
-const { register, verifyOTP } = require('./controllers/auth/register'); // Disesuaikan dengan folder barumu
-const { login, googleLogin } = require('./controllers/auth/login');
-const { forgotPassword } = require('./controllers/auth/forgot');
+// --- IMPORT CONTROLLERS ---
+const { register, verifyOTP, login, googleLogin, forgotPassword } = require('./controllers/auth');
+const { getProfile, updateProfile } = require('./controllers/profile');
+const { uploadProduct, getAllProducts } = require('./controllers/product');
+const { createPost, getPosts } = require('./controllers/forum');
 const { askAI } = require('./controllers/ai');
-const upload = require('./middleware/upload'); 
 
-// Nanti kamu bisa buat controller untuk produk
-// const { uploadProduct } = require('./controllers/product'); 
+// --- IMPORT MIDDLEWARE ---
+const upload = require('./middleware/upload');   // Penjaga File Upload
+const verifyToken = require('./middleware/auth'); // Penjaga Pintu Masuk (Satpam)
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// Konfigurasi Middleware Global
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Penting untuk menerima form-data (file upload)
+app.use(express.urlencoded({ extended: true }));
 
-// Menyajikan file statis (HTML, CSS, JS, dan folder Uploads)
+// Menyajikan file statis (Frontend & Folder Uploads)
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
-// --- ROUTING API AUTHENTICATION ---
+// ==========================================
+// 🔓 API PUBLIK (Siapa saja boleh akses)
+// ==========================================
 app.post('/api/register', register);
 app.post('/api/verify-otp', verifyOTP);
 app.post('/api/login', login);
 app.post('/api/google-login', googleLogin);
 app.post('/api/forgot-password', forgotPassword);
 
-// --- ROUTING API AI ---
 app.post('/api/ai/search', askAI);
+app.get('/api/products', getAllProducts); // Melihat daftar barang tidak perlu login
+app.get('/api/forum', getPosts);          // Melihat forum tidak perlu login
 
-// --- ROUTING API JUALAN (PRODUCTS) ---
-// Rute ini menggunakan middleware 'upload.single("media")' untuk menangkap file dari input ber-name="media"
-app.post('/api/products', upload.single('media'), (req, res) => {
-    // Ini hanya placeholder, nanti akan diarahkan ke controller product beneran
-    if (!req.file) {
-        return res.status(400).json({ success: false, message: "File media wajib diunggah!" });
-    }
-    
-    console.log("File berhasil diupload:", req.file.filename);
-    console.log("Data barang:", req.body);
-    
-    res.json({ 
-        success: true, 
-        message: "Produk berhasil diunggah!", 
-        fileUrl: `/uploads/${req.file.filename}` 
-    });
-});
+// ==========================================
+// 🔒 API PRIVAT (Wajib Login / Bawa Token)
+// ==========================================
+// Rute Profil
+app.get('/api/profile', verifyToken, getProfile);
+app.put('/api/profile', verifyToken, updateProfile);
 
+// Rute Jualan (Produk) -> Melewati Satpam Tiket (verifyToken) & Pemeriksa File (upload.single)
+app.post('/api/products', verifyToken, upload.single('media'), uploadProduct);
+
+// Rute Forum
+app.post('/api/forum', verifyToken, createPost);
+
+// ==========================================
 // Jalankan Server
 app.listen(PORT, () => {
     console.log(`🚀 Server belidikita berjalan di port ${PORT}`);
