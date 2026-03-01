@@ -1,4 +1,5 @@
-const pool = require('../../config/db');
+const { pool } = require('../../config/db');
+
 
 const createPost = async (req, res) => {
     const { title, content } = req.body;
