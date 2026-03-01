@@ -127,6 +127,27 @@ document.addEventListener("DOMContentLoaded", () => {
         uploadSection.classList.toggle('hidden');
     });
 
+        // 6B. NAVIGASI BERANDA & FORUM LOGIC
+    const navHome = document.getElementById('navHome');
+    const navForum = document.getElementById('navForum');
+    const aiSearchSection = document.getElementById('aiSearchSection');
+    const forumSection = document.getElementById('forumSection');
+
+    navHome.addEventListener('click', (e) => {
+        e.preventDefault();
+        aiSearchSection.classList.remove('hidden'); // Munculkan Beranda (AI)
+        forumSection.classList.add('hidden');       // Tutup Forum
+        uploadSection.classList.add('hidden');      // Tutup Upload
+    });
+
+    navForum.addEventListener('click', (e) => {
+        e.preventDefault();
+        forumSection.classList.remove('hidden');    // Munculkan Forum
+        aiSearchSection.classList.add('hidden');    // Tutup Beranda (AI)
+        uploadSection.classList.add('hidden');      // Tutup Upload
+    });
+
+
     // 7. AI SEARCH LOGIC
     document.getElementById('aiSearchForm').addEventListener('submit', async (e) => {
         e.preventDefault();
