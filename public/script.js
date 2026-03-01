@@ -224,3 +224,47 @@ window.handleCredentialResponse = async function(response) {
         location.reload(); 
     }
 };
+
+// 10. FUNGSI MEMUAT DAFTAR BARANG
+async function loadProducts() {
+    const productList = document.getElementById('productList');
+    productList.innerHTML = '<p style="color: #666; font-size: 14px;">Memuat barang...</p>';
+    
+    try {
+        const res = await fetch('/api/products');
+        const result = await res.json();
+        
+        if (result.success && result.data.length > 0) {
+            productList.innerHTML = ''; // Kosongkan tulisan "Memuat..."
+            
+            result.data.forEach(product => {
+                // Cek apakah uploadnya video atau gambar
+                const mediaTag = product.media_type === 'video' 
+                    ? `<video src="${product.media_url}" class="product-media" controls></video>`
+                    : `<img src="${product.media_url}" class="product-media" alt="${product.title}">`;
+                
+                // Format angka jadi Rupiah (Rp)
+                const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
+
+                // Buat kartu produk HTML
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    ${product.media_url ? mediaTag : '<div class="product-media" style="display:flex; align-items:center; justify-content:center; font-size:10px; color:#aaa;">No Media</div>'}
+                    <div class="product-info">
+                        <div class="product-title">${product.title}</div>
+                        <div class="product-price">${priceRp}</div>
+                        <div class="product-desc">${product.description || 'Tidak ada deskripsi'}</div>
+                        <div class="product-seller">👤 ${product.seller_name}</div>
+                    </div>
+                `;
+                productList.appendChild(card);
+            });
+        } else {
+            productList.innerHTML = '<p style="color: #666; font-size: 14px;">Belum ada barang yang dijual. Jadilah yang pertama!</p>';
+        }
+    } catch (error) {
+        console.error("Error loading products:", error);
+        productList.innerHTML = '<p style="color: red; font-size: 14px;">Gagal memuat barang dari server.</p>';
+    }
+}
