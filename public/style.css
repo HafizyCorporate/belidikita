@@ -227,6 +227,41 @@ a.forgot-text { color: #5f3cf5; font-size: 12px; text-decoration: none; margin: 
 }
 
 
+/* === FORUM DISKUSI === */
+.forum-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+.forum-card {
+    background: #f8f9fa;
+    border-left: 4px solid #009688; /* Warna hijau toska senada splash screen */
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.forum-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 5px;
+}
+.forum-author {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 10px;
+    font-style: italic;
+}
+.forum-content {
+    font-size: 13px;
+    color: #444;
+    line-height: 1.5;
+}
+
+
 /* Update khusus agar di HP benar-benar terasa FULL */
 @media (max-width: 600px) {
     /* Auth Container jadi Full Layar */
