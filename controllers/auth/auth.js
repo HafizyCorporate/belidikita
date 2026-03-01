@@ -105,11 +105,22 @@ const forgotPassword = async (req, res) => {
     try {
         const user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
         if (user.rows.length === 0) return res.status(400).json({ success: false, message: 'Email tidak terdaftar.' });
-        res.json({ success: true, message: "Instruksi reset password berhasil dikirim!" });
+        
+        // Generate OTP baru untuk Lupa Password
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Simpan OTP ke database user tersebut
+        await pool.query('UPDATE users SET otp = $1 WHERE email = $2', [otp, email]);
+        
+        // Kirim email sungguhan
+        await sendEmail(email, "Reset Password belidikita", `Kode OTP untuk mereset password kamu adalah: ${otp}`);
+        
+        res.json({ success: true, message: "Cek email! Kode OTP untuk reset password sudah dikirim." });
     } catch (err) {
         console.error("Forgot Password Error:", err.message);
         res.status(500).json({ success: false, message: "Server Error" });
     }
 };
+
 
 module.exports = { register, verifyOTP, login, googleLogin, forgotPassword };
