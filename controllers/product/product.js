@@ -1,4 +1,4 @@
-const pool = require('../../config/db');
+const { pool } = require('../../config/db');
 
 const uploadProduct = async (req, res) => {
     const { title, description, price } = req.body;
