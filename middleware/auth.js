@@ -5,7 +5,7 @@ const verifyToken = (req, res, next) => {
     // 1. Tangkap header Authorization dari request frontend
     const authHeader = req.headers['authorization'];
     
-    // 2. Format token biasanya "Bearer <token_panjang>", kita ambil tokennya saja
+    // 2. Ekstrak token (Pisahkan kata "Bearer " dan ambil tokennya saja)
     const token = authHeader && authHeader.split(' ')[1];
 
     // 3. Jika tidak ada token (user belum login / tidak bawa tiket)
