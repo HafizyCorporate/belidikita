@@ -101,7 +101,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     
-        // 5B. LUPA PASSWORD LOGIC
+            // 5B. LUPA PASSWORD LOGIC
     document.getElementById('forgotPasswordBtn').addEventListener('click', async (e) => {
         e.preventDefault();
         const email = document.getElementById('loginEmail').value;
@@ -118,6 +118,40 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         const data = await res.json();
         alert(data.message);
+
+        // Jika email berhasil dikirim, munculkan popup reset password
+        if(data.success) {
+            document.getElementById('resetEmail').value = email; // Simpan email secara diam-diam
+            document.getElementById('resetPasswordModal').style.display = "block";
+        }
+    });
+
+    // 5C. SIMPAN PASSWORD BARU LOGIC
+    document.getElementById('submitResetBtn').addEventListener('click', async () => {
+        const email = document.getElementById('resetEmail').value;
+        const otp = document.getElementById('resetOtpCode').value;
+        const newPassword = document.getElementById('resetNewPassword').value;
+
+        if(!otp || !newPassword) {
+            alert("Harap isi kode OTP dan Password Baru!");
+            return;
+        }
+
+        const res = await fetch('/api/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, otp, newPassword })
+        });
+        const data = await res.json();
+        alert(data.message);
+
+        // Jika berhasil ganti password, tutup popup-nya
+        if(data.success) {
+            document.getElementById('resetPasswordModal').style.display = "none";
+            document.getElementById('loginPassword').value = ''; // Kosongkan form password lama
+            document.getElementById('resetOtpCode').value = ''; 
+            document.getElementById('resetNewPassword').value = '';
+        }
     });
 
 
