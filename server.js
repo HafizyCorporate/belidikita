@@ -8,7 +8,8 @@ require('dotenv').config();
 const { pool, initDB } = require('./config/db'); 
 
 // --- 1. UPDATE: IMPORT CONTROLLERS DENGAN NAMA FILE BARU ---
-const { register, verifyOTP, login, googleLogin, forgotPassword } = require('./controllers/auth/auth');
+// ✅ DITAMBAHKAN: resetPassword di dalam kurung kurawal
+const { register, verifyOTP, login, googleLogin, forgotPassword, resetPassword } = require('./controllers/auth/auth');
 const { getProfile, updateProfile } = require('./controllers/profile/profile');
 const { uploadProduct, getAllProducts } = require('./controllers/product/product');
 const { createPost, getPosts } = require('./controllers/forum/forum');
@@ -38,20 +39,22 @@ app.get('/', (req, res) => {
 });
 
 // ==========================================
-// ðŸ”“ API PUBLIK (Siapa saja boleh akses)
+// 🔓 API PUBLIK (Siapa saja boleh akses)
 // ==========================================
 app.post('/api/register', register);
 app.post('/api/verify-otp', verifyOTP);
 app.post('/api/login', login);
 app.post('/api/google-login', googleLogin);
 app.post('/api/forgot-password', forgotPassword);
+// ✅ DITAMBAHKAN: Route untuk proses simpan password baru
+app.post('/api/reset-password', resetPassword);
 
 app.post('/api/ai/search', askAI);
 app.get('/api/products', getAllProducts); 
 app.get('/api/forum', getPosts);          
 
 // ==========================================
-// ðŸ”’ API PRIVAT (Wajib Login / Bawa Token JWT)
+// 🔒 API PRIVAT (Wajib Login / Bawa Token JWT)
 // ==========================================
 app.get('/api/profile', verifyToken, getProfile);
 app.put('/api/profile', verifyToken, updateProfile);
@@ -63,5 +66,5 @@ app.post('/api/forum', verifyToken, createPost);
 // ==========================================
 // Jalankan Server
 app.listen(PORT, () => {
-    console.log(`ðŸš€ Server belidikita berjalan di port ${PORT}`);
+    console.log(`🚀 Server belidikita berjalan di port ${PORT}`);
 });
