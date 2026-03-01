@@ -1,10 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. SPLASH SCREEN LOGIC
+    // 1. SPLASH SCREEN LOGIC (Update: Penutup Halus & Mewah)
     const splashScreen = document.getElementById('splashScreen');
     setTimeout(() => {
-        splashScreen.classList.add('hide');
-        checkLoginStatus(); // Cek apakah user sudah login sebelumnya
-    }, 3500);
+        // Efek memudar (fade out) selama 1 detik
+        splashScreen.style.transition = "opacity 1s ease";
+        splashScreen.style.opacity = "0";
+
+        setTimeout(() => {
+            splashScreen.classList.add('hide');
+            splashScreen.style.display = "none";
+            checkLoginStatus(); // Cek apakah user sudah login sebelumnya
+        }, 1000); // Tunggu sampai proses memudar selesai
+    }, 4500); // Memberi waktu animasi truk & teks megah tampil sempurna
 
     // 2. SLIDING PANEL LOGIC
     const signUpBtn = document.getElementById('signUp');
@@ -129,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Buat objek FormData karena kita mengirim file (gambar/video)
         const formData = new FormData();
         formData.append('title', document.getElementById('prodTitle').value);
         formData.append('price', document.getElementById('prodPrice').value);
@@ -140,13 +146,11 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append('media', fileInput.files[0]);
         }
 
-        const token = localStorage.getItem('token'); // Ambil token untuk dipasang di Header nanti
+        const token = localStorage.getItem('token'); 
 
         try {
             const res = await fetch('/api/products', {
                 method: 'POST',
-                // Ingat: Jangan set Content-Type secara manual saat menggunakan FormData
-                // Browser akan otomatis men-setnya menjadi multipart/form-data
                 headers: {
                     'Authorization': `Bearer ${token}` 
                 },
@@ -176,6 +180,6 @@ window.handleCredentialResponse = async function(response) {
     alert(data.message);
     if(data.success) {
         localStorage.setItem('token', data.token);
-        location.reload(); // Refresh untuk memuat dashboard
+        location.reload(); 
     }
 };
