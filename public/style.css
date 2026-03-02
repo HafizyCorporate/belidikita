@@ -1,344 +1,161 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // === 1. LOGIKA SPLASH SCREEN (Membuka Gembok Layar) ===
-    const splashScreen = document.getElementById('splashScreen');
-    const topHeader = document.getElementById('topHeader');
-    const mainContent = document.getElementById('mainContent');
-    const bottomNav = document.getElementById('bottomNav');
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,600,800');
 
-    setTimeout(() => {
-        splashScreen.style.transition = "opacity 1s ease";
-        splashScreen.style.opacity = "0";
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
 
-        setTimeout(() => {
-            splashScreen.classList.add('hide');
-            splashScreen.style.display = "none";
-            document.body.classList.remove('no-scroll'); // Buka gembok scroll layar
-            
-            topHeader.classList.remove('hidden');
-            mainContent.classList.remove('hidden');
-            bottomNav.classList.remove('hidden');
-            
-            initDashboard(); // Muat data jendela
-        }, 1000); 
-    }, 4500); 
+/* ✅ Mengunci body agar tidak bisa digeser-geser saat animasi */
+html, body { max-width: 100%; overflow-x: hidden; background: #f4f4f4; color: #333; }
+body.no-scroll { overflow: hidden; }
+.hidden { display: none !important; }
 
-    // === 2. LOGIKA SLIDER PROMO (Geser Otomatis) ===
-    const sliderWrapper = document.getElementById('promoSlider');
-    let slideIndex = 0;
-    setInterval(() => {
-        slideIndex++;
-        if (slideIndex > 2) slideIndex = 0; // Karena ada 3 slide (0,1,2)
-        // Geser per 33.33% karena 3 slide dibungkus 300% width
-        sliderWrapper.style.transform = `translateX(-${slideIndex * 33.33}%)`;
-    }, 3000); // Geser setiap 3 detik
+/* === 1. SPLASH SCREEN === */
+.splash-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #81D4FA 0%, #E1F5FE 100%); display: flex; flex-direction: column; z-index: 9999; overflow: hidden; }
+.splash-screen.hide { opacity: 0; visibility: hidden; transition: opacity 1s ease, visibility 1s ease; }
 
+.loop-wrapper { position: absolute; bottom: 0; left: 0; width: 100vw; height: 40vh; border-bottom: 15px solid #fff; z-index: 2; }
+.anim-scaler { position: absolute; bottom: 0; left: 50%; width: 1000px; height: 300px; margin-left: -500px; transform: scale(3.0); transform-origin: bottom center; }
+.sun { position: absolute; top: 2vh; right: -2vw; width: 180px; height: 180px; background: #FFD700; border-radius: 50%; box-shadow: 0 0 50px #FFD700; z-index: 0; }
 
-    // === 3. MENGISI 10 JENDELA DATA (SCROLL KESAMPING) ===
-    function initDashboard() {
-        populateHorizontalCards('topSellingList', '🔥 Laris');
-        populateHorizontalCards('topCartList', '🛒 Disimpan');
-        populateTopSellers('topSellerList');
-        loadRandomProducts(); // Fungsi API lama kamu untuk Grid bawah
-    }
+.sun-beam { position: absolute; top: 90px; left: 90px; width: 600px; height: 150vh; margin-left: -300px; background: linear-gradient(180deg, rgba(255, 215, 0, 0.6) 0%, rgba(255, 255, 255, 0) 70%); transform-origin: top center; transform: rotate(40deg); clip-path: polygon(45% 0, 55% 0, 100% 100%, 0 100%); animation: beamPulse 3s infinite alternate; pointer-events: none; }
+@keyframes beamPulse { 0% { opacity: 0.5; filter: blur(5px); } 100% { opacity: 1; filter: blur(15px); } }
 
-    // Fungsi membuat 10 kartu barang (Foto, Nama & Harga satu baris)
-    function populateHorizontalCards(containerId, label) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = '';
-        for(let i=1; i<=10; i++) {
-            const card = document.createElement('div');
-            card.className = 'h-card';
-            card.innerHTML = `
-                <img src="https://via.placeholder.com/150/f1f1f1/888?text=Barang+${i}" class="h-card-img" alt="Barang">
-                <div class="h-card-info">
-                    <div class="h-card-row">
-                        <span class="h-card-title">Barang ${label} ${i}</span>
-                        <span class="h-card-price">Rp${i}0K</span>
-                    </div>
-                </div>
-            `;
-            container.appendChild(card);
-        }
-    }
+.mountain { position: absolute; right: -900px; bottom: -20px; width: 2px; height: 2px; box-shadow: 0 0 0 50px #4FC3F7, 60px 50px 0 70px #4FC3F7, 90px 90px 0 50px #4FC3F7, 250px 250px 0 50px #4FC3F7, 290px 320px 0 50px #4FC3F7, 320px 400px 0 50px #4FC3F7; transform: rotate(130deg); animation: mtn 20s linear infinite; }
+.hill { position: absolute; right: -900px; bottom: -50px; width: 400px; border-radius: 50%; height: 20px; box-shadow: 0 0 0 50px #4FC3F7, -20px 0 0 20px #4FC3F7, -90px 0 0 50px #4FC3F7, 250px 0 0 50px #4FC3F7, 290px 0 0 50px #4FC3F7, 620px 0 0 50px #4FC3F7; animation: hill 4s 2s linear infinite; }
+.tree, .tree:nth-child(2), .tree:nth-child(3) { position: absolute; height: 130px; width: 45px; bottom: 0; background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/tree.svg) no-repeat; background-size: contain; }
+.rock { margin-top: -17%; height: 2%; width: 2%; bottom: -2px; border-radius: 20px; position: absolute; background: #ddd; }
+.truck-wrapper { position: absolute; bottom: 0; left: 50%; width: 120px; margin-left: -60px; }
+.truck, .wheels { width: 120px; position: absolute; bottom: 0; left: 0; }
+.truck { background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/truck.svg) no-repeat; background-size: contain; height: 85px; }
+.truck:before { content: " "; position: absolute; width: 30px; box-shadow: -30px 40px 0 2px #fff, -35px 25px 0 2px #fff; }
+.wheels { background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/wheels.svg) no-repeat; height: 20px; background-size: contain; margin-bottom: 0; }
+.tree { animation: tree 3s 0.000s linear infinite; } .tree:nth-child(2) { animation: tree2 2s 0.150s linear infinite; } .tree:nth-child(3) { animation: tree3 8s 0.050s linear infinite; } .rock { animation: rock 4s -0.530s linear infinite; } .truck { animation: truck 4s 0.080s ease infinite; } .wheels { animation: truck 4s 0.001s ease infinite; } .truck:before { animation: wind 1.5s 0.000s ease infinite; }
 
-    // Fungsi membuat 10 kartu profil penjual
-    function populateTopSellers(containerId) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = '';
-        for(let i=1; i<=10; i++) {
-            const card = document.createElement('div');
-            card.className = 'seller-card';
-            card.innerHTML = `
-                <div class="seller-avatar"><i class="fas fa-user"></i></div>
-                <div class="seller-name">Toko ${i}</div>
-            `;
-            container.appendChild(card);
-        }
-    }
+.splash-text-container { position: absolute; top: 40%; left: 0; width: 100%; transform: translateY(-50%); text-align: center; z-index: 5; }
+.splash-logo { width: 700px; max-width: 95vw; height: auto; margin-bottom: 0px; opacity: 0; transform: scale(0.5); animation: textZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1s; }
+.brand-slogan { font-size: clamp(1.5rem, 5vw, 2.5rem); color: #0D47A1; margin-top: -30px; font-weight: 800; position: relative; z-index: 6; opacity: 0; animation: fadeIn 1s ease forwards 1.8s; }
 
-    // === 4. LOGIKA KLIK BOTTOM NAVBAR (Semua Tombol Berfungsi) ===
-    const menuHome = document.getElementById('menuHome');
-    const menuProduct = document.getElementById('menuProduct');
-    const menuFeed = document.getElementById('menuFeed');
-    const menuTransaction = document.getElementById('menuTransaction');
-    const menuAccount = document.getElementById('menuAccount');
+@keyframes tree { 0% { transform: translate(1500px); } 100% { transform: translate(-300px); } } @keyframes tree2 { 0% { transform: translate(800px); } 100% { transform: translate(-300px); } } @keyframes tree3 { 0% { transform: translate(3000px); } 100% { transform: translate(-300px); } } @keyframes rock { 0% { right: -250px; } 100% { right: 2500px; } } @keyframes truck { 0% {} 6% { transform: translateY(0px); } 7% { transform: translateY(-8px); } 9% { transform: translateY(0px); } 10% { transform: translateY(-2px); } 11% { transform: translateY(0px); } 100% {} } @keyframes wind { 0% {} 50% { transform: translateY(4px) } 100% {} } @keyframes mtn { 100% { transform: translateX(-2000px) rotate(130deg); } } @keyframes hill { 100% { transform: translateX(-2000px); } } @keyframes textZoom { to { opacity: 1; transform: scale(1); } } @keyframes fadeIn { to { opacity: 1; } }
+
+/* === 2. HEADER ATAS (LOGO DIPERBESAR) === */
+header { position: fixed; top: 0; left: 0; width: 100%; background: #81D4FA; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.15); z-index: 1000; height: 70px !important; padding: 8px 15px !important; }
+.header-logo-box { display: flex; align-items: center; width: auto; margin-right: 12px; }
+.main-logo-header { width: 140px !important; height: auto !important; max-height: 50px !important; transform: none !important; margin: 0 !important; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+.header-search { flex-grow: 1; margin: 0 15px; background: #ffffff; border-radius: 20px; display: flex; align-items: center; padding: 5px 15px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #e0e0e0; }
+.header-search i { color: #1976D2; font-size: 14px; }
+.header-search input { border: none; background: transparent; outline: none; width: 100%; padding: 5px 10px; font-size: 13px; color: #333; font-weight: 600; }
+.header-cart { position: relative; font-size: 22px; color: #0D47A1; cursor: pointer; }
+.cart-badge { position: absolute; top: -5px; right: -8px; background: #ff3b30; color: #fff; font-size: 10px; font-weight: bold; padding: 2px 5px; border-radius: 10px; border: 2px solid #81D4FA; }
+
+/* === 3. KONTEN UTAMA (DASHBOARD) === */
+main { margin-top: 70px !important; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; background: #f4f4f4; min-height: 100vh; }
+.slider-container { width: 100%; overflow: hidden; position: relative; padding: 15px; background: #fff; }
+.slider-wrapper { display: flex; transition: transform 0.5s ease-in-out; width: 300%; }
+.slide { width: 33.33%; min-height: 120px; border-radius: 15px; padding: 20px; color: #fff; display: flex; flex-direction: column; justify-content: center; margin-right: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+.slide h3 { font-size: 18px; margin-bottom: 5px; }
+.slide p { font-size: 12px; opacity: 0.9; }
+
+.scroll-section { padding: 15px 0 15px 15px; background: #fff; border-bottom: 8px solid #f4f4f4; }
+.section-header { display: flex; justify-content: space-between; align-items: center; padding-right: 15px; margin-bottom: 15px; }
+.section-header h2 { font-size: 15px; font-weight: 800; color: #333; }
+.section-header a { font-size: 12px; color: #1976D2; text-decoration: none; font-weight: 700; }
+.horizontal-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; scroll-behavior: smooth; }
+.horizontal-scroll::-webkit-scrollbar { display: none; }
+
+.h-card { min-width: 140px; max-width: 140px; background: #fff; border: 1px solid #eee; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.h-card-img { width: 100%; height: 140px; object-fit: cover; background: #f1f1f1; }
+.h-card-info { padding: 10px; }
+.h-card-row { display: flex; justify-content: space-between; align-items: center; gap: 5px; }
+.h-card-title { font-size: 12px; font-weight: 600; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-grow: 1; }
+.h-card-price { font-size: 13px; font-weight: 800; color: #ff5722; white-space: nowrap; }
+
+.seller-card { min-width: 100px; display: flex; flex-direction: column; align-items: center; background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 15px 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.seller-avatar { width: 60px; height: 60px; border-radius: 50%; background: #1976D2; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 10px; }
+.seller-name { font-size: 12px; font-weight: bold; color: #333; text-align: center; }
+
+.grid-section { padding: 15px; background: #fff; }
+.product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+.product-card { background: #fff; border: 1px solid #eee; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+.product-info { padding: 12px; display: flex; flex-direction: column; flex-grow: 1; }
+.product-title { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.product-price { color: #ff5722; font-weight: bold; font-size: 15px; margin-bottom: 8px; }
+.product-seller { font-size: 10px; color: #999; margin-top: auto; }
+
+/* === 4. BOTTOM NAVBAR === */
+#bottomNav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: #81D4FA; border-top: 1px solid #4FC3F7; display: flex; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); }
+.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: #333; font-size: 11px; gap: 5px; flex-grow: 1; font-weight: 600; transition: color 0.2s ease; }
+.nav-item i { font-size: 22px; }
+.nav-item.active { color: #0D47A1; font-weight: 800; transform: scale(1.05); } 
+.nav-item.active i { filter: drop-shadow(0 2px 4px rgba(13, 71, 161, 0.4)); }
+
+/* === 5. POPUP LOGIN & REGISTER (MODAL AUTH) === */
+.backdrop { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 1900; }
+.modal-auth { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000; box-shadow: 0 15px 50px rgba(0,0,0,0.5); }
+.close-auth-btn { position: absolute; top: 15px; right: 20px; background: rgba(0,0,0,0.2); width: 35px; height: 35px; border-radius: 50%; border: none; color: #fff; font-size: 24px; cursor: pointer; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+
+.container { background-color: #fff; border-radius: 15px; overflow: hidden; width: 768px; max-width: 95%; min-height: 480px; }
+.form-container form { background-color: #1e1e1e; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 0 40px; height: 100%; text-align: center; }
+.modal-auth h1 { font-weight: bold; margin: 0; color: #fff; font-size: 24px; }
+.modal-auth p { font-size: 14px; font-weight: 100; line-height: 20px; letter-spacing: 0.5px; margin: 20px 0 30px; }
+form span { color: #aaa; font-size: 12px; margin: 10px 0; }
+a.forgot-text { color: #1976D2; font-size: 12px; text-decoration: none; margin: 10px 0; font-weight: bold; }
+input { background-color: #2a2a2a; border: none; padding: 12px 15px; margin: 8px 0; width: 100%; border-radius: 8px; color: #fff; }
+button[type="submit"], .login-btn { border-radius: 20px; border: 1px solid #1976D2; background-color: #1976D2; color: #FFF; font-size: 12px; font-weight: bold; padding: 12px 45px; cursor: pointer; margin-top: 10px; transition: transform 0.2s, box-shadow 0.2s; text-transform: uppercase;}
+button[type="submit"]:hover, .login-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(25, 118, 210, 0.4); }
+
+.form-container { position: absolute; top: 0; height: 100%; transition: all 0.6s ease-in-out; }
+.sign-in-container { left: 0; width: 50%; z-index: 2; }
+.container.active .sign-in-container { transform: translateX(100%); }
+.sign-up-container { left: 0; width: 50%; opacity: 0; z-index: 1; }
+.container.active .sign-up-container { transform: translateX(100%); opacity: 1; z-index: 5; }
+.overlay-container { position: absolute; top: 0; left: 50%; width: 50%; height: 100%; transition: transform 0.6s ease-in-out; z-index: 100; }
+.container.active .overlay-container { transform: translateX(-100%); }
+.overlay { background: linear-gradient(to right, #0D47A1, #1976D2); color: #FFF; position: relative; left: -100%; height: 100%; width: 200%; transform: translateX(0); transition: transform 0.6s ease-in-out; }
+.container.active .overlay { transform: translateX(50%); }
+.overlay-panel { position: absolute; display: flex; align-items: center; justify-content: center; flex-direction: column; padding: 0 40px; text-align: center; top: 0; height: 100%; width: 50%; transform: translateX(0); transition: transform 0.6s ease-in-out; }
+.overlay-left { transform: translateX(-20%); }
+.container.active .overlay-left { transform: translateX(0); }
+.overlay-right { right: 0; transform: translateX(0); }
+.container.active .overlay-right { transform: translateX(20%); }
+button.ghost { background-color: transparent; border-color: #FFF; border-radius: 20px; padding: 12px 45px; color: #fff; font-weight: bold; cursor: pointer; border: 1px solid #fff;}
+
+.mobile-toggle { display: none; font-size: 13px; margin-top: 20px; color: #ccc; }
+.mobile-toggle b { color: #1976D2; cursor: pointer; }
+
+/* === 6. HALAMAN AKUN TEMA BIRU MUDA === */
+#accountContent { width: 100%; max-width: 600px; margin: 0 auto; background: #f4f4f4; min-height: 100vh; position: relative; }
+.account-header { background: linear-gradient(180deg, #81D4FA 0%, #ffffff 100%); border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; padding: 20px 20px 30px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+.account-top-icons { display: flex; justify-content: flex-end; gap: 20px; font-size: 20px; color: #0D47A1; margin-bottom: 20px; }
+.account-promo-icons { display: flex; justify-content: space-around; text-align: center; }
+.promo-item { width: 45%; }
+.icon-circle { width: 50px; height: 50px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 10px; background: #E1F5FE; color: #1976D2; }
+.promo-item h4 { font-size: 14px; font-weight: 800; color: #0D47A1; margin-bottom: 3px; }
+.promo-item p { font-size: 11px; color: #666; }
+.account-login-box { background: #fff; margin: -15px 15px 15px; padding: 15px; border-radius: 12px; position: relative; z-index: 2; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+.btn-login-large { width: 100%; background: #1976D2; color: #fff; font-size: 16px; font-weight: bold; padding: 12px; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(25, 118, 210, 0.2); }
+.klaim-diskon { display: flex; align-items: center; justify-content: space-between; background: #E1F5FE; border: 1px dashed #4FC3F7; border-radius: 8px; padding: 10px; cursor: pointer; }
+.klaim-icon { font-size: 24px; margin-right: 10px; }
+.klaim-text h4 { font-size: 13px; font-weight: 700; color: #0D47A1; margin-bottom: 2px;}
+.klaim-text p { font-size: 11px; color: #555; }
+.klaim-diskon i { color: #1976D2; }
+.account-menu-row { display: flex; gap: 10px; padding: 0 15px 15px; }
+.menu-box { background: #fff; flex: 1; padding: 12px 5px; border-radius: 8px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+.menu-box i { font-size: 20px; margin-bottom: 8px; color: #4FC3F7; } 
+.menu-box h5 { font-size: 11px; font-weight: 700; color: #1976D2; margin-bottom: 3px; line-height: 1.2; }
+.menu-box p { font-size: 10px; color: #888; }
+.account-recommendation { padding: 15px; background: #fff; }
+.account-recommendation h3 { font-size: 16px; font-weight: 800; color: #0D47A1; margin-bottom: 15px; }
+
+/* === 7. RESPONSIVE HP === */
+@media (max-width: 600px) {
+    .sun { width: 90px; height: 90px; top: 3vh; right: 3vw; } 
+    .sun-beam { top: 45px; left: 45px; width: 350px; margin-left: -175px; transform: rotate(25deg); clip-path: polygon(30% 0, 70% 0, 90% 100%, 10% 100%); }
+    .loop-wrapper { bottom: 8vh; height: 220px; border-bottom: 5px solid #fff; } 
+    .anim-scaler { transform: scale(0.85); bottom: 0px; } 
+    .splash-text-container { top: 42%; } 
+    .splash-logo { width: 380px; max-width: 92vw; } 
+    .brand-slogan { margin-top: -25px; font-size: 1.3rem; } 
     
-    const authContainer = document.getElementById('authContainer');
-    const authBackdrop = document.getElementById('authBackdrop');
-
-    // Fungsi kecil untuk memindahkan warna aktif (Biru Tua) ke menu yang diklik
-    function setActiveNav(clickedMenu) {
-        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-        clickedMenu.classList.add('active');
-    }
-
-    // 1. Tombol Home (Beranda)
-    menuHome.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuHome);
-        // Scroll kembali ke paling atas dengan halus
-        window.scrollTo({ top: 0, behavior: 'smooth' }); 
-    });
-
-    // 2. Tombol Produk
-    menuProduct.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuProduct);
-        alert("Fitur Halaman Produk sedang dalam tahap pengembangan! 📦");
-        // Nanti kodingan untuk memunculkan list produk ditaruh di sini
-    });
-
-    // 3. Tombol Feed
-    menuFeed.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuFeed);
-        alert("Fitur Video Feed Promosi Penjual segera hadir! 🎬");
-        // Nanti kodingan untuk memunculkan video ditaruh di sini
-    });
-
-    // 4. Tombol Transaksi
-    menuTransaction.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuTransaction);
-        
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert("Kamu harus login dulu untuk melihat riwayat transaksimu!");
-            // Otomatis buka form login
-            authContainer.classList.remove('hidden');
-            authBackdrop.classList.remove('hidden');
-        } else {
-            alert("Membuka Halaman Riwayat Transaksi... 🧾");
-            // Nanti kodingan untuk memunculkan data transaksi ditaruh di sini
-        }
-    });
-
-    // 5. Tombol Akun (Login / Profil)
-    menuAccount.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuAccount);
-        
-        const token = localStorage.getItem('token');
-        if (!token) {
-            // Kalau belum login, munculkan Popup Form
-            authContainer.classList.remove('hidden');
-            authBackdrop.classList.remove('hidden');
-        } else {
-            // Kalau sudah login, tanya apakah mau logout (atau nanti diarahkan ke edit profil)
-            if(confirm("Anda sudah masuk. Apakah ingin Logout?")) {
-                localStorage.removeItem('token');
-                location.reload();
-            }
-        }
-    });
-
-    // Tombol X (Tutup) pada Popup Login
-    document.getElementById('closeAuthBtn').addEventListener('click', () => {
-        authContainer.classList.add('hidden');
-        authBackdrop.classList.add('hidden');
-        
-        // Kembalikan status ikon navbar ke Home jika batal login
-        setActiveNav(menuHome); 
-    });
-
-
-           // === 5. Tombol Akun (Tampilan Baru) ===
-    const accountContent = document.getElementById('accountContent');
-    const topHeader = document.getElementById('topHeader');
-
-    menuAccount.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuAccount);
-        
-        // Sembunyikan Dashboard Utama dan Header Atas
-        mainContent.classList.add('hidden');
-        topHeader.classList.add('hidden');
-        
-        // Munculkan Halaman Akun
-        accountContent.classList.remove('hidden');
-        window.scrollTo({ top: 0 }); 
-        
-        // Muat rekomendasi produk di halaman akun
-        loadRandomProductsToAccount();
-    });
-
-    // === Logika Kembali ke Home dari Akun ===
-    menuHome.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuHome);
-        
-        // Sembunyikan Halaman Akun
-        accountContent.classList.add('hidden');
-        
-        // Munculkan kembali Dashboard Utama dan Header
-        mainContent.classList.remove('hidden');
-        topHeader.classList.remove('hidden');
-        
-        window.scrollTo({ top: 0, behavior: 'smooth' }); 
-    });
-
-    // === Tombol Masuk Besar di Halaman Akun ===
-    document.getElementById('mainLoginBtn').addEventListener('click', () => {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            // Panggil popup modal login jika belum login
-            authContainer.classList.remove('hidden');
-            authBackdrop.classList.remove('hidden');
-        } else {
-            alert("Kamu sudah login! Tombol ini nanti mengarah ke Edit Profil.");
-        }
-    });
-
-    // === Tambahan: Fungsi Load Produk ke Halaman Akun ===
-    async function loadRandomProductsToAccount() {
-        const productList = document.getElementById('accountProductList');
-        // Kode ini sama persis dengan loadRandomProducts() sebelumnya, 
-        // hanya target div-nya yang berbeda (accountProductList)
-        try {
-            const res = await fetch('/api/products');
-            const result = await res.json();
-            
-            if (result.success && result.data.length > 0) {
-                productList.innerHTML = ''; 
-                result.data.forEach(product => {
-                    const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
-                    const card = document.createElement('div');
-                    card.className = 'product-card';
-                    card.innerHTML = `
-                        <img src="${product.media_url || 'https://via.placeholder.com/150'}" class="product-media" alt="${product.title}">
-                        <div class="product-info">
-                            <div class="product-title">${product.title}</div>
-                            <div class="product-price">${priceRp}</div>
-                            <div class="product-seller"><i class="fas fa-store"></i> ${product.seller_name}</div>
-                        </div>
-                    `;
-                    productList.appendChild(card);
-                });
-            } else {
-                productList.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Belum ada rekomendasi.</p>';
-            }
-        } catch (error) {
-            console.log("Gagal memuat rekomendasi akun.");
-        }
-    }
-
-
-
-    // === 6. AUTHENTICATION API LOGIC (Register, OTP, Login) ===
-    const otpModal = document.getElementById('otpModal');
-    const otpEmailInput = document.getElementById('otpEmail');
-
-    document.getElementById('registerForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const name = document.getElementById('regName').value;
-        const email = document.getElementById('regEmail').value;
-        const password = document.getElementById('regPassword').value;
-
-        const res = await fetch('/api/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password })
-        });
-        const data = await res.json();
-        alert(data.message);
-        if(data.success) {
-            otpEmailInput.value = email;
-            otpModal.style.display = "block";
-        }
-    });
-
-    document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
-        const email = otpEmailInput.value;
-        const otp = document.getElementById('otpCode').value;
-
-        const res = await fetch('/api/verify-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, otp })
-        });
-        const data = await res.json();
-        alert(data.message);
-        if(data.success) {
-            otpModal.style.display = "none";
-            authContainer.classList.remove("active"); 
-        }
-    });
-
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-
-        const res = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-        alert(data.message);
-        if(data.success) {
-            localStorage.setItem('token', data.token);
-            authContainer.classList.add('hidden');
-            authBackdrop.classList.add('hidden');
-            document.getElementById('loginForm').reset();
-            alert("Berhasil Login! Selamat berbelanja.");
-        }
-    });
-
-    // === 7. AMBIL BARANG ASLI DARI DATABASE UNTUK GRID BAWAH ===
-    async function loadRandomProducts() {
-        const productList = document.getElementById('randomProductList');
-        try {
-            const res = await fetch('/api/products');
-            const result = await res.json();
-            
-            if (result.success && result.data.length > 0) {
-                productList.innerHTML = ''; 
-                result.data.forEach(product => {
-                    const mediaTag = product.media_type === 'video' 
-                        ? `<video src="${product.media_url}" class="product-media" controls></video>`
-                        : `<img src="${product.media_url}" class="product-media" alt="${product.title}">`;
-                    
-                    const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
-
-                    const card = document.createElement('div');
-                    card.className = 'product-card';
-                    card.innerHTML = `
-                        ${product.media_url ? mediaTag : '<div class="product-media" style="display:flex; align-items:center; justify-content:center; color:#aaa;">No Media</div>'}
-                        <div class="product-info">
-                            <div class="product-title">${product.title}</div>
-                            <div class="product-price">${priceRp}</div>
-                            <div class="product-seller"><i class="fas fa-store"></i> ${product.seller_name}</div>
-                        </div>
-                    `;
-                    productList.appendChild(card);
-                });
-            } else {
-                productList.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Belum ada barang, jadilah yang pertama menjual!</p>';
-            }
-        } catch (error) {
-            console.error("Error loading products:", error);
-            productList.innerHTML = '<p style="color: red; text-align:center;">Gagal memuat barang.</p>';
-        }
-    }
-});
+    .overlay-container { display: none !important; } 
+    .sign-in-container, .sign-up-container { width: 100% !important; }
+    .modal-auth { width: 95vw !important; height: 80vh !important; }
+    .mobile-toggle { display: block; }
+}
