@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const topHeader = document.getElementById('topHeader');
     const mainContent = document.getElementById('mainContent');
     const bottomNav = document.getElementById('bottomNav');
+    const accountContent = document.getElementById('accountContent'); // Halaman Akun
 
     setTimeout(() => {
         splashScreen.style.transition = "opacity 1s ease";
@@ -12,38 +13,38 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
             splashScreen.classList.add('hide');
             splashScreen.style.display = "none";
-            document.body.classList.remove('no-scroll'); // Buka gembok scroll layar
+            document.body.classList.remove('no-scroll'); 
             
             topHeader.classList.remove('hidden');
             mainContent.classList.remove('hidden');
             bottomNav.classList.remove('hidden');
             
-            initDashboard(); // Muat data jendela
+            initDashboard(); 
         }, 1000); 
     }, 4500); 
 
     // === 2. LOGIKA SLIDER PROMO (Geser Otomatis) ===
     const sliderWrapper = document.getElementById('promoSlider');
     let slideIndex = 0;
-    setInterval(() => {
-        slideIndex++;
-        if (slideIndex > 2) slideIndex = 0; // Karena ada 3 slide (0,1,2)
-        // Geser per 33.33% karena 3 slide dibungkus 300% width
-        sliderWrapper.style.transform = `translateX(-${slideIndex * 33.33}%)`;
-    }, 3000); // Geser setiap 3 detik
+    if(sliderWrapper) {
+        setInterval(() => {
+            slideIndex++;
+            if (slideIndex > 2) slideIndex = 0; 
+            sliderWrapper.style.transform = `translateX(-${slideIndex * 33.33}%)`;
+        }, 3000); 
+    }
 
-
-    // === 3. MENGISI 10 JENDELA DATA (SCROLL KESAMPING) ===
+    // === 3. MENGISI 10 JENDELA DATA (DUMMY DATA) ===
     function initDashboard() {
         populateHorizontalCards('topSellingList', '🔥 Laris');
         populateHorizontalCards('topCartList', '🛒 Disimpan');
         populateTopSellers('topSellerList');
-        loadRandomProducts(); // Fungsi API lama kamu untuk Grid bawah
+        loadRandomProducts(); 
     }
 
-    // Fungsi membuat 10 kartu barang (Foto, Nama & Harga satu baris)
     function populateHorizontalCards(containerId, label) {
         const container = document.getElementById(containerId);
+        if(!container) return;
         container.innerHTML = '';
         for(let i=1; i<=10; i++) {
             const card = document.createElement('div');
@@ -61,9 +62,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Fungsi membuat 10 kartu profil penjual
     function populateTopSellers(containerId) {
         const container = document.getElementById(containerId);
+        if(!container) return;
         container.innerHTML = '';
         for(let i=1; i<=10; i++) {
             const card = document.createElement('div');
@@ -76,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // === 4. LOGIKA KLIK BOTTOM NAVBAR (Semua Tombol Berfungsi) ===
+    // === 4. LOGIKA NAVIGASI BAWAH (BOTTOM NAVBAR) ===
     const menuHome = document.getElementById('menuHome');
     const menuProduct = document.getElementById('menuProduct');
     const menuFeed = document.getElementById('menuFeed');
@@ -86,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const authContainer = document.getElementById('authContainer');
     const authBackdrop = document.getElementById('authBackdrop');
 
-    // Fungsi kecil untuk memindahkan warna aktif (Biru Tua) ke menu yang diklik
+    // Fungsi pindah warna aktif
     function setActiveNav(clickedMenu) {
         document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
         clickedMenu.classList.add('active');
@@ -96,155 +97,92 @@ document.addEventListener("DOMContentLoaded", () => {
     menuHome.addEventListener('click', (e) => {
         e.preventDefault();
         setActiveNav(menuHome);
-        // Scroll kembali ke paling atas dengan halus
-        window.scrollTo({ top: 0, behavior: 'smooth' }); 
-    });
-
-    // 2. Tombol Produk
-    menuProduct.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuProduct);
-        alert("Fitur Halaman Produk sedang dalam tahap pengembangan! 📦");
-        // Nanti kodingan untuk memunculkan list produk ditaruh di sini
-    });
-
-    // 3. Tombol Feed
-    menuFeed.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuFeed);
-        alert("Fitur Video Feed Promosi Penjual segera hadir! 🎬");
-        // Nanti kodingan untuk memunculkan video ditaruh di sini
-    });
-
-    // 4. Tombol Transaksi
-    menuTransaction.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuTransaction);
         
-        const token = localStorage.getItem('token');
-        if (!token) {
-            alert("Kamu harus login dulu untuk melihat riwayat transaksimu!");
-            // Otomatis buka form login
-            authContainer.classList.remove('hidden');
-            authBackdrop.classList.remove('hidden');
-        } else {
-            alert("Membuka Halaman Riwayat Transaksi... 🧾");
-            // Nanti kodingan untuk memunculkan data transaksi ditaruh di sini
-        }
-    });
-
-    // 5. Tombol Akun (Login / Profil)
-    menuAccount.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuAccount);
-        
-        const token = localStorage.getItem('token');
-        if (!token) {
-            // Kalau belum login, munculkan Popup Form
-            authContainer.classList.remove('hidden');
-            authBackdrop.classList.remove('hidden');
-        } else {
-            // Kalau sudah login, tanya apakah mau logout (atau nanti diarahkan ke edit profil)
-            if(confirm("Anda sudah masuk. Apakah ingin Logout?")) {
-                localStorage.removeItem('token');
-                location.reload();
-            }
-        }
-    });
-
-    // Tombol X (Tutup) pada Popup Login
-    document.getElementById('closeAuthBtn').addEventListener('click', () => {
-        authContainer.classList.add('hidden');
-        authBackdrop.classList.add('hidden');
-        
-        // Kembalikan status ikon navbar ke Home jika batal login
-        setActiveNav(menuHome); 
-    });
-
-
-           // === 5. Tombol Akun (Tampilan Baru) ===
-    const accountContent = document.getElementById('accountContent');
-    const topHeader = document.getElementById('topHeader');
-
-    menuAccount.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuAccount);
-        
-        // Sembunyikan Dashboard Utama dan Header Atas
-        mainContent.classList.add('hidden');
-        topHeader.classList.add('hidden');
-        
-        // Munculkan Halaman Akun
-        accountContent.classList.remove('hidden');
-        window.scrollTo({ top: 0 }); 
-        
-        // Muat rekomendasi produk di halaman akun
-        loadRandomProductsToAccount();
-    });
-
-    // === Logika Kembali ke Home dari Akun ===
-    menuHome.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuHome);
-        
-        // Sembunyikan Halaman Akun
+        // Sembunyikan Halaman Akun, Munculkan Dashboard
         accountContent.classList.add('hidden');
-        
-        // Munculkan kembali Dashboard Utama dan Header
         mainContent.classList.remove('hidden');
         topHeader.classList.remove('hidden');
         
         window.scrollTo({ top: 0, behavior: 'smooth' }); 
     });
 
-    // === Tombol Masuk Besar di Halaman Akun ===
-    document.getElementById('mainLoginBtn').addEventListener('click', () => {
+    // 2. Tombol Akun (Tampilan Baru)
+    menuAccount.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveNav(menuAccount);
+        
+        // Sembunyikan Dashboard, Munculkan Halaman Akun
+        mainContent.classList.add('hidden');
+        topHeader.classList.add('hidden');
+        accountContent.classList.remove('hidden');
+        
+        window.scrollTo({ top: 0 }); 
+        loadRandomProductsToAccount(); // Muat produk di halaman akun
+    });
+
+    // 3. Tombol Produk
+    menuProduct.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveNav(menuProduct);
+        alert("Fitur Produk segera hadir!");
+    });
+
+    // 4. Tombol Feed
+    menuFeed.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveNav(menuFeed);
+        alert("Fitur Feed segera hadir!");
+    });
+
+    // 5. Tombol Transaksi
+    menuTransaction.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveNav(menuTransaction);
+        
         const token = localStorage.getItem('token');
         if (!token) {
-            // Panggil popup modal login jika belum login
+            alert("Login dulu untuk melihat transaksi!");
             authContainer.classList.remove('hidden');
             authBackdrop.classList.remove('hidden');
         } else {
-            alert("Kamu sudah login! Tombol ini nanti mengarah ke Edit Profil.");
+            alert("Membuka Riwayat Transaksi...");
         }
     });
 
-    // === Tambahan: Fungsi Load Produk ke Halaman Akun ===
-    async function loadRandomProductsToAccount() {
-        const productList = document.getElementById('accountProductList');
-        // Kode ini sama persis dengan loadRandomProducts() sebelumnya, 
-        // hanya target div-nya yang berbeda (accountProductList)
-        try {
-            const res = await fetch('/api/products');
-            const result = await res.json();
-            
-            if (result.success && result.data.length > 0) {
-                productList.innerHTML = ''; 
-                result.data.forEach(product => {
-                    const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
-                    const card = document.createElement('div');
-                    card.className = 'product-card';
-                    card.innerHTML = `
-                        <img src="${product.media_url || 'https://via.placeholder.com/150'}" class="product-media" alt="${product.title}">
-                        <div class="product-info">
-                            <div class="product-title">${product.title}</div>
-                            <div class="product-price">${priceRp}</div>
-                            <div class="product-seller"><i class="fas fa-store"></i> ${product.seller_name}</div>
-                        </div>
-                    `;
-                    productList.appendChild(card);
-                });
-            } else {
-                productList.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Belum ada rekomendasi.</p>';
-            }
-        } catch (error) {
-            console.log("Gagal memuat rekomendasi akun.");
+
+    // === 5. LOGIKA POPUP LOGIN (Modal Auth) ===
+    
+    // Tombol X untuk menutup modal
+    document.getElementById('closeAuthBtn').addEventListener('click', () => {
+        authContainer.classList.add('hidden');
+        authBackdrop.classList.add('hidden');
+    });
+
+    // Tombol "Masuk atau Daftar" Hijau/Biru di halaman Akun
+    document.getElementById('mainLoginBtn').addEventListener('click', () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            authContainer.classList.remove('hidden');
+            authBackdrop.classList.remove('hidden');
+        } else {
+            alert("Kamu sudah login! Tombol ini nanti untuk Edit Profil.");
         }
-    }
+    });
+
+    // Panel Geser Animasi (PC)
+    const signUpBtn = document.getElementById('signUp');
+    const signInBtn = document.getElementById('signIn');
+    if(signUpBtn) signUpBtn.addEventListener('click', () => authContainer.classList.add("active"));
+    if(signInBtn) signInBtn.addEventListener('click', () => authContainer.classList.remove("active"));
+
+    // Teks Geser di Layar HP
+    const mobileSignUp = document.getElementById('mobileSignUp');
+    const mobileSignIn = document.getElementById('mobileSignIn');
+    if(mobileSignUp) mobileSignUp.addEventListener('click', () => authContainer.classList.add("active"));
+    if(mobileSignIn) mobileSignIn.addEventListener('click', () => authContainer.classList.remove("active"));
 
 
-
-    // === 6. AUTHENTICATION API LOGIC (Register, OTP, Login) ===
+    // === 6. AUTHENTICATION API (Register, OTP, Login) ===
     const otpModal = document.getElementById('otpModal');
     const otpEmailInput = document.getElementById('otpEmail');
 
@@ -301,13 +239,14 @@ document.addEventListener("DOMContentLoaded", () => {
             authContainer.classList.add('hidden');
             authBackdrop.classList.add('hidden');
             document.getElementById('loginForm').reset();
-            alert("Berhasil Login! Selamat berbelanja.");
+            alert("Berhasil Login!");
         }
     });
 
-    // === 7. AMBIL BARANG ASLI DARI DATABASE UNTUK GRID BAWAH ===
+    // === 7. FUNGSI AMBIL BARANG DARI DATABASE ===
     async function loadRandomProducts() {
         const productList = document.getElementById('randomProductList');
+        if(!productList) return;
         try {
             const res = await fetch('/api/products');
             const result = await res.json();
@@ -315,12 +254,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (result.success && result.data.length > 0) {
                 productList.innerHTML = ''; 
                 result.data.forEach(product => {
-                    const mediaTag = product.media_type === 'video' 
-                        ? `<video src="${product.media_url}" class="product-media" controls></video>`
-                        : `<img src="${product.media_url}" class="product-media" alt="${product.title}">`;
-                    
                     const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
-
+                    const mediaTag = product.media_type === 'video' ? `<video src="${product.media_url}" class="product-media" controls></video>` : `<img src="${product.media_url}" class="product-media" alt="${product.title}">`;
                     const card = document.createElement('div');
                     card.className = 'product-card';
                     card.innerHTML = `
@@ -334,11 +269,41 @@ document.addEventListener("DOMContentLoaded", () => {
                     productList.appendChild(card);
                 });
             } else {
-                productList.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Belum ada barang, jadilah yang pertama menjual!</p>';
+                productList.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Belum ada barang.</p>';
             }
         } catch (error) {
-            console.error("Error loading products:", error);
             productList.innerHTML = '<p style="color: red; text-align:center;">Gagal memuat barang.</p>';
+        }
+    }
+
+    async function loadRandomProductsToAccount() {
+        const productList = document.getElementById('accountProductList');
+        if(!productList) return;
+        try {
+            const res = await fetch('/api/products');
+            const result = await res.json();
+            
+            if (result.success && result.data.length > 0) {
+                productList.innerHTML = ''; 
+                result.data.forEach(product => {
+                    const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.innerHTML = `
+                        <img src="${product.media_url || 'https://via.placeholder.com/150'}" class="product-media" alt="${product.title}">
+                        <div class="product-info">
+                            <div class="product-title">${product.title}</div>
+                            <div class="product-price">${priceRp}</div>
+                            <div class="product-seller"><i class="fas fa-store"></i> ${product.seller_name}</div>
+                        </div>
+                    `;
+                    productList.appendChild(card);
+                });
+            } else {
+                productList.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Belum ada rekomendasi.</p>';
+            }
+        } catch (error) {
+            console.log("Gagal memuat rekomendasi akun.");
         }
     }
 });
