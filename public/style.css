@@ -2,6 +2,7 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
 
+/* ✅ Mengunci body agar tidak bisa digeser-geser saat animasi */
 html, body { max-width: 100%; overflow-x: hidden; background: #f4f4f4; color: #333; }
 body.no-scroll { overflow: hidden; }
 .hidden { display: none !important; }
@@ -9,11 +10,14 @@ body.no-scroll { overflow: hidden; }
 /* === 1. SPLASH SCREEN === */
 .splash-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, #81D4FA 0%, #E1F5FE 100%); display: flex; flex-direction: column; z-index: 9999; overflow: hidden; }
 .splash-screen.hide { opacity: 0; visibility: hidden; transition: opacity 1s ease, visibility 1s ease; }
+
 .loop-wrapper { position: absolute; bottom: 0; left: 0; width: 100vw; height: 40vh; border-bottom: 15px solid #fff; z-index: 2; }
 .anim-scaler { position: absolute; bottom: 0; left: 50%; width: 1000px; height: 300px; margin-left: -500px; transform: scale(3.0); transform-origin: bottom center; }
 .sun { position: absolute; top: 2vh; right: -2vw; width: 180px; height: 180px; background: #FFD700; border-radius: 50%; box-shadow: 0 0 50px #FFD700; z-index: 0; }
+
 .sun-beam { position: absolute; top: 90px; left: 90px; width: 600px; height: 150vh; margin-left: -300px; background: linear-gradient(180deg, rgba(255, 215, 0, 0.6) 0%, rgba(255, 255, 255, 0) 70%); transform-origin: top center; transform: rotate(40deg); clip-path: polygon(45% 0, 55% 0, 100% 100%, 0 100%); animation: beamPulse 3s infinite alternate; pointer-events: none; }
 @keyframes beamPulse { 0% { opacity: 0.5; filter: blur(5px); } 100% { opacity: 1; filter: blur(15px); } }
+
 .mountain { position: absolute; right: -900px; bottom: -20px; width: 2px; height: 2px; box-shadow: 0 0 0 50px #4FC3F7, 60px 50px 0 70px #4FC3F7, 90px 90px 0 50px #4FC3F7, 250px 250px 0 50px #4FC3F7, 290px 320px 0 50px #4FC3F7, 320px 400px 0 50px #4FC3F7; transform: rotate(130deg); animation: mtn 20s linear infinite; }
 .hill { position: absolute; right: -900px; bottom: -50px; width: 400px; border-radius: 50%; height: 20px; box-shadow: 0 0 0 50px #4FC3F7, -20px 0 0 20px #4FC3F7, -90px 0 0 50px #4FC3F7, 250px 0 0 50px #4FC3F7, 290px 0 0 50px #4FC3F7, 620px 0 0 50px #4FC3F7; animation: hill 4s 2s linear infinite; }
 .tree, .tree:nth-child(2), .tree:nth-child(3) { position: absolute; height: 130px; width: 45px; bottom: 0; background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/tree.svg) no-repeat; background-size: contain; }
@@ -24,16 +28,43 @@ body.no-scroll { overflow: hidden; }
 .truck:before { content: " "; position: absolute; width: 30px; box-shadow: -30px 40px 0 2px #fff, -35px 25px 0 2px #fff; }
 .wheels { background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/wheels.svg) no-repeat; height: 20px; background-size: contain; margin-bottom: 0; }
 .tree { animation: tree 3s 0.000s linear infinite; } .tree:nth-child(2) { animation: tree2 2s 0.150s linear infinite; } .tree:nth-child(3) { animation: tree3 8s 0.050s linear infinite; } .rock { animation: rock 4s -0.530s linear infinite; } .truck { animation: truck 4s 0.080s ease infinite; } .wheels { animation: truck 4s 0.001s ease infinite; } .truck:before { animation: wind 1.5s 0.000s ease infinite; }
+
 .splash-text-container { position: absolute; top: 40%; left: 0; width: 100%; transform: translateY(-50%); text-align: center; z-index: 5; }
 .splash-logo { width: 700px; max-width: 95vw; height: auto; margin-bottom: 0px; opacity: 0; transform: scale(0.5); animation: textZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1s; }
 .brand-slogan { font-size: clamp(1.5rem, 5vw, 2.5rem); color: #0D47A1; margin-top: -30px; font-weight: 800; position: relative; z-index: 6; opacity: 0; animation: fadeIn 1s ease forwards 1.8s; }
+
 @keyframes tree { 0% { transform: translate(1500px); } 100% { transform: translate(-300px); } } @keyframes tree2 { 0% { transform: translate(800px); } 100% { transform: translate(-300px); } } @keyframes tree3 { 0% { transform: translate(3000px); } 100% { transform: translate(-300px); } } @keyframes rock { 0% { right: -250px; } 100% { right: 2500px; } } @keyframes truck { 0% {} 6% { transform: translateY(0px); } 7% { transform: translateY(-8px); } 9% { transform: translateY(0px); } 10% { transform: translateY(-2px); } 11% { transform: translateY(0px); } 100% {} } @keyframes wind { 0% {} 50% { transform: translateY(4px) } 100% {} } @keyframes mtn { 100% { transform: translateX(-2000px) rotate(130deg); } } @keyframes hill { 100% { transform: translateX(-2000px); } } @keyframes textZoom { to { opacity: 1; transform: scale(1); } } @keyframes fadeIn { to { opacity: 1; } }
 
-/* === 2. HEADER ATAS === */
-header { position: fixed; top: 0; left: 0; width: 100%; background: #81D4FA; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.15); z-index: 1000; height: 70px !important; padding: 8px 15px !important; }
-.header-logo-box { display: flex; align-items: center; width: auto; margin-right: 12px; }
-.main-logo-header { width: 140px !important; height: auto !important; max-height: 50px !important; margin: 0 !important; object-fit: contain; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
-.header-search { flex-grow: 1; margin: 0 10px; background: #ffffff; border-radius: 20px; display: flex; align-items: center; padding: 5px 15px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #e0e0e0; }
+/* === 2. HEADER ATAS (LOGO JUMBO & MEPET KIRI) === */
+header { 
+    position: fixed; top: 0; left: 0; width: 100%; 
+    background: #81D4FA; display: flex; align-items: center; justify-content: space-between; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15); z-index: 1000; 
+    height: 85px !important; /* ✅ Atap ditinggikan agar logo 75px muat */
+    padding: 8px 15px 8px 5px !important; /* ✅ Padding kiri dikecilkan jadi 5px agar mepet */
+}
+
+.header-logo-box { 
+    display: flex; align-items: center; 
+    margin-right: 10px; 
+}
+
+.main-logo-header { 
+    height: 75px !important; /* ✅ Logo membesar secara fisik jadi 75px */
+    width: auto !important; 
+    max-width: 160px !important; /* ✅ Ruang dilebarkan */
+    margin: 0 !important; 
+    object-fit: contain; 
+    object-position: left center; /* ✅ Memaksa gambar logo mentok ke kiri */
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); 
+}
+
+.header-search { 
+    flex-grow: 1; /* ✅ Kotak pencarian didorong agar meregang mengisi ruang sisa */
+    margin: 0 10px; background: #ffffff; border-radius: 20px; 
+    display: flex; align-items: center; padding: 6px 15px; 
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #e0e0e0; 
+}
 .header-search i { color: #1976D2; font-size: 14px; }
 .header-search input { border: none; background: transparent; outline: none; width: 100%; padding: 5px 10px; font-size: 13px; color: #333; font-weight: 600; }
 
@@ -44,7 +75,10 @@ header { position: fixed; top: 0; left: 0; width: 100%; background: #81D4FA; dis
 .cart-badge { position: absolute; top: -5px; right: -8px; background: #ff3b30; color: #fff; font-size: 10px; font-weight: bold; padding: 2px 5px; border-radius: 10px; border: 2px solid #81D4FA; }
 
 /* === 3. KONTEN UTAMA (DASHBOARD TOKO) === */
-main { margin-top: 70px !important; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; background: #f4f4f4; min-height: 100vh; }
+main { 
+    margin-top: 85px !important; /* ✅ Diturunkan agar tidak tertutup header baru */
+    width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; background: #f4f4f4; min-height: 100vh; 
+}
 .slider-container { width: 100%; overflow: hidden; position: relative; padding: 15px; background: #fff; }
 .slider-wrapper { display: flex; transition: transform 0.5s ease-in-out; width: 300%; }
 .slide { width: 33.33%; min-height: 120px; border-radius: 15px; padding: 20px; color: #fff; display: flex; flex-direction: column; justify-content: center; margin-right: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
