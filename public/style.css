@@ -25,7 +25,7 @@ body {
 /* Wadah Jalanan: Menutupi Seluruh Lebar Layar */
 .loop-wrapper {
     position: absolute; top: 0; left: 0; 
-    width: 100vw; height: 65vh; /* ✅ Diturunkan sedikit agar teks punya ruang napas */
+    width: 100vw; height: 65vh; 
     overflow: hidden;
     border-bottom: 12px solid #fff; /* Jalanan putih */
     z-index: 0;
@@ -34,7 +34,7 @@ body {
 /* MATAHARI */
 .sun {
     position: absolute; top: 8vh; right: 8vw;
-    width: 120px; height: 120px; /* ✅ Diperkecil sedikit */
+    width: 120px; height: 120px; 
     background: #FFD700;
     border-radius: 50%; box-shadow: 0 0 40px #FFD700;
     z-index: 1;
@@ -46,7 +46,7 @@ body {
     bottom: 0; left: 50%;
     width: 1000px; height: 300px;
     margin-left: -500px; /* Menengahkan scaler */
-    transform: scale(2.0); /* ✅ PERBESARAN DIKURANGI SEDIKIT (Dari 2.5 jadi 2.0) */
+    transform: scale(2.0); /* Skala PC/Laptop Tetap Besar */
     transform-origin: bottom center;
 }
 
@@ -109,7 +109,7 @@ body {
 /* TEKS: DITURUNKAN KE PALING BAWAH */
 .splash-text-container { 
     position: absolute;
-    bottom: 8vh; /* ✅ Dinaikkan sedikit dari bawah agar tidak kepotong layar HP */
+    bottom: 8vh; 
     left: 0; width: 100%;
     text-align: center; 
     z-index: 2; 
@@ -217,8 +217,8 @@ a.forgot-text { color: #5f3cf5; font-size: 12px; text-decoration: none; margin: 
     nav { padding: 10px 20px; }
     .dashboard { width: 100%; padding: 10px; margin-top: 60px; }
     
-    /* ✅ SKALA DIKURANGI SEDIKIT DI HP (Dari 1.8 jadi 1.5) */
+    /* ✅ SKALA DIKURANGI KHUSUS HP (Dari 1.5 jadi 1.2 agar lebih pas) */
     .anim-scaler { 
-        transform: scale(1.5); 
+        transform: scale(1.2); 
     }
 }
