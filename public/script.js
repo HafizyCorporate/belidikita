@@ -162,19 +162,86 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-        // === 5. SLIDING PANEL LOGIN/REGISTER LOGIC ===
-    
-    // Untuk tombol di Panel Sliding (PC/Laptop)
-    const signUpBtn = document.getElementById('signUp');
-    const signInBtn = document.getElementById('signIn');
-    if(signUpBtn) signUpBtn.addEventListener('click', () => authContainer.classList.add("active"));
-    if(signInBtn) signInBtn.addEventListener('click', () => authContainer.classList.remove("active"));
+           // === 5. Tombol Akun (Tampilan Baru) ===
+    const accountContent = document.getElementById('accountContent');
+    const topHeader = document.getElementById('topHeader');
 
-    // ✅ TAMBAHKAN INI UNTUK TOMBOL TEKS BIRU DI HP
-    const mobileSignUp = document.getElementById('mobileSignUp');
-    const mobileSignIn = document.getElementById('mobileSignIn');
-    if(mobileSignUp) mobileSignUp.addEventListener('click', () => authContainer.classList.add("active"));
-    if(mobileSignIn) mobileSignIn.addEventListener('click', () => authContainer.classList.remove("active"));
+    menuAccount.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveNav(menuAccount);
+        
+        // Sembunyikan Dashboard Utama dan Header Atas
+        mainContent.classList.add('hidden');
+        topHeader.classList.add('hidden');
+        
+        // Munculkan Halaman Akun
+        accountContent.classList.remove('hidden');
+        window.scrollTo({ top: 0 }); 
+        
+        // Muat rekomendasi produk di halaman akun
+        loadRandomProductsToAccount();
+    });
+
+    // === Logika Kembali ke Home dari Akun ===
+    menuHome.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveNav(menuHome);
+        
+        // Sembunyikan Halaman Akun
+        accountContent.classList.add('hidden');
+        
+        // Munculkan kembali Dashboard Utama dan Header
+        mainContent.classList.remove('hidden');
+        topHeader.classList.remove('hidden');
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' }); 
+    });
+
+    // === Tombol Masuk Besar di Halaman Akun ===
+    document.getElementById('mainLoginBtn').addEventListener('click', () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            // Panggil popup modal login jika belum login
+            authContainer.classList.remove('hidden');
+            authBackdrop.classList.remove('hidden');
+        } else {
+            alert("Kamu sudah login! Tombol ini nanti mengarah ke Edit Profil.");
+        }
+    });
+
+    // === Tambahan: Fungsi Load Produk ke Halaman Akun ===
+    async function loadRandomProductsToAccount() {
+        const productList = document.getElementById('accountProductList');
+        // Kode ini sama persis dengan loadRandomProducts() sebelumnya, 
+        // hanya target div-nya yang berbeda (accountProductList)
+        try {
+            const res = await fetch('/api/products');
+            const result = await res.json();
+            
+            if (result.success && result.data.length > 0) {
+                productList.innerHTML = ''; 
+                result.data.forEach(product => {
+                    const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.innerHTML = `
+                        <img src="${product.media_url || 'https://via.placeholder.com/150'}" class="product-media" alt="${product.title}">
+                        <div class="product-info">
+                            <div class="product-title">${product.title}</div>
+                            <div class="product-price">${priceRp}</div>
+                            <div class="product-seller"><i class="fas fa-store"></i> ${product.seller_name}</div>
+                        </div>
+                    `;
+                    productList.appendChild(card);
+                });
+            } else {
+                productList.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Belum ada rekomendasi.</p>';
+            }
+        } catch (error) {
+            console.log("Gagal memuat rekomendasi akun.");
+        }
+    }
+
 
 
     // === 6. AUTHENTICATION API LOGIC (Register, OTP, Login) ===
