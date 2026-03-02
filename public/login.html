@@ -84,13 +84,14 @@
                 
                 if(data.success) {
                     localStorage.setItem('token', data.token);
-                    // ✅ Panggil pop-up cantik Hijau
+                    // Panggil pop-up cantik Hijau
                     showToast(data.message, "success"); 
                     btn.innerText = "Berhasil!";
-                    // Beri jeda 1.5 detik agar tulisan terbaca, lalu pindah halaman
-                    setTimeout(() => { window.location.href = 'dashboardutama.html'; }, 1500);
+                    
+                    // ✅ INI YANG DIUBAH: Pindah halaman ke admin-panel.html
+                    setTimeout(() => { window.location.href = 'admin-panel.html'; }, 1500);
                 } else {
-                    // ✅ Panggil pop-up cantik Merah
+                    // Panggil pop-up cantik Merah
                     showToast(data.message, "error"); 
                     btn.innerText = "Masuk Sistem";
                 }
