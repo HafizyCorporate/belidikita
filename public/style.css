@@ -117,14 +117,26 @@ body {
     z-index: 2; 
 }
 
-/* ✅ STYLE UNTUK LOGO BARU */
+/* ✅ STYLE UNTUK LOGO (DIBESARKAN KARENA MENGGANTIKAN TEKS) */
 .splash-logo {
-    width: 80px; /* Ukuran logo, silakan ubah angka ini jika kurang besar/kecil */
+    width: 180px; /* Ukuran logo dibesarkan agar gagah. Bisa kamu ubah angkanya kalau kurang pas */
     height: auto;
-    margin-bottom: 10px; /* Jarak antara logo dan tulisan Belidikita */
+    margin-bottom: 5px; /* Jarak antara logo dan slogan */
+    /* Efek animasi membesar seperti teks lama */
     opacity: 0;
-    animation: fadeIn 1s ease forwards 0.5s; /* Efek muncul pelan-pelan */
+    transform: scale(0.5);
+    animation: textZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1s; 
 }
+
+/* (Class .megah-title sudah dihapus dari sini karena tidak dipakai lagi) */
+
+.brand-slogan {
+    font-size: clamp(1rem, 5vw, 1.5rem); 
+    color: #0D47A1; /* Biru Tua Belidikita */
+    margin-top: 5px; font-weight: 700;
+    opacity: 0; animation: fadeIn 1s ease forwards 1.8s;
+}
+
 
 .megah-title {
     font-size: clamp(3rem, 12vw, 5rem); 
@@ -233,4 +245,4 @@ a.forgot-text { color: #5f3cf5; font-size: 12px; text-decoration: none; margin: 
     .anim-scaler { 
         transform: scale(1.0); 
     }
-}
+    }
