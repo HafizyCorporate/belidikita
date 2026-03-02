@@ -35,41 +35,48 @@ body.no-scroll { overflow: hidden; }
 
 @keyframes tree { 0% { transform: translate(1500px); } 100% { transform: translate(-300px); } } @keyframes tree2 { 0% { transform: translate(800px); } 100% { transform: translate(-300px); } } @keyframes tree3 { 0% { transform: translate(3000px); } 100% { transform: translate(-300px); } } @keyframes rock { 0% { right: -250px; } 100% { right: 2500px; } } @keyframes truck { 0% {} 6% { transform: translateY(0px); } 7% { transform: translateY(-8px); } 9% { transform: translateY(0px); } 10% { transform: translateY(-2px); } 11% { transform: translateY(0px); } 100% {} } @keyframes wind { 0% {} 50% { transform: translateY(4px) } 100% {} } @keyframes mtn { 100% { transform: translateX(-2000px) rotate(130deg); } } @keyframes hill { 100% { transform: translateX(-2000px); } } @keyframes textZoom { to { opacity: 1; transform: scale(1); } } @keyframes fadeIn { to { opacity: 1; } }
 
-/* === 2. HEADER ATAS (LOGO JUMBO & MEPET KIRI) === */
-
-/* === 2. HEADER ATAS (LOGO JUMBO & PENCARIAN LEGA) === */
+/* === 2. HEADER ATAS (LOGO TERTARIK MAKSIMAL KE KIRI) === */
 header { 
     position: fixed; top: 0; left: 0; width: 100%; 
     background: #81D4FA; display: flex; align-items: center; justify-content: space-between; 
     box-shadow: 0 2px 10px rgba(0,0,0,0.15); z-index: 1000; 
     height: 85px !important; 
-    /* ✅ Padding kiri dibuat 0 agar mentok kiri banget */
-    padding: 8px 10px 8px 0px !important; 
+    padding: 8px 10px 8px 0px !important; /* ✅ Padding kiri dibuat 0 habis */
 }
 
 .header-logo-box { 
     display: flex; align-items: center; 
-    margin-right: 0px; /* ✅ Jarak kanan dihapus */
-    padding-left: 5px; 
+    margin-right: 0px; 
+    margin-left: -15px; /* ✅ INI KUNCINYA: Menarik logo paksa ke kiri menembus layar */
 }
 
 .main-logo-header { 
-    height: 75px !important; /* Ukuran tinggi tetap 75px */
+    height: 75px !important; 
     width: auto !important; 
-    /* ✅ INI KUNCINYA: Lebar dibatasi maksimal 110px untuk memotong area transparan gambar yang mendorong search bar */
-    max-width: 110px !important; 
+    max-width: 105px !important; /* ✅ Membatasi ruang transparan di kanan logo */
     margin: 0 !important; 
     object-fit: cover; 
-    object-position: left center; /* Memaksa gambar nempel ke kiri */
+    object-position: left center; 
     filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); 
 }
 
 .header-search { 
-    flex-grow: 1; /* ✅ Kolom pencarian otomatis merenggang mengisi sisa ruang */
-    margin: 0 10px 0 5px; background: #ffffff; border-radius: 20px; 
+    flex-grow: 1; /* ✅ Search bar memanjang maksimal */
+    margin: 0 10px 0 0px; /* ✅ Jarak kiri ke logo ditiadakan agar makin lega */
+    background: #ffffff; border-radius: 20px; 
     display: flex; align-items: center; padding: 6px 15px; 
     box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #e0e0e0; 
 }
+
+.header-search i { color: #1976D2; font-size: 14px; }
+.header-search input { border: none; background: transparent; outline: none; width: 100%; padding: 5px 10px; font-size: 13px; color: #333; font-weight: 600; }
+
+/* ✅ Ikon Admin & Cart di Header */
+.header-admin { color: #0D47A1; font-size: 20px; cursor: pointer; margin-right: 12px; transition: transform 0.2s; }
+.header-admin:hover { transform: scale(1.1); }
+.header-cart { position: relative; font-size: 22px; color: #0D47A1; cursor: pointer; }
+.cart-badge { position: absolute; top: -5px; right: -8px; background: #ff3b30; color: #fff; font-size: 10px; font-weight: bold; padding: 2px 5px; border-radius: 10px; border: 2px solid #81D4FA; }
+
 .header-search i { color: #1976D2; font-size: 14px; }
 .header-search input { border: none; background: transparent; outline: none; width: 100%; padding: 5px 10px; font-size: 13px; color: #333; font-weight: 600; }
 
