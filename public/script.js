@@ -1,48 +1,73 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. SPLASH SCREEN LOGIC (Update: Penutup Halus & Mewah)
     const splashScreen = document.getElementById('splashScreen');
+    const navbar = document.getElementById('navbar');
+    const dashboardContainer = document.getElementById('dashboardContainer');
+    
+    const navUploadBtn = document.getElementById('navUploadBtn');
+    const navLoginBtn = document.getElementById('navLoginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    const authContainer = document.getElementById('authContainer');
+    const authBackdrop = document.getElementById('authBackdrop');
+
+    // 1. FUNGSI INISIALISASI (LANGSUNG TAMPIL DASHBOARD)
+    function initApp() {
+        navbar.classList.remove('hidden');
+        dashboardContainer.classList.remove('hidden');
+        
+        // Cek tiket login untuk mengatur tombol navbar
+        const token = localStorage.getItem('token');
+        if (token) {
+            navLoginBtn.classList.add('hidden'); // Sembunyikan tombol login
+            logoutBtn.classList.remove('hidden'); // Munculkan tombol logout
+            navUploadBtn.classList.remove('hidden'); // Munculkan tombol upload
+        } else {
+            navLoginBtn.classList.remove('hidden'); 
+            logoutBtn.classList.add('hidden');
+            navUploadBtn.classList.add('hidden');
+        }
+        
+        // Memuat barang secara otomatis tanpa harus login
+        loadProducts(); 
+    }
+
+    // 2. SPLASH SCREEN LOGIC
     setTimeout(() => {
-        // Efek memudar (fade out) selama 1 detik
         splashScreen.style.transition = "opacity 1s ease";
         splashScreen.style.opacity = "0";
 
         setTimeout(() => {
             splashScreen.classList.add('hide');
             splashScreen.style.display = "none";
-            checkLoginStatus(); // Cek apakah user sudah login sebelumnya
-        }, 1000); // Tunggu sampai proses memudar selesai
-    }, 4500); // Memberi waktu animasi truk & teks megah tampil sempurna
+            initApp(); // Panggil fungsi inisialisasi untuk menampilkan dashboard
+        }, 1000); 
+    }, 4500); 
 
-    // 2. SLIDING PANEL LOGIC
+    // 3. FUNGSI POPUP LOGIN (MODAL AUTH)
+    navLoginBtn.addEventListener('click', () => {
+        authContainer.classList.remove('hidden');
+        authBackdrop.classList.remove('hidden');
+    });
+
+    document.getElementById('closeAuthBtn').addEventListener('click', () => {
+        authContainer.classList.add('hidden');
+        authBackdrop.classList.add('hidden');
+    });
+
+    // 4. SLIDING PANEL LOGIC
     const signUpBtn = document.getElementById('signUp');
     const signInBtn = document.getElementById('signIn');
-    const authContainer = document.getElementById('authContainer');
 
     signUpBtn.addEventListener('click', () => authContainer.classList.add("active"));
     signInBtn.addEventListener('click', () => authContainer.classList.remove("active"));
 
-    // 3. UI TOGGLE LOGIC (Menampilkan Dashboard)
-    const navbar = document.getElementById('navbar');
-    const dashboardContainer = document.getElementById('dashboardContainer');
-
-    function checkLoginStatus() {
-        const token = localStorage.getItem('token');
-        if (token) {
-            authContainer.classList.add('hidden');
-            navbar.classList.remove('hidden');
-            dashboardContainer.classList.remove('hidden');
-            
-            // ✅ BARANG LANGSUNG MUNCUL SAAT LOGIN
-            loadProducts(); 
-        }
-    }
-
-    document.getElementById('logoutBtn').addEventListener('click', () => {
+    // 5. LOGOUT LOGIC
+    logoutBtn.addEventListener('click', () => {
         localStorage.removeItem('token');
-        location.reload(); // Refresh halaman agar kembali ke login
+        location.reload(); 
     });
 
-    // 4. REGISTER & OTP LOGIC
+    // 6. REGISTER & OTP LOGIC
     const otpModal = document.getElementById('otpModal');
     const otpEmailInput = document.getElementById('otpEmail');
 
@@ -62,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if(data.success) {
             otpEmailInput.value = email;
-            otpModal.style.display = "block"; // Tampilkan modal OTP
+            otpModal.style.display = "block";
         }
     });
 
@@ -80,11 +105,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if(data.success) {
             otpModal.style.display = "none";
-            authContainer.classList.remove("active"); // Geser kembali ke panel login
+            authContainer.classList.remove("active"); 
         }
     });
 
-    // 5. LOGIN REGULER
+    // 7. LOGIN REGULER LOGIC
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('loginEmail').value;
@@ -100,11 +125,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if(data.success) {
             localStorage.setItem('token', data.token);
-            checkLoginStatus(); // Masuk ke dashboard
+            // Tutup form dan segarkan dashboard
+            authContainer.classList.add('hidden');
+            authBackdrop.classList.add('hidden');
+            document.getElementById('loginForm').reset();
+            initApp(); 
         }
     });
     
-    // 5B. LUPA PASSWORD LOGIC
+    // 8. LUPA PASSWORD LOGIC
     document.getElementById('forgotPasswordBtn').addEventListener('click', async (e) => {
         e.preventDefault();
         const email = document.getElementById('loginEmail').value;
@@ -122,14 +151,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await res.json();
         alert(data.message);
 
-        // Jika email berhasil dikirim, munculkan popup reset password
         if(data.success) {
-            document.getElementById('resetEmail').value = email; // Simpan email secara diam-diam
+            document.getElementById('resetEmail').value = email; 
             document.getElementById('resetPasswordModal').style.display = "block";
         }
     });
 
-    // 5C. SIMPAN PASSWORD BARU LOGIC
     document.getElementById('submitResetBtn').addEventListener('click', async () => {
         const email = document.getElementById('resetEmail').value;
         const otp = document.getElementById('resetOtpCode').value;
@@ -148,23 +175,21 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await res.json();
         alert(data.message);
 
-        // Jika berhasil ganti password, tutup popup-nya
         if(data.success) {
             document.getElementById('resetPasswordModal').style.display = "none";
-            document.getElementById('loginPassword').value = ''; // Kosongkan form password lama
+            document.getElementById('loginPassword').value = ''; 
             document.getElementById('resetOtpCode').value = ''; 
             document.getElementById('resetNewPassword').value = '';
         }
     });
 
 
-    // 6. TOGGLE MENU UPLOAD
+    // 9. MENU UPLOAD & NAVIGASI
     const uploadSection = document.getElementById('uploadSection');
-    document.getElementById('navUploadBtn').addEventListener('click', () => {
+    navUploadBtn.addEventListener('click', () => {
         uploadSection.classList.toggle('hidden');
     });
 
-    // 6B. NAVIGASI BERANDA & FORUM LOGIC
     const navHome = document.getElementById('navHome');
     const navForum = document.getElementById('navForum');
     const aiSearchSection = document.getElementById('aiSearchSection');
@@ -172,27 +197,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     navHome.addEventListener('click', (e) => {
         e.preventDefault();
-        aiSearchSection.classList.remove('hidden'); // Munculkan Beranda (AI)
-        forumSection.classList.add('hidden');       // Tutup Forum
-        uploadSection.classList.add('hidden');      // Tutup Upload
+        aiSearchSection.classList.remove('hidden'); 
+        forumSection.classList.add('hidden');       
+        uploadSection.classList.add('hidden');      
     });
 
     navForum.addEventListener('click', (e) => {
         e.preventDefault();
-        forumSection.classList.remove('hidden');    // Munculkan Forum
-        aiSearchSection.classList.add('hidden');    // Tutup Beranda (AI)
-        uploadSection.classList.add('hidden');      // Tutup Upload
+        forumSection.classList.remove('hidden');    
+        aiSearchSection.classList.add('hidden');    
+        uploadSection.classList.add('hidden');      
+        loadForumPosts(); // Panggil data forum saat menu forum diklik
     });
 
 
-    // 7. AI SEARCH LOGIC
+    // 10. AI SEARCH
     document.getElementById('aiSearchForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const promptText = document.getElementById('aiPrompt').value;
         const aiResponseBox = document.getElementById('aiResponseBox');
         const aiBtn = document.getElementById('aiBtn');
         
-        // ✅ EMOJI DIPERBAIKI
         aiResponseBox.innerHTML = "<em>AI sedang berpikir... ⏳</em>";
         aiBtn.disabled = true;
 
@@ -211,7 +236,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 8. UPLOAD PRODUCT LOGIC (Kirim File ke Backend)
+    // 11. UPLOAD PRODUCT 
     document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -240,9 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if(data.success) {
                 document.getElementById('uploadForm').reset();
                 uploadSection.classList.add('hidden');
-                
-                // ✅ BARANG LANGSUNG MUNCUL SETELAH UPLOAD
-                loadProducts();
+                loadProducts(); // Update daftar setelah upload
             }
         } catch (error) {
             console.error("Upload error:", error);
@@ -251,7 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// 9. GOOGLE LOGIN CALLBACK (Fungsi Global)
+// 12. GOOGLE LOGIN CALLBACK
 window.handleCredentialResponse = async function(response) {
     const res = await fetch('/api/google-login', {
         method: 'POST',
@@ -262,11 +285,13 @@ window.handleCredentialResponse = async function(response) {
     alert(data.message);
     if(data.success) {
         localStorage.setItem('token', data.token);
-        location.reload(); 
+        document.getElementById('authContainer').classList.add('hidden');
+        document.getElementById('authBackdrop').classList.add('hidden');
+        location.reload(); // Refresh menyeluruh jika pakai google login
     }
 };
 
-// 10. FUNGSI MEMUAT DAFTAR BARANG
+// 13. FUNGSI MEMUAT DAFTAR BARANG
 async function loadProducts() {
     const productList = document.getElementById('productList');
     productList.innerHTML = '<p style="color: #666; font-size: 14px;">Memuat barang...</p>';
@@ -276,21 +301,17 @@ async function loadProducts() {
         const result = await res.json();
         
         if (result.success && result.data.length > 0) {
-            productList.innerHTML = ''; // Kosongkan tulisan "Memuat..."
+            productList.innerHTML = ''; 
             
             result.data.forEach(product => {
-                // Cek apakah uploadnya video atau gambar
                 const mediaTag = product.media_type === 'video' 
                     ? `<video src="${product.media_url}" class="product-media" controls></video>`
                     : `<img src="${product.media_url}" class="product-media" alt="${product.title}">`;
                 
-                // Format angka jadi Rupiah (Rp)
                 const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
 
-                // Buat kartu produk HTML
                 const card = document.createElement('div');
                 card.className = 'product-card';
-                // ✅ EMOJI DIPERBAIKI
                 card.innerHTML = `
                     ${product.media_url ? mediaTag : '<div class="product-media" style="display:flex; align-items:center; justify-content:center; font-size:10px; color:#aaa;">No Media</div>'}
                     <div class="product-info">
@@ -311,7 +332,7 @@ async function loadProducts() {
     }
 }
 
-// 11. FUNGSI MEMUAT FORUM DISKUSI
+// 14. FUNGSI MEMUAT FORUM DISKUSI
 async function loadForumPosts() {
     const forumList = document.getElementById('forumList');
     forumList.innerHTML = '<p style="color: #666; font-size: 14px;">Memuat diskusi...</p>';
@@ -324,12 +345,10 @@ async function loadForumPosts() {
             forumList.innerHTML = ''; 
             
             result.data.forEach(post => {
-                // Bikin tanggal jadi rapi
                 const date = new Date(post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
                 
                 const card = document.createElement('div');
                 card.className = 'forum-card';
-                // ✅ EMOJI DIPERBAIKI
                 card.innerHTML = `
                     <div class="forum-title">${post.title}</div>
                     <div class="forum-author">👤 ${post.author_name} • 🕒 ${date}</div>
@@ -346,16 +365,18 @@ async function loadForumPosts() {
     }
 }
 
-// 12. LOGIC POSTING FORUM BARU
+// 15. LOGIC POSTING FORUM BARU
 document.getElementById('forumForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const title = document.getElementById('forumTitle').value;
     const content = document.getElementById('forumContent').value;
     const token = localStorage.getItem('token'); 
 
-    // Satpam pengecek login
+    // ✅ FITUR PINTAR: Jika belum login, form login otomatis melayang muncul!
     if (!token) {
         alert("Kamu harus login dulu untuk membuat diskusi!");
+        document.getElementById('authContainer').classList.remove('hidden');
+        document.getElementById('authBackdrop').classList.remove('hidden');
         return;
     }
 
@@ -373,7 +394,7 @@ document.getElementById('forumForm').addEventListener('submit', async (e) => {
         
         if(data.success) {
             document.getElementById('forumForm').reset();
-            loadForumPosts(); // Langsung refresh daftar forum tanpa perlu reload web
+            loadForumPosts(); 
         }
     } catch (error) {
         console.error("Forum post error:", error);
