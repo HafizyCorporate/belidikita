@@ -166,3 +166,37 @@ main { margin-top: 85px !important; width: 100%; max-width: 600px; margin-left: 
 #customToast.error { background-color: #ff3b30; } /* Merah */
 #customToast.info { background-color: #1976D2; } /* Biru */
 
+/* === 8. KOTAK PERINGATAN UPLOAD (TIPS ADMIN) === */
+.upload-warning {
+    background: #FFFDE7; 
+    border-left: 4px solid #FBC02D;
+    color: #F57F17;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    /* Animasi berdenyut lembut */
+    animation: pulseWarning 2s infinite; 
+}
+.upload-warning i {
+    font-size: 18px;
+    /* Animasi lonceng/lampu bergoyang */
+    animation: shakeIcon 3s infinite; 
+}
+.upload-warning b { color: #E65100; font-weight: 800; }
+
+@keyframes pulseWarning {
+    0% { box-shadow: 0 0 0 0 rgba(251, 192, 45, 0.4); }
+    70% { box-shadow: 0 0 0 8px rgba(251, 192, 45, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(251, 192, 45, 0); }
+}
+@keyframes shakeIcon {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+    20%, 40%, 60%, 80% { transform: rotate(10deg); }
+}
