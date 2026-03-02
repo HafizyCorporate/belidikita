@@ -11,15 +11,13 @@
 <body>
 
     <div id="splashScreen" class="splash-screen">
-        
         <div class="sun">
-            <div class="sun-beam"></div> </div>
-
+            <div class="sun-beam"></div>
+        </div>
         <div class="splash-text-container">
             <img src="assets/nama_logo_kamu.png" alt="Logo Belidikita" class="splash-logo" onerror="this.style.display='none'">
             <p class="brand-slogan">Belanja pintar, Jualan lancar</p>
         </div>
-
         <div class="loop-wrapper">
             <div class="anim-scaler">
                 <div class="mountain"></div>
@@ -28,14 +26,12 @@
                 <div class="tree"></div>
                 <div class="tree"></div>
                 <div class="rock"></div>
-                
                 <div class="truck-wrapper">
                     <div class="truck"></div>
                     <div class="wheels"></div>
                 </div>
             </div>
         </div>
-
     </div> 
 
     <nav id="navbar" class="hidden">
@@ -43,8 +39,9 @@
         <ul class="nav-links">
             <li><a href="#" id="navHome">Beranda</a></li>
             <li><a href="#" id="navForum">Forum</a></li>
-            <li><button id="navUploadBtn" class="upload-btn">+ Jual Barang</button></li>
-            <li><button id="logoutBtn" class="logout-btn">Logout</button></li>
+            <li><button id="navUploadBtn" class="upload-btn hidden">+ Jual Barang</button></li>
+            <li><button id="navLoginBtn" class="login-btn">Login / Daftar</button></li>
+            <li><button id="logoutBtn" class="logout-btn hidden">Logout</button></li>
         </ul>
     </nav>
 
@@ -93,7 +90,10 @@
 
     </div>
 
-    <div class="container" id="authContainer">
+    <div id="authBackdrop" class="hidden backdrop"></div>
+    <div class="container hidden modal-auth" id="authContainer">
+        <button id="closeAuthBtn" class="close-auth-btn">&times;</button>
+        
         <div class="form-container sign-up-container">
             <form id="registerForm">
                 <h2>Buat Akun</h2>
