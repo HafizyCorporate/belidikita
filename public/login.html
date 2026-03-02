@@ -53,11 +53,20 @@
         <a href="dashboardutama.html" class="back-link"><i class="fas fa-arrow-left"></i> Kembali ke Toko</a>
     </div>
 
+    <div id="customToast"></div>
+
     <script>
+        // FUNGSI MEMUNCULKAN NOTIFIKASI
+        function showToast(msg, type) {
+            const toast = document.getElementById("customToast");
+            toast.innerText = msg;
+            toast.className = type + " show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
         document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
-            e.preventDefault(); // Mencegah halaman refresh otomatis
+            e.preventDefault(); 
             
-            // Ambil isi teks yang diketik user
             const usernameInput = document.getElementById('loginUsername').value;
             const passwordInput = document.getElementById('loginPassword').value;
             const btn = e.target.querySelector('button');
@@ -65,29 +74,28 @@
             btn.innerText = "Memeriksa...";
 
             try {
-                // Tembak jalur '/api/login' yang ada di server.js
                 const res = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // Kirim data dengan label 'username' agar dikenali server
                     body: JSON.stringify({ username: usernameInput, password: passwordInput })
                 });
                 
                 const data = await res.json();
                 
                 if(data.success) {
-                    // JIKA BENAR (Versacy / Farid)
-                    localStorage.setItem('token', data.token); // Simpan Kunci Admin
-                    alert(data.message); // Muncul notif "Selamat datang, Admin Versacy!"
-                    window.location.href = 'dashboardutama.html'; // Balik ke halaman utama sebagai Admin
+                    localStorage.setItem('token', data.token);
+                    // ✅ Panggil pop-up cantik Hijau
+                    showToast(data.message, "success"); 
+                    btn.innerText = "Berhasil!";
+                    // Beri jeda 1.5 detik agar tulisan terbaca, lalu pindah halaman
+                    setTimeout(() => { window.location.href = 'dashboardutama.html'; }, 1500);
                 } else {
-                    // JIKA SALAH
-                    alert(data.message); // Muncul notif "Username atau password salah!"
+                    // ✅ Panggil pop-up cantik Merah
+                    showToast(data.message, "error"); 
                     btn.innerText = "Masuk Sistem";
                 }
             } catch(err) {
-                alert("Gagal terhubung ke server. Pastikan server Railway sudah jalan.");
-                console.error(err);
+                showToast("Gagal terhubung ke server. Cek Railway!", "error");
                 btn.innerText = "Masuk Sistem";
             }
         });
