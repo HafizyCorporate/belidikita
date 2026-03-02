@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body class="no-scroll"> <div id="splashScreen" class="splash-screen">
+<body class="no-scroll"> 
+    
+    <div id="splashScreen" class="splash-screen">
         <div class="sun"><div class="sun-beam"></div></div>
         <div class="splash-text-container">
             <img src="assets/nama_logo_kamu.png" alt="Logo" class="splash-logo" onerror="this.style.display='none'">
@@ -26,7 +28,7 @@
         </div>
     </div> 
 
-     <header id="topHeader" class="hidden">
+    <header id="topHeader" class="hidden">
         <div class="header-logo-box">
             <img src="assets/nama_logo_kamu.png" alt="Logo Belidikita" class="main-logo-header">
         </div>
@@ -39,7 +41,6 @@
             <span class="cart-badge">0</span>
         </div>
     </header>
-
 
     <main id="mainContent" class="hidden">
         
@@ -63,7 +64,7 @@
                 <a href="#">Lihat Semua</a>
             </div>
             <div class="horizontal-scroll" id="topSellingList">
-                </div>
+            </div>
         </section>
 
         <section class="scroll-section">
@@ -71,7 +72,7 @@
                 <h2>🛒 Paling Banyak Masuk Keranjang</h2>
             </div>
             <div class="horizontal-scroll" id="topCartList">
-                </div>
+            </div>
         </section>
 
         <section class="scroll-section">
@@ -79,7 +80,7 @@
                 <h2>⭐ Top Seller Minggu Ini</h2>
             </div>
             <div class="horizontal-scroll" id="topSellerList">
-                </div>
+            </div>
         </section>
 
         <section class="grid-section">
@@ -93,6 +94,72 @@
         
         <div style="height: 80px;"></div>
     </main>
+
+    <main id="accountContent" class="hidden" style="margin-top: 0;">
+        
+        <div class="account-header">
+            <div class="account-top-icons">
+                <i class="fas fa-headset"></i>
+                <i class="fas fa-cog"></i>
+            </div>
+            
+            <div class="account-promo-icons">
+                <div class="promo-item">
+                    <div class="icon-circle">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <h4>Gratis Ongkir</h4>
+                    <p>Tiap hari, tanpa ribet</p>
+                </div>
+                <div class="promo-item">
+                    <div class="icon-circle">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <h4>Bonus Reward</h4>
+                    <p>Untung tiap transaksi</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="account-login-box">
+            <button id="mainLoginBtn" class="btn-login-large">Masuk atau Daftar</button>
+            
+            <div class="klaim-diskon">
+                <div class="klaim-icon">🎁</div>
+                <div class="klaim-text">
+                    <h4>Klaim diskon s.d. 40% buat belanja</h4>
+                    <p>Yuk segera pakai, khusus belanja pertamamu!</p>
+                </div>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+        </div>
+
+        <div class="account-menu-row">
+            <div class="menu-box">
+                <i class="fas fa-coins"></i>
+                <h5>Mulai kumpulin bonus, yuk!</h5>
+                <p>Bonus</p>
+            </div>
+            <div class="menu-box">
+                <i class="fas fa-wallet"></i>
+                <h5>Cek & tarik saldo</h5>
+                <p>Saldo Belidikita</p>
+            </div>
+            <div class="menu-box">
+                <i class="fas fa-credit-card"></i>
+                <h5>Belidikita Card</h5>
+                <p>Unlimited Cashback</p>
+            </div>
+        </div>
+
+        <div class="account-recommendation">
+            <h3>Rekomendasi Untuk Anda</h3>
+            <div class="product-grid" id="accountProductList">
+                <p style="text-align:center; width:100%; color:#888;">Memuat rekomendasi...</p>
+            </div>
+        </div>
+        
+        <div style="height: 80px;"></div> </main>
 
     <nav id="bottomNav" class="hidden">
         <a href="#" class="nav-item active" id="menuHome">
@@ -112,28 +179,37 @@
         </a>
     </nav>
 
-      <div id="authBackdrop" class="hidden backdrop"></div>
+    <div id="authBackdrop" class="hidden backdrop"></div>
     <div class="container hidden modal-auth" id="authContainer">
         <button id="closeAuthBtn" class="close-auth-btn">&times;</button>
         
         <div class="form-container sign-up-container">
             <form id="registerForm">
                 <h1>Buat Akun</h1>
+                <span>Daftar dengan email kamu</span>
                 <input type="text" id="regName" placeholder="Nama Lengkap" required />
                 <input type="email" id="regEmail" placeholder="Email" required />
                 <input type="password" id="regPassword" placeholder="Password" required />
                 <button type="submit">Daftar</button>
+                <p class="mobile-toggle">Sudah punya akun? <b id="mobileSignIn">Masuk di sini</b></p>
             </form>
         </div>
+
         <div class="form-container sign-in-container">
             <form id="loginForm">
                 <h1>Sign In</h1>
+                <div id="g_id_onload" data-client_id="MASUKKAN_GOOGLE_CLIENT_ID_DISINI" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
+                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
+                
+                <span>atau gunakan email</span>
                 <input type="email" id="loginEmail" placeholder="Email" required />
                 <input type="password" id="loginPassword" placeholder="Password" required />
-                <a href="#" id="forgotPasswordBtn">Lupa password?</a>
+                <a href="#" id="forgotPasswordBtn" class="forgot-text">Lupa password?</a>
                 <button type="submit">Masuk</button>
+                <p class="mobile-toggle">Belum punya akun? <b id="mobileSignUp">Daftar di sini</b></p>
             </form>
         </div>
+
         <div class="overlay-container">
             <div class="overlay">
                 <div class="overlay-panel overlay-left">
