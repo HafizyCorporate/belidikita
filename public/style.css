@@ -9,10 +9,10 @@ html, body {
 body.no-scroll { overflow: hidden; }
 .hidden { display: none !important; }
 
-/* === 1. SPLASH SCREEN (DIKUNCI MATI UKURANNYA) === */
+/* === 1. SPLASH SCREEN === */
 .splash-screen {
     position: fixed; 
-    top: 0; left: 0; right: 0; bottom: 0; /* ✅ Kunci penuh di semua sisi layar */
+    top: 0; left: 0; right: 0; bottom: 0; 
     background: linear-gradient(180deg, #81D4FA 0%, #E1F5FE 100%);
     display: flex; flex-direction: column; z-index: 9999; overflow: hidden; 
 }
@@ -43,7 +43,7 @@ body.no-scroll { overflow: hidden; }
 .tree { animation: tree 3s 0.000s linear infinite; } .tree:nth-child(2) { animation: tree2 2s 0.150s linear infinite; } .tree:nth-child(3) { animation: tree3 8s 0.050s linear infinite; } .rock { animation: rock 4s -0.530s linear infinite; } .truck { animation: truck 4s 0.080s ease infinite; } .wheels { animation: truck 4s 0.001s ease infinite; } .truck:before { animation: wind 1.5s 0.000s ease infinite; }
 
 .splash-text-container { position: absolute; top: 40%; left: 0; width: 100%; transform: translateY(-50%); text-align: center; z-index: 5; }
-.splash-logo { width: 650px; max-width: 95vw; height: auto; margin-bottom: 0px; opacity: 0; transform: scale(0.5); animation: textZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1s; }
+.splash-logo { width: 700px; max-width: 95vw; height: auto; margin-bottom: 0px; opacity: 0; transform: scale(0.5); animation: textZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1s; }
 .brand-slogan { font-size: clamp(1.5rem, 5vw, 2.5rem); color: #0D47A1; margin-top: -30px; font-weight: 800; position: relative; z-index: 6; opacity: 0; animation: fadeIn 1s ease forwards 1.8s; }
 
 @keyframes tree { 0% { transform: translate(1500px); } 100% { transform: translate(-300px); } } @keyframes tree2 { 0% { transform: translate(800px); } 100% { transform: translate(-300px); } } @keyframes tree3 { 0% { transform: translate(3000px); } 100% { transform: translate(-300px); } } @keyframes rock { 0% { right: -250px; } 100% { right: 2500px; } } @keyframes truck { 0% {} 6% { transform: translateY(0px); } 7% { transform: translateY(-8px); } 9% { transform: translateY(0px); } 10% { transform: translateY(-2px); } 11% { transform: translateY(0px); } 100% {} } @keyframes wind { 0% {} 50% { transform: translateY(4px) } 100% {} } @keyframes mtn { 100% { transform: translateX(-2000px) rotate(130deg); } } @keyframes hill { 100% { transform: translateX(-2000px); } } @keyframes textZoom { to { opacity: 1; transform: scale(1); } } @keyframes fadeIn { to { opacity: 1; } }
@@ -137,7 +137,7 @@ button.ghost { background-color: transparent; border-color: #FFF; border-radius:
 .modal-content { background-color: #1e1e1e; margin: 20vh auto; padding: 30px; border-radius: 10px; width: 90%; max-width: 400px; text-align: center; color: #fff; }
 
 /* ================================================== */
-/* 📱 SETTINGAN KHUSUS UNTUK HP (YANG DIPERPADAT)     */
+/* 📱 SETTINGAN KHUSUS UNTUK HP (JUMBO & MANTAP)      */
 /* ================================================== */
 @media (max-width: 600px) {
     .sun { 
@@ -145,32 +145,33 @@ button.ghost { background-color: transparent; border-color: #FFF; border-radius:
         top: 3vh; right: 3vw; 
     } 
     
-    /* ✅ SINAR DIBUAT FOKUS KE TENGAH (Logo) */
     .sun-beam {
         top: 45px; left: 45px;
-        width: 300px; /* ✅ Lebih lebar agar menyelimuti area tengah */
-        margin-left: -150px; 
-        transform: rotate(25deg); /* ✅ Sudut dikurangi agar menukik lurus ke tengah, BUKAN ke kiri */
+        width: 350px; /* ✅ Dilebarkan sedikit agar logo tertutup cahaya */
+        margin-left: -175px; 
+        transform: rotate(25deg); 
         clip-path: polygon(30% 0, 70% 0, 90% 100%, 10% 100%);
     }
 
-    /* ✅ TRUK DIANGKAT & DIPERPADAT AGAR UTUH 100% */
+    /* ✅ WADAH JALANAN DITINGGIKAN AGAR TRUK BESAR TIDAK KELUAR LAYAR */
     .loop-wrapper { 
-        bottom: 8vh; /* ✅ Diangkat tinggi dari dasar layar */
-        height: 180px; /* ✅ Wadah dipadatkan */
+        bottom: 8vh; 
+        height: 220px; /* ✅ Naik dari 180px jadi 220px untuk menampung truk besar */
         border-bottom: 5px solid #fff; 
     } 
+    
+    /* ✅ UKURAN TRUK DIPERBESAR SIGNIFIKAN */
     .anim-scaler { 
-        transform: scale(0.65); /* ✅ Truk dikecilkan agar masuk semua tanpa terpotong */
+        transform: scale(0.85); /* ✅ Skala naik drastis dari 0.65 ke 0.85 */
         bottom: 0px; 
     } 
 
-    /* ✅ LOGO DAN SLOGAN LEBIH COMPACT */
-    .splash-text-container { top: 45%; }
-    .splash-logo { width: 300px; max-width: 80vw; }
+    /* ✅ LOGO DAN SLOGAN JUGA DIPERBESAR */
+    .splash-text-container { top: 42%; } /* Agak sedikit naik agar tidak menabrak truk besar */
+    .splash-logo { width: 380px; max-width: 92vw; } /* ✅ Logo membesar */
     .brand-slogan { 
-        margin-top: -20px; 
-        font-size: 1.1rem; 
+        margin-top: -25px; 
+        font-size: 1.3rem; /* ✅ Huruf diperbesar agar mantap */
     } 
     
     .modal-auth { width: 100vw !important; height: 100vh !important; top: 0 !important; left: 0 !important; transform: none !important; border-radius: 0 !important; }
