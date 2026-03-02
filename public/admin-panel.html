@@ -90,6 +90,19 @@
         #customToast.success { background-color: #00AA5B; }
         #customToast.error { background-color: #ff3b30; }
         #customToast.info { background-color: #1976D2; }
+
+        /* ✅ KOTAK PERINGATAN UPLOAD (TIPS ADMIN) */
+        .upload-warning {
+            background: #FFFDE7; border-left: 4px solid #FBC02D; color: #F57F17;
+            padding: 10px 15px; border-radius: 8px; font-size: 11px; font-weight: 600;
+            margin-bottom: 15px; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); animation: pulseWarning 2s infinite; 
+        }
+        .upload-warning i { font-size: 18px; animation: shakeIcon 3s infinite; }
+        .upload-warning b { color: #E65100; font-weight: 800; }
+
+        @keyframes pulseWarning { 0% { box-shadow: 0 0 0 0 rgba(251, 192, 45, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(251, 192, 45, 0); } 100% { box-shadow: 0 0 0 0 rgba(251, 192, 45, 0); } }
+        @keyframes shakeIcon { 0%, 100% { transform: rotate(0deg); } 10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); } 20%, 40%, 60%, 80% { transform: rotate(10deg); } }
     </style>
 </head>
 <body>
@@ -138,6 +151,10 @@
                     <label>Pilih Gambar Banner (Landscape disarankan)</label>
                     <input type="file" id="promoMedia" accept="image/*" required>
                 </div>
+                <div class="upload-warning">
+                    <i class="fas fa-lightbulb"></i>
+                    <span><b>TIPS BANNER:</b> Gunakan foto mendatar (Landscape / 16:9). Sistem otomatis memotong bagian yang tidak pas!</span>
+                </div>
                 <button type="submit" class="btn-submit" id="btnSimpanPromo" style="background: #0D47A1;"><i class="fas fa-cloud-upload-alt"></i> Pasang Banner Promo</button>
             </form>
         </div>
@@ -184,6 +201,10 @@
                     <label>Upload Foto Asli</label>
                     <input type="file" id="prodMedia" accept="image/*" required>
                 </div>
+                <div class="upload-warning">
+                    <i class="fas fa-camera"></i>
+                    <span><b>TIPS FOTO:</b> Gunakan foto kotak (Square / 1:1) agar produk tampil utuh, rapi, dan tidak terpotong di etalase.</span>
+                </div>
                 <button type="submit" class="btn-submit" id="btnSimpanBarang"><i class="fas fa-cloud-upload-alt"></i> Upload Ke Depan</button>
             </form>
         </div>
@@ -214,7 +235,7 @@
         <div class="modal-content">
             <span class="close-modal" onclick="document.getElementById('grafikModal').style.display='none'">&times;</span>
             <h2 style="color:#0D47A1; font-weight:800; margin-bottom: 20px;"><i class="fas fa-chart-area"></i> Statistik Toko</h2>
-            <h3 style="font-size: 13px; color:#555; margin-bottom:5px;">📊 Pengunjung Harian</h3>
+            <h3 style="font-size: 13px; color:#555; margin-bottom:5px;">📊 Pengunjung Harian (Contoh)</h3>
             <div class="css-chart">
                 <div class="chart-col"><div class="c-val">120</div><div class="c-bar bg-green" style="height: 30%;"></div><div class="c-label">Sen</div></div>
                 <div class="chart-col"><div class="c-val">190</div><div class="c-bar bg-green" style="height: 50%;"></div><div class="c-label">Sel</div></div>
@@ -254,7 +275,6 @@
 
         const doLogout = (e) => {
             e.preventDefault();
-            // Logout tanpa alert jelek
             localStorage.removeItem('token');
             showToast("Berhasil Keluar!", "success");
             setTimeout(() => window.location.href = 'login.html', 1000);
