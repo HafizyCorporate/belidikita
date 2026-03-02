@@ -102,6 +102,28 @@
         </a>
     </nav>
 
+        <div id="productDetailModal" class="modal" style="display: none;">
+        <div class="modal-content product-detail-box">
+            <button id="closeDetailBtn" class="close-detail-btn">&times;</button>
+            <div class="detail-img-box">
+                <img id="detailImage" src="" alt="Foto Barang">
+            </div>
+            <h2 id="detailTitle">Nama Barang</h2>
+            <h3 id="detailPrice">Rp0</h3>
+            
+            <div class="detail-desc-box">
+                <h4>Deskripsi Produk:</h4>
+                <p id="detailDesc">Deskripsi barang akan muncul di sini secara detail...</p>
+            </div>
+
+            <div class="detail-buttons">
+                <button id="btnAddToCart" class="btn-cart"><i class="fas fa-shopping-cart"></i> Masukkan Keranjang</button>
+                <button id="btnCheckout" class="btn-checkout"><i class="fas fa-money-bill-wave"></i> Beli Sekarang</button>
+            </div>
+        </div>
+    </div>
+
+
     <script src="script.js"></script>
 </body>
 </html>
