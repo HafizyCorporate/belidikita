@@ -35,21 +35,51 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1000); 
     }, 4500); 
 
-    // === 2. SLIDER PROMO ===
-    const sliderWrapper = document.getElementById('promoSlider');
-    let slideIndex = 0;
-    if(sliderWrapper) {
-        setInterval(() => {
-            slideIndex++;
-            if (slideIndex > 2) slideIndex = 0; 
-            sliderWrapper.style.transform = `translateX(-${slideIndex * 33.33}%)`;
-        }, 3000); 
+    // === 2. SLIDER PROMO (DINAMIS BACA DARI DATABASE) ===
+    async function loadPromoSlider() {
+        const sliderWrapper = document.getElementById('promoSlider');
+        if(!sliderWrapper) return;
+
+        try {
+            const res = await fetch('/api/promos');
+            const result = await res.json();
+            
+            if (result.success && result.data.length > 0) {
+                sliderWrapper.innerHTML = ''; // Hapus gambar bawaan HTML
+                const totalPromos = result.data.length;
+                
+                // Atur lebar wadah panjangnya menyesuaikan jumlah foto
+                sliderWrapper.style.width = `${totalPromos * 100}%`;
+                
+                result.data.forEach(promo => {
+                    const slideWidth = 100 / totalPromos; 
+                    sliderWrapper.innerHTML += `
+                        <div class="slide" style="width: ${slideWidth}%; background: url('${promo.media_url}') center/cover no-repeat; min-height: 140px; border-radius: 15px; margin-right: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                        </div>
+                    `;
+                });
+
+                // Cuma geser kalau promonya lebih dari 1
+                if (totalPromos > 1) {
+                    let slideIndex = 0;
+                    setInterval(() => {
+                        slideIndex++;
+                        if (slideIndex >= totalPromos) slideIndex = 0; 
+                        sliderWrapper.style.transform = `translateX(-${slideIndex * (100 / totalPromos)}%)`;
+                    }, 3500); // Geser tiap 3.5 detik
+                }
+            } else {
+                console.log("Belum ada banner promo dari Admin.");
+            }
+        } catch (error) {
+            console.error("Gagal load banner promo:", error);
+        }
     }
 
     // === 3. INISIALISASI DASHBOARD ===
     function initDashboard() {
-        // HANYA panggil data asli dari database, hapus data dummy!
-        loadRandomProducts(); 
+        loadPromoSlider();   // Panggil fungsi tarik promo
+        loadRandomProducts(); // Panggil fungsi tarik barang
     }
 
     // === 4. LOGIKA BOTTOM NAVBAR ===
