@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* CSS Khusus untuk memosisikan form login di tengah layar */
         body { 
             background: linear-gradient(135deg, #81D4FA 0%, #E1F5FE 100%); 
             display: flex; align-items: center; justify-content: center; 
@@ -46,7 +45,7 @@
         <p>Hanya untuk pengelola Toko Belidikita</p>
         
         <form id="adminLoginForm">
-            <input type="text" id="loginUsername" placeholder="Username Admin" required>
+            <input type="text" id="loginUsername" placeholder="Username Admin" required autocomplete="off">
             <input type="password" id="loginPassword" placeholder="Password Admin" required>
             <button type="submit">Masuk Sistem</button>
         </form>
@@ -56,32 +55,39 @@
 
     <script>
         document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
+            e.preventDefault(); // Mencegah halaman refresh otomatis
+            
+            // Ambil isi teks yang diketik user
+            const usernameInput = document.getElementById('loginUsername').value;
+            const passwordInput = document.getElementById('loginPassword').value;
             const btn = e.target.querySelector('button');
             
             btn.innerText = "Memeriksa...";
 
             try {
+                // Tembak jalur '/api/login' yang ada di server.js
                 const res = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    // Kirim data dengan label 'username' agar dikenali server
+                    body: JSON.stringify({ username: usernameInput, password: passwordInput })
                 });
+                
                 const data = await res.json();
                 
                 if(data.success) {
-                    localStorage.setItem('token', data.token);
-                    alert("Berhasil masuk sebagai Admin!");
-                    // Setelah sukses, kembali ke dashboard (atau nanti arahkan ke halaman input barang)
-                    window.location.href = 'dashboardutama.html'; 
+                    // JIKA BENAR (Versacy / Farid)
+                    localStorage.setItem('token', data.token); // Simpan Kunci Admin
+                    alert(data.message); // Muncul notif "Selamat datang, Admin Versacy!"
+                    window.location.href = 'dashboardutama.html'; // Balik ke halaman utama sebagai Admin
                 } else {
-                    alert(data.message || "Email atau password salah!");
+                    // JIKA SALAH
+                    alert(data.message); // Muncul notif "Username atau password salah!"
                     btn.innerText = "Masuk Sistem";
                 }
             } catch(err) {
-                alert("Gagal terhubung ke server.");
+                alert("Gagal terhubung ke server. Pastikan server Railway sudah jalan.");
+                console.error(err);
                 btn.innerText = "Masuk Sistem";
             }
         });
