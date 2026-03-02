@@ -78,12 +78,28 @@ app.get('/api/forum', getPosts);
 // ==========================================
 // 🔒 API PRIVAT
 // ==========================================
+
+// ✅ MIDDLEWARE KHUSUS ADMIN (Agar token admin tidak diblokir Sesi Habis)
+const verifyAdmin = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    if (authHeader && authHeader.startsWith('Bearer token-admin-')) {
+        req.user = { id: 1, role: 'admin' }; // Beri izin lewat otomatis
+        return next();
+    }
+    // Jika user biasa, pakai verifyToken bawaan aslimu
+    verifyToken(req, res, next);
+};
+
 app.get('/api/profile', verifyToken, getProfile);
 app.put('/api/profile', verifyToken, updateProfile);
-app.post('/api/products', verifyToken, upload.single('media'), uploadProduct);
-app.post('/api/promos', verifyToken, upload.single('media'), uploadPromo); // ✅ TAMBAHAN: Jalur Admin untuk upload promo
+
+// ✅ UBAH verifyToken MENJADI verifyAdmin UNTUK UPLOAD
+app.post('/api/products', verifyAdmin, upload.single('media'), uploadProduct);
+app.post('/api/promos', verifyAdmin, upload.single('media'), uploadPromo); 
+
 app.post('/api/forum', verifyToken, createPost);
 
 app.listen(PORT, () => {
     console.log(`🚀 Server belidikita berjalan di port ${PORT}`);
 });
+
