@@ -76,20 +76,75 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // === 4. LOGIKA KLIK BOTTOM NAVBAR (Menu Akun memanggil Popup) ===
+    // === 4. LOGIKA KLIK BOTTOM NAVBAR (Semua Tombol Berfungsi) ===
+    const menuHome = document.getElementById('menuHome');
+    const menuProduct = document.getElementById('menuProduct');
+    const menuFeed = document.getElementById('menuFeed');
+    const menuTransaction = document.getElementById('menuTransaction');
     const menuAccount = document.getElementById('menuAccount');
+    
     const authContainer = document.getElementById('authContainer');
     const authBackdrop = document.getElementById('authBackdrop');
 
+    // Fungsi kecil untuk memindahkan warna aktif (Biru Tua) ke menu yang diklik
+    function setActiveNav(clickedMenu) {
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        clickedMenu.classList.add('active');
+    }
+
+    // 1. Tombol Home (Beranda)
+    menuHome.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveNav(menuHome);
+        // Scroll kembali ke paling atas dengan halus
+        window.scrollTo({ top: 0, behavior: 'smooth' }); 
+    });
+
+    // 2. Tombol Produk
+    menuProduct.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveNav(menuProduct);
+        alert("Fitur Halaman Produk sedang dalam tahap pengembangan! 📦");
+        // Nanti kodingan untuk memunculkan list produk ditaruh di sini
+    });
+
+    // 3. Tombol Feed
+    menuFeed.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveNav(menuFeed);
+        alert("Fitur Video Feed Promosi Penjual segera hadir! 🎬");
+        // Nanti kodingan untuk memunculkan video ditaruh di sini
+    });
+
+    // 4. Tombol Transaksi
+    menuTransaction.addEventListener('click', (e) => {
+        e.preventDefault();
+        setActiveNav(menuTransaction);
+        
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert("Kamu harus login dulu untuk melihat riwayat transaksimu!");
+            // Otomatis buka form login
+            authContainer.classList.remove('hidden');
+            authBackdrop.classList.remove('hidden');
+        } else {
+            alert("Membuka Halaman Riwayat Transaksi... 🧾");
+            // Nanti kodingan untuk memunculkan data transaksi ditaruh di sini
+        }
+    });
+
+    // 5. Tombol Akun (Login / Profil)
     menuAccount.addEventListener('click', (e) => {
         e.preventDefault();
+        setActiveNav(menuAccount);
+        
         const token = localStorage.getItem('token');
         if (!token) {
             // Kalau belum login, munculkan Popup Form
             authContainer.classList.remove('hidden');
             authBackdrop.classList.remove('hidden');
         } else {
-            // Kalau sudah login, arahkan ke profil / logout
+            // Kalau sudah login, tanya apakah mau logout (atau nanti diarahkan ke edit profil)
             if(confirm("Anda sudah masuk. Apakah ingin Logout?")) {
                 localStorage.removeItem('token');
                 location.reload();
@@ -97,10 +152,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Tombol X (Tutup) pada Popup Login
     document.getElementById('closeAuthBtn').addEventListener('click', () => {
         authContainer.classList.add('hidden');
         authBackdrop.classList.add('hidden');
+        
+        // Kembalikan status ikon navbar ke Home jika batal login
+        setActiveNav(menuHome); 
     });
+
 
     // === 5. SLIDING PANEL LOGIN/REGISTER LOGIC ===
     const signUpBtn = document.getElementById('signUp');
