@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Belidikita - Belanja Pintar, Jualan Lancar</title>
+    <title>Belidikita - Toko Online Resmi</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="no-scroll"> 
     
@@ -36,6 +35,9 @@
             <i class="fas fa-search"></i>
             <input type="text" placeholder="Cari di belidikita...">
         </div>
+        <div class="header-admin" id="adminLoginIcon">
+            <i class="fas fa-user-shield"></i>
+        </div>
         <div class="header-cart">
             <i class="fas fa-shopping-cart"></i>
             <span class="cart-badge">0</span>
@@ -50,7 +52,7 @@
                     <h3>Promo Spesial Belidikita!</h3><p>Diskon hingga 50%</p>
                 </div>
                 <div class="slide" style="background: linear-gradient(45deg, #a18cd1, #fbc2eb);">
-                    <h3>Berita Perusahaan</h3><p>Fitur baru telah rilis!</p>
+                    <h3>Barang Baru Datang</h3><p>Cek koleksi terbaru kami</p>
                 </div>
                 <div class="slide" style="background: linear-gradient(45deg, #84fab0, #8fd3f4);">
                     <h3>Gratis Ongkir</h3><p>Ke seluruh Indonesia</p>
@@ -60,164 +62,58 @@
 
         <section class="scroll-section">
             <div class="section-header">
-                <h2>🔥 Top Barang Laris Hari Ini</h2>
+                <h2>🔥 Top Barang Laris</h2>
                 <a href="#">Lihat Semua</a>
             </div>
-            <div class="horizontal-scroll" id="topSellingList">
-            </div>
+            <div class="horizontal-scroll" id="topSellingList"></div>
         </section>
 
         <section class="scroll-section">
             <div class="section-header">
-                <h2>🛒 Paling Banyak Masuk Keranjang</h2>
+                <h2>🛒 Paling Banyak Diminati</h2>
             </div>
-            <div class="horizontal-scroll" id="topCartList">
-            </div>
-        </section>
-
-        <section class="scroll-section">
-            <div class="section-header">
-                <h2>⭐ Top Seller Minggu Ini</h2>
-            </div>
-            <div class="horizontal-scroll" id="topSellerList">
-            </div>
+            <div class="horizontal-scroll" id="topCartList"></div>
         </section>
 
         <section class="grid-section">
             <div class="section-header">
-                <h2>📦 Jelajahi Barang Menarik</h2>
+                <h2>📦 Jelajahi Semua Barang</h2>
             </div>
             <div class="product-grid" id="randomProductList">
-                <p style="text-align:center; width:100%;">Memuat barang terbaru...</p>
+                <p style="text-align:center; width:100%; color:#888;">Memuat barang toko...</p>
             </div>
         </section>
         
         <div style="height: 80px;"></div>
     </main>
 
-        <main id="accountContent" class="hidden">
-        
-        <div class="account-header-new">
-            <div class="account-top-icons">
-                <i class="fas fa-headset"></i>
-                <i class="fas fa-cog"></i>
-            </div>
-            
-            <div class="account-profile-placeholder">
-                <div class="profile-avatar-guest">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <h2>Selamat Datang!</h2>
-                <p>Masuk sekarang untuk mulai belanja dan jualan</p>
-                <button id="mainLoginBtn" class="btn-login-large-new">Masuk / Daftar</button>
-            </div>
-        </div>
-
-        <div class="account-body-new">
-            <div class="account-services">
-                <h3>Layanan Belidikita</h3>
-                <div class="services-grid">
-                    <div class="service-item">
-                        <i class="fas fa-box"></i>
-                        <span>Pesanan</span>
-                    </div>
-                    <div class="service-item">
-                        <i class="fas fa-heart"></i>
-                        <span>Wishlist</span>
-                    </div>
-                    <div class="service-item">
-                        <i class="fas fa-store"></i>
-                        <span>Toko Saya</span>
-                    </div>
-                    <div class="service-item">
-                        <i class="fas fa-history"></i>
-                        <span>Riwayat</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="account-recommendation">
-                <h3>Rekomendasi Untuk Anda</h3>
-                <div class="product-grid" id="accountProductList">
-                    <p style="text-align:center; width:100%; color:#888;">Memuat rekomendasi...</p>
-                </div>
-            </div>
-        </div>
-        
-        <div style="height: 90px;"></div> </main>
-
     <nav id="bottomNav" class="hidden">
         <a href="#" class="nav-item active" id="menuHome">
             <i class="fas fa-home"></i><span>Beranda</span>
         </a>
         <a href="#" class="nav-item" id="menuProduct">
-            <i class="fas fa-box-open"></i><span>Produk</span>
+            <i class="fas fa-box-open"></i><span>Katalog</span>
         </a>
         <a href="#" class="nav-item" id="menuFeed">
-            <i class="fas fa-play-circle"></i><span>Feed</span>
+            <i class="fas fa-play-circle"></i><span>Video</span>
         </a>
         <a href="#" class="nav-item" id="menuTransaction">
-            <i class="fas fa-receipt"></i><span>Transaksi</span>
-        </a>
-        <a href="#" class="nav-item" id="menuAccount">
-            <i class="fas fa-user"></i><span>Akun</span>
+            <i class="fas fa-receipt"></i><span>Cek Pesanan</span>
         </a>
     </nav>
 
     <div id="authBackdrop" class="hidden backdrop"></div>
-    <div class="container hidden modal-auth" id="authContainer">
+    <div class="container hidden modal-auth" id="authContainer" style="min-height: 350px;">
         <button id="closeAuthBtn" class="close-auth-btn">&times;</button>
         
-        <div class="form-container sign-up-container">
-            <form id="registerForm">
-                <h1>Buat Akun</h1>
-                <span>Daftar dengan email kamu</span>
-                <input type="text" id="regName" placeholder="Nama Lengkap" required />
-                <input type="email" id="regEmail" placeholder="Email" required />
-                <input type="password" id="regPassword" placeholder="Password" required />
-                <button type="submit">Daftar</button>
-                <p class="mobile-toggle">Sudah punya akun? <b id="mobileSignIn">Masuk di sini</b></p>
-            </form>
-        </div>
-
-        <div class="form-container sign-in-container">
+        <div class="form-container sign-in-container" style="width: 100%;">
             <form id="loginForm">
-                <h1>Sign In</h1>
-                <div id="g_id_onload" data-client_id="MASUKKAN_GOOGLE_CLIENT_ID_DISINI" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-                <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
-                
-                <span>atau gunakan email</span>
-                <input type="email" id="loginEmail" placeholder="Email" required />
-                <input type="password" id="loginPassword" placeholder="Password" required />
-                <a href="#" id="forgotPasswordBtn" class="forgot-text">Lupa password?</a>
-                <button type="submit">Masuk</button>
-                <p class="mobile-toggle">Belum punya akun? <b id="mobileSignUp">Daftar di sini</b></p>
+                <h1>Login Admin</h1>
+                <span>Hanya untuk pengelola toko</span>
+                <input type="email" id="loginEmail" placeholder="Email Admin" required />
+                <input type="password" id="loginPassword" placeholder="Password Admin" required />
+                <button type="submit" style="margin-top: 20px;">Masuk ke Toko</button>
             </form>
-        </div>
-
-        <div class="overlay-container">
-            <div class="overlay">
-                <div class="overlay-panel overlay-left">
-                    <h1>Selamat Datang!</h1>
-                    <p>Silakan login untuk mulai berbelanja</p>
-                    <button class="ghost" id="signIn">Sign In</button>
-                </div>
-                <div class="overlay-panel overlay-right">
-                    <h1>Halo, Teman!</h1>
-                    <p>Daftar akun baru dan mulai jualan hari ini</p>
-                    <button class="ghost" id="signUp">Sign Up</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-        <div id="otpModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <h2 style="color: #0D47A1; margin-bottom: 10px;">Verifikasi Email</h2>
-            <p style="color: #666; font-size: 12px; margin-bottom: 20px;">Masukkan 6 digit kode OTP yang dikirim ke emailmu.</p>
-            <input type="text" id="otpCode" placeholder="Kode OTP" maxlength="6" style="background-color: #f4f4f4; border: 1px solid #ddd; padding: 12px; margin-bottom: 15px; color: #333; width: 100%; border-radius: 8px; text-align: center; font-size: 18px; letter-spacing: 2px; outline: none;" />
-            <input type="hidden" id="otpEmail" />
-            <button id="verifyOtpBtn" style="border-radius: 20px; border: 1px solid #1976D2; background-color: #1976D2; color: #FFF; font-size: 12px; font-weight: bold; padding: 12px 45px; cursor: pointer; width: 100%;">Verifikasi</button>
         </div>
     </div>
 
