@@ -46,40 +46,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3000); 
     }
 
-    // === 3. MENGISI JENDELA HORIZONTAL ===
+    // === 3. INISIALISASI DASHBOARD ===
     function initDashboard() {
-        populateHorizontalCards('topSellingList', '🔥 Hot');
-        populateHorizontalCards('topCartList', '🛒 List');
+        // HANYA panggil data asli dari database, hapus data dummy!
         loadRandomProducts(); 
-    }
-
-    function populateHorizontalCards(containerId, label) {
-        const container = document.getElementById(containerId);
-        if(!container) return;
-        container.innerHTML = '';
-        
-        for(let i=1; i<=10; i++) {
-            const card = document.createElement('div');
-            card.className = 'h-card';
-            
-            const foto = `https://via.placeholder.com/150/f1f1f1/888?text=Produk+${i}`;
-            const nama = `Produk ${label} ${i}`;
-            const harga = `Rp${i}0.000`;
-            const deskripsi = `Ini adalah detail lengkap untuk ${nama}. Barang dijamin 100% original dari Belidikita Official. Silakan langsung checkout sebelum kehabisan stok!`;
-
-            card.innerHTML = `
-                <img src="${foto}" class="h-card-img" alt="Barang">
-                <div class="h-card-info">
-                    <div class="h-card-row">
-                        <span class="h-card-title">${nama}</span>
-                        <span class="h-card-price">${harga}</span>
-                    </div>
-                </div>
-            `;
-            
-            card.addEventListener('click', () => bukaDetailProduk(foto, nama, harga, deskripsi));
-            container.appendChild(card);
-        }
     }
 
     // === 4. LOGIKA BOTTOM NAVBAR ===
@@ -120,24 +90,55 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // === 6. AMBIL BARANG DARI DATABASE ===
+    // === 6. AMBIL BARANG & PISAHKAN BERDASARKAN KATEGORI (DATABASE ASLI) ===
     async function loadRandomProducts() {
         const productList = document.getElementById('randomProductList');
+        const larisList = document.getElementById('topSellingList');
+        const cartList = document.getElementById('topCartList');
+        
         if(!productList) return;
+
         try {
             const res = await fetch('/api/products');
             const result = await res.json();
             
             if (result.success && result.data.length > 0) {
+                // Kosongkan semua tempat sebelum diisi
                 productList.innerHTML = ''; 
+                if(larisList) larisList.innerHTML = '';
+                if(cartList) cartList.innerHTML = '';
+
                 result.data.forEach(product => {
                     const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
+                    const deskripsiBarang = product.description || "Deskripsi belum tersedia.";
                     
                     const isVideo = product.media_type === 'video';
+                    const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video+Produk' : (product.media_url || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
+                    
                     const mediaTag = isVideo 
                         ? `<video src="${product.media_url}" class="product-media" style="object-fit:cover;"></video>` 
                         : `<img src="${product.media_url}" class="product-media" alt="${product.title}">`;
-                    
+
+                    // ✅ JIKA BARANG KATEGORI 'laris' atau 'keranjang' (Masuk ke Slider Atas)
+                    if (product.category === 'laris' || product.category === 'keranjang') {
+                        const hCard = document.createElement('div');
+                        hCard.className = 'h-card';
+                        hCard.innerHTML = `
+                            <img src="${fotoBarang}" class="h-card-img" alt="Barang">
+                            <div class="h-card-info">
+                                <div class="h-card-row">
+                                    <span class="h-card-title">${product.title}</span>
+                                    <span class="h-card-price" style="font-size:11px;">${priceRp}</span>
+                                </div>
+                            </div>
+                        `;
+                        hCard.addEventListener('click', () => bukaDetailProduk(fotoBarang, product.title, priceRp, deskripsiBarang));
+                        
+                        if (product.category === 'laris' && larisList) larisList.appendChild(hCard);
+                        if (product.category === 'keranjang' && cartList) cartList.appendChild(hCard);
+                    }
+
+                    // ✅ SEMUA BARANG TETAP MASUK KE KOTAK BAWAH (Jelajahi Semua Barang)
                     const card = document.createElement('div');
                     card.className = 'product-card';
                     card.innerHTML = `
@@ -150,20 +151,21 @@ document.addEventListener("DOMContentLoaded", () => {
                             </div>
                         </div>
                     `;
-
-                    const deskripsiBarang = product.description || "Deskripsi belum tersedia untuk produk ini.";
-                    const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video+Produk' : (product.media_url || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
-
-                    card.addEventListener('click', () => {
-                        bukaDetailProduk(fotoBarang, product.title, priceRp, deskripsiBarang);
-                    });
-
+                    card.addEventListener('click', () => bukaDetailProduk(fotoBarang, product.title, priceRp, deskripsiBarang));
                     productList.appendChild(card);
                 });
+
+                // Teks otomatis jika kategori tertentu belum diisi admin
+                if(larisList && larisList.innerHTML === '') larisList.innerHTML = '<p style="padding:15px; font-size:12px; color:#888;">Belum ada barang di etalase ini.</p>';
+                if(cartList && cartList.innerHTML === '') cartList.innerHTML = '<p style="padding:15px; font-size:12px; color:#888;">Belum ada barang di etalase ini.</p>';
+
             } else {
                 productList.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Admin belum menambahkan barang.</p>';
+                if(larisList) larisList.innerHTML = '<p style="padding:15px; font-size:12px; color:#888;">Belum ada barang.</p>';
+                if(cartList) cartList.innerHTML = '<p style="padding:15px; font-size:12px; color:#888;">Belum ada barang.</p>';
             }
         } catch (error) {
+            console.error("Gagal memuat barang:", error);
             productList.innerHTML = '<p style="color: red; text-align:center;">Gagal memuat barang toko.</p>';
         }
     }
