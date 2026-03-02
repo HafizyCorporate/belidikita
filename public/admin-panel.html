@@ -38,18 +38,23 @@
         /* BOX KONTEN & FORM */
         .box { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 25px;}
         .box h3 { font-size: 14px; font-weight: 800; margin-bottom: 15px; color: #0D47A1; border-bottom: 2px solid #f4f7fa; padding-bottom: 10px; }
-
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 12px; }
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-size: 11px; font-weight: 600; margin-bottom: 5px; color: #555; }
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Montserrat', sans-serif; outline: none; font-size:12px; background:#f9f9f9;}
-        .form-group input:focus { border-color: #1976D2; background:#fff;}
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1976D2; background:#fff;}
         .btn-submit { width: 100%; padding: 12px; background: #00AA5B; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px; text-transform: uppercase;}
         
         /* TABEL BARANG */
         .table-responsive { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 450px;}
+        table { width: 100%; border-collapse: collapse; min-width: 600px;}
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; font-size: 11px; }
         th { font-weight: 800; color: #0D47A1; background: #f4f7fa; white-space: nowrap;}
+        .badge { padding: 4px 8px; border-radius: 20px; font-size: 9px; font-weight: bold; text-transform: uppercase; }
+        .badge-laris { background: #ffeb3b; color: #b71c1c; }
+        .badge-keranjang { background: #E1F5FE; color: #0D47A1; }
+        .badge-biasa { background: #eee; color: #555; }
         
         /* === 3. MENU BAWAH KHUSUS HP === */
         .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); border-top: 1px solid #eee;}
@@ -64,14 +69,15 @@
             .mobile-nav { display: flex !important; } 
             .main-content { margin-left: 0; width: 100%; padding: 15px; margin-bottom: 70px; } 
             .cards { grid-template-columns: 1fr; gap: 10px; } 
+            .grid-2 { grid-template-columns: 1fr; gap: 0; }
         }
 
-        /* === 4. MODAL JENDELA GRAFIK (ANTI ERROR) === */
+        /* === 4. MODAL JENDELA GRAFIK === */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); overflow: auto; }
         .modal-content { background-color: #fefefe; margin: 10% auto; padding: 20px; border-radius: 15px; width: 90%; max-width: 500px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .close-modal { position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
         
-        /* GRAFIK CSS MURNI (DIJAMIN 100% TIDAK MEMBESAR) */
+        /* GRAFIK CSS MURNI */
         .css-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 120px; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 25px; padding-top: 20px; }
         .chart-col { display: flex; flex-direction: column; align-items: center; width: 12%; height: 100%; justify-content: flex-end; }
         .c-val { font-size: 10px; font-weight: bold; margin-bottom: 4px; color: #555; }
@@ -110,7 +116,7 @@
             </div>
             <div class="card">
                 <div class="card-info">
-                    <h3>Pesanan Masuk</h3>
+                    <h3>Pesanan Masuk (Segera)</h3>
                     <h2>0 Pesanan</h2>
                 </div>
                 <i class="fas fa-shopping-cart card-icon"></i>
@@ -126,10 +132,33 @@
                     <label>Nama Barang</label>
                     <input type="text" id="prodName" placeholder="Contoh: Sepatu Sneakers" required>
                 </div>
-                <div class="form-group">
-                    <label>Harga Jual (Angka saja)</label>
-                    <input type="number" id="prodPrice" placeholder="Contoh: 150000" required>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Harga Modal (Rp)</label>
+                        <input type="number" id="prodCapital" placeholder="Contoh: 100000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Harga Jual (Rp)</label>
+                        <input type="number" id="prodPrice" placeholder="Contoh: 150000" required>
+                    </div>
                 </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Stok Awal</label>
+                        <input type="number" id="prodStock" placeholder="Contoh: 50" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Kategori Etalase Depan</label>
+                        <select id="prodCategory" required>
+                            <option value="biasa">Barang Biasa</option>
+                            <option value="laris">🔥 Top Laris</option>
+                            <option value="keranjang">🛒 Paling Banyak Diminati</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label>Deskripsi Barang</label>
                     <textarea id="prodDesc" rows="3" placeholder="Jelaskan detail barangmu di sini..." required></textarea>
@@ -148,14 +177,16 @@
                 <table>
                     <thead>
                         <tr>
+                            <th>Kategori</th>
                             <th>Nama Barang</th>
+                            <th>Stok</th>
                             <th>Harga Jual</th>
-                            <th>Deskripsi (Singkat)</th>
+                            <th>Harga Modal</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="tableBodyProducts">
-                        <tr><td colspan="4" style="text-align:center;">Memuat data dari Server...</td></tr>
+                        <tr><td colspan="6" style="text-align:center;">Memuat data dari Server...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -167,7 +198,7 @@
             <span class="close-modal" id="closeGrafikBtn">&times;</span>
             <h2 style="color:#0D47A1; font-weight:800; margin-bottom: 20px;"><i class="fas fa-chart-area"></i> Statistik Toko</h2>
             
-            <h3 style="font-size: 13px; color:#555; margin-bottom:5px;">📊 Pengunjung Harian</h3>
+            <h3 style="font-size: 13px; color:#555; margin-bottom:5px;">📊 Pengunjung Harian (Contoh)</h3>
             <div class="css-chart">
                 <div class="chart-col"><div class="c-val">120</div><div class="c-bar bg-green" style="height: 30%;"></div><div class="c-label">Sen</div></div>
                 <div class="chart-col"><div class="c-val">190</div><div class="c-bar bg-green" style="height: 50%;"></div><div class="c-label">Sel</div></div>
@@ -178,7 +209,7 @@
                 <div class="chart-col"><div class="c-val">510</div><div class="c-bar bg-green" style="height: 100%;"></div><div class="c-label">Min</div></div>
             </div>
 
-            <h3 style="font-size: 13px; color:#555; margin-bottom:5px;">💰 Penjualan (Juta Rp)</h3>
+            <h3 style="font-size: 13px; color:#555; margin-bottom:5px;">💰 Penjualan Juta Rp (Contoh)</h3>
             <div class="css-chart">
                 <div class="chart-col"><div class="c-val">1.2</div><div class="c-bar bg-blue" style="height: 20%;"></div><div class="c-label">Sen</div></div>
                 <div class="chart-col"><div class="c-val">1.9</div><div class="c-bar bg-blue" style="height: 35%;"></div><div class="c-label">Sel</div></div>
@@ -226,68 +257,3 @@
         async function fetchProducts() {
             try {
                 const res = await fetch('/api/products');
-                const result = await res.json();
-                const tbody = document.getElementById('tableBodyProducts');
-                
-                if (result.success && result.data.length > 0) {
-                    tbody.innerHTML = '';
-                    document.getElementById('totalProduk').innerText = result.data.length + " Barang";
-                    
-                    result.data.forEach(prod => {
-                        const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(prod.price);
-                        const descPendek = prod.description ? prod.description.substring(0, 30) + "..." : "Tidak ada";
-                        
-                        tbody.innerHTML += `
-                            <tr>
-                                <td><b>${prod.title}</b></td>
-                                <td style="color:#ff5722; font-weight:bold;">${priceRp}</td>
-                                <td>${descPendek}</td>
-                                <td><a href="#" style="color:#ff3b30; text-decoration:none;" onclick="alert('Fitur hapus barang segera hadir!')">Hapus</a></td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Toko Anda masih kosong. Silakan upload barang.</td></tr>';
-                }
-            } catch (err) {
-                console.error("Gagal load tabel", err);
-            }
-        }
-        fetchProducts();
-
-        // 4. UPLOAD BARANG KE DATABASE
-        document.getElementById('formUploadBarang').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSimpanBarang');
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengupload...";
-
-            const formData = new FormData();
-            formData.append('title', document.getElementById('prodName').value);
-            formData.append('price', document.getElementById('prodPrice').value);
-            formData.append('description', document.getElementById('prodDesc').value);
-            formData.append('media', document.getElementById('prodMedia').files[0]);
-
-            try {
-                const res = await fetch('/api/products', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }, 
-                    body: formData
-                });
-                
-                const data = await res.json();
-                if(data.success) {
-                    alert("✅ YAY! Barang berhasil di-upload! Silakan cek toko depan.");
-                    document.getElementById('formUploadBarang').reset();
-                    fetchProducts(); 
-                } else {
-                    alert("Gagal mengupload: " + data.message);
-                }
-            } catch(err) {
-                alert("Upload gagal! Pastikan server backend sudah menyala dengan benar.");
-            } finally {
-                btn.innerHTML = "<i class='fas fa-cloud-upload-alt'></i> Upload Ke Depan";
-            }
-        });
-    </script>
-</body>
-</html>
