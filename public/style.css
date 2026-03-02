@@ -148,3 +148,21 @@ main { margin-top: 85px !important; width: 100%; max-width: 600px; margin-left: 
 }
 .btn-cart { background: #E1F5FE; color: #1976D2; border: 1px solid #1976D2 !important; }
 .btn-checkout { background: #1976D2; color: #fff; }
+
+/* === 7. NOTIFIKASI MODERN (TOAST) === */
+#customToast {
+    visibility: hidden; min-width: 250px; margin-left: -125px;
+    background-color: #333; color: #fff; text-align: center;
+    border-radius: 25px; padding: 16px; position: fixed;
+    z-index: 9999; left: 50%; bottom: 30px;
+    font-size: 13px; font-weight: 600;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transition: opacity 0.3s, bottom 0.3s; opacity: 0;
+}
+#customToast.show {
+    visibility: visible; opacity: 1; bottom: 50px;
+}
+#customToast.success { background-color: #00AA5B; } /* Hijau */
+#customToast.error { background-color: #ff3b30; } /* Merah */
+#customToast.info { background-color: #1976D2; } /* Biru */
+
