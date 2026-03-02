@@ -1,51 +1,48 @@
 const { pool } = require('../../config/db');
 
+// (Fungsi Upload Barang yang sudah ada)
 const uploadProduct = async (req, res) => {
-    // ✅ Tambahkan 'category' di sini untuk ditangkap dari form Admin
-    const { title, description, price, category } = req.body; 
-    
+    const { title, description, price, category, capital_price, stock } = req.body; 
     const media_url = req.file ? `/uploads/${req.file.filename}` : null;
     const media_type = req.file && req.file.mimetype.startsWith('video/') ? 'video' : 'image';
 
-    // Filter Konten Ketat
     const forbiddenWords = ['judi', 'slot', 'gacor', 'porno', 'bokep', '18+', 'togel'];
     const contentCheck = `${title} ${description}`.toLowerCase();
-    
-    if (forbiddenWords.some(word => contentCheck.includes(word))) {
-        return res.status(403).json({ 
-            success: false, 
-            message: "Pelanggaran Komunitas: Konten dilarang." 
-        });
-    }
+    if (forbiddenWords.some(word => contentCheck.includes(word))) return res.status(403).json({ success: false, message: "Pelanggaran Komunitas!" });
 
     try {
-        // ✅ Tambahkan 'category' ke dalam perintah INSERT database
-        // Jika category kosong, otomatis diisi 'biasa'
         const newProduct = await pool.query(
-            'INSERT INTO products (user_id, title, description, price, media_url, media_type, category) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-            [req.user ? req.user.id : 1, title, description, price, media_url, media_type, category || 'biasa']
+            `INSERT INTO products (user_id, title, description, price, media_url, media_type, category, capital_price, stock) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+            [req.user ? req.user.id : 1, title, description, price, media_url, media_type, category || 'biasa', capital_price || 0, stock || 0]
         );
-        res.json({ success: true, message: "Jualan berhasil diposting!", product: newProduct.rows[0] });
-    } catch (err) {
-        console.error("Error upload:", err);
-        res.status(500).json({ success: false, message: "Server Error. Pastikan kolom 'category' sudah ada di database." });
-    }
+        res.json({ success: true, message: "Barang berhasil diposting!", product: newProduct.rows[0] });
+    } catch (err) { res.status(500).json({ success: false, message: "Server Error" }); }
 };
 
 const getAllProducts = async (req, res) => {
     try {
-        // ✅ Ambil semua produk beserta kategorinya (LEFT JOIN agar tidak error kalau user admin tidak ada di tabel users)
-        const products = await pool.query(`
-            SELECT p.*, COALESCE(u.name, 'Admin') as seller_name 
-            FROM products p 
-            LEFT JOIN users u ON p.user_id = u.id 
-            ORDER BY p.created_at DESC
-        `);
+        const products = await pool.query(`SELECT p.*, COALESCE(u.name, 'Admin') as seller_name FROM products p LEFT JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC`);
         res.json({ success: true, data: products.rows });
-    } catch (err) {
-        console.error("Error get products:", err);
-        res.status(500).json({ success: false, message: "Server Error" });
-    }
+    } catch (err) { res.status(500).json({ success: false, message: "Server Error" }); }
 };
 
-module.exports = { uploadProduct, getAllProducts };
+// ✅ 1. FUNGSI BARU UPLOAD SLIDER PROMO
+const uploadPromo = async (req, res) => {
+    const media_url = req.file ? `/uploads/${req.file.filename}` : null;
+    if (!media_url) return res.status(400).json({ success: false, message: "Foto promo wajib ada!" });
+    try {
+        const newPromo = await pool.query('INSERT INTO promo_sliders (media_url) VALUES ($1) RETURNING *', [media_url]);
+        res.json({ success: true, message: "Banner Promo Berhasil Diunggah!", data: newPromo.rows[0] });
+    } catch (err) { res.status(500).json({ success: false, message: "Server Error" }); }
+};
+
+// ✅ 2. FUNGSI BARU AMBIL SLIDER PROMO (Maksimal 5 Promo Terbaru)
+const getPromos = async (req, res) => {
+    try {
+        const promos = await pool.query('SELECT * FROM promo_sliders ORDER BY created_at DESC LIMIT 5');
+        res.json({ success: true, data: promos.rows });
+    } catch (err) { res.status(500).json({ success: false, message: "Server Error" }); }
+};
+
+// Jangan lupa daftarkan fungsi barunya di sini:
+module.exports = { uploadProduct, getAllProducts, uploadPromo, getPromos };
