@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // === 4. LOGIKA BOTTOM NAVBAR (TANPA MENU AKUN) ===
+    // === 4. LOGIKA BOTTOM NAVBAR ===
     const menuHome = document.getElementById('menuHome');
     const menuProduct = document.getElementById('menuProduct');
     const menuFeed = document.getElementById('menuFeed');
@@ -77,75 +77,26 @@ document.addEventListener("DOMContentLoaded", () => {
         window.scrollTo({ top: 0, behavior: 'smooth' }); 
     });
 
-    menuProduct.addEventListener('click', (e) => { 
-        e.preventDefault(); 
-        setActiveNav(menuProduct); 
-        alert("Membuka Katalog Produk..."); 
-    });
+    menuProduct.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuProduct); alert("Membuka Katalog Produk..."); });
+    menuFeed.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuFeed); alert("Fitur Video Feed segera hadir!"); });
+    menuTransaction.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuTransaction); alert("Silakan masukkan nomor resi pesananmu di menu ini nanti!"); });
 
-    menuFeed.addEventListener('click', (e) => { 
-        e.preventDefault(); 
-        setActiveNav(menuFeed); 
-        alert("Fitur Video Feed segera hadir!"); 
-    });
-
-    menuTransaction.addEventListener('click', (e) => { 
-        e.preventDefault(); 
-        setActiveNav(menuTransaction); 
-        alert("Silakan masukkan nomor resi pesananmu di menu ini nanti!"); 
-    });
-
-    // === 5. LOGIKA LOGIN ADMIN RAHASIA (IKON PERISAI) ===
+    // === 5. PINDAH KE HALAMAN LOGIN ADMIN TERPISAH ===
     const adminLoginIcon = document.getElementById('adminLoginIcon');
-    const authContainer = document.getElementById('authContainer');
-    const authBackdrop = document.getElementById('authBackdrop');
 
     if(adminLoginIcon) {
         adminLoginIcon.addEventListener('click', () => {
             const token = localStorage.getItem('token');
             if (!token) {
-                authContainer.classList.remove('hidden');
-                authBackdrop.classList.remove('hidden');
+                // ✅ JIKA BELUM LOGIN, ARAHKAN KE HALAMAN LOGIN.HTML
+                window.location.href = 'login.html';
             } else {
-                if(confirm("Admin sudah masuk. Ingin Logout?")) {
+                // ✅ JIKA SUDAH LOGIN, TANYA APAKAH MAU LOGOUT
+                if(confirm("Admin sudah masuk. Apakah ingin Logout?")) {
                     localStorage.removeItem('token');
+                    alert("Berhasil Logout!");
                     location.reload();
                 }
-            }
-        });
-    }
-
-    if(document.getElementById('closeAuthBtn')) {
-        document.getElementById('closeAuthBtn').addEventListener('click', () => {
-            authContainer.classList.add('hidden');
-            authBackdrop.classList.add('hidden');
-        });
-    }
-
-    const loginForm = document.getElementById('loginForm');
-    if(loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            // Proses Login Admin
-            try {
-                const res = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await res.json();
-                alert(data.message);
-                if(data.success) {
-                    localStorage.setItem('token', data.token);
-                    authContainer.classList.add('hidden');
-                    authBackdrop.classList.add('hidden');
-                    loginForm.reset();
-                }
-            } catch(err) {
-                alert("Gagal koneksi ke server.");
             }
         });
     }
@@ -165,8 +116,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     const mediaTag = product.media_type === 'video' ? `<video src="${product.media_url}" class="product-media" controls></video>` : `<img src="${product.media_url}" class="product-media" alt="${product.title}">`;
                     const card = document.createElement('div');
                     card.className = 'product-card';
-                    
-                    // ✅ NAMA PENJUAL OTOMATIS MENJADI BELIDIKITA OFFICIAL
                     card.innerHTML = `
                         ${product.media_url ? mediaTag : '<div class="product-media" style="display:flex; align-items:center; justify-content:center; color:#aaa;">No Media</div>'}
                         <div class="product-info">
