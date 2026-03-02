@@ -1,4 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // === MEMBUAT DIV TOAST NOTIFIKASI SECARA OTOMATIS ===
+    const toastDiv = document.createElement('div');
+    toastDiv.id = 'customToast';
+    document.body.appendChild(toastDiv);
+
+    // FUNGSI MEMUNCULKAN NOTIFIKASI CANTIK
+    function showToast(msg, type = 'info') {
+        const toast = document.getElementById("customToast");
+        toast.innerText = msg;
+        toast.className = type + " show";
+        setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+    }
+
     // === 1. LOGIKA SPLASH SCREEN ===
     const splashScreen = document.getElementById('splashScreen');
     const topHeader = document.getElementById('topHeader');
@@ -33,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3000); 
     }
 
-    // === 3. MENGISI JENDELA HORIZONTAL (DITAMBAH LOGIKA KLIK) ===
+    // === 3. MENGISI JENDELA HORIZONTAL ===
     function initDashboard() {
         populateHorizontalCards('topSellingList', '🔥 Hot');
         populateHorizontalCards('topCartList', '🛒 List');
@@ -49,7 +62,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const card = document.createElement('div');
             card.className = 'h-card';
             
-            // 🔹 Data Dummy Barang
             const foto = `https://via.placeholder.com/150/f1f1f1/888?text=Produk+${i}`;
             const nama = `Produk ${label} ${i}`;
             const harga = `Rp${i}0.000`;
@@ -65,9 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 </div>
             `;
             
-            // ✅ Fungsi saat kartu barang di-klik
             card.addEventListener('click', () => bukaDetailProduk(foto, nama, harga, deskripsi));
-            
             container.appendChild(card);
         }
     }
@@ -84,14 +94,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     menuHome.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuHome);
+        e.preventDefault(); setActiveNav(menuHome);
         window.scrollTo({ top: 0, behavior: 'smooth' }); 
     });
 
-    menuProduct.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuProduct); alert("Membuka Katalog Produk..."); });
-    menuFeed.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuFeed); alert("Fitur Video Feed segera hadir!"); });
-    menuTransaction.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuTransaction); alert("Silakan masukkan nomor resi pesananmu di menu ini nanti!"); });
+    menuProduct.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuProduct); showToast("Membuka Katalog Produk...", "info"); });
+    menuFeed.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuFeed); showToast("Fitur Video Feed segera hadir!", "info"); });
+    menuTransaction.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuTransaction); showToast("Silakan login untuk cek pesanan!", "info"); });
 
     // === 5. PINDAH KE HALAMAN LOGIN ADMIN TERPISAH ===
     const adminLoginIcon = document.getElementById('adminLoginIcon');
@@ -100,20 +109,18 @@ document.addEventListener("DOMContentLoaded", () => {
         adminLoginIcon.addEventListener('click', () => {
             const token = localStorage.getItem('token');
             if (!token) {
-                // ARAHKAN KE HALAMAN LOGIN.HTML
                 window.location.href = 'login.html';
             } else {
-                // JIKA SUDAH LOGIN
                 if(confirm("Admin sudah masuk. Apakah ingin Logout?")) {
                     localStorage.removeItem('token');
-                    alert("Berhasil Logout!");
-                    location.reload();
+                    showToast("Berhasil Logout!", "success");
+                    setTimeout(() => location.reload(), 1000);
                 }
             }
         });
     }
 
-    // === 6. AMBIL BARANG DARI DATABASE (DITAMBAH LOGIKA KLIK) ===
+    // === 6. AMBIL BARANG DARI DATABASE ===
     async function loadRandomProducts() {
         const productList = document.getElementById('randomProductList');
         if(!productList) return;
@@ -144,11 +151,9 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     `;
 
-                    // 🔹 Data yang dikirim ke Pop-up
                     const deskripsiBarang = product.description || "Deskripsi belum tersedia untuk produk ini.";
                     const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video+Produk' : (product.media_url || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
 
-                    // ✅ Fungsi saat barang dari database di-klik
                     card.addEventListener('click', () => {
                         bukaDetailProduk(fotoBarang, product.title, priceRp, deskripsiBarang);
                     });
@@ -163,62 +168,48 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ==============================================================
-    // 7. LOGIKA JENDELA POP-UP DETAIL PRODUK (CART & CHECKOUT)
-    // ==============================================================
+    // === 7. LOGIKA JENDELA POP-UP DETAIL PRODUK ===
     const productModal = document.getElementById('productDetailModal');
     const closeDetailBtn = document.getElementById('closeDetailBtn');
     
-    // Fungsi Memasukkan Data ke Pop-up
     function bukaDetailProduk(foto, nama, harga, deskripsi) {
-        if(!productModal) return; // Mencegah error jika HTML pop-up belum di-paste
-        
+        if(!productModal) return; 
         document.getElementById('detailImage').src = foto;
         document.getElementById('detailTitle').innerText = nama;
         document.getElementById('detailPrice').innerText = harga;
         document.getElementById('detailDesc').innerText = deskripsi;
-        
         productModal.style.display = "block"; 
     }
 
-    // Menutup pop-up saat tombol X ditekan
     if(closeDetailBtn) {
-        closeDetailBtn.addEventListener('click', () => {
-            productModal.style.display = "none";
-        });
+        closeDetailBtn.addEventListener('click', () => { productModal.style.display = "none"; });
     }
 
-    // Logika Tombol "Masukkan Keranjang"
     const btnAddToCart = document.getElementById('btnAddToCart');
     if(btnAddToCart) {
         btnAddToCart.addEventListener('click', () => {
             let badge = document.querySelector('.cart-badge');
             if(badge) {
                 let currentTotal = parseInt(badge.innerText) || 0;
-                badge.innerText = currentTotal + 1; // Menambah angka keranjang di pojok kanan atas
+                badge.innerText = currentTotal + 1; 
             }
-            alert("✅ Barang berhasil dimasukkan ke keranjang!");
-            productModal.style.display = "none"; // Tutup otomatis pop-up
+            showToast("Barang dimasukkan ke keranjang 🛒", "success");
+            productModal.style.display = "none"; 
         });
     }
 
-    // Logika Tombol "Beli Sekarang" (Checkout via WhatsApp Admin)
     const btnCheckout = document.getElementById('btnCheckout');
     if(btnCheckout) {
         btnCheckout.addEventListener('click', () => {
             const namaBarang = document.getElementById('detailTitle').innerText;
             const hargaBarang = document.getElementById('detailPrice').innerText;
-            
-            // Format pesan otomatis ke WhatsApp
             const pesan = `Halo Admin Belidikita, saya tertarik untuk membeli:\n\n*Nama Barang:* ${namaBarang}\n*Harga:* ${hargaBarang}\n\nApakah stoknya masih tersedia?`;
             
-            // ✅ NANTI GANTI NOMOR INI DENGAN NOMOR WA KAMU (Dimulai dengan 62)
-            const nomorAdmin = "6281234567890"; 
-            
+            const nomorAdmin = "6281234567890"; // Ganti Nomor WA
             const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
             
-            alert("Membuka obrolan ke WhatsApp Admin... 🚀");
-            window.open(linkWA, '_blank'); // Membuka tab WA baru
+            showToast("Mengarahkan ke WhatsApp...", "info");
+            setTimeout(() => window.open(linkWA, '_blank'), 1000); 
             productModal.style.display = "none"; 
         });
     }
