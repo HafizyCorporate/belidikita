@@ -106,14 +106,26 @@ body {
 .wheels  { animation: truck 4s 0.001s ease infinite; }
 .truck:before { animation: wind 1.5s 0.000s ease infinite; }
 
-/* TEKS: DITURUNKAN KE PALING BAWAH */
+/* ================================================== */
+/* TEKS & LOGO: DINAIRKAN SEDIKIT KE ATAS             */
+/* ================================================== */
 .splash-text-container { 
     position: absolute;
-    bottom: 8vh; 
+    bottom: 12vh; /* ✅ Dinaikkan dari 8vh jadi 12vh agar ada ruang untuk logo */
     left: 0; width: 100%;
     text-align: center; 
     z-index: 2; 
 }
+
+/* ✅ STYLE UNTUK LOGO BARU */
+.splash-logo {
+    width: 80px; /* Ukuran logo, silakan ubah angka ini jika kurang besar/kecil */
+    height: auto;
+    margin-bottom: 10px; /* Jarak antara logo dan tulisan Belidikita */
+    opacity: 0;
+    animation: fadeIn 1s ease forwards 0.5s; /* Efek muncul pelan-pelan */
+}
+
 .megah-title {
     font-size: clamp(3rem, 12vw, 5rem); 
     font-weight: 800; color: #fff; 
@@ -217,8 +229,8 @@ a.forgot-text { color: #5f3cf5; font-size: 12px; text-decoration: none; margin: 
     nav { padding: 10px 20px; }
     .dashboard { width: 100%; padding: 10px; margin-top: 60px; }
     
-    /* ✅ SKALA DIKURANGI KHUSUS HP (Dari 1.5 jadi 1.2 agar lebih pas) */
+    /* ✅ SKALA DIKURANGI KHUSUS HP MENJADI 1.0 (Standar / Normal) */
     .anim-scaler { 
-        transform: scale(1.2); 
+        transform: scale(1.0); 
     }
 }
