@@ -18,15 +18,14 @@ body {
     background: linear-gradient(180deg, #81D4FA 0%, #E1F5FE 100%);
     display: flex; flex-direction: column; 
     z-index: 9999; 
-    /* ✅ GEMBOK SCROLL: Ini yang menghilangkan efek bisa digeser/scroll */
     overflow: hidden; 
 }
 .splash-screen.hide { opacity: 0; visibility: hidden; transition: opacity 1s ease, visibility 1s ease; }
 
-/* ✅ WADAH JALANAN (Diangkat lebih tinggi) */
+/* WADAH JALANAN */
 .loop-wrapper {
     position: absolute; 
-    bottom: 8vh; /* ✅ Diangkat dari 0 menjadi 8vh dari dasar layar (Komputer) */
+    bottom: 0; 
     left: 0; 
     width: 100vw; height: 40vh; 
     overflow: hidden;
@@ -41,13 +40,15 @@ body {
     left: 50%;
     width: 1000px; height: 300px;
     margin-left: -500px; 
-    transform: scale(2.8); 
+    transform: scale(3.0); 
     transform-origin: bottom center;
 }
 
 /* MATAHARI */
 .sun {
-    position: absolute; top: 8vh; right: 8vw;
+    position: absolute; 
+    top: 2vh; 
+    right: -2vw; 
     width: 180px; height: 180px; 
     background: #FFD700;
     border-radius: 50%; box-shadow: 0 0 50px #FFD700;
@@ -64,7 +65,7 @@ body {
     margin-left: -300px; 
     background: linear-gradient(180deg, rgba(255, 215, 0, 0.6) 0%, rgba(255, 255, 255, 0) 70%);
     transform-origin: top center;
-    transform: rotate(48deg); 
+    transform: rotate(40deg); 
     clip-path: polygon(45% 0, 55% 0, 100% 100%, 0 100%); 
     animation: beamPulse 3s infinite alternate; 
     pointer-events: none;
@@ -133,16 +134,17 @@ body {
 /* ================================================== */
 .splash-text-container { 
     position: absolute;
-    top: 45%; 
+    top: 40%; 
     left: 0; width: 100%;
     transform: translateY(-50%); 
     text-align: center; 
     z-index: 5; 
 }
 
+/* ✅ LOGO DIPERBESAR LAGI BIAR SERASI */
 .splash-logo {
-    width: 600px; 
-    max-width: 95vw; 
+    width: 650px; /* ✅ Ukuran PC dinaikkan jadi 650px */
+    max-width: 95vw; /* ✅ Memberi ruang lebih besar di HP */
     height: auto;
     margin-bottom: 0px; 
     opacity: 0;
@@ -150,11 +152,12 @@ body {
     animation: textZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1s; 
 }
 
+/* ✅ SLOGAN DIPERBESAR & DIPERTEBAL BIAR IMBANG */
 .brand-slogan {
-    font-size: clamp(1.2rem, 4vw, 2rem); 
+    font-size: clamp(1.5rem, 5vw, 2.5rem); /* ✅ Teks slogan dibesarkan */
     color: #0D47A1; 
     margin-top: -30px; 
-    font-weight: 700;
+    font-weight: 800; /* ✅ Dibuat lebih tebal/bold */
     position: relative;
     z-index: 6; 
     opacity: 0; animation: fadeIn 1s ease forwards 1.8s;
@@ -252,31 +255,32 @@ a.forgot-text { color: #5f3cf5; font-size: 12px; text-decoration: none; margin: 
     
     .sun { 
         width: 100px; height: 100px; 
-        top: 6vh; right: 5vw;
+        top: 2vh; right: 2vw; 
     } 
     .sun-beam {
         top: 50px; left: 50px;
-        width: 400px; 
-        margin-left: -200px;
-        transform: rotate(30deg); 
+        width: 600px; 
+        margin-left: -300px;
+        transform: rotate(38deg); 
+        clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
     }
 
-    /* ✅ TRUK DIANGKAT TINGGI DI HP BIAR JELAS (TIDAK TENGGELAM) */
     .loop-wrapper { 
-        bottom: 12vh; /* ✅ Naik jauh dari 5vh ke 12vh */
+        bottom: 0; 
         height: 250px; 
-        border-bottom: 4px solid #fff; 
+        border-bottom: 8px solid #fff; 
     } 
     .anim-scaler { 
-        transform: scale(0.85); 
+        transform: scale(1.0); 
         bottom: 0px; 
     } 
 
+    /* ✅ LOGO DAN SLOGAN HP DIBESARKAN */
     .splash-logo {
-        max-width: 90vw; 
+        max-width: 95vw; /* Lebih mentok ke pinggir layar HP */
     }
     .brand-slogan { 
-        margin-top: -45px; 
-        font-size: 1.1rem;
+        margin-top: -40px; /* Tarikan agar nempel ke logo */
+        font-size: 1.3rem; /* ✅ Dibesarkan dari 1.1rem agar lebih terbaca */
     } 
 }
