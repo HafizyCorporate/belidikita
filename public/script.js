@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3000); 
     }
 
-    // === 3. MENGISI JENDELA HORIZONTAL ===
+    // === 3. MENGISI JENDELA HORIZONTAL (DITAMBAH LOGIKA KLIK) ===
     function initDashboard() {
         populateHorizontalCards('topSellingList', '🔥 Hot');
         populateHorizontalCards('topCartList', '🛒 List');
@@ -44,18 +44,30 @@ document.addEventListener("DOMContentLoaded", () => {
         const container = document.getElementById(containerId);
         if(!container) return;
         container.innerHTML = '';
+        
         for(let i=1; i<=10; i++) {
             const card = document.createElement('div');
             card.className = 'h-card';
+            
+            // 🔹 Data Dummy Barang
+            const foto = `https://via.placeholder.com/150/f1f1f1/888?text=Produk+${i}`;
+            const nama = `Produk ${label} ${i}`;
+            const harga = `Rp${i}0.000`;
+            const deskripsi = `Ini adalah detail lengkap untuk ${nama}. Barang dijamin 100% original dari Belidikita Official. Silakan langsung checkout sebelum kehabisan stok!`;
+
             card.innerHTML = `
-                <img src="https://via.placeholder.com/150/f1f1f1/888?text=Produk+${i}" class="h-card-img" alt="Barang">
+                <img src="${foto}" class="h-card-img" alt="Barang">
                 <div class="h-card-info">
                     <div class="h-card-row">
-                        <span class="h-card-title">Produk ${label} ${i}</span>
-                        <span class="h-card-price">Rp${i}0K</span>
+                        <span class="h-card-title">${nama}</span>
+                        <span class="h-card-price">${harga}</span>
                     </div>
                 </div>
             `;
+            
+            // ✅ Fungsi saat kartu barang di-klik
+            card.addEventListener('click', () => bukaDetailProduk(foto, nama, harga, deskripsi));
+            
             container.appendChild(card);
         }
     }
@@ -101,7 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // === 6. AMBIL BARANG UNTUK TOKO PRIBADI (OFFICIAL STORE) ===
+    // === 6. AMBIL BARANG DARI DATABASE (DITAMBAH LOGIKA KLIK) ===
     async function loadRandomProducts() {
         const productList = document.getElementById('randomProductList');
         if(!productList) return;
@@ -113,7 +125,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 productList.innerHTML = ''; 
                 result.data.forEach(product => {
                     const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
-                    const mediaTag = product.media_type === 'video' ? `<video src="${product.media_url}" class="product-media" controls></video>` : `<img src="${product.media_url}" class="product-media" alt="${product.title}">`;
+                    
+                    const isVideo = product.media_type === 'video';
+                    const mediaTag = isVideo 
+                        ? `<video src="${product.media_url}" class="product-media" style="object-fit:cover;"></video>` 
+                        : `<img src="${product.media_url}" class="product-media" alt="${product.title}">`;
+                    
                     const card = document.createElement('div');
                     card.className = 'product-card';
                     card.innerHTML = `
@@ -126,6 +143,16 @@ document.addEventListener("DOMContentLoaded", () => {
                             </div>
                         </div>
                     `;
+
+                    // 🔹 Data yang dikirim ke Pop-up
+                    const deskripsiBarang = product.description || "Deskripsi belum tersedia untuk produk ini.";
+                    const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video+Produk' : (product.media_url || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
+
+                    // ✅ Fungsi saat barang dari database di-klik
+                    card.addEventListener('click', () => {
+                        bukaDetailProduk(fotoBarang, product.title, priceRp, deskripsiBarang);
+                    });
+
                     productList.appendChild(card);
                 });
             } else {
@@ -134,5 +161,65 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (error) {
             productList.innerHTML = '<p style="color: red; text-align:center;">Gagal memuat barang toko.</p>';
         }
+    }
+
+    // ==============================================================
+    // 7. LOGIKA JENDELA POP-UP DETAIL PRODUK (CART & CHECKOUT)
+    // ==============================================================
+    const productModal = document.getElementById('productDetailModal');
+    const closeDetailBtn = document.getElementById('closeDetailBtn');
+    
+    // Fungsi Memasukkan Data ke Pop-up
+    function bukaDetailProduk(foto, nama, harga, deskripsi) {
+        if(!productModal) return; // Mencegah error jika HTML pop-up belum di-paste
+        
+        document.getElementById('detailImage').src = foto;
+        document.getElementById('detailTitle').innerText = nama;
+        document.getElementById('detailPrice').innerText = harga;
+        document.getElementById('detailDesc').innerText = deskripsi;
+        
+        productModal.style.display = "block"; 
+    }
+
+    // Menutup pop-up saat tombol X ditekan
+    if(closeDetailBtn) {
+        closeDetailBtn.addEventListener('click', () => {
+            productModal.style.display = "none";
+        });
+    }
+
+    // Logika Tombol "Masukkan Keranjang"
+    const btnAddToCart = document.getElementById('btnAddToCart');
+    if(btnAddToCart) {
+        btnAddToCart.addEventListener('click', () => {
+            let badge = document.querySelector('.cart-badge');
+            if(badge) {
+                let currentTotal = parseInt(badge.innerText) || 0;
+                badge.innerText = currentTotal + 1; // Menambah angka keranjang di pojok kanan atas
+            }
+            alert("✅ Barang berhasil dimasukkan ke keranjang!");
+            productModal.style.display = "none"; // Tutup otomatis pop-up
+        });
+    }
+
+    // Logika Tombol "Beli Sekarang" (Checkout via WhatsApp Admin)
+    const btnCheckout = document.getElementById('btnCheckout');
+    if(btnCheckout) {
+        btnCheckout.addEventListener('click', () => {
+            const namaBarang = document.getElementById('detailTitle').innerText;
+            const hargaBarang = document.getElementById('detailPrice').innerText;
+            
+            // Format pesan otomatis ke WhatsApp
+            const pesan = `Halo Admin Belidikita, saya tertarik untuk membeli:\n\n*Nama Barang:* ${namaBarang}\n*Harga:* ${hargaBarang}\n\nApakah stoknya masih tersedia?`;
+            
+            // ✅ NANTI GANTI NOMOR INI DENGAN NOMOR WA KAMU (Dimulai dengan 62)
+            const nomorAdmin = "6281234567890"; 
+            
+            const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
+            
+            alert("Membuka obrolan ke WhatsApp Admin... 🚀");
+            window.open(linkWA, '_blank'); // Membuka tab WA baru
+            productModal.style.display = "none"; 
+        });
     }
 });
