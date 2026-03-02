@@ -177,3 +177,60 @@ button.ghost { background-color: transparent; border-color: #FFF; border-radius:
     .modal-auth { width: 100vw !important; height: 100vh !important; top: 0 !important; left: 0 !important; transform: none !important; border-radius: 0 !important; }
     form { padding: 0 30px; }
 }
+
+/* ========================================== */
+/* PERBAIKAN LOGO HEADER & MODAL SLIDING      */
+/* ========================================== */
+
+/* 1. PERBAIKAN LOGO HEADER BIAR BESAR */
+.header-logo-box {
+    display: flex;
+    align-items: center;
+    min-width: 80px; 
+}
+
+.main-logo-header {
+    height: 45px !important; /* Memaksa logo jadi lebih besar */
+    width: auto;
+    object-fit: contain;
+}
+
+/* 2. KEMBALIKAN DESAIN MODAL SLIDING MEWAH */
+.modal-auth h1 { 
+    font-weight: bold; 
+    margin: 0; 
+    color: #fff; 
+    font-size: 24px; 
+}
+
+.modal-auth p { 
+    font-size: 14px; 
+    font-weight: 100; 
+    line-height: 20px; 
+    letter-spacing: 0.5px; 
+    margin: 20px 0 30px; 
+}
+
+/* Merapikan posisi form di dalam jendela pop-up */
+.form-container form {
+    background-color: #1e1e1e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 40px;
+    height: 100%;
+    text-align: center;
+}
+
+/* 3. PENYESUAIAN MODAL KHUSUS LAYAR HP */
+@media (max-width: 600px) {
+    /* Menyembunyikan panel animasi geser di HP agar muat */
+    .overlay-container { display: none !important; } 
+    
+    /* Memaksa form mengisi seluruh lebar pop-up di HP */
+    .sign-in-container, .sign-up-container { width: 100% !important; }
+    
+    /* Ukuran pop-up modal di HP sedikit dikecilkan agar rapi */
+    .modal-auth { width: 95vw !important; height: 80vh !important; }
+}
