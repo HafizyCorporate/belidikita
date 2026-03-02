@@ -162,11 +162,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    // === 5. SLIDING PANEL LOGIN/REGISTER LOGIC ===
+        // === 5. SLIDING PANEL LOGIN/REGISTER LOGIC ===
+    
+    // Untuk tombol di Panel Sliding (PC/Laptop)
     const signUpBtn = document.getElementById('signUp');
     const signInBtn = document.getElementById('signIn');
-    signUpBtn.addEventListener('click', () => authContainer.classList.add("active"));
-    signInBtn.addEventListener('click', () => authContainer.classList.remove("active"));
+    if(signUpBtn) signUpBtn.addEventListener('click', () => authContainer.classList.add("active"));
+    if(signInBtn) signInBtn.addEventListener('click', () => authContainer.classList.remove("active"));
+
+    // ✅ TAMBAHKAN INI UNTUK TOMBOL TEKS BIRU DI HP
+    const mobileSignUp = document.getElementById('mobileSignUp');
+    const mobileSignIn = document.getElementById('mobileSignIn');
+    if(mobileSignUp) mobileSignUp.addEventListener('click', () => authContainer.classList.add("active"));
+    if(mobileSignIn) mobileSignIn.addEventListener('click', () => authContainer.classList.remove("active"));
+
 
     // === 6. AUTHENTICATION API LOGIC (Register, OTP, Login) ===
     const otpModal = document.getElementById('otpModal');
