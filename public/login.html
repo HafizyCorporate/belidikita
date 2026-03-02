@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login Admin - Belidikita</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* CSS Khusus untuk memosisikan form login di tengah layar */
+        body { 
+            background: linear-gradient(135deg, #81D4FA 0%, #E1F5FE 100%); 
+            display: flex; align-items: center; justify-content: center; 
+            height: 100vh; margin: 0; font-family: 'Montserrat', sans-serif;
+        }
+        .login-box { 
+            background: #fff; padding: 40px 30px; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            width: 90%; max-width: 380px; text-align: center; 
+        }
+        .login-box i.fa-user-shield { font-size: 40px; color: #1976D2; margin-bottom: 10px; }
+        .login-box h1 { color: #0D47A1; margin: 0 0 5px; font-size: 24px; font-weight: 800; }
+        .login-box p { color: #666; font-size: 12px; margin-bottom: 25px; }
+        .login-box input { 
+            width: 100%; padding: 14px; margin-bottom: 15px; 
+            border: 1px solid #ddd; border-radius: 10px; 
+            background: #f9f9f9; outline: none; box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif; font-weight: 600;
+        }
+        .login-box input:focus { border-color: #1976D2; background: #fff; }
+        .login-box button { 
+            width: 100%; padding: 14px; background: #1976D2; 
+            color: #fff; border: none; border-radius: 25px; 
+            font-weight: bold; cursor: pointer; text-transform: uppercase; 
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .login-box button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(25, 118, 210, 0.3); }
+        .back-link { display: block; margin-top: 20px; font-size: 12px; color: #1976D2; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <i class="fas fa-user-shield"></i>
+        <h1>Login Admin</h1>
+        <p>Hanya untuk pengelola Toko Belidikita</p>
+        
+        <form id="adminLoginForm">
+            <input type="email" id="loginEmail" placeholder="Email Admin" required>
+            <input type="password" id="loginPassword" placeholder="Password Admin" required>
+            <button type="submit">Masuk Sistem</button>
+        </form>
+
+        <a href="dashboardutama.html" class="back-link"><i class="fas fa-arrow-left"></i> Kembali ke Toko</a>
+    </div>
+
+    <script>
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const btn = e.target.querySelector('button');
+            
+            btn.innerText = "Memeriksa...";
+
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                
+                if(data.success) {
+                    localStorage.setItem('token', data.token);
+                    alert("Berhasil masuk sebagai Admin!");
+                    // Setelah sukses, kembali ke dashboard (atau nanti arahkan ke halaman input barang)
+                    window.location.href = 'dashboardutama.html'; 
+                } else {
+                    alert(data.message || "Email atau password salah!");
+                    btn.innerText = "Masuk Sistem";
+                }
+            } catch(err) {
+                alert("Gagal terhubung ke server.");
+                btn.innerText = "Masuk Sistem";
+            }
+        });
+    </script>
+</body>
+</html>
