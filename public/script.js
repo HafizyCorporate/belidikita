@@ -88,10 +88,10 @@ document.addEventListener("DOMContentLoaded", () => {
         adminLoginIcon.addEventListener('click', () => {
             const token = localStorage.getItem('token');
             if (!token) {
-                // ✅ JIKA BELUM LOGIN, ARAHKAN KE HALAMAN LOGIN.HTML
+                // ARAHKAN KE HALAMAN LOGIN.HTML
                 window.location.href = 'login.html';
             } else {
-                // ✅ JIKA SUDAH LOGIN, TANYA APAKAH MAU LOGOUT
+                // JIKA SUDAH LOGIN
                 if(confirm("Admin sudah masuk. Apakah ingin Logout?")) {
                     localStorage.removeItem('token');
                     alert("Berhasil Logout!");
