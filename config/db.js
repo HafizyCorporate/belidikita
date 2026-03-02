@@ -31,6 +31,9 @@ const initDB = async () => {
         price DECIMAL(12,2) NOT NULL,
         media_url VARCHAR(255),
         media_type VARCHAR(10),
+        category VARCHAR(50) DEFAULT 'biasa',     -- ✅ Laci Kategori Etalase
+        capital_price DECIMAL(12,2) DEFAULT 0,    -- ✅ Laci Harga Modal (Untuk Admin)
+        stock INT DEFAULT 0,                      -- ✅ Laci Stok Barang (Untuk Admin)
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
@@ -41,6 +44,11 @@ const initDB = async () => {
         content TEXT NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+    -- ✅ TRIK AMAN: Menambahkan kolom baru jika tabel sudah telanjur dibuat sebelumnya
+    ALTER TABLE products ADD COLUMN IF NOT EXISTS category VARCHAR(50) DEFAULT 'biasa';
+    ALTER TABLE products ADD COLUMN IF NOT EXISTS capital_price DECIMAL(12,2) DEFAULT 0;
+    ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INT DEFAULT 0;
     `;
 
     try {
