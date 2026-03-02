@@ -31,7 +31,7 @@ body {
     z-index: 0;
 }
 
-/* ✅ MATAHARI (Tetap Sama, Tidak Ikut Naik) */
+/* MATAHARI */
 .sun {
     position: absolute; top: 8vh; right: 8vw;
     width: 120px; height: 120px; 
@@ -40,19 +40,18 @@ body {
     z-index: 1;
 }
 
-/* ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ */
-/* MESIN PEMBESAR (SCALER): Diangkat Sedikit Ke Atas */
+/* MESIN PEMBESAR (SCALER) */
 .anim-scaler {
     position: absolute;
-    bottom: 5vh; /* ✅ ✅ ✅ ✅ DINAIKKAN SEDIKIT (Dari 0 ke 5vh) */
+    bottom: 5vh; 
     left: 50%;
     width: 1000px; height: 300px;
-    margin-left: -500px; /* Menengahkan scaler */
-    transform: scale(2.0); /* Skala PC/Laptop Tetap Besar */
+    margin-left: -500px; 
+    transform: scale(2.0); 
     transform-origin: bottom center;
 }
 
-/* Gunung & Bukit (Warna disesuaikan langit biru) */
+/* Gunung & Bukit */
 .mountain {
   position: absolute; right: -900px; bottom: -20px;
   width: 2px; height: 2px;
@@ -78,10 +77,10 @@ body {
   border-radius: 20px; position: absolute; background: #ddd;
 }
 
-/* TRUK & RODA DIBUAT GAGAH */
+/* TRUK & RODA */
 .truck-wrapper {
     position: absolute; bottom: 0; left: 50%;
-    width: 120px; margin-left: -60px; /* Tengah */
+    width: 120px; margin-left: -60px;
 }
 .truck, .wheels {
   width: 120px; position: absolute; bottom: 0; left: 0;
@@ -108,23 +107,22 @@ body {
 .wheels  { animation: truck 4s 0.001s ease infinite; }
 .truck:before { animation: wind 1.5s 0.000s ease infinite; }
 
-/* ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ */
-/* LOGO UTAMA & SLOGAN: DINAIRKAN SEDIKIT KE ATAS  */
+/* ================================================== */
+/* LOGO UTAMA & SLOGAN                                */
+/* ================================================== */
 .splash-text-container { 
     position: absolute;
-    bottom: 15vh; /* ✅ ✅ ✅ ✅ DINAIKKAN SEDIKIT (Dari 12vh jadi 15vh) */
+    bottom: 15vh; 
     left: 0; width: 100%;
     text-align: center; 
     z-index: 2; 
 }
 
-/* ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ ✅ */
-/* LOGO UTAMA: DIBESARKAN SEDIKIT */
+/* ✅ ✅ ✅ ✅ LOGO DIPERBESAR LAGI ✅ ✅ ✅ ✅ */
 .splash-logo {
-    width: 210px; /* ✅ ✅ ✅ ✅ DIBESARKAN (Dari 180px jadi 210px) */
+    width: 280px; /* ✅ Ukuran dinaikkan menjadi 280px agar makin besar */
     height: auto;
-    margin-bottom: 5px; /* Jarak antara logo dan slogan */
-    /* Efek animasi membesar seperti teks lama */
+    margin-bottom: 5px; 
     opacity: 0;
     transform: scale(0.5);
     animation: textZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1s; 
@@ -132,14 +130,12 @@ body {
 
 .brand-slogan {
     font-size: clamp(1rem, 5vw, 1.5rem); 
-    color: #0D47A1; /* Biru Tua Belidikita */
+    color: #0D47A1; 
     margin-top: 5px; font-weight: 700;
     opacity: 0; animation: fadeIn 1s ease forwards 1.8s;
 }
 
-/* (Class .megah-title dan kawan-kawan dihapus di sini karena di HTML-nya sudah kita hapus) */
-
-/* Keyframes Animasi Jarak Jauh (Kiri ke Kanan Penuh) */
+/* Keyframes Animasi */
 @keyframes tree { 0% { transform: translate(1500px); } 100% { transform: translate(-300px); } }
 @keyframes tree2 { 0% { transform: translate(800px); } 100% { transform: translate(-300px); } }
 @keyframes tree3 { 0% { transform: translate(3000px); } 100% { transform: translate(-300px); } }
@@ -227,8 +223,7 @@ a.forgot-text { color: #5f3cf5; font-size: 12px; text-decoration: none; margin: 
     nav { padding: 10px 20px; }
     .dashboard { width: 100%; padding: 10px; margin-top: 60px; }
     
-    /* SKALA DIKURANGI KHUSUS HP (Dari 1.5 jadi 1.2 agar lebih pas) */
     .anim-scaler { 
-        transform: scale(1.2); 
+        transform: scale(1.0); 
     }
 }
