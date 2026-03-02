@@ -21,48 +21,48 @@ body {
 }
 .splash-screen.hide { opacity: 0; visibility: hidden; transition: opacity 1s ease, visibility 1s ease; }
 
-/* ✅ WADAH JALANAN: PINDAH KE BAWAH LAYAR */
+/* ✅ WADAH JALANAN (Untuk Komputer) */
 .loop-wrapper {
-    position: absolute; bottom: 0; left: 0; /* Pindah ke paling bawah */
-    width: 100vw; height: 40vh; /* Tinggi secukupnya untuk truk */
+    position: absolute; bottom: 0; left: 0; 
+    width: 100vw; height: 40vh; 
     overflow: hidden;
-    border-bottom: 20px solid #fff; /* Garis jalanan bawah */
-    z-index: 2; /* Di atas sinar matahari */
+    border-bottom: 15px solid #fff; 
+    z-index: 2; 
 }
 
-/* ✅ MESIN PEMBESAR (SCALER) */
+/* ✅ MESIN PEMBESAR ANIMASI (Untuk Komputer) */
 .anim-scaler {
     position: absolute;
-    bottom: 0; /* Mengikuti loop-wrapper di bawah */
+    bottom: 0; 
     left: 50%;
     width: 1000px; height: 300px;
     margin-left: -500px; 
-    transform: scale(2.8); /* Jumbo di PC */
+    transform: scale(2.8); 
     transform-origin: bottom center;
 }
 
-/* MATAHARI (Di PC 180px) */
+/* MATAHARI */
 .sun {
     position: absolute; top: 8vh; right: 8vw;
     width: 180px; height: 180px; 
     background: #FFD700;
     border-radius: 50%; box-shadow: 0 0 50px #FFD700;
-    z-index: 0; /* Di paling belakang agar sinarnya tidak menutupi truk/teks */
+    z-index: 0; 
 }
 
-/* ✅ ✅ ANIMASI SINAR SPOTLIGHT DARI MATAHARI ✅ ✅ */
+/* ✅ ANIMASI SINAR MATAHARI (Untuk Komputer) */
 .sun-beam {
     position: absolute;
-    top: 90px; /* Titik awal di tengah matahari PC */
+    top: 90px; 
     left: 90px;
     width: 600px;
     height: 150vh;
-    margin-left: -300px; /* Menengahkan sinar */
+    margin-left: -300px; 
     background: linear-gradient(180deg, rgba(255, 215, 0, 0.6) 0%, rgba(255, 255, 255, 0) 70%);
     transform-origin: top center;
-    transform: rotate(55deg); /* Mengarahkan sinar menyorot ke tengah (logo) */
-    clip-path: polygon(45% 0, 55% 0, 100% 100%, 0 100%); /* Bentuk melebar ke bawah */
-    animation: beamPulse 3s infinite alternate; /* Animasi berdenyut */
+    transform: rotate(48deg); /* Menyorot ke tengah di layar lebar PC */
+    clip-path: polygon(45% 0, 55% 0, 100% 100%, 0 100%); 
+    animation: beamPulse 3s infinite alternate; 
     pointer-events: none;
 }
 @keyframes beamPulse {
@@ -101,9 +101,7 @@ body {
     position: absolute; bottom: 0; left: 50%;
     width: 120px; margin-left: -60px;
 }
-.truck, .wheels {
-  width: 120px; position: absolute; bottom: 0; left: 0;
-}
+.truck, .wheels { width: 120px; position: absolute; bottom: 0; left: 0; }
 .truck {
   background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/130015/truck.svg) no-repeat;
   background-size: contain; height: 85px;
@@ -127,20 +125,20 @@ body {
 .truck:before { animation: wind 1.5s 0.000s ease infinite; }
 
 /* ================================================== */
-/* ✅ LOGO UTAMA & SLOGAN: PINDAH KE TENGAH LAYAR     */
+/* LOGO UTAMA & SLOGAN: DI TENGAH LAYAR               */
 /* ================================================== */
 .splash-text-container { 
     position: absolute;
-    top: 40%; /* Pindah Ke Tengah (sedikit di atas agar tidak nabrak truk) */
+    top: 45%; 
     left: 0; width: 100%;
-    transform: translateY(-50%); /* Sentris sempurna */
+    transform: translateY(-50%); 
     text-align: center; 
-    z-index: 5; /* Di paling depan */
+    z-index: 5; 
 }
 
 .splash-logo {
-    width: 500px; 
-    max-width: 85vw; /* Pengaman layar HP */
+    width: 600px; /* Ukuran Super Besar di Komputer */
+    max-width: 95vw; 
     height: auto;
     margin-bottom: 0px; 
     opacity: 0;
@@ -151,8 +149,10 @@ body {
 .brand-slogan {
     font-size: clamp(1.2rem, 4vw, 2rem); 
     color: #0D47A1; 
-    margin-top: -20px; /* Ditarik nempel logo */
+    margin-top: -30px; /* Tarik naik untuk menembus background transparan logo */
     font-weight: 700;
+    position: relative;
+    z-index: 6; /* Pastikan teks di atas ruang transparan logo */
     opacity: 0; animation: fadeIn 1s ease forwards 1.8s;
 }
 
@@ -237,21 +237,44 @@ a.forgot-text { color: #5f3cf5; font-size: 12px; text-decoration: none; margin: 
 .forum-author { font-size: 11px; color: #666; margin-bottom: 10px; font-style: italic; }
 .forum-content { font-size: 13px; color: #444; line-height: 1.5; }
 
-/* Responsif HP */
+/* ================================================== */
+/* 📱 SETTINGAN KHUSUS UNTUK HP (MENJAWAB SCREENSHOT) */
+/* ================================================== */
 @media (max-width: 600px) {
     .container { width: 100vw; height: 100vh; border-radius: 0; box-shadow: none; }
     form { padding: 0 30px; }
     nav { padding: 10px 20px; }
     .dashboard { width: 100%; padding: 10px; margin-top: 60px; }
     
-    /* ✅ PENYESUAIAN KHUSUS HP UNTUK SINAR & TRUK */
-    .sun { width: 100px; height: 100px; } 
+    /* 1. MATAHARI & SINAR (Diperbaiki agar jatuh ke tengah) */
+    .sun { 
+        width: 100px; height: 100px; 
+        top: 6vh; right: 5vw;
+    } 
     .sun-beam {
         top: 50px; left: 50px;
-        width: 400px; margin-left: -200px;
-        transform: rotate(45deg); /* Sudut sedikit berubah di layar sempit */
+        width: 400px; 
+        margin-left: -200px;
+        transform: rotate(30deg); /* ✅ Sudut dikecilkan agar lurus menyorot logo di tengah layar */
     }
-    .anim-scaler { transform: scale(1.2); } 
-    .brand-slogan { margin-top: -10px; } 
-    .loop-wrapper { height: 35vh; } /* Jalanan sedikit lebih pendek di HP */
+
+    /* 2. TRUK (Diangkat dari bawah layar agar tidak terpotong) */
+    .loop-wrapper { 
+        bottom: 5vh; /* ✅ Mengambang sedikit dari bawah layar HP */
+        height: 250px; /* ✅ Ukuran ruang kotak pasti, truk tidak akan terpotong */
+        border-bottom: 4px solid #fff; 
+    } 
+    .anim-scaler { 
+        transform: scale(0.85); /* ✅ Diperkecil agar proporsional di HP */
+        bottom: 0px; 
+    } 
+
+    /* 3. LOGO & SLOGAN (Tarik menempel kuat) */
+    .splash-logo {
+        max-width: 92vw; /* Mentok penuhi layar HP */
+    }
+    .brand-slogan { 
+        margin-top: -45px; /* ✅ Tarikan minus sangat besar untuk mengalahkan blank space gambar logo kamu! */
+        font-size: 1.1rem;
+    } 
 }
