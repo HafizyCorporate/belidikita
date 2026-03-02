@@ -10,7 +10,8 @@ const { pool, initDB } = require('./config/db');
 // 'login' dihapus dari sini karena kita buat manual di bawah khusus Admin
 const { register, verifyOTP, googleLogin, forgotPassword, resetPassword } = require('./controllers/auth/auth');
 const { getProfile, updateProfile } = require('./controllers/profile/profile');
-const { uploadProduct, getAllProducts } = require('./controllers/product/product');
+// ✅ TAMBAHAN: Import fungsi promo dari product.js
+const { uploadProduct, getAllProducts, uploadPromo, getPromos } = require('./controllers/product/product');
 const { createPost, getPosts } = require('./controllers/forum/forum');
 const { askAI } = require('./controllers/ai/ai');
 
@@ -42,7 +43,7 @@ app.post('/api/google-login', googleLogin);
 app.post('/api/forgot-password', forgotPassword);
 app.post('/api/reset-password', resetPassword);
 
-// ✅ DITAMBAHKAN: LOGIN KHUSUS 2 ADMIN MENGGUNAKAN USERNAME
+// LOGIN KHUSUS 2 ADMIN MENGGUNAKAN USERNAME
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body; 
 
@@ -71,6 +72,7 @@ app.post('/api/login', (req, res) => {
 
 app.post('/api/ai/search', askAI);
 app.get('/api/products', getAllProducts); 
+app.get('/api/promos', getPromos); // ✅ TAMBAHAN: Jalur untuk halaman depan mengambil banner promo
 app.get('/api/forum', getPosts);          
 
 // ==========================================
@@ -79,6 +81,7 @@ app.get('/api/forum', getPosts);
 app.get('/api/profile', verifyToken, getProfile);
 app.put('/api/profile', verifyToken, updateProfile);
 app.post('/api/products', verifyToken, upload.single('media'), uploadProduct);
+app.post('/api/promos', verifyToken, upload.single('media'), uploadPromo); // ✅ TAMBAHAN: Jalur Admin untuk upload promo
 app.post('/api/forum', verifyToken, createPost);
 
 app.listen(PORT, () => {
