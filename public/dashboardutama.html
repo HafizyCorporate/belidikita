@@ -95,71 +95,56 @@
         <div style="height: 80px;"></div>
     </main>
 
-    <main id="accountContent" class="hidden" style="margin-top: 0;">
+        <main id="accountContent" class="hidden">
         
-        <div class="account-header">
+        <div class="account-header-new">
             <div class="account-top-icons">
                 <i class="fas fa-headset"></i>
                 <i class="fas fa-cog"></i>
             </div>
             
-            <div class="account-promo-icons">
-                <div class="promo-item">
-                    <div class="icon-circle">
-                        <i class="fas fa-shipping-fast"></i>
+            <div class="account-profile-placeholder">
+                <div class="profile-avatar-guest">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h2>Selamat Datang!</h2>
+                <p>Masuk sekarang untuk mulai belanja dan jualan</p>
+                <button id="mainLoginBtn" class="btn-login-large-new">Masuk / Daftar</button>
+            </div>
+        </div>
+
+        <div class="account-body-new">
+            <div class="account-services">
+                <h3>Layanan Belidikita</h3>
+                <div class="services-grid">
+                    <div class="service-item">
+                        <i class="fas fa-box"></i>
+                        <span>Pesanan</span>
                     </div>
-                    <h4>Gratis Ongkir</h4>
-                    <p>Tiap hari, tanpa ribet</p>
-                </div>
-                <div class="promo-item">
-                    <div class="icon-circle">
-                        <i class="fas fa-ticket-alt"></i>
+                    <div class="service-item">
+                        <i class="fas fa-heart"></i>
+                        <span>Wishlist</span>
                     </div>
-                    <h4>Bonus Reward</h4>
-                    <p>Untung tiap transaksi</p>
+                    <div class="service-item">
+                        <i class="fas fa-store"></i>
+                        <span>Toko Saya</span>
+                    </div>
+                    <div class="service-item">
+                        <i class="fas fa-history"></i>
+                        <span>Riwayat</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="account-login-box">
-            <button id="mainLoginBtn" class="btn-login-large">Masuk atau Daftar</button>
-            
-            <div class="klaim-diskon">
-                <div class="klaim-icon">🎁</div>
-                <div class="klaim-text">
-                    <h4>Klaim diskon s.d. 40% buat belanja</h4>
-                    <p>Yuk segera pakai, khusus belanja pertamamu!</p>
+            <div class="account-recommendation">
+                <h3>Rekomendasi Untuk Anda</h3>
+                <div class="product-grid" id="accountProductList">
+                    <p style="text-align:center; width:100%; color:#888;">Memuat rekomendasi...</p>
                 </div>
-                <i class="fas fa-chevron-right"></i>
-            </div>
-        </div>
-
-        <div class="account-menu-row">
-            <div class="menu-box">
-                <i class="fas fa-coins"></i>
-                <h5>Mulai kumpulin bonus, yuk!</h5>
-                <p>Bonus</p>
-            </div>
-            <div class="menu-box">
-                <i class="fas fa-wallet"></i>
-                <h5>Cek & tarik saldo</h5>
-                <p>Saldo Belidikita</p>
-            </div>
-            <div class="menu-box">
-                <i class="fas fa-credit-card"></i>
-                <h5>Belidikita Card</h5>
-                <p>Unlimited Cashback</p>
-            </div>
-        </div>
-
-        <div class="account-recommendation">
-            <h3>Rekomendasi Untuk Anda</h3>
-            <div class="product-grid" id="accountProductList">
-                <p style="text-align:center; width:100%; color:#888;">Memuat rekomendasi...</p>
             </div>
         </div>
         
-        <div style="height: 80px;"></div> </main>
+        <div style="height: 90px;"></div> </main>
 
     <nav id="bottomNav" class="hidden">
         <a href="#" class="nav-item active" id="menuHome">
