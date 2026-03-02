@@ -1,138 +1,107 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // === 1. LOGIKA SPLASH SCREEN ===
-    const splashScreen = document.getElementById('splashScreen');
-    const topHeader = document.getElementById('topHeader');
-    const mainContent = document.getElementById('mainContent');
-    const bottomNav = document.getElementById('bottomNav');
-
-    setTimeout(() => {
-        splashScreen.style.transition = "opacity 1s ease";
-        splashScreen.style.opacity = "0";
-
-        setTimeout(() => {
-            splashScreen.classList.add('hide');
-            splashScreen.style.display = "none";
-            document.body.classList.remove('no-scroll'); 
-            
-            topHeader.classList.remove('hidden');
-            mainContent.classList.remove('hidden');
-            bottomNav.classList.remove('hidden');
-            
-            initDashboard(); 
-        }, 1000); 
-    }, 4500); 
-
-    // === 2. SLIDER PROMO ===
-    const sliderWrapper = document.getElementById('promoSlider');
-    let slideIndex = 0;
-    if(sliderWrapper) {
-        setInterval(() => {
-            slideIndex++;
-            if (slideIndex > 2) slideIndex = 0; 
-            sliderWrapper.style.transform = `translateX(-${slideIndex * 33.33}%)`;
-        }, 3000); 
-    }
-
-    // === 3. MENGISI JENDELA HORIZONTAL ===
-    function initDashboard() {
-        populateHorizontalCards('topSellingList', '🔥 Hot');
-        populateHorizontalCards('topCartList', '🛒 List');
-        loadRandomProducts(); 
-    }
-
-    function populateHorizontalCards(containerId, label) {
-        const container = document.getElementById(containerId);
-        if(!container) return;
-        container.innerHTML = '';
-        for(let i=1; i<=10; i++) {
-            const card = document.createElement('div');
-            card.className = 'h-card';
-            card.innerHTML = `
-                <img src="https://via.placeholder.com/150/f1f1f1/888?text=Produk+${i}" class="h-card-img" alt="Barang">
-                <div class="h-card-info">
-                    <div class="h-card-row">
-                        <span class="h-card-title">Produk ${label} ${i}</span>
-                        <span class="h-card-price">Rp${i}0K</span>
-                    </div>
-                </div>
-            `;
-            container.appendChild(card);
-        }
-    }
-
-    // === 4. LOGIKA BOTTOM NAVBAR ===
-    const menuHome = document.getElementById('menuHome');
-    const menuProduct = document.getElementById('menuProduct');
-    const menuFeed = document.getElementById('menuFeed');
-    const menuTransaction = document.getElementById('menuTransaction');
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Belidikita - Toko Online Resmi</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="no-scroll"> 
     
-    function setActiveNav(clickedMenu) {
-        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-        clickedMenu.classList.add('active');
-    }
+    <div id="splashScreen" class="splash-screen">
+        <div class="sun"><div class="sun-beam"></div></div>
+        <div class="splash-text-container">
+            <img src="assets/nama_logo_kamu.png" alt="Logo" class="splash-logo" onerror="this.style.display='none'">
+            <p class="brand-slogan">Belanja pintar, Jualan lancar</p>
+        </div>
+        <div class="loop-wrapper">
+            <div class="anim-scaler">
+                <div class="mountain"></div><div class="hill"></div>
+                <div class="tree"></div><div class="tree"></div><div class="tree"></div>
+                <div class="rock"></div>
+                <div class="truck-wrapper">
+                    <div class="truck"></div><div class="wheels"></div>
+                </div>
+            </div>
+        </div>
+    </div> 
 
-    menuHome.addEventListener('click', (e) => {
-        e.preventDefault();
-        setActiveNav(menuHome);
-        window.scrollTo({ top: 0, behavior: 'smooth' }); 
-    });
+    <header id="topHeader" class="hidden">
+        <div class="header-logo-box">
+            <img src="assets/nama_logo_kamu.png" alt="Logo Belidikita" class="main-logo-header">
+        </div>
+        <div class="header-search">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Cari di belidikita...">
+        </div>
+        <div class="header-admin" id="adminLoginIcon">
+            <i class="fas fa-user-shield"></i>
+        </div>
+        <div class="header-cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-badge">0</span>
+        </div>
+    </header>
 
-    menuProduct.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuProduct); alert("Membuka Katalog Produk..."); });
-    menuFeed.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuFeed); alert("Fitur Video Feed segera hadir!"); });
-    menuTransaction.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuTransaction); alert("Silakan masukkan nomor resi pesananmu di menu ini nanti!"); });
+    <main id="mainContent" class="hidden">
+        
+        <div class="slider-container">
+            <div class="slider-wrapper" id="promoSlider">
+                <div class="slide" style="background: linear-gradient(45deg, #FF9A9E, #FECFEF);">
+                    <h3>Promo Spesial Belidikita!</h3><p>Diskon hingga 50%</p>
+                </div>
+                <div class="slide" style="background: linear-gradient(45deg, #a18cd1, #fbc2eb);">
+                    <h3>Barang Baru Datang</h3><p>Cek koleksi terbaru kami</p>
+                </div>
+                <div class="slide" style="background: linear-gradient(45deg, #84fab0, #8fd3f4);">
+                    <h3>Gratis Ongkir</h3><p>Ke seluruh Indonesia</p>
+                </div>
+            </div>
+        </div>
 
-    // === 5. PINDAH KE HALAMAN LOGIN ADMIN TERPISAH ===
-    const adminLoginIcon = document.getElementById('adminLoginIcon');
+        <section class="scroll-section">
+            <div class="section-header">
+                <h2>🔥 Top Barang Laris</h2>
+                <a href="#">Lihat Semua</a>
+            </div>
+            <div class="horizontal-scroll" id="topSellingList"></div>
+        </section>
 
-    if(adminLoginIcon) {
-        adminLoginIcon.addEventListener('click', () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                // ✅ JIKA BELUM LOGIN, ARAHKAN KE HALAMAN LOGIN.HTML
-                window.location.href = 'login.html';
-            } else {
-                // ✅ JIKA SUDAH LOGIN, TANYA APAKAH MAU LOGOUT
-                if(confirm("Admin sudah masuk. Apakah ingin Logout?")) {
-                    localStorage.removeItem('token');
-                    alert("Berhasil Logout!");
-                    location.reload();
-                }
-            }
-        });
-    }
+        <section class="scroll-section">
+            <div class="section-header">
+                <h2>🛒 Paling Banyak Diminati</h2>
+            </div>
+            <div class="horizontal-scroll" id="topCartList"></div>
+        </section>
 
-    // === 6. AMBIL BARANG UNTUK TOKO PRIBADI (OFFICIAL STORE) ===
-    async function loadRandomProducts() {
-        const productList = document.getElementById('randomProductList');
-        if(!productList) return;
-        try {
-            const res = await fetch('/api/products');
-            const result = await res.json();
-            
-            if (result.success && result.data.length > 0) {
-                productList.innerHTML = ''; 
-                result.data.forEach(product => {
-                    const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
-                    const mediaTag = product.media_type === 'video' ? `<video src="${product.media_url}" class="product-media" controls></video>` : `<img src="${product.media_url}" class="product-media" alt="${product.title}">`;
-                    const card = document.createElement('div');
-                    card.className = 'product-card';
-                    card.innerHTML = `
-                        ${product.media_url ? mediaTag : '<div class="product-media" style="display:flex; align-items:center; justify-content:center; color:#aaa;">No Media</div>'}
-                        <div class="product-info">
-                            <div class="product-title">${product.title}</div>
-                            <div class="product-price">${priceRp}</div>
-                            <div class="product-seller" style="color:#00AA5B; font-weight:bold;">
-                                <i class="fas fa-check-circle"></i> Belidikita Official
-                            </div>
-                        </div>
-                    `;
-                    productList.appendChild(card);
-                });
-            } else {
-                productList.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Admin belum menambahkan barang.</p>';
-            }
-        } catch (error) {
-            productList.innerHTML = '<p style="color: red; text-align:center;">Gagal memuat barang toko.</p>';
-        }
-    }
-});
+        <section class="grid-section">
+            <div class="section-header">
+                <h2>📦 Jelajahi Semua Barang</h2>
+            </div>
+            <div class="product-grid" id="randomProductList">
+                <p style="text-align:center; width:100%; color:#888;">Memuat barang toko...</p>
+            </div>
+        </section>
+        
+        <div style="height: 80px;"></div>
+    </main>
+
+    <nav id="bottomNav" class="hidden">
+        <a href="#" class="nav-item active" id="menuHome">
+            <i class="fas fa-home"></i><span>Beranda</span>
+        </a>
+        <a href="#" class="nav-item" id="menuProduct">
+            <i class="fas fa-box-open"></i><span>Katalog</span>
+        </a>
+        <a href="#" class="nav-item" id="menuFeed">
+            <i class="fas fa-play-circle"></i><span>Video</span>
+        </a>
+        <a href="#" class="nav-item" id="menuTransaction">
+            <i class="fas fa-receipt"></i><span>Cek Pesanan</span>
+        </a>
+    </nav>
+
+    <script src="script.js"></script>
+</body>
+</html>
