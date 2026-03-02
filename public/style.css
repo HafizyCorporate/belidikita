@@ -2,6 +2,13 @@
 
 /* RESET & DASAR */
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ✅ MENGHINDARI SCROLLING BOCOR DI HTML/BODY */
+html, body {
+    max-width: 100%;
+    overflow-x: hidden; 
+}
+
 body {
     background: #f6f5f7; display: flex; justify-content: center;
     align-items: center; min-height: 100vh; font-family: 'Montserrat', sans-serif;
@@ -14,20 +21,23 @@ body {
 /* === 1. JUMBO FULL SCREEN SPLASH ANIMATION       === */
 /* === =========================================== === */
 .splash-screen {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+    position: fixed; 
+    top: 0; left: 0; right: 0; bottom: 0; /* ✅ Mencegah bug ukuran layar HP */
+    width: 100%; height: 100%;
     background: linear-gradient(180deg, #81D4FA 0%, #E1F5FE 100%);
     display: flex; flex-direction: column; 
     z-index: 9999; 
-    overflow: hidden; 
+    overflow: hidden; /* ✅ Kunci mati agar tidak bisa di-scroll sama sekali */
 }
 .splash-screen.hide { opacity: 0; visibility: hidden; transition: opacity 1s ease, visibility 1s ease; }
 
-/* WADAH JALANAN */
+/* ✅ WADAH JALANAN */
 .loop-wrapper {
     position: absolute; 
     bottom: 0; 
     left: 0; 
-    width: 100vw; height: 40vh; 
+    width: 100%; /* ✅ Mencegah scroll ke samping */
+    height: 350px; /* ✅ DITINGGIKAN agar truk tidak terpotong bawahnya */
     overflow: hidden;
     border-bottom: 15px solid #fff; 
     z-index: 2; 
@@ -55,18 +65,18 @@ body {
     z-index: 0; 
 }
 
-/* ANIMASI SINAR MATAHARI */
+/* ✅ ANIMASI SINAR MATAHARI (Dibuat Fokus Seperti Spotlight) */
 .sun-beam {
     position: absolute;
     top: 90px; 
     left: 90px;
-    width: 600px;
+    width: 150px; /* ✅ Dikecilkan agar cahayanya tidak menutupi seluruh layar */
     height: 150vh;
-    margin-left: -300px; 
-    background: linear-gradient(180deg, rgba(255, 215, 0, 0.6) 0%, rgba(255, 255, 255, 0) 70%);
+    margin-left: -75px; 
+    background: linear-gradient(180deg, rgba(255, 215, 0, 0.6) 0%, rgba(255, 255, 255, 0) 80%);
     transform-origin: top center;
-    transform: rotate(40deg); 
-    clip-path: polygon(45% 0, 55% 0, 100% 100%, 0 100%); 
+    transform: rotate(45deg); /* ✅ Mengarah ke tengah layar PC */
+    clip-path: polygon(40% 0, 60% 0, 85% 100%, 15% 100%); /* ✅ Bentuk sorotan menyempit */
     animation: beamPulse 3s infinite alternate; 
     pointer-events: none;
 }
@@ -141,10 +151,9 @@ body {
     z-index: 5; 
 }
 
-/* ✅ LOGO DIPERBESAR LAGI BIAR SERASI */
 .splash-logo {
-    width: 650px; /* ✅ Ukuran PC dinaikkan jadi 650px */
-    max-width: 95vw; /* ✅ Memberi ruang lebih besar di HP */
+    width: 650px; 
+    max-width: 95vw; 
     height: auto;
     margin-bottom: 0px; 
     opacity: 0;
@@ -152,12 +161,11 @@ body {
     animation: textZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1s; 
 }
 
-/* ✅ SLOGAN DIPERBESAR & DIPERTEBAL BIAR IMBANG */
 .brand-slogan {
-    font-size: clamp(1.5rem, 5vw, 2.5rem); /* ✅ Teks slogan dibesarkan */
+    font-size: clamp(1.5rem, 5vw, 2.5rem); 
     color: #0D47A1; 
     margin-top: -30px; 
-    font-weight: 800; /* ✅ Dibuat lebih tebal/bold */
+    font-weight: 800; 
     position: relative;
     z-index: 6; 
     opacity: 0; animation: fadeIn 1s ease forwards 1.8s;
@@ -257,30 +265,31 @@ a.forgot-text { color: #5f3cf5; font-size: 12px; text-decoration: none; margin: 
         width: 100px; height: 100px; 
         top: 2vh; right: 2vw; 
     } 
+    /* ✅ SINAR DI HP: LEBIH FOKUS, TIDAK TERLALU LEBAR */
     .sun-beam {
         top: 50px; left: 50px;
-        width: 600px; 
-        margin-left: -300px;
-        transform: rotate(38deg); 
-        clip-path: polygon(40% 0, 60% 0, 100% 100%, 0 100%);
+        width: 120px; /* ✅ Ukuran pangkal sinar sangat dikecilkan */
+        margin-left: -60px;
+        transform: rotate(35deg); /* ✅ Mengarah tepat ke truk dan tengah logo */
+        clip-path: polygon(45% 0, 55% 0, 85% 100%, 15% 100%); /* ✅ Sorotan ketat */
     }
 
+    /* ✅ TRUK DIANGKAT & DIUTUHKAN */
     .loop-wrapper { 
-        bottom: 0; 
-        height: 250px; 
-        border-bottom: 8px solid #fff; 
+        bottom: 5vh; /* ✅ Diangkat sedikit dari bawah layar agar aman dari bar browser */
+        height: 350px; /* ✅ Sangat tinggi agar truk tidak terpotong sama sekali */
+        border-bottom: 6px solid #fff; 
     } 
     .anim-scaler { 
-        transform: scale(1.0); 
+        transform: scale(0.9); /* ✅ Ukuran pas */
         bottom: 0px; 
     } 
 
-    /* ✅ LOGO DAN SLOGAN HP DIBESARKAN */
     .splash-logo {
-        max-width: 95vw; /* Lebih mentok ke pinggir layar HP */
+        max-width: 90vw; 
     }
     .brand-slogan { 
-        margin-top: -40px; /* Tarikan agar nempel ke logo */
-        font-size: 1.3rem; /* ✅ Dibesarkan dari 1.1rem agar lebih terbaca */
+        margin-top: -35px; /* ✅ Tarikan agar menempel */
+        font-size: 1.2rem; 
     } 
 }
