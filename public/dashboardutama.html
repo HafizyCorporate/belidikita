@@ -2,93 +2,115 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>belidikita - Belanja Pintar, Jualan Lancar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Belidikita - Belanja Pintar, Jualan Lancar</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body>
-
-    <div id="splashScreen" class="splash-screen">
-        <div class="sun">
-            <div class="sun-beam"></div>
-        </div>
+<body class="no-scroll"> <div id="splashScreen" class="splash-screen">
+        <div class="sun"><div class="sun-beam"></div></div>
         <div class="splash-text-container">
-            <img src="assets/nama_logo_kamu.png" alt="Logo Belidikita" class="splash-logo" onerror="this.style.display='none'">
+            <img src="assets/nama_logo_kamu.png" alt="Logo" class="splash-logo" onerror="this.style.display='none'">
             <p class="brand-slogan">Belanja pintar, Jualan lancar</p>
         </div>
         <div class="loop-wrapper">
             <div class="anim-scaler">
-                <div class="mountain"></div>
-                <div class="hill"></div>
-                <div class="tree"></div>
-                <div class="tree"></div>
-                <div class="tree"></div>
+                <div class="mountain"></div><div class="hill"></div>
+                <div class="tree"></div><div class="tree"></div><div class="tree"></div>
                 <div class="rock"></div>
                 <div class="truck-wrapper">
-                    <div class="truck"></div>
-                    <div class="wheels"></div>
+                    <div class="truck"></div><div class="wheels"></div>
                 </div>
             </div>
         </div>
     </div> 
 
-    <nav id="navbar" class="hidden">
-        <div class="nav-logo">belidikita<span>.</span></div>
-        <ul class="nav-links">
-            <li><a href="#" id="navHome">Beranda</a></li>
-            <li><a href="#" id="navForum">Forum</a></li>
-            <li><button id="navUploadBtn" class="upload-btn hidden">+ Jual Barang</button></li>
-            <li><button id="navLoginBtn" class="login-btn">Login / Daftar</button></li>
-            <li><button id="logoutBtn" class="logout-btn hidden">Logout</button></li>
-        </ul>
-    </nav>
+    <header id="topHeader" class="hidden">
+        <div class="header-logo-box">
+            <img src="assets/nama_logo_kamu.png" alt="Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <span style="display:none; font-weight:800; color:#5f3cf5; font-size:18px;">B.</span>
+        </div>
+        <div class="header-search">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Cari di belidikita...">
+        </div>
+        <div class="header-cart">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-badge">3</span>
+        </div>
+    </header>
 
-    <div id="dashboardContainer" class="hidden dashboard">
+    <main id="mainContent" class="hidden">
         
-        <div id="aiSearchSection" class="section-box">
-            <h3>Tanya AI / Cari Barang Pintar 🤖</h3>
-            <div class="ai-chat-container">
-                <div id="aiResponseBox" class="ai-response-box">Halo! Aku Asisten AI belidikita. Mau cari barang apa hari ini?</div>
-                <form id="aiSearchForm" class="ai-input-group">
-                    <input type="text" id="aiPrompt" placeholder="Contoh: Cariin sepatu lari..." required>
-                    <button type="submit" id="aiBtn">Tanya</button>
-                </form>
-            </div>
-            
-            <div style="margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
-                <h3>Barang Terbaru 🛒</h3>
-                <div id="productList" class="product-grid">
-                    <p style="color: #666; font-size: 14px;">Memuat barang...</p>
+        <div class="slider-container">
+            <div class="slider-wrapper" id="promoSlider">
+                <div class="slide" style="background: linear-gradient(45deg, #FF9A9E, #FECFEF);">
+                    <h3>Promo Spesial Belidikita!</h3><p>Diskon hingga 50%</p>
+                </div>
+                <div class="slide" style="background: linear-gradient(45deg, #a18cd1, #fbc2eb);">
+                    <h3>Berita Perusahaan</h3><p>Fitur baru telah rilis!</p>
+                </div>
+                <div class="slide" style="background: linear-gradient(45deg, #84fab0, #8fd3f4);">
+                    <h3>Gratis Ongkir</h3><p>Ke seluruh Indonesia</p>
                 </div>
             </div>
         </div>
 
-        <div id="forumSection" class="section-box hidden">
-            <h3>Forum Diskusi 💬</h3>
-            <form id="forumForm" style="margin-bottom: 20px;">
-                <input type="text" id="forumTitle" placeholder="Judul Topik Diskusi" required>
-                <textarea id="forumContent" placeholder="Tulis isi diskusimu di sini..." rows="3" required></textarea>
-                <button type="submit">Posting Topik</button>
-            </form>
-            <div id="forumList" class="forum-container">
-                <p style="color: #666; font-size: 14px;">Memuat diskusi...</p>
+        <section class="scroll-section">
+            <div class="section-header">
+                <h2>🔥 Top Barang Laris Hari Ini</h2>
+                <a href="#">Lihat Semua</a>
             </div>
-        </div>
+            <div class="horizontal-scroll" id="topSellingList">
+                </div>
+        </section>
 
-        <div id="uploadSection" class="section-box hidden">
-            <h3>Mulai Jualan 📦</h3>
-            <form id="uploadForm">
-                <input type="text" id="prodTitle" placeholder="Nama Barang" required>
-                <input type="number" id="prodPrice" placeholder="Harga (Rp)" required>
-                <textarea id="prodDesc" placeholder="Deskripsi Barang" rows="3"></textarea>
-                <input type="file" id="prodMedia" accept="image/*,video/*" required>
-                <button type="submit">Posting Barang</button>
-            </form>
-        </div>
+        <section class="scroll-section">
+            <div class="section-header">
+                <h2>🛒 Paling Banyak Masuk Keranjang</h2>
+            </div>
+            <div class="horizontal-scroll" id="topCartList">
+                </div>
+        </section>
 
-    </div>
+        <section class="scroll-section">
+            <div class="section-header">
+                <h2>⭐ Top Seller Minggu Ini</h2>
+            </div>
+            <div class="horizontal-scroll" id="topSellerList">
+                </div>
+        </section>
+
+        <section class="grid-section">
+            <div class="section-header">
+                <h2>📦 Jelajahi Barang Menarik</h2>
+            </div>
+            <div class="product-grid" id="randomProductList">
+                <p style="text-align:center; width:100%;">Memuat barang terbaru...</p>
+            </div>
+        </section>
+        
+        <div style="height: 80px;"></div>
+    </main>
+
+    <nav id="bottomNav" class="hidden">
+        <a href="#" class="nav-item active" id="menuHome">
+            <i class="fas fa-home"></i><span>Beranda</span>
+        </a>
+        <a href="#" class="nav-item" id="menuProduct">
+            <i class="fas fa-box-open"></i><span>Produk</span>
+        </a>
+        <a href="#" class="nav-item" id="menuFeed">
+            <i class="fas fa-play-circle"></i><span>Feed</span>
+        </a>
+        <a href="#" class="nav-item" id="menuTransaction">
+            <i class="fas fa-receipt"></i><span>Transaksi</span>
+        </a>
+        <a href="#" class="nav-item" id="menuAccount">
+            <i class="fas fa-user"></i><span>Akun</span>
+        </a>
+    </nav>
 
     <div id="authBackdrop" class="hidden backdrop"></div>
     <div class="container hidden modal-auth" id="authContainer">
@@ -106,13 +128,7 @@
         <div class="form-container sign-in-container">
             <form id="loginForm">
                 <h2>Sign In</h2>
-                <div id="g_id_onload"
-                     data-client_id="MASUKKAN_GOOGLE_CLIENT_ID_DISINI"
-                     data-context="signin"
-                     data-ux_mode="popup"
-                     data-callback="handleCredentialResponse"
-                     data-auto_prompt="false">
-                </div>
+                <div id="g_id_onload" data-client_id="MASUKKAN_GOOGLE_CLIENT_ID_DISINI" data-context="signin" data-ux_mode="popup" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
                 <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="signin_with" data-size="large" data-logo_alignment="left"></div>
                 <span>atau gunakan email</span>
                 <input type="email" id="loginEmail" placeholder="Email" required />
@@ -144,17 +160,6 @@
             <input type="text" id="otpCode" placeholder="Kode OTP" maxlength="6" />
             <input type="hidden" id="otpEmail" />
             <button id="verifyOtpBtn">Verifikasi</button>
-        </div>
-    </div>
-    
-    <div id="resetPasswordModal" class="modal">
-        <div class="modal-content">
-            <h2>Reset Password</h2>
-            <p>Masukkan kode OTP dari email dan password barumu.</p>
-            <input type="hidden" id="resetEmail" />
-            <input type="text" id="resetOtpCode" placeholder="Kode 6 Digit OTP" maxlength="6" required />
-            <input type="password" id="resetNewPassword" placeholder="Password Baru" required />
-            <button id="submitResetBtn">Simpan Password Baru</button>
         </div>
     </div>
 
