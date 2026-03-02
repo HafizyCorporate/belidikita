@@ -112,17 +112,18 @@ body {
 /* ================================================== */
 .splash-text-container { 
     position: absolute;
-    bottom: 15vh; 
+    bottom: 12vh; 
     left: 0; width: 100%;
     text-align: center; 
     z-index: 2; 
 }
 
-/* ✅ ✅ ✅ ✅ LOGO DIPERBESAR LAGI ✅ ✅ ✅ ✅ */
+/* ✅ ✅ ✅ ✅ LOGO JUMBO (400px) & GAP DIRAPATKAN ✅ ✅ ✅ ✅ */
 .splash-logo {
-    width: 280px; /* ✅ Ukuran dinaikkan menjadi 280px agar makin besar */
+    width: 380px; /* ✅ Ukuran JUMBO 400px */
+    max-width: 90vw; /* Pengaman agar tidak keluar layar di HP kecil */
     height: auto;
-    margin-bottom: 5px; 
+    margin-bottom: 1px; /* ✅ Jarak bawah logo dihilangkan (nempel) */
     opacity: 0;
     transform: scale(0.5);
     animation: textZoom 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards 1s; 
@@ -131,7 +132,8 @@ body {
 .brand-slogan {
     font-size: clamp(1rem, 5vw, 1.5rem); 
     color: #0D47A1; 
-    margin-top: 5px; font-weight: 700;
+    margin-top: 0px; /* ✅ Jarak atas slogan dihilangkan (nempel) */
+    font-weight: 700;
     opacity: 0; animation: fadeIn 1s ease forwards 1.8s;
 }
 
