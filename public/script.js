@@ -201,28 +201,45 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(larisList) larisList.innerHTML = '';
                 if(cartList) cartList.innerHTML = '';
 
-                result.data.forEach(product => {
+                                result.data.forEach(product => {
                     const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
                     const deskripsiBarang = product.description || "Deskripsi belum tersedia.";
                     const isVideo = product.media_type === 'video';
-                    const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video+Produk' : (product.media_url || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
-                    const mediaTag = isVideo ? `<video src="${product.media_url}" class="product-media" style="object-fit:cover;"></video>` : `<img src="${product.media_url}" class="product-media" alt="${product.title}">`;
+                    
+                    // ✅ PINTAR MEMILIH FOTO SAMPUL (Ambil foto pertama dari kumpulan foto)
+                    let fotoUtama = product.media_url;
+                    try {
+                        const parsedMedia = JSON.parse(product.media_url);
+                        if (Array.isArray(parsedMedia) && parsedMedia.length > 0) {
+                            fotoUtama = parsedMedia[0];
+                        }
+                    } catch(e) {} // Jika bukan array (kodingan lama), biarkan saja
+
+                    const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video+Produk' : (fotoUtama || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
+                    const mediaTag = isVideo ? `<video src="${fotoBarang}" class="product-media" style="object-fit:cover;"></video>` : `<img src="${fotoBarang}" class="product-media" alt="${product.title}">`;
 
                     if (product.category === 'laris' || product.category === 'keranjang') {
                         const hCard = document.createElement('div');
                         hCard.className = 'h-card';
                         hCard.innerHTML = `<img src="${fotoBarang}" class="h-card-img" alt="Barang"><div class="h-card-info"><div class="h-card-row"><span class="h-card-title">${product.title}</span><span class="h-card-price" style="font-size:11px;">${priceRp}</span></div></div>`;
-                        hCard.addEventListener('click', () => bukaDetailProduk(fotoBarang, product.title, priceRp, deskripsiBarang, product.price));
+                        
+                        // Perhatikan! Yang dikirim ke detail produk adalah 'product.media_url' (berisi semua array foto)
+                        hCard.addEventListener('click', () => bukaDetailProduk(product.media_url, product.title, priceRp, deskripsiBarang, product.price));
+                        
                         if (product.category === 'laris' && larisList) larisList.appendChild(hCard);
                         if (product.category === 'keranjang' && cartList) cartList.appendChild(hCard);
                     }
 
                     const card = document.createElement('div');
                     card.className = 'product-card';
-                    card.innerHTML = `${product.media_url ? mediaTag : '<div class="product-media" style="display:flex; align-items:center; justify-content:center; color:#aaa;">No Media</div>'}<div class="product-info"><div class="product-title">${product.title}</div><div class="product-price">${priceRp}</div><div class="product-seller" style="color:#00AA5B; font-weight:bold;"><i class="fas fa-check-circle"></i> Belidikita Official</div></div>`;
-                    card.addEventListener('click', () => bukaDetailProduk(fotoBarang, product.title, priceRp, deskripsiBarang, product.price));
+                    card.innerHTML = `${fotoUtama ? mediaTag : '<div class="product-media" style="display:flex; align-items:center; justify-content:center; color:#aaa;">No Media</div>'}<div class="product-info"><div class="product-title">${product.title}</div><div class="product-price">${priceRp}</div><div class="product-seller" style="color:#00AA5B; font-weight:bold;"><i class="fas fa-check-circle"></i> Belidikita Official</div></div>`;
+                    
+                    // Perhatikan! Yang dikirim ke detail produk adalah 'product.media_url' (berisi semua array foto)
+                    card.addEventListener('click', () => bukaDetailProduk(product.media_url, product.title, priceRp, deskripsiBarang, product.price));
+                    
                     productList.appendChild(card);
                 });
+
 
                 if(larisList && larisList.innerHTML === '') larisList.innerHTML = '<p style="padding:15px; font-size:12px; color:#888;">Belum ada barang di etalase ini.</p>';
                 if(cartList && cartList.innerHTML === '') cartList.innerHTML = '<p style="padding:15px; font-size:12px; color:#888;">Belum ada barang di etalase ini.</p>';
