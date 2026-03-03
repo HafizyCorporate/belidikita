@@ -159,8 +159,8 @@ app.post('/api/address', verifyToken, async (req, res) => {
     }
 });
 
-// ✅ PAKAI verifyAdmin AGAR TIDAK DITOLAK
-app.post('/api/products', verifyAdmin, upload.single('media'), uploadProduct);
+// ✅ PERBAIKAN FASE 2: Terima hingga 5 foto sekaligus
+app.post('/api/products', verifyAdmin, upload.array('media', 5), uploadProduct);
 app.post('/api/promos', verifyAdmin, upload.single('media'), uploadPromo); 
 app.post('/api/forum', verifyToken, createPost);
 
