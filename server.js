@@ -262,6 +262,23 @@ app.put('/api/orders/:id', verifyAdmin, async (req, res) => {
     }
 });
 
+// 5. Hapus Pesanan (Bisa dieksekusi oleh Admin atau Pembeli)
+app.delete('/api/orders/:id', verifyAdmin, async (req, res) => {
+    try {
+        // Logika Pintar: Jika Admin, hapus bebas. Jika Pembeli, hanya bisa hapus miliknya sendiri.
+        if (req.user.role === 'admin') {
+            await pool.query('DELETE FROM orders WHERE id = $1', [req.params.id]);
+        } else {
+            await pool.query('DELETE FROM orders WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+        }
+        res.json({ success: true, message: "Pesanan berhasil dihapus dari Database!" });
+    } catch(err) {
+        console.error("🔥 Error Hapus Pesanan:", err);
+        res.status(500).json({ success: false, message: "Gagal menghapus pesanan" });
+    }
+});
+
+
 
 
 app.listen(PORT, () => { console.log(`🚀 Server belidikita berjalan di port ${PORT}`); });
