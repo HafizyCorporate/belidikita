@@ -192,14 +192,13 @@ app.delete('/api/promos/:id', verifyAdmin, async (req, res) => {
     }
 });
 
-
-// 3. Edit Produk (Nama, Harga, Stok, Kategori)
+// 3. Edit Produk (Sekarang Menerima Berat)
 app.put('/api/products/:id', verifyAdmin, async (req, res) => {
-    const { title, price, capital_price, stock, category } = req.body;
+    const { title, price, capital_price, stock, category, weight } = req.body;
     try {
         await pool.query(
-            'UPDATE products SET title=$1, price=$2, capital_price=$3, stock=$4, category=$5 WHERE id=$6',
-            [title, price, capital_price, stock, category, req.params.id]
+            'UPDATE products SET title=$1, price=$2, capital_price=$3, stock=$4, category=$5, weight=$6 WHERE id=$7',
+            [title, price, capital_price, stock, category, weight, req.params.id]
         );
         res.json({ success: true, message: "Produk berhasil diubah!" });
     } catch(err) { 
@@ -207,5 +206,6 @@ app.put('/api/products/:id', verifyAdmin, async (req, res) => {
         res.status(500).json({ success: false, message: "Gagal mengedit produk" }); 
     }
 });
+
 
 app.listen(PORT, () => { console.log(`🚀 Server belidikita berjalan di port ${PORT}`); });
