@@ -102,7 +102,6 @@
         @keyframes pulseWarning { 0% { box-shadow: 0 0 0 0 rgba(251, 192, 45, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(251, 192, 45, 0); } 100% { box-shadow: 0 0 0 0 rgba(251, 192, 45, 0); } }
         @keyframes shakeIcon { 0%, 100% { transform: rotate(0deg); } 10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); } 20%, 40%, 60%, 80% { transform: rotate(10deg); } }
 
-        /* ✅ TAMBAHAN CSS UNTUK TOMBOL AKSI & PREVIEW FOTO */
         .btn-aksi { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; color: #fff; margin-right: 5px; display: inline-block; }
         .btn-edit { background: #ff9800; }
         .btn-hapus { background: #ff3b30; }
@@ -269,6 +268,45 @@
         </div>
     </div>
 
+    <div id="modalEditProduk" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="document.getElementById('modalEditProduk').style.display='none'">&times;</span>
+            <h2 style="color:#0D47A1; font-weight:800; margin-bottom: 20px;"><i class="fas fa-edit"></i> Edit Data Barang</h2>
+            <form id="formEditProduk">
+                <input type="hidden" id="editProdId">
+                <div class="form-group">
+                    <label>Nama Barang Baru</label>
+                    <input type="text" id="editProdName" required>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Harga Modal (Rp)</label>
+                        <input type="number" id="editProdCapital" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Harga Jual (Rp)</label>
+                        <input type="number" id="editProdPrice" required>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Stok Baru</label>
+                        <input type="number" id="editProdStock" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ubah Kategori</label>
+                        <select id="editProdCategory" required>
+                            <option value="biasa">Barang Biasa</option>
+                            <option value="laris">🔥 Top Laris</option>
+                            <option value="keranjang">🛒 Paling Banyak Diminati</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit" id="btnSimpanEdit" style="background: #ff9800;"><i class="fas fa-save"></i> Simpan Perubahan</button>
+            </form>
+        </div>
+    </div>
+
     <div class="mobile-nav">
         <a href="#" class="active"><i class="fas fa-chart-pie"></i><span>Dasbor</span></a>
         <a href="#promoSection"><i class="fas fa-images"></i><span>Promo</span></a>
@@ -302,10 +340,14 @@
         document.getElementById('btnKeluarPC').addEventListener('click', doLogout);
         if(document.getElementById('btnKeluarHP')) document.getElementById('btnKeluarHP').addEventListener('click', doLogout);
 
+        // ✅ PERBAIKAN: JENDELA BISA DITUTUP JIKA DIKLIK DI LUAR AREA KOTAK
         const modalGrafik = document.getElementById('grafikModal');
-        window.onclick = (e) => { if (e.target == modalGrafik) { modalGrafik.style.display = "none"; } }
+        const modalEdit = document.getElementById('modalEditProduk');
+        window.onclick = (e) => { 
+            if (e.target == modalGrafik) { modalGrafik.style.display = "none"; } 
+            if (e.target == modalEdit) { modalEdit.style.display = "none"; } 
+        }
 
-        // ✅ LOGIKA BARU UNTUK HAPUS DATA DI DATABASE
         async function hapusData(tipe, id) {
             if(!confirm("Yakin ingin menghapus data ini secara permanen?")) return;
             try {
@@ -346,7 +388,7 @@
                         if(prod.category === 'laris') { badgeClass = 'badge-laris'; badgeText = '🔥 Laris'; }
                         else if(prod.category === 'keranjang') { badgeClass = 'badge-keranjang'; badgeText = '🛒 Diminati'; }
 
-                        // ✅ PERBAIKAN: Tombol Edit & Hapus Disambungkan
+                        // ✅ PERBAIKAN: Tombol Edit Sudah Disambungkan ke Fungsi Buka Pop-up Edit
                         tbody.innerHTML += `
                             <tr>
                                 <td><span class="badge ${badgeClass}">${badgeText}</span></td>
@@ -355,7 +397,7 @@
                                 <td style="color:#ff5722; font-weight:bold;">${priceRp}</td>
                                 <td>${modalRp}</td>
                                 <td>
-                                    <button class="btn-aksi btn-edit" onclick="showToast('Fitur edit segera hadir!', 'info')"><i class="fas fa-edit"></i> Edit</button>
+                                    <button class="btn-aksi btn-edit" onclick="bukaEditProduk(${prod.id}, '${prod.title.replace(/'/g, "\\'")}', ${prod.capital_price || 0}, ${prod.price}, ${stok}, '${prod.category}')"><i class="fas fa-edit"></i> Edit</button>
                                     <button class="btn-aksi btn-hapus" onclick="hapusData('products', ${prod.id})"><i class="fas fa-trash"></i> Hapus</button>
                                 </td>
                             </tr>
@@ -370,7 +412,6 @@
             }
         }
 
-        // ✅ TAMBAHAN: FUNGSI TARIK DATA BANNER PROMO
         async function fetchPromos() {
             try {
                 const res = await fetch('/api/promos');
@@ -394,7 +435,6 @@
             } catch (err) { console.error("Gagal load promo", err); }
         }
 
-        // Panggil kedua fungsi saat halaman dibuka
         fetchProducts();
         fetchPromos();
 
@@ -453,7 +493,7 @@
                 if(data.success) {
                     showToast("✅ Banner Promo berhasil dipasang!", "success");
                     document.getElementById('formUploadPromo').reset();
-                    fetchPromos(); // ✅ Refresh tabel banner otomatis
+                    fetchPromos(); 
                 } else {
                     showToast("Gagal: " + data.message, "error");
                 }
@@ -461,6 +501,55 @@
                 showToast("Upload Banner gagal! Cek koneksi.", "error");
             } finally {
                 btn.innerHTML = "<i class='fas fa-cloud-upload-alt'></i> Pasang Banner Promo";
+            }
+        });
+
+        // 🔥 TAMBAHAN BARU: LOGIKA MEMBUKA MODAL EDIT
+        function bukaEditProduk(id, title, capital, price, stock, category) {
+            document.getElementById('editProdId').value = id;
+            document.getElementById('editProdName').value = title;
+            document.getElementById('editProdCapital').value = capital;
+            document.getElementById('editProdPrice').value = price;
+            document.getElementById('editProdStock').value = stock;
+            document.getElementById('editProdCategory').value = category;
+            
+            document.getElementById('modalEditProduk').style.display = 'block';
+        }
+
+        // 🔥 TAMBAHAN BARU: LOGIKA MENGIRIM DATA EDIT KE SERVER
+        document.getElementById('formEditProduk').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSimpanEdit');
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
+
+            const id = document.getElementById('editProdId').value;
+            const bodyData = {
+                title: document.getElementById('editProdName').value,
+                capital_price: document.getElementById('editProdCapital').value,
+                price: document.getElementById('editProdPrice').value,
+                stock: document.getElementById('editProdStock').value,
+                category: document.getElementById('editProdCategory').value
+            };
+
+            try {
+                const res = await fetch(`/api/products/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(bodyData)
+                });
+                const data = await res.json();
+                
+                if(data.success) {
+                    showToast("✅ Barang berhasil diupdate!", "success");
+                    document.getElementById('modalEditProduk').style.display = 'none';
+                    fetchProducts(); // Otomatis refresh tabel setelah edit
+                } else {
+                    showToast("Gagal: " + data.message, "error");
+                }
+            } catch(err) {
+                showToast("Server Error saat mengedit!", "error");
+            } finally {
+                btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan";
             }
         });
     </script>
