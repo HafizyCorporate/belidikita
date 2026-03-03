@@ -13,18 +13,21 @@
         .back-btn i { margin-right: 5px; }
         .auth-title { font-size: 20px; font-weight: 800; color: #0D47A1; margin-bottom: 5px; }
         .auth-subtitle { font-size: 12px; color: #666; margin-bottom: 25px; }
-        
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-group label { display: block; font-size: 11px; font-weight: 600; color: #555; margin-bottom: 5px; }
         .input-group input { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; outline: none; font-family: 'Montserrat', sans-serif; font-size: 13px; background: #f9f9f9; transition: 0.3s; }
         .input-group input:focus { border-color: #1976D2; background: #fff; box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1); }
-        
         .forgot-link { display: block; text-align: right; font-size: 11px; color: #1976D2; text-decoration: none; font-weight: 600; margin-top: -5px; margin-bottom: 15px; }
         .btn-auth { width: 100%; padding: 14px; background: #1976D2; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(25, 118, 210, 0.3); }
         .btn-auth:hover { background: #0D47A1; transform: translateY(-2px); }
-        
         .toggle-text { margin-top: 20px; font-size: 12px; color: #666; }
         .toggle-text a { color: #1976D2; font-weight: 800; text-decoration: none; }
+        
+        /* CSS NOTIFIKASI TOAST */
+        #customToast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 25px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; font-size: 13px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: opacity 0.3s, bottom 0.3s; opacity: 0; }
+        #customToast.show { visibility: visible; opacity: 1; bottom: 50px; }
+        #customToast.success { background-color: #00AA5B; }
+        #customToast.error { background-color: #ff3b30; }
     </style>
 </head>
 <body>
@@ -43,24 +46,31 @@
                 <label>Password</label>
                 <input type="password" id="loginPassword" placeholder="Masukkan password" required>
             </div>
-            
             <a href="lupapassword.html" class="forgot-link">Lupa Password?</a>
-            
             <button type="submit" class="btn-auth" id="btnLogin">MASUK SEKARANG</button>
         </form>
         <div class="toggle-text">Belum punya akun? <a href="daftarpembeli.html">Daftar di sini</a></div>
     </div>
 
+    <div id="customToast"></div>
+
     <script>
+        // Fitur Anti Nyangkut (Otomatis hapus token lama jika membuka halaman login)
+        window.onload = () => { localStorage.removeItem('token'); };
+
+        function showToast(msg, type = 'error') {
+            const toast = document.getElementById("customToast");
+            toast.innerText = msg;
+            toast.className = type + " show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
         document.getElementById('formLogin').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnLogin');
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Memproses...";
 
-            const bodyData = { 
-                username: document.getElementById('loginEmail').value, 
-                password: document.getElementById('loginPassword').value 
-            };
+            const bodyData = { username: document.getElementById('loginEmail').value, password: document.getElementById('loginPassword').value };
 
             try {
                 const res = await fetch('/api/login', {
@@ -71,13 +81,14 @@
                 const data = await res.json();
 
                 if(data.success) {
+                    showToast("Login Berhasil! Mengalihkan...", "success");
                     localStorage.setItem('token', data.token);
-                    window.location.href = 'profilpembeli.html';
+                    setTimeout(() => { window.location.href = 'profilpembeli.html'; }, 1000);
                 } else {
-                    alert("❌ Gagal: " + data.message);
+                    showToast(data.message, "error");
                 }
             } catch(err) {
-                alert("❌ Gagal menyambung ke server!");
+                showToast("Server sibuk! Coba lagi nanti.", "error");
             } finally {
                 btn.innerHTML = "MASUK SEKARANG";
             }
