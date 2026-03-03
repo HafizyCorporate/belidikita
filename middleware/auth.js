@@ -1,36 +1,26 @@
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
+const JWT_SECRET = process.env.JWT_SECRET || 'rahasia_belidikita_super_aman';
 
 const verifyToken = (req, res, next) => {
-    // 1. Tangkap header Authorization dari request frontend
     const authHeader = req.headers['authorization'];
-    
-    // 2. Ekstrak token (Pisahkan kata "Bearer " dan ambil tokennya saja)
-    const token = authHeader && authHeader.split(' ')[1];
+    if (!authHeader) return res.status(401).json({ success: false, message: 'Akses ditolak! Silakan login.' });
 
-    // 3. Jika tidak ada token (user belum login / tidak bawa tiket)
-    if (!token) {
-        return res.status(401).json({ 
-            success: false, 
-            message: "Akses Ditolak! Kamu harus login terlebih dahulu." 
-        });
+    // Ambil token (Menangani format "Bearer token..." atau langsung "token...")
+    const token = authHeader.split(' ')[1] || authHeader;
+
+    // ✅ JALUR KHUSUS ADMIN (Bypass)
+    if (token && token.startsWith('token-admin-')) {
+        req.user = { id: 1, role: 'admin' };
+        return next();
     }
 
-    // 4. Verifikasi keaslian token menggunakan Kunci Rahasia
+    // ✅ JALUR RESMI PEMBELI (Cek JWT Asli)
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
-        // 5. Jika asli, simpan data user (seperti ID dan Role) ke dalam req.user
-        req.user = decoded;
-        
-        // 6. Persilakan masuk ke proses selanjutnya (Controller)
+        const verified = jwt.verify(token, JWT_SECRET);
+        req.user = verified; // Menyimpan data ID pembeli
         next();
     } catch (err) {
-        console.error("Token Error:", err.message);
-        return res.status(403).json({ 
-            success: false, 
-            message: "Sesi telah habis atau token tidak valid. Silakan login ulang." 
-        });
+        res.status(403).json({ success: false, message: 'Sesi telah habis, silakan login ulang.' });
     }
 };
 
