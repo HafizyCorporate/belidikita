@@ -76,6 +76,7 @@
         .bg-blue { background: #1976D2; }
         .c-label { font-size: 10px; color: #888; margin-top: 5px; font-weight: 600; }
 
+        /* CSS TOAST MODERN */
         #customToast {
             visibility: hidden; min-width: 250px; margin-left: -125px;
             background-color: #333; color: #fff; text-align: center;
@@ -106,6 +107,17 @@
         .btn-edit { background: #ff9800; }
         .btn-hapus { background: #ff3b30; }
         .img-preview { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
+
+        /* ✅ CSS BARU: MODAL KONFIRMASI MODERN (PENGGANTI ALERT BAWAAN HP) */
+        .modal-confirm { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .confirm-box { background: #fff; padding: 30px 20px; border-radius: 15px; text-align: center; width: 90%; max-width: 320px; animation: popIn 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .confirm-box i { font-size: 45px; color: #ff3b30; margin-bottom: 15px; }
+        .confirm-box h3 { font-size: 18px; color: #333; margin-bottom: 10px; font-weight: 800; }
+        .confirm-box p { font-size: 12px; color: #666; margin-bottom: 25px; line-height: 1.5; }
+        .confirm-btn-group { display: flex; gap: 10px; justify-content: center; }
+        .btn-batal { flex: 1; padding: 12px; background: #eee; color: #555; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .btn-yakin { flex: 1; padding: 12px; background: #ff3b30; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 59, 48, 0.3); }
     </style>
 </head>
 <body>
@@ -307,6 +319,18 @@
         </div>
     </div>
 
+    <div id="modalConfirm" class="modal-confirm">
+        <div class="confirm-box">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Yakin Hapus Data?</h3>
+            <p>Data yang sudah dihapus tidak akan bisa dikembalikan lagi dari database.</p>
+            <div class="confirm-btn-group">
+                <button class="btn-batal" onclick="tutupConfirm()">Batal</button>
+                <button class="btn-yakin" id="btnEksekusiHapus">Ya, Hapus!</button>
+            </div>
+        </div>
+    </div>
+
     <div class="mobile-nav">
         <a href="#" class="active"><i class="fas fa-chart-pie"></i><span>Dasbor</span></a>
         <a href="#promoSection"><i class="fas fa-images"></i><span>Promo</span></a>
@@ -340,7 +364,6 @@
         document.getElementById('btnKeluarPC').addEventListener('click', doLogout);
         if(document.getElementById('btnKeluarHP')) document.getElementById('btnKeluarHP').addEventListener('click', doLogout);
 
-        // ✅ PERBAIKAN: JENDELA BISA DITUTUP JIKA DIKLIK DI LUAR AREA KOTAK
         const modalGrafik = document.getElementById('grafikModal');
         const modalEdit = document.getElementById('modalEditProduk');
         window.onclick = (e) => { 
@@ -348,25 +371,53 @@
             if (e.target == modalEdit) { modalEdit.style.display = "none"; } 
         }
 
-        async function hapusData(tipe, id) {
-            if(!confirm("Yakin ingin menghapus data ini secara permanen?")) return;
+        // ==========================================
+        // ✅ LOGIKA BARU: POP-UP KONFIRMASI MODERN
+        // ==========================================
+        let targetHapusTipe = "";
+        let targetHapusId = "";
+
+        // Fungsi yang dipanggil saat klik tombol sampah merah
+        function konfirmasiHapus(tipe, id) {
+            targetHapusTipe = tipe;
+            targetHapusId = id;
+            document.getElementById('modalConfirm').style.display = 'flex'; // Munculkan pop-up keren
+        }
+
+        function tutupConfirm() {
+            document.getElementById('modalConfirm').style.display = 'none'; // Tutup pop-up
+        }
+
+        // Jika tombol "Ya, Hapus!" di dalam pop-up ditekan
+        document.getElementById('btnEksekusiHapus').addEventListener('click', async () => {
+            tutupConfirm(); // Tutup dulu pop-upnya
+            const btn = document.getElementById('btnEksekusiHapus');
+            btn.innerHTML = "Memproses...";
+
             try {
-                const res = await fetch(`/api/${tipe}/${id}`, {
+                const res = await fetch(`/api/${targetHapusTipe}/${targetHapusId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();
+                
                 if(data.success) {
                     showToast("✅ Berhasil dihapus!", "success");
-                    if(tipe === 'products') fetchProducts();
-                    if(tipe === 'promos') fetchPromos();
+                    if(targetHapusTipe === 'products') fetchProducts();
+                    if(targetHapusTipe === 'promos') fetchPromos();
                 } else {
-                    showToast("❌ Gagal menghapus!", "error");
+                    // Jika Backend mengirim error, tampilkan di sini
+                    showToast("❌ Gagal: " + (data.message || "Tolak oleh server"), "error");
                 }
             } catch(err) {
-                showToast("Server Error saat menghapus", "error");
+                // Jika server mati atau rute tidak ditemukan
+                showToast("❌ Server Error: Periksa koneksi / server.js", "error");
+            } finally {
+                btn.innerHTML = "Ya, Hapus!";
             }
-        }
+        });
+
+        // ==========================================
 
         async function fetchProducts() {
             try {
@@ -388,7 +439,7 @@
                         if(prod.category === 'laris') { badgeClass = 'badge-laris'; badgeText = '🔥 Laris'; }
                         else if(prod.category === 'keranjang') { badgeClass = 'badge-keranjang'; badgeText = '🛒 Diminati'; }
 
-                        // ✅ PERBAIKAN: Tombol Edit Sudah Disambungkan ke Fungsi Buka Pop-up Edit
+                        // ✅ PERBAIKAN: Tombol Hapus sekarang memanggil pop-up custom
                         tbody.innerHTML += `
                             <tr>
                                 <td><span class="badge ${badgeClass}">${badgeText}</span></td>
@@ -398,7 +449,7 @@
                                 <td>${modalRp}</td>
                                 <td>
                                     <button class="btn-aksi btn-edit" onclick="bukaEditProduk(${prod.id}, '${prod.title.replace(/'/g, "\\'")}', ${prod.capital_price || 0}, ${prod.price}, ${stok}, '${prod.category}')"><i class="fas fa-edit"></i> Edit</button>
-                                    <button class="btn-aksi btn-hapus" onclick="hapusData('products', ${prod.id})"><i class="fas fa-trash"></i> Hapus</button>
+                                    <button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('products', ${prod.id})"><i class="fas fa-trash"></i> Hapus</button>
                                 </td>
                             </tr>
                         `;
@@ -420,11 +471,12 @@
                 if (result.success && result.data.length > 0) {
                     tbody.innerHTML = '';
                     result.data.forEach(promo => {
+                        // ✅ PERBAIKAN: Tombol Hapus memanggil pop-up custom
                         tbody.innerHTML += `
                             <tr>
                                 <td><img src="${promo.media_url}" class="img-preview" alt="Banner"></td>
                                 <td>
-                                    <button class="btn-aksi btn-hapus" onclick="hapusData('promos', ${promo.id})"><i class="fas fa-trash"></i> Hapus</button>
+                                    <button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('promos', ${promo.id})"><i class="fas fa-trash"></i> Hapus</button>
                                 </td>
                             </tr>
                         `;
@@ -504,7 +556,6 @@
             }
         });
 
-        // 🔥 TAMBAHAN BARU: LOGIKA MEMBUKA MODAL EDIT
         function bukaEditProduk(id, title, capital, price, stock, category) {
             document.getElementById('editProdId').value = id;
             document.getElementById('editProdName').value = title;
@@ -516,7 +567,6 @@
             document.getElementById('modalEditProduk').style.display = 'block';
         }
 
-        // 🔥 TAMBAHAN BARU: LOGIKA MENGIRIM DATA EDIT KE SERVER
         document.getElementById('formEditProduk').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanEdit');
@@ -542,7 +592,7 @@
                 if(data.success) {
                     showToast("✅ Barang berhasil diupdate!", "success");
                     document.getElementById('modalEditProduk').style.display = 'none';
-                    fetchProducts(); // Otomatis refresh tabel setelah edit
+                    fetchProducts(); 
                 } else {
                     showToast("Gagal: " + data.message, "error");
                 }
