@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs'); // ✅ TAMBAHAN: Untuk membaca file/folder
+const bcrypt = require('bcryptjs'); // ✅ TAMBAHAN: Untuk cek password pembeli
+const jwt = require('jsonwebtoken'); // ✅ TAMBAHAN: Untuk bikin tiket masuk pembeli
 require('dotenv').config();
 
 // --- INJEKSI AUTO-DB ---
@@ -47,9 +49,11 @@ app.post('/api/google-login', googleLogin);
 app.post('/api/forgot-password', forgotPassword);
 app.post('/api/reset-password', resetPassword);
 
-// LOGIN KHUSUS ADMIN
-app.post('/api/login', (req, res) => {
+// ✅ GABUNGAN LOGIN ADMIN & LOGIN PEMBELI
+app.post('/api/login', async (req, res) => {
     const { username, password } = req.body; 
+    
+    // 1. CEK JALUR KHUSUS ADMIN DULU
     const admins = [
         { username: "Versacy", password: "08556645" },
         { username: "Farid", password: "11223344" }
@@ -57,9 +61,30 @@ app.post('/api/login', (req, res) => {
     const validAdmin = admins.find(a => a.username === username && a.password === password);
 
     if (validAdmin) {
-        res.json({ success: true, message: `Selamat datang, Admin ${validAdmin.username}!`, token: `token-admin-${validAdmin.username}` });
-    } else {
-        res.status(401).json({ success: false, message: "Username atau password salah!" });
+        return res.json({ success: true, message: `Selamat datang, Admin ${validAdmin.username}!`, token: `token-admin-${validAdmin.username}` });
+    }
+
+    // 2. JIKA BUKAN ADMIN, CARI KE DATABASE UNTUK PEMBELI
+    try {
+        const user = await pool.query('SELECT * FROM users WHERE email = $1', [username]);
+        if (user.rows.length === 0) {
+            return res.status(401).json({ success: false, message: "Email atau password salah!" });
+        }
+
+        // Cek kecocokan sandi pembeli
+        const validPassword = await bcrypt.compare(password, user.rows[0].password);
+        if (!validPassword) {
+            return res.status(401).json({ success: false, message: "Email atau password salah!" });
+        }
+
+        // Bikin tiket JWT untuk pembeli
+        const JWT_SECRET = process.env.JWT_SECRET || 'rahasia_belidikita_super_aman';
+        const token = jwt.sign({ id: user.rows[0].id, role: user.rows[0].role }, JWT_SECRET, { expiresIn: '7d' });
+
+        res.json({ success: true, message: "Login berhasil!", token: token });
+    } catch (err) {
+        console.error("🔥 Error Login Pembeli:", err);
+        res.status(500).json({ success: false, message: "Server Error saat login." });
     }
 });
 
