@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if(larisList) larisList.innerHTML = '';
                 if(cartList) cartList.innerHTML = '';
 
-                                result.data.forEach(product => {
+                result.data.forEach(product => {
                     const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
                     const deskripsiBarang = product.description || "Deskripsi belum tersedia.";
                     const isVideo = product.media_type === 'video';
@@ -223,8 +223,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         hCard.className = 'h-card';
                         hCard.innerHTML = `<img src="${fotoBarang}" class="h-card-img" alt="Barang"><div class="h-card-info"><div class="h-card-row"><span class="h-card-title">${product.title}</span><span class="h-card-price" style="font-size:11px;">${priceRp}</span></div></div>`;
                         
-                        // Perhatikan! Yang dikirim ke detail produk adalah 'product.media_url' (berisi semua array foto)
-                        hCard.addEventListener('click', () => bukaDetailProduk(product.media_url, product.title, priceRp, deskripsiBarang, product.price));
+                        // ✅ PERBAIKAN: Mengirimkan product.weight (Berat Barang)
+                        hCard.addEventListener('click', () => bukaDetailProduk(product.media_url, product.title, priceRp, deskripsiBarang, product.price, product.weight));
                         
                         if (product.category === 'laris' && larisList) larisList.appendChild(hCard);
                         if (product.category === 'keranjang' && cartList) cartList.appendChild(hCard);
@@ -234,8 +234,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     card.className = 'product-card';
                     card.innerHTML = `${fotoUtama ? mediaTag : '<div class="product-media" style="display:flex; align-items:center; justify-content:center; color:#aaa;">No Media</div>'}<div class="product-info"><div class="product-title">${product.title}</div><div class="product-price">${priceRp}</div><div class="product-seller" style="color:#00AA5B; font-weight:bold;"><i class="fas fa-check-circle"></i> Belidikita Official</div></div>`;
                     
-                    // Perhatikan! Yang dikirim ke detail produk adalah 'product.media_url' (berisi semua array foto)
-                    card.addEventListener('click', () => bukaDetailProduk(product.media_url, product.title, priceRp, deskripsiBarang, product.price));
+                    // ✅ PERBAIKAN: Mengirimkan product.weight (Berat Barang)
+                    card.addEventListener('click', () => bukaDetailProduk(product.media_url, product.title, priceRp, deskripsiBarang, product.price, product.weight));
                     
                     productList.appendChild(card);
                 });
@@ -254,14 +254,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const productModal = document.getElementById('productDetailModal');
     const closeDetailBtn = document.getElementById('closeDetailBtn');
     
-        function bukaDetailProduk(foto, nama, hargaStr, deskripsi, hargaRaw) {
-        // 1. Bungkus data barang yang ditekan
+    // ✅ PERBAIKAN: MENANGKAP PARAMETER BERAT (beratRaw)
+    function bukaDetailProduk(foto, nama, hargaStr, deskripsi, hargaRaw, beratRaw) {
+        // 1. Bungkus data barang yang ditekan beserta beratnya
         const dataProduk = { 
             foto: foto, 
             nama: nama, 
             hargaStr: hargaStr, 
             deskripsi: deskripsi, 
-            harga: hargaRaw, // Harus 'harga' agar sinkron dengan sistem keranjang
+            harga: hargaRaw, 
+            weight: beratRaw || 1000, // Jika belum diset di admin, otomatis anggap 1000 gram (1 Kg)
             qty: 1 
         };
         
