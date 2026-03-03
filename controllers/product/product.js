@@ -1,30 +1,26 @@
 const { pool } = require('../../config/db');
 
-// ✅ LOGIKA BARU: UPLOAD BANYAK FOTO (Maksimal 5)
+// ✅ LOGIKA BARU: MENERIMA BERAT BARANG
 const uploadProduct = async (req, res) => {
-    const { title, description, price, category, capital_price, stock } = req.body; 
+    const { title, description, price, category, capital_price, stock, weight } = req.body; 
     
-    // Tangkap semua file foto yang diupload admin
     let mediaUrls = [];
     let media_type = 'image';
     
     if (req.files && req.files.length > 0) {
-        // Buat daftar link fotonya
         mediaUrls = req.files.map(file => `/uploads/${file.filename}`);
         if (req.files[0].mimetype.startsWith('video/')) media_type = 'video';
     }
 
-    // Jadikan format teks JSON agar bisa masuk ke 1 kolom Database
     const media_url_string = JSON.stringify(mediaUrls);
-
     const forbiddenWords = ['judi', 'slot', 'gacor', 'porno', 'bokep', '18+', 'togel'];
     const contentCheck = `${title} ${description}`.toLowerCase();
     if (forbiddenWords.some(word => contentCheck.includes(word))) return res.status(403).json({ success: false, message: "Pelanggaran Komunitas!" });
 
     try {
         const newProduct = await pool.query(
-            `INSERT INTO products (user_id, title, description, price, media_url, media_type, category, capital_price, stock) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-            [req.user ? req.user.id : 1, title, description, price, media_url_string, media_type, category || 'biasa', capital_price || 0, stock || 0]
+            `INSERT INTO products (user_id, title, description, price, media_url, media_type, category, capital_price, stock, weight) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+            [req.user ? req.user.id : 1, title, description, price, media_url_string, media_type, category || 'biasa', capital_price || 0, stock || 0, weight || 1000]
         );
         res.json({ success: true, message: "Barang berhasil diposting!", product: newProduct.rows[0] });
     } catch (err) { 
