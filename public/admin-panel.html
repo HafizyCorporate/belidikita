@@ -43,7 +43,7 @@
         
         .table-responsive { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 600px;}
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; font-size: 11px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; font-size: 11px; vertical-align: middle;}
         th { font-weight: 800; color: #0D47A1; background: #f4f7fa; white-space: nowrap;}
         .badge { padding: 4px 8px; border-radius: 20px; font-size: 9px; font-weight: bold; text-transform: uppercase; }
         .badge-laris { background: #ffeb3b; color: #b71c1c; }
@@ -76,7 +76,6 @@
         .bg-blue { background: #1976D2; }
         .c-label { font-size: 10px; color: #888; margin-top: 5px; font-weight: 600; }
 
-        /* ✅ CSS KHUSUS POP-UP TOAST */
         #customToast {
             visibility: hidden; min-width: 250px; margin-left: -125px;
             background-color: #333; color: #fff; text-align: center;
@@ -91,7 +90,6 @@
         #customToast.error { background-color: #ff3b30; }
         #customToast.info { background-color: #1976D2; }
 
-        /* ✅ KOTAK PERINGATAN UPLOAD (TIPS ADMIN) */
         .upload-warning {
             background: #FFFDE7; border-left: 4px solid #FBC02D; color: #F57F17;
             padding: 10px 15px; border-radius: 8px; font-size: 11px; font-weight: 600;
@@ -103,6 +101,12 @@
 
         @keyframes pulseWarning { 0% { box-shadow: 0 0 0 0 rgba(251, 192, 45, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(251, 192, 45, 0); } 100% { box-shadow: 0 0 0 0 rgba(251, 192, 45, 0); } }
         @keyframes shakeIcon { 0%, 100% { transform: rotate(0deg); } 10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); } 20%, 40%, 60%, 80% { transform: rotate(10deg); } }
+
+        /* ✅ TAMBAHAN CSS UNTUK TOMBOL AKSI & PREVIEW FOTO */
+        .btn-aksi { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; color: #fff; margin-right: 5px; display: inline-block; }
+        .btn-edit { background: #ff9800; }
+        .btn-hapus { background: #ff3b30; }
+        .img-preview { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
@@ -157,6 +161,23 @@
                 </div>
                 <button type="submit" class="btn-submit" id="btnSimpanPromo" style="background: #0D47A1;"><i class="fas fa-cloud-upload-alt"></i> Pasang Banner Promo</button>
             </form>
+        </div>
+
+        <div class="box" id="daftarPromoSection">
+            <h3><i class="fas fa-list-alt"></i> Daftar Banner Promo Aktif</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Preview Banner</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBodyPromos">
+                        <tr><td colspan="2" style="text-align:center;">Memuat data dari Server...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="box" id="uploadSection">
@@ -259,7 +280,6 @@
     <div id="customToast"></div>
 
     <script>
-        // ✅ FUNGSI MEMUNCULKAN NOTIFIKASI MODERN
         function showToast(msg, type = 'info') {
             const toast = document.getElementById("customToast");
             toast.innerText = msg;
@@ -285,6 +305,27 @@
         const modalGrafik = document.getElementById('grafikModal');
         window.onclick = (e) => { if (e.target == modalGrafik) { modalGrafik.style.display = "none"; } }
 
+        // ✅ LOGIKA BARU UNTUK HAPUS DATA DI DATABASE
+        async function hapusData(tipe, id) {
+            if(!confirm("Yakin ingin menghapus data ini secara permanen?")) return;
+            try {
+                const res = await fetch(`/api/${tipe}/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if(data.success) {
+                    showToast("✅ Berhasil dihapus!", "success");
+                    if(tipe === 'products') fetchProducts();
+                    if(tipe === 'promos') fetchPromos();
+                } else {
+                    showToast("❌ Gagal menghapus!", "error");
+                }
+            } catch(err) {
+                showToast("Server Error saat menghapus", "error");
+            }
+        }
+
         async function fetchProducts() {
             try {
                 const res = await fetch('/api/products');
@@ -305,6 +346,7 @@
                         if(prod.category === 'laris') { badgeClass = 'badge-laris'; badgeText = '🔥 Laris'; }
                         else if(prod.category === 'keranjang') { badgeClass = 'badge-keranjang'; badgeText = '🛒 Diminati'; }
 
+                        // ✅ PERBAIKAN: Tombol Edit & Hapus Disambungkan
                         tbody.innerHTML += `
                             <tr>
                                 <td><span class="badge ${badgeClass}">${badgeText}</span></td>
@@ -312,20 +354,50 @@
                                 <td style="color:#00AA5B; font-weight:bold;">${stok}</td>
                                 <td style="color:#ff5722; font-weight:bold;">${priceRp}</td>
                                 <td>${modalRp}</td>
-                                <td><a href="#" style="color:#ff3b30; text-decoration:none;" onclick="showToast('Fitur hapus segera hadir!', 'info')">Hapus</a></td>
+                                <td>
+                                    <button class="btn-aksi btn-edit" onclick="showToast('Fitur edit segera hadir!', 'info')"><i class="fas fa-edit"></i> Edit</button>
+                                    <button class="btn-aksi btn-hapus" onclick="hapusData('products', ${prod.id})"><i class="fas fa-trash"></i> Hapus</button>
+                                </td>
                             </tr>
                         `;
                     });
                 } else {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Toko Anda masih kosong. Silakan upload barang.</td></tr>';
+                    document.getElementById('totalProduk').innerText = "0 Barang";
                 }
             } catch (err) {
                 console.error("Gagal load tabel", err);
             }
         }
-        fetchProducts();
 
-        // UPLOAD BARANG KE DATABASE
+        // ✅ TAMBAHAN: FUNGSI TARIK DATA BANNER PROMO
+        async function fetchPromos() {
+            try {
+                const res = await fetch('/api/promos');
+                const result = await res.json();
+                const tbody = document.getElementById('tableBodyPromos');
+                if (result.success && result.data.length > 0) {
+                    tbody.innerHTML = '';
+                    result.data.forEach(promo => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><img src="${promo.media_url}" class="img-preview" alt="Banner"></td>
+                                <td>
+                                    <button class="btn-aksi btn-hapus" onclick="hapusData('promos', ${promo.id})"><i class="fas fa-trash"></i> Hapus</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Belum ada banner promo.</td></tr>';
+                }
+            } catch (err) { console.error("Gagal load promo", err); }
+        }
+
+        // Panggil kedua fungsi saat halaman dibuka
+        fetchProducts();
+        fetchPromos();
+
         document.getElementById('formUploadBarang').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanBarang');
@@ -362,7 +434,6 @@
             }
         });
 
-        // UPLOAD BANNER PROMO
         document.getElementById('formUploadPromo').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanPromo');
@@ -382,6 +453,7 @@
                 if(data.success) {
                     showToast("✅ Banner Promo berhasil dipasang!", "success");
                     document.getElementById('formUploadPromo').reset();
+                    fetchPromos(); // ✅ Refresh tabel banner otomatis
                 } else {
                     showToast("Gagal: " + data.message, "error");
                 }
