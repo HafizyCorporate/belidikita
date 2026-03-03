@@ -42,13 +42,16 @@ const initDB = async () => {
     `;
 
 
+        // 3. Modifikasi tabel jika ada kolom baru (Tanpa menghapus data lama)
     const alterTables = `
         ALTER TABLE products ADD COLUMN IF NOT EXISTS category VARCHAR(50) DEFAULT 'biasa';
         ALTER TABLE products ADD COLUMN IF NOT EXISTS capital_price DECIMAL(12,2) DEFAULT 0;
         ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INT DEFAULT 0;
         ALTER TABLE products ALTER COLUMN media_url TYPE TEXT;
         ALTER TABLE products ADD COLUMN IF NOT EXISTS weight INT DEFAULT 1000;
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_hidden BOOLEAN DEFAULT FALSE; -- ✅ TAMBAHAN: Untuk memisah hapus admin & pembeli
     `;
+
 
     try {
         console.log("⏳ Sedang mencoba membangun tabel di Database...");
