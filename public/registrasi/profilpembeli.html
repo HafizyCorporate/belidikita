@@ -11,7 +11,7 @@
         .header-profile { background: #1976D2; color: #fff; padding: 30px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; }
         .btn-back-home { position: absolute; top: 20px; left: 20px; color: #fff; font-size: 20px; text-decoration: none; }
         .avatar { width: 80px; height: 80px; background: #fff; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 30px; color: #1976D2; box-shadow: 0 4px 10px rgba(0,0,0,0.2); overflow: hidden; }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; display: none; } /* Default sembunyi sampai ada foto */
+        .avatar img { width: 100%; height: 100%; object-fit: cover; display: none; } 
         .profile-name { font-size: 18px; font-weight: 800; margin-bottom: 5px; }
         .profile-email { font-size: 12px; opacity: 0.8; }
         
@@ -24,21 +24,18 @@
         
         .btn-logout { margin: 20px; padding: 15px; background: #ff3b30; color: #fff; text-align: center; border-radius: 12px; font-weight: 800; display: block; text-decoration: none; box-shadow: 0 4px 10px rgba(255, 59, 48, 0.2); }
 
-        /* JENDELA POP-UP (MODAL) KHUSUS PROFIL */
         .modal-profil { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
         .modal-content-profil { background-color: #fff; margin: 15vh auto; padding: 20px; border-radius: 15px; width: 90%; max-width: 400px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: slideUp 0.3s ease; }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .close-modal { position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 24px; font-weight: bold; cursor: pointer; }
         .modal-title { font-size: 18px; font-weight: 800; color: #0D47A1; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         
-        /* FORM DALAM MODAL */
         .form-group { margin-bottom: 12px; text-align: left; }
         .form-group label { display: block; font-size: 11px; font-weight: 600; color: #555; margin-bottom: 5px; }
         .form-group input, .form-group textarea { width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Montserrat', sans-serif; font-size: 12px; outline: none; background: #f9f9f9; }
         .form-group input:focus, .form-group textarea:focus { border-color: #1976D2; background: #fff; }
         .btn-save { width: 100%; padding: 12px; background: #00AA5B; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
 
-        /* TOAST NOTIFIKASI */
         #customToast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 25px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; font-size: 13px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: opacity 0.3s, bottom 0.3s; opacity: 0; }
         #customToast.show { visibility: visible; opacity: 1; bottom: 50px; }
         #customToast.success { background-color: #00AA5B; }
@@ -133,7 +130,6 @@
     <div id="customToast"></div>
 
     <script>
-        // --- SISTEM NOTIFIKASI ---
         function showToast(msg, type = 'info') {
             const toast = document.getElementById("customToast");
             toast.innerText = msg;
@@ -141,77 +137,86 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // --- SISTEM BUKA TUTUP JENDELA (MODAL) ---
         function bukaModal(idModal) { document.getElementById(idModal).style.display = 'block'; }
         function tutupModal(idModal) { document.getElementById(idModal).style.display = 'none'; }
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal-profil')) { event.target.style.display = "none"; }
-        }
+        window.onclick = function(event) { if (event.target.classList.contains('modal-profil')) { event.target.style.display = "none"; } }
 
-        // --- TARIK DATA ASLI SAAT HALAMAN DIBUKA ---
+        // ✅ TARIK DATA PROFIL DAN ALAMAT DARI DATABASE SERVER
         document.addEventListener("DOMContentLoaded", async () => {
             const token = localStorage.getItem('token');
-            if(!token) { window.location.href = 'loginpembeli.html'; return; }
+            if(!token || token.startsWith('token-admin-')) { window.location.href = 'loginpembeli.html'; return; }
 
             try {
-                const res = await fetch('/api/profile', { headers: { 'Authorization': `Bearer ${token}` } });
-                const result = await res.json();
+                // 1. Tarik Data Profil Utama
+                const resProfile = await fetch('/api/profile', { headers: { 'Authorization': `Bearer ${token}` } });
+                const resultProfile = await resProfile.json();
                 
-                if(result.success) {
-                    // Update tampilan Profil Atas
-                    document.getElementById('profileName').innerText = result.data.name;
-                    document.getElementById('profileEmail').innerText = result.data.email;
-                    document.getElementById('aturNama').value = result.data.name; // Isi otomatis di form edit
+                if(resultProfile.success) {
+                    document.getElementById('profileName').innerText = resultProfile.data.name;
+                    document.getElementById('profileEmail').innerText = resultProfile.data.email;
+                    document.getElementById('aturNama').value = resultProfile.data.name;
                     
-                    // Cek jika ada foto profil tersimpan
-                    if(result.data.avatar_url) {
+                    if(resultProfile.data.avatar_url) {
                         document.getElementById('avatarIcon').style.display = 'none';
                         document.getElementById('avatarImage').style.display = 'block';
-                        document.getElementById('avatarImage').src = result.data.avatar_url;
-                        document.getElementById('aturFoto').value = result.data.avatar_url;
+                        document.getElementById('avatarImage').src = resultProfile.data.avatar_url;
+                        document.getElementById('aturFoto').value = resultProfile.data.avatar_url;
                     }
-                    
-                    // Simulasi Tarik Data Alamat (Nanti disambung ke Database)
-                    const simpananAlamat = localStorage.getItem('alamat_pembeli');
-                    if(simpananAlamat) {
-                        const dataAlamat = JSON.parse(simpananAlamat);
-                        document.getElementById('alamatNama').value = dataAlamat.nama;
-                        document.getElementById('alamatWA').value = dataAlamat.wa;
-                        document.getElementById('alamatDetail').value = dataAlamat.detail;
-                    }
-
                 } else {
                     localStorage.removeItem('token');
                     window.location.href = 'loginpembeli.html';
                 }
+
+                // 2. Tarik Data Alamat dari Server Database
+                const resAddress = await fetch('/api/address', { headers: { 'Authorization': `Bearer ${token}` } });
+                const addrData = await resAddress.json();
+                if(addrData.success && addrData.data) {
+                    document.getElementById('alamatNama').value = addrData.data.nama_penerima;
+                    document.getElementById('alamatWA').value = addrData.data.nomor_wa;
+                    document.getElementById('alamatDetail').value = addrData.data.alamat_lengkap;
+                }
+
             } catch (err) {
+                console.error("Gagal terhubung ke database", err);
                 document.getElementById('profileName').innerText = "Gagal Memuat";
             }
         });
 
-        // --- LOGIKA SIMPAN ALAMAT (SEMENTARA PAKE LOCALSTORAGE) ---
-        document.getElementById('formAlamat').addEventListener('submit', (e) => {
+        // ✅ LOGIKA SIMPAN ALAMAT (MENEMBAK API DATABASE SERVER)
+        document.getElementById('formAlamat').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const token = localStorage.getItem('token');
             const btn = document.getElementById('btnSimpanAlamat');
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
 
-            const dataAlamat = {
+            const bodyData = {
                 nama: document.getElementById('alamatNama').value,
                 wa: document.getElementById('alamatWA').value,
                 detail: document.getElementById('alamatDetail').value
             };
 
-            // Simpan di memori HP pembeli
-            localStorage.setItem('alamat_pembeli', JSON.stringify(dataAlamat));
-            
-            setTimeout(() => {
-                showToast("✅ Alamat berhasil disimpan!", "success");
+            try {
+                const res = await fetch('/api/address', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(bodyData)
+                });
+                const data = await res.json();
+
+                if(data.success) {
+                    showToast("✅ Alamat tersimpan permanen di Server!", "success");
+                    tutupModal('modalAlamat');
+                } else {
+                    showToast("Gagal menyimpan alamat", "error");
+                }
+            } catch(err) {
+                showToast("Server Error", "error");
+            } finally {
                 btn.innerHTML = "<i class='fas fa-save'></i> Simpan Alamat";
-                tutupModal('modalAlamat');
-            }, 800);
+            }
         });
 
-        // --- LOGIKA SIMPAN PENGATURAN (Nembak ke Backend /api/profile) ---
+        // ✅ LOGIKA SIMPAN PENGATURAN (MENEMBAK API DATABASE SERVER)
         document.getElementById('formPengaturan').addEventListener('submit', async (e) => {
             e.preventDefault();
             const token = localStorage.getItem('token');
@@ -221,16 +226,13 @@
             const bodyData = {
                 name: document.getElementById('aturNama').value,
                 avatar_url: document.getElementById('aturFoto').value,
-                bio: document.getElementById('aturBank').value // Kita pakai kolom bio untuk simpan metode bayar
+                bio: document.getElementById('aturBank').value 
             };
 
             try {
                 const res = await fetch('/api/profile', {
                     method: 'PUT',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` 
-                    },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(bodyData)
                 });
                 const data = await res.json();
@@ -238,7 +240,7 @@
                 if(data.success) {
                     showToast("✅ Profil berhasil diperbarui!", "success");
                     tutupModal('modalPengaturan');
-                    setTimeout(() => location.reload(), 1000); // Refresh agar nama & foto berubah
+                    setTimeout(() => location.reload(), 1000); 
                 } else {
                     showToast("Gagal: " + data.message, "error");
                 }
@@ -249,7 +251,6 @@
             }
         });
 
-        // --- LOGIKA LOGOUT ---
         function logout(e) {
             e.preventDefault();
             if(confirm("Yakin ingin keluar dari akun?")) {
