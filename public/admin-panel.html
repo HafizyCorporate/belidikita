@@ -230,8 +230,8 @@
                     <textarea id="prodDesc" rows="3" placeholder="Jelaskan detail barangmu di sini..." required></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Upload Foto Asli</label>
-                    <input type="file" id="prodMedia" accept="image/*" required>
+                    <label>Upload Foto Asli (Bisa pilih hingga 5 foto sekaligus)</label>
+                    <input type="file" id="prodMedia" accept="image/*" multiple required>
                 </div>
                 <div class="upload-warning">
                     <i class="fas fa-camera"></i>
@@ -355,18 +355,16 @@
             setTimeout(() => window.location.href = 'login.html', 1500);
         }
 
-                // ✅ LOGIKA BARU: TOMBOL LIHAT TOKO DEPAN (Logout & Skip Animasi)
         function lihatTokoDepan() {
-            localStorage.removeItem('token'); // Log out admin
-            sessionStorage.setItem('skipSplash', 'true'); // Beri tiket VIP skip animasi
-            window.location.href = 'dashboardutama.html'; // Langsung pindah
+            localStorage.removeItem('token'); 
+            sessionStorage.setItem('skipSplash', 'true'); 
+            window.location.href = 'dashboardutama.html'; 
         }
 
-        // ✅ LOGIKA BARU: TOMBOL KELUAR (Logout & Skip Animasi)
         const doLogout = (e) => {
             e.preventDefault();
-            localStorage.removeItem('token'); // Log out admin
-            sessionStorage.setItem('skipSplash', 'true'); // Beri tiket VIP skip animasi
+            localStorage.removeItem('token'); 
+            sessionStorage.setItem('skipSplash', 'true'); 
             showToast("Mengarahkan ke Halaman Utama...", "success");
             setTimeout(() => window.location.href = 'dashboardutama.html', 1000);
         };
@@ -381,26 +379,21 @@
             if (e.target == modalEdit) { modalEdit.style.display = "none"; } 
         }
 
-        // ==========================================
-        // ✅ LOGIKA BARU: POP-UP KONFIRMASI MODERN
-        // ==========================================
         let targetHapusTipe = "";
         let targetHapusId = "";
 
-        // Fungsi yang dipanggil saat klik tombol sampah merah
         function konfirmasiHapus(tipe, id) {
             targetHapusTipe = tipe;
             targetHapusId = id;
-            document.getElementById('modalConfirm').style.display = 'flex'; // Munculkan pop-up keren
+            document.getElementById('modalConfirm').style.display = 'flex'; 
         }
 
         function tutupConfirm() {
-            document.getElementById('modalConfirm').style.display = 'none'; // Tutup pop-up
+            document.getElementById('modalConfirm').style.display = 'none'; 
         }
 
-        // Jika tombol "Ya, Hapus!" di dalam pop-up ditekan
         document.getElementById('btnEksekusiHapus').addEventListener('click', async () => {
-            tutupConfirm(); // Tutup dulu pop-upnya
+            tutupConfirm(); 
             const btn = document.getElementById('btnEksekusiHapus');
             btn.innerHTML = "Memproses...";
 
@@ -416,18 +409,14 @@
                     if(targetHapusTipe === 'products') fetchProducts();
                     if(targetHapusTipe === 'promos') fetchPromos();
                 } else {
-                    // Jika Backend mengirim error, tampilkan di sini
                     showToast("❌ Gagal: " + (data.message || "Tolak oleh server"), "error");
                 }
             } catch(err) {
-                // Jika server mati atau rute tidak ditemukan
                 showToast("❌ Server Error: Periksa koneksi / server.js", "error");
             } finally {
                 btn.innerHTML = "Ya, Hapus!";
             }
         });
-
-        // ==========================================
 
         async function fetchProducts() {
             try {
@@ -449,7 +438,6 @@
                         if(prod.category === 'laris') { badgeClass = 'badge-laris'; badgeText = '🔥 Laris'; }
                         else if(prod.category === 'keranjang') { badgeClass = 'badge-keranjang'; badgeText = '🛒 Diminati'; }
 
-                        // ✅ PERBAIKAN: Tombol Hapus sekarang memanggil pop-up custom
                         tbody.innerHTML += `
                             <tr>
                                 <td><span class="badge ${badgeClass}">${badgeText}</span></td>
@@ -481,7 +469,6 @@
                 if (result.success && result.data.length > 0) {
                     tbody.innerHTML = '';
                     result.data.forEach(promo => {
-                        // ✅ PERBAIKAN: Tombol Hapus memanggil pop-up custom
                         tbody.innerHTML += `
                             <tr>
                                 <td><img src="${promo.media_url}" class="img-preview" alt="Banner"></td>
@@ -512,7 +499,12 @@
             formData.append('stock', document.getElementById('prodStock').value); 
             formData.append('category', document.getElementById('prodCategory').value); 
             formData.append('description', document.getElementById('prodDesc').value);
-            formData.append('media', document.getElementById('prodMedia').files[0]);
+            
+            // ✅ PERBAIKAN FASE 2: Logika Mengangkut Banyak File Sekaligus
+            const files = document.getElementById('prodMedia').files;
+            for (let i = 0; i < files.length; i++) {
+                formData.append('media', files[i]);
+            }
 
             try {
                 const res = await fetch('/api/products', {
