@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Profil Saya - Belidikita</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f7fa; font-family: 'Montserrat', sans-serif; }
+        .header-profile { background: #1976D2; color: #fff; padding: 30px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; }
+        .btn-back-home { position: absolute; top: 20px; left: 20px; color: #fff; font-size: 20px; text-decoration: none; }
+        .avatar { width: 80px; height: 80px; background: #fff; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 30px; color: #1976D2; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .profile-name { font-size: 18px; font-weight: 800; margin-bottom: 5px; }
+        .profile-email { font-size: 12px; opacity: 0.8; }
+        
+        .profile-menu { margin: 20px; background: #fff; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; }
+        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #eee; text-decoration: none; color: #333; font-size: 14px; font-weight: 600; }
+        .menu-item:last-child { border-bottom: none; }
+        .menu-item i.icon-left { font-size: 18px; color: #1976D2; width: 30px; text-align: center; margin-right: 10px; }
+        .menu-item i.icon-right { color: #ccc; font-size: 14px; }
+        
+        .btn-logout { margin: 20px; padding: 15px; background: #ff3b30; color: #fff; text-align: center; border-radius: 12px; font-weight: 800; display: block; text-decoration: none; box-shadow: 0 4px 10px rgba(255, 59, 48, 0.2); }
+    </style>
+</head>
+<body>
+
+    <div class="header-profile">
+        <a href="../dashboardutama.html" class="btn-back-home"><i class="fas fa-arrow-left"></i></a>
+        <div class="avatar"><i class="fas fa-user"></i></div>
+        <div class="profile-name">Pengguna Belidikita</div>
+        <div class="profile-email">pembeli@gmail.com</div>
+    </div>
+
+    <div class="profile-menu">
+        <a href="#" class="menu-item">
+            <div style="display:flex; align-items:center;"><i class="fas fa-map-marker-alt icon-left"></i> Alamat Pengiriman</div>
+            <i class="fas fa-chevron-right icon-right"></i>
+        </a>
+        <a href="#" class="menu-item">
+            <div style="display:flex; align-items:center;"><i class="fas fa-box icon-left"></i> Riwayat Pesanan</div>
+            <i class="fas fa-chevron-right icon-right"></i>
+        </a>
+        <a href="#" class="menu-item">
+            <div style="display:flex; align-items:center;"><i class="fas fa-cog icon-left"></i> Pengaturan Akun</div>
+            <i class="fas fa-chevron-right icon-right"></i>
+        </a>
+    </div>
+
+    <a href="#" class="btn-logout" onclick="logout(event)"><i class="fas fa-sign-out-alt"></i> Keluar dari Akun</a>
+
+    <script>
+        // Cek apakah user memang punya token, jika tidak usir ke login
+        if(!localStorage.getItem('token')) {
+            window.location.href = 'loginpembeli.html';
+        }
+
+        function logout(e) {
+            e.preventDefault();
+            if(confirm("Yakin ingin keluar dari akun?")) {
+                localStorage.removeItem('token');
+                window.location.href = '../dashboardutama.html';
+            }
+        }
+    </script>
+</body>
+</html>
