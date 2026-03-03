@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs'); // ✅ TAMBAHAN: Untuk membaca file/folder
-const bcrypt = require('bcryptjs'); // ✅ TAMBAHAN: Untuk cek password pembeli
+const bcrypt = require('bcrypt'); // ✅ TAMBAHAN: Untuk cek password pembeli
 const jwt = require('jsonwebtoken'); // ✅ TAMBAHAN: Untuk bikin tiket masuk pembeli
 require('dotenv').config();
 
