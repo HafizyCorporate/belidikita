@@ -126,26 +126,23 @@
         document.getElementById('descProduk').innerText = produk.deskripsi;
 
         // 2. KECERDASAN SLIDER FOTO
-        // (Sistem ini otomatis mendeteksi apakah fotonya 1 buah atau array banyak foto)
         let daftarFoto = [];
         try {
             daftarFoto = JSON.parse(produk.foto); 
             if(!Array.isArray(daftarFoto)) daftarFoto = [produk.foto];
         } catch(e) {
-            daftarFoto = [produk.foto]; // Jika foto cuma 1 string biasa
+            daftarFoto = [produk.foto]; 
         }
 
         const slider = document.getElementById('imageSlider');
         const dotsContainer = document.getElementById('sliderDots');
 
         daftarFoto.forEach((url, index) => {
-            // Masukkan gambar ke slider
             const img = document.createElement('img');
             img.src = url;
-            img.onclick = () => bukaFullscreen(url); // Klik untuk full screen
+            img.onclick = () => bukaFullscreen(url); 
             slider.appendChild(img);
 
-            // Buat titik indikator jika foto lebih dari 1
             if(daftarFoto.length > 1) {
                 const dot = document.createElement('div');
                 dot.className = `dot ${index === 0 ? 'active' : ''}`;
@@ -153,7 +150,6 @@
             }
         });
 
-        // Logika geser titik indikator saat gambar di-scroll
         slider.addEventListener('scroll', () => {
             const scrollLeft = slider.scrollLeft;
             const width = slider.clientWidth;
@@ -182,7 +178,6 @@
                     url: window.location.href
                 }).catch(err => console.log("Gagal membagikan", err));
             } else {
-                // Alternatif jika HP tidak mendukung fitur Share otomatis
                 navigator.clipboard.writeText(window.location.href);
                 showToast("Link produk berhasil disalin!", "success");
             }
@@ -196,26 +191,22 @@
         }
         updateBadge();
 
-        // ==========================================
-        // ✅ 6. LOGIKA WAJIB LOGIN UNTUK KERANJANG
-        // ==========================================
+        // 6. LOGIKA WAJIB LOGIN UNTUK KERANJANG
         document.getElementById('btnTambahKeranjang').addEventListener('click', () => {
             const token = localStorage.getItem('token');
-            // Cek apakah belum login ATAU yang login adalah admin
             if (!token || token.startsWith('token-admin-')) {
                 showToast("Silakan Login Pembeli terlebih dahulu!", "error");
                 setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
                 return;
             }
 
-            // Jika sudah login, masukkan ke keranjang
             let cart = JSON.parse(localStorage.getItem('belidikita_cart')) || [];
             const existingItem = cart.find(item => item.nama === produk.nama);
             if(existingItem) {
                 existingItem.qty += 1; 
             } else {
                 cart.push({
-                    foto: daftarFoto[0], // Ambil foto pertama saja untuk keranjang
+                    foto: daftarFoto[0], 
                     nama: produk.nama,
                     harga: produk.harga,
                     qty: 1
@@ -226,7 +217,9 @@
             showToast("Barang ditambahkan ke keranjang 🛒", "success");
         });
 
-        // 7. Logika Beli Sekarang (Ke WA)
+        // ==========================================
+        // ✅ 7. LOGIKA BARU: BELI SEKARANG (Lompat ke Halaman Checkout)
+        // ==========================================
         document.getElementById('btnBeliLangsung').addEventListener('click', () => {
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) {
@@ -234,12 +227,18 @@
                 setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
                 return; 
             }
-            const pesan = `Halo Admin Belidikita, saya tertarik untuk membeli:\n\n*Nama Barang:* ${produk.nama}\n*Harga:* ${produk.hargaStr}\n\nApakah stoknya masih tersedia?`;
-            const nomorAdmin = "6281234567890"; // Ganti dengan WA kamu
-            const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
             
-            showToast("Mengarahkan ke WhatsApp...", "info");
-            setTimeout(() => window.open(linkWA, '_blank'), 1000); 
+            // Siapkan barang yang mau di-checkout
+            const dataCheckout = [{
+                foto: daftarFoto[0], // Ambil foto pertama saja
+                nama: produk.nama,
+                harga: produk.harga,
+                qty: 1
+            }];
+            
+            // Simpan ke memori sementara dan pindah ke halaman checkout
+            sessionStorage.setItem('belidikita_checkout', JSON.stringify(dataCheckout));
+            window.location.href = 'checkout.html';
         });
     </script>
 </body>
