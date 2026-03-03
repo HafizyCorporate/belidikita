@@ -87,20 +87,38 @@ document.addEventListener("DOMContentLoaded", () => {
     const menuProduct = document.getElementById('menuProduct');
     const menuFeed = document.getElementById('menuFeed');
     const menuTransaction = document.getElementById('menuTransaction');
+    const menuAccount = document.getElementById('menuAccount'); // ✅ Tarik elemen Akun Baru
     
     function setActiveNav(clickedMenu) {
         document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-        clickedMenu.classList.add('active');
+        if(clickedMenu) clickedMenu.classList.add('active');
     }
 
-    menuHome.addEventListener('click', (e) => {
+    if(menuHome) menuHome.addEventListener('click', (e) => {
         e.preventDefault(); setActiveNav(menuHome);
         window.scrollTo({ top: 0, behavior: 'smooth' }); 
     });
 
-    menuProduct.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuProduct); showToast("Membuka Katalog Produk...", "info"); });
-    menuFeed.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuFeed); showToast("Fitur Video Feed segera hadir!", "info"); });
-    menuTransaction.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuTransaction); showToast("Silakan login untuk cek pesanan!", "info"); });
+    if(menuProduct) menuProduct.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuProduct); showToast("Membuka Katalog Produk...", "info"); });
+    if(menuFeed) menuFeed.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuFeed); showToast("Fitur Video Feed segera hadir!", "info"); });
+    if(menuTransaction) menuTransaction.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuTransaction); showToast("Silakan login untuk cek pesanan!", "info"); });
+
+    // ✅ LOGIKA BARU KHUSUS UNTUK MENU AKUN (GEMBOK LOGIN)
+    if(menuAccount) {
+        menuAccount.addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            setActiveNav(menuAccount); 
+            
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showToast("Silakan Login atau Daftar akun dulu ya!", "error");
+                setTimeout(() => window.location.href = 'login.html', 1500);
+            } else {
+                showToast("Membuka profil...", "info");
+                setTimeout(() => window.location.href = 'profil.html', 500);
+            }
+        });
+    }
 
     // === 5. PINDAH KE HALAMAN LOGIN ADMIN TERPISAH ===
     const adminLoginIcon = document.getElementById('adminLoginIcon');
@@ -233,6 +251,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnCheckout = document.getElementById('btnCheckout');
     if(btnCheckout) {
         btnCheckout.addEventListener('click', () => {
+            // ✅ CEK APAKAH PEMBELI SUDAH LOGIN? JIKA BELUM, STOP & TAMPILKAN LOGIN!
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showToast("Silakan Login atau Daftar akun dulu ya!", "error");
+                setTimeout(() => window.location.href = 'login.html', 1500);
+                return; // Hentikan kode agar tidak lanjut membuka WhatsApp
+            }
+
+            // Jika sudah punya akun/login, baru WA dibuka
             const namaBarang = document.getElementById('detailTitle').innerText;
             const hargaBarang = document.getElementById('detailPrice').innerText;
             const pesan = `Halo Admin Belidikita, saya tertarik untuk membeli:\n\n*Nama Barang:* ${namaBarang}\n*Harga:* ${hargaBarang}\n\nApakah stoknya masih tersedia?`;
