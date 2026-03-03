@@ -182,13 +182,15 @@ app.delete('/api/products/:id', verifyAdmin, async (req, res) => {
 // 2. Hapus Banner Promo
 app.delete('/api/promos/:id', verifyAdmin, async (req, res) => {
     try {
-        await pool.query('DELETE FROM promos WHERE id = $1', [req.params.id]);
+        // ✅ PERBAIKAN: Ganti 'promos' menjadi nama tabel aslinya yaitu 'promo_sliders'
+        await pool.query('DELETE FROM promo_sliders WHERE id = $1', [req.params.id]);
         res.json({ success: true, message: "Banner berhasil dihapus!" });
     } catch(err) {
         console.error("🔥 Error Hapus Banner:", err);
         res.status(500).json({ success: false, message: "Gagal menghapus banner" });
     }
 });
+
 
 // 3. Edit Produk (Nama, Harga, Stok, Kategori)
 app.put('/api/products/:id', verifyAdmin, async (req, res) => {
