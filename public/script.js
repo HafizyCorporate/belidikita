@@ -308,7 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const namaBarang = document.getElementById('detailTitle').innerText;
             const hargaBarang = document.getElementById('detailPrice').innerText;
             const pesan = `Halo Admin Belidikita, saya tertarik untuk membeli:\n\n*Nama Barang:* ${namaBarang}\n*Harga:* ${hargaBarang}\n\nApakah stoknya masih tersedia?`;
-            const nomorAdmin = "6281234567890"; 
+            const nomorAdmin = "6282240400388"; 
             const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
             showToast("Mengarahkan ke WhatsApp...", "info");
             setTimeout(() => window.open(linkWA, '_blank'), 1000); 
