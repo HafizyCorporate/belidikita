@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Checkout - Belidikita</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,800" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
+        body { background-color: #f4f7fa; color: #333; padding-bottom: 80px; }
+
+        .header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .header i { font-size: 20px; color: #0D47A1; cursor: pointer; }
+        .header h2 { font-size: 16px; font-weight: 800; color: #333; }
+
+        .section { background: #fff; margin-top: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .section-title { font-size: 13px; font-weight: 800; color: #0D47A1; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+
+        /* Alamat */
+        .address-box p { font-size: 12px; color: #555; line-height: 1.5; margin-bottom: 5px; }
+        .address-box strong { color: #333; }
+
+        /* Produk */
+        .product-item { display: flex; gap: 15px; align-items: center; margin-bottom: 10px; }
+        .product-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; }
+        .product-detail { flex: 1; }
+        .product-detail h4 { font-size: 13px; font-weight: 600; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .product-detail .price { color: #ff5722; font-weight: 800; font-size: 14px; }
+        .product-detail .qty { font-size: 12px; color: #888; float: right; }
+
+        /* Pilihan Radio Custom (Ongkir & Pembayaran) */
+        .option-group { display: flex; flex-direction: column; gap: 10px; }
+        .option-label { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        .option-label:hover { background: #f0f8ff; }
+        .option-label input[type="radio"] { display: none; }
+        .option-content { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; }
+        .option-content img { width: 30px; height: auto; object-fit: contain; }
+        .option-price { font-size: 12px; color: #ff5722; font-weight: bold; }
+        
+        /* State saat dipilih */
+        .option-label input[type="radio"]:checked + .option-content { color: #0D47A1; }
+        .option-label:has(input[type="radio"]:checked) { border-color: #0D47A1; background: #E1F5FE; border-width: 2px; }
+
+        /* Rincian Pembayaran */
+        .summary-row { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 8px; }
+        .summary-row.total { font-size: 15px; font-weight: 800; color: #ff5722; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #eee; }
+
+        /* Bottom Bar */
+        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); }
+        .bottom-bar .total-text { font-size: 11px; color: #666; }
+        .bottom-bar .total-price { font-size: 18px; font-weight: 800; color: #ff5722; }
+        .btn-checkout { background: #00AA5B; color: #fff; border: none; padding: 12px 25px; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s; }
+        .btn-checkout:active { transform: scale(0.95); }
+
+        /* Toast Modern */
+        #customToast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 25px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 80px; font-size: 13px; font-weight: 600; transition: opacity 0.3s, bottom 0.3s; opacity: 0; }
+        #customToast.show { visibility: visible; opacity: 1; bottom: 100px; }
+        #customToast.error { background-color: #ff3b30; }
+        #customToast.success { background-color: #00AA5B; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <i class="fas fa-arrow-left" onclick="history.back()"></i>
+        <h2>Checkout Pesanan</h2>
+    </div>
+
+    <div class="section">
+        <div class="section-title"><i class="fas fa-map-marker-alt"></i> Alamat Pengiriman</div>
+        <div class="address-box" id="addressBox">
+            <p>Memuat alamat...</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title"><i class="fas fa-box"></i> Produk Dipesan</div>
+        <div id="checkoutItems">
+            </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title"><i class="fas fa-truck"></i> Opsi Pengiriman</div>
+        <div class="option-group">
+            <label class="option-label">
+                <input type="radio" name="shipping" value="JNE" data-cost="15000">
+                <div class="option-content">JNE Reguler (Estimasi 2-3 Hari)</div>
+                <div class="option-price">Rp15.000</div>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="shipping" value="JNT" data-cost="12000">
+                <div class="option-content">J&T Express (Estimasi 2-4 Hari)</div>
+                <div class="option-price">Rp12.000</div>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="shipping" value="Sicepat" data-cost="14000">
+                <div class="option-content">SiCepat REG (Estimasi 1-2 Hari)</div>
+                <div class="option-price">Rp14.000</div>
+            </label>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title"><i class="fas fa-wallet"></i> Metode Pembayaran</div>
+        <div class="option-group">
+            <label class="option-label">
+                <input type="radio" name="payment" value="BCA">
+                <div class="option-content"><i class="fas fa-university"></i> Transfer Bank BCA</div>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="payment" value="Mandiri">
+                <div class="option-content"><i class="fas fa-university"></i> Transfer Bank Mandiri</div>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="payment" value="GoPay">
+                <div class="option-content"><i class="fas fa-qrcode"></i> E-Wallet (GoPay)</div>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="payment" value="OVO">
+                <div class="option-content"><i class="fas fa-qrcode"></i> E-Wallet (OVO)</div>
+            </label>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title"><i class="fas fa-receipt"></i> Rincian Pembayaran</div>
+        <div class="summary-row">
+            <span>Subtotal Produk</span>
+            <span id="txtSubtotal">Rp0</span>
+        </div>
+        <div class="summary-row">
+            <span>Total Ongkos Kirim</span>
+            <span id="txtOngkir">Rp0</span>
+        </div>
+        <div class="summary-row total">
+            <span>Total Pembayaran</span>
+            <span id="txtTotalAkhir">Rp0</span>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div>
+            <div class="total-text">Total Pembayaran:</div>
+            <div class="total-price" id="bottomTotal">Rp0</div>
+        </div>
+        <button class="btn-checkout" id="btnBuatPesanan">Buat Pesanan</button>
+    </div>
+
+    <div id="customToast"></div>
+
+    <script>
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById("customToast");
+            toast.innerText = msg;
+            toast.className = type + " show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        let subtotal = 0;
+        let ongkir = 0;
+        let totalAkhir = 0;
+        let items = [];
+        let userInfo = { nama: "Pembeli", wa: "-", alamat: "Alamat belum diatur." };
+
+        const token = localStorage.getItem('token');
+        if (!token) { window.location.href = 'login.html'; }
+
+        // 1. FORMAT RUPIAH
+        const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+
+        // 2. AMBIL ALAMAT DARI DATABASE SERVER
+        async function fetchAddress() {
+            try {
+                const res = await fetch('/api/address', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                if (result.success && result.data) {
+                    userInfo = { nama: result.data.nama_penerima, wa: result.data.nomor_wa, alamat: result.data.alamat_lengkap };
+                    document.getElementById('addressBox').innerHTML = `
+                        <p><strong>${userInfo.nama}</strong> (${userInfo.wa})</p>
+                        <p>${userInfo.alamat}</p>
+                    `;
+                } else {
+                    document.getElementById('addressBox').innerHTML = `<p style="color:red;">Alamat belum diatur. Silakan atur di Profil Akun.</p>`;
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        // 3. TAMPILKAN BARANG YANG DI CHECKOUT
+        function loadCheckoutItems() {
+            const dataStr = sessionStorage.getItem('belidikita_checkout');
+            if(!dataStr) { window.location.href = 'dashboardutama.html'; return; }
+            
+            items = JSON.parse(dataStr);
+            const container = document.getElementById('checkoutItems');
+            container.innerHTML = '';
+            
+            items.forEach(item => {
+                subtotal += (item.harga * item.qty);
+                container.innerHTML += `
+                    <div class="product-item">
+                        <img src="${item.foto}" alt="Foto">
+                        <div class="product-detail">
+                            <h4>${item.nama}</h4>
+                            <span class="price">${formatRp(item.harga)}</span>
+                            <span class="qty">x${item.qty}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            hitungTotal();
+        }
+
+        // 4. HITUNG TOTAL HARGA BERUBAH-UBAH
+        function hitungTotal() {
+            totalAkhir = subtotal + ongkir;
+            document.getElementById('txtSubtotal').innerText = formatRp(subtotal);
+            document.getElementById('txtOngkir').innerText = formatRp(ongkir);
+            document.getElementById('txtTotalAkhir').innerText = formatRp(totalAkhir);
+            document.getElementById('bottomTotal').innerText = formatRp(totalAkhir);
+        }
+
+        // Event Listener untuk Radio Ongkir
+        document.querySelectorAll('input[name="shipping"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                ongkir = parseInt(this.getAttribute('data-cost'));
+                hitungTotal();
+            });
+        });
+
+        // 5. EKSEKUSI TOMBOL BUAT PESANAN
+        document.getElementById('btnBuatPesanan').addEventListener('click', () => {
+            if(userInfo.wa === "-") {
+                showToast("Silakan isi Alamat Pengiriman di Profil Akun dulu!", "error"); return;
+            }
+            
+            const shippingSelected = document.querySelector('input[name="shipping"]:checked');
+            const paymentSelected = document.querySelector('input[name="payment"]:checked');
+            
+            if(!shippingSelected) { showToast("Pilih Opsi Pengiriman!", "error"); return; }
+            if(!paymentSelected) { showToast("Pilih Metode Pembayaran!", "error"); return; }
+
+            const pengiriman = shippingSelected.value;
+            const pembayaran = paymentSelected.value;
+
+            // Buat Invoice Profesional ke WA Admin
+            let pesanWA = `*INVOICE PESANAN BARU* 🛒\n\n`;
+            pesanWA += `*Data Penerima:*\nNama: ${userInfo.nama}\nNo WA: ${userInfo.wa}\nAlamat: ${userInfo.alamat}\n\n`;
+            pesanWA += `*Daftar Barang:*\n`;
+            items.forEach(item => {
+                pesanWA += `- ${item.nama} (x${item.qty}) = ${formatRp(item.harga * item.qty)}\n`;
+            });
+            pesanWA += `\n*Pengiriman:* ${pengiriman} (${formatRp(ongkir)})\n`;
+            pesanWA += `*Pembayaran:* ${pembayaran}\n\n`;
+            pesanWA += `*TOTAL TAGIHAN: ${formatRp(totalAkhir)}*\n\n`;
+            pesanWA += `Mohon info nomor rekening / barcode pembayarannya ya Admin. Terima kasih!`;
+
+            const nomorAdmin = "6281234567890"; // GANTI DENGAN NOMOR WA KAMU
+            const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesanWA)}`;
+
+            showToast("Pesanan Dibuat! Meneruskan ke Admin...", "success");
+            
+            // Hapus isi keranjang jika checkout berhasil
+            sessionStorage.removeItem('belidikita_checkout'); 
+            
+            setTimeout(() => {
+                window.location.href = linkWA;
+            }, 1500);
+        });
+
+        // Jalankan saat halaman dibuka
+        fetchAddress();
+        loadCheckoutItems();
+    </script>
+</body>
+</html>
