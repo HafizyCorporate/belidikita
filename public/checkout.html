@@ -275,8 +275,8 @@
             });
         });
 
-        // 5. BUAT PESANAN KE WHATSAPP (INVOICE PINTAR)
-        document.getElementById('btnBuatPesanan').addEventListener('click', () => {
+                // 5. SIMPAN KE DATABASE LALU BUAT PESANAN KE WA
+        document.getElementById('btnBuatPesanan').addEventListener('click', async () => {
             if(userInfo.wa === "-") {
                 document.getElementById('modalConfirmAddress').style.display = 'flex'; 
                 return;
@@ -288,33 +288,64 @@
             if(!shippingSelected) { showToast("Silakan pilih Opsi Pengiriman!", "error"); return; }
             if(!paymentSelected) { showToast("Silakan pilih Metode Pembayaran!", "error"); return; }
 
+            const btn = document.getElementById('btnBuatPesanan');
+            btn.innerHTML = "Memproses...";
+            btn.disabled = true;
+
             const pengiriman = shippingSelected.value;
             const pembayaran = paymentSelected.value;
 
-            // Susun Chat WA
-            let pesanWA = `*INVOICE PESANAN BARU* 🛒\n\n`;
-            pesanWA += `*Data Penerima:*\nNama: ${userInfo.nama}\nNo WA: ${userInfo.wa}\nAlamat: ${userInfo.alamat}\n\n`;
-            pesanWA += `*Daftar Barang:*\n`;
-            items.forEach(item => {
-                pesanWA += `- ${item.nama} (x${item.qty}) = ${formatRp(item.harga * item.qty)}\n`;
-            });
-            pesanWA += `\n*Detail Pengiriman:*\nEkspedisi: ${pengiriman}\nBerat Total: ${totalKg} kg\nOngkos Kirim: ${formatRp(ongkir)}\n\n`;
-            pesanWA += `*Metode Pembayaran:*\nPilihan: ${pembayaran}\n`;
-            pesanWA += `\n*TOTAL TAGIHAN: ${formatRp(totalAkhir)}*\n\n`;
-            pesanWA += `Mohon info nomor rekening / barcode pembayarannya ya Admin. Terima kasih!`;
+            // A. DATA UNTUK DISIMPAN KE DATABASE
+            const orderPayload = {
+                customer_name: userInfo.nama,
+                customer_wa: userInfo.wa,
+                shipping_address: userInfo.alamat,
+                items: JSON.stringify(items), // Bungkus barang jadi teks
+                total_price: totalAkhir,
+                shipping_courier: pengiriman,
+                shipping_cost: ongkir,
+                payment_method: pembayaran
+            };
 
-            const nomorAdmin = "6281234567890"; // GANTI DENGAN NOMOR WA ADMIN
-            const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesanWA)}`;
+            try {
+                // Tembak ke Database Server
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(orderPayload)
+                });
+                const dbResult = await res.json();
 
-            showToast("Pesanan Dibuat! Meneruskan ke Admin...", "success");
-            
-            // Hapus isi keranjang karena sudah di checkout
-            sessionStorage.removeItem('belidikita_checkout'); 
-            
-            setTimeout(() => {
-                window.location.href = linkWA;
-            }, 1500);
+                if(dbResult.success) {
+                    // B. DATA UNTUK DIKIRIM KE WA (INVOICE PINTAR)
+                    let pesanWA = `*INVOICE PESANAN BARU* 🛒\n*ID Pesanan:* #ORD-${dbResult.order_id}\n\n`;
+                    pesanWA += `*Data Penerima:*\nNama: ${userInfo.nama}\nNo WA: ${userInfo.wa}\nAlamat: ${userInfo.alamat}\n\n`;
+                    pesanWA += `*Daftar Barang:*\n`;
+                    items.forEach(item => {
+                        pesanWA += `- ${item.nama} (x${item.qty}) = ${formatRp(item.harga * item.qty)}\n`;
+                    });
+                    pesanWA += `\n*Pengiriman:* ${pengiriman} (${formatRp(ongkir)})\n`;
+                    pesanWA += `*Pembayaran:* ${pembayaran}\n\n`;
+                    pesanWA += `*TOTAL TAGIHAN: ${formatRp(totalAkhir)}*\n\n`;
+                    pesanWA += `Mohon info nomor rekening / barcode pembayarannya ya Admin. Terima kasih!`;
+
+                    const nomorAdmin = "6281234567890"; // GANTI NOMOR WA KAMU
+                    const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesanWA)}`;
+
+                    showToast("Pesanan Disimpan! Meneruskan ke WhatsApp...", "success");
+                    sessionStorage.removeItem('belidikita_checkout'); 
+                    
+                    setTimeout(() => {
+                        window.location.href = linkWA;
+                    }, 1500);
+                }
+            } catch(err) {
+                showToast("Gagal memproses pesanan. Periksa koneksi.", "error");
+                btn.innerHTML = "Buat Pesanan";
+                btn.disabled = false;
+            }
         });
+
 
         // Jalankan saat web dibuka
         fetchAddress();
