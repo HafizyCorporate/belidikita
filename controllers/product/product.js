@@ -8,8 +8,12 @@ const uploadProduct = async (req, res) => {
     let media_type = 'image';
     
     if (req.files && req.files.length > 0) {
-        mediaUrls = req.files.map(file => `/uploads/${file.filename}`);
-        if (req.files[0].mimetype.startsWith('video/')) media_type = 'video';
+        // 🔥 PERUBAHAN CLOUDINARY: Menggunakan file.path untuk mendapatkan URL internet
+        mediaUrls = req.files.map(file => file.path);
+        
+        if (req.files[0].mimetype && req.files[0].mimetype.startsWith('video/')) {
+            media_type = 'video';
+        }
     }
 
     const media_url_string = JSON.stringify(mediaUrls);
@@ -38,7 +42,9 @@ const getAllProducts = async (req, res) => {
 
 // ✅ 1. FUNGSI BARU UPLOAD SLIDER PROMO
 const uploadPromo = async (req, res) => {
-    const media_url = req.file ? `/uploads/${req.file.filename}` : null;
+    // 🔥 PERUBAHAN CLOUDINARY: Menggunakan req.file.path
+    const media_url = req.file ? req.file.path : null;
+    
     if (!media_url) return res.status(400).json({ success: false, message: "Foto promo wajib ada!" });
     try {
         const newPromo = await pool.query('INSERT INTO promo_sliders (media_url) VALUES ($1) RETURNING *', [media_url]);
