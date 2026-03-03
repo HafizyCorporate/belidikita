@@ -1,10 +1,37 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs'); // ✅ TAMBAHAN: Untuk membaca file/folder
-const bcrypt = require('bcrypt'); // ✅ TAMBAHAN: Untuk cek password pembeli
-const jwt = require('jsonwebtoken'); // ✅ TAMBAHAN: Untuk bikin tiket masuk pembeli
+const fs = require('fs'); // Untuk membaca file/folder
+const bcrypt = require('bcrypt'); // Untuk cek password pembeli
+const jwt = require('jsonwebtoken'); // Untuk bikin tiket masuk pembeli
 require('dotenv').config();
+
+// ==========================================
+// ☁️ KONFIGURASI GUDANG CLOUDINARY (ANTI HILANG)
+// ==========================================
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const multer = require('multer');
+
+// Masukkan Kunci Cloudinary (Disarankan menggunakan Variables di Railway, tapi ini disematkan sebagai cadangan)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dbct8tltw', 
+  api_key: process.env.CLOUDINARY_API_KEY || '419391893671787', 
+  api_secret: process.env.CLOUDINARY_API_SECRET || 'vOzR16hMqiAADm5gBm60-_ntTgU' 
+});
+
+// Atur Gudang Penyimpanan ke Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'belidikita_images', // Folder otomatis di Cloudinary
+    allowedFormats: ['jpeg', 'png', 'jpg', 'webp'], 
+  },
+});
+
+// Jadikan 'upload' sebagai alat pengangkut (MENGGANTIKAN multer/upload lokal sebelumnya)
+const upload = multer({ storage: storage });
+// ==========================================
 
 // --- INJEKSI AUTO-DB ---
 const { pool, initDB } = require('./config/db'); 
@@ -16,7 +43,7 @@ const { uploadProduct, getAllProducts, uploadPromo, getPromos } = require('./con
 const { createPost, getPosts } = require('./controllers/forum/forum');
 const { askAI } = require('./controllers/ai/ai');
 
-const upload = require('./middleware/upload');   
+// Middleware Token
 const verifyToken = require('./middleware/auth'); 
 
 const app = express();
@@ -24,7 +51,7 @@ const PORT = process.env.PORT || 8080;
 
 initDB();
 
-// ✅ FIX ERROR 500 MULTER: Buat folder uploads otomatis jika di Railway belum ada
+// ✅ PENGAMANAN: Folder uploads lokal tetap dibiarkan untuk berjaga-jaga (meski sekarang pakai Cloudinary)
 const uploadDir = path.join(__dirname, 'public/uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -36,6 +63,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, 'public')));
+// Jika ada file lama di folder lokal, tetap bisa diakses lewat /uploads
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'dashboardutama.html')); });
@@ -159,7 +187,7 @@ app.post('/api/address', verifyToken, async (req, res) => {
     }
 });
 
-// ✅ PERBAIKAN FASE 2: Terima hingga 5 foto sekaligus
+// ✅ UPLOAD CLOUDINARY: Rute ini sekarang menggunakan multer "upload" versi awan
 app.post('/api/products', verifyAdmin, upload.array('media', 5), uploadProduct);
 app.post('/api/promos', verifyAdmin, upload.single('media'), uploadPromo); 
 app.post('/api/forum', verifyToken, createPost);
@@ -179,11 +207,9 @@ app.delete('/api/products/:id', verifyAdmin, async (req, res) => {
     }
 });
 
-
 // 2. Hapus Banner Promo
 app.delete('/api/promos/:id', verifyAdmin, async (req, res) => {
     try {
-        // ✅ PERBAIKAN: Ganti 'promos' menjadi nama tabel aslinya yaitu 'promo_sliders'
         await pool.query('DELETE FROM promo_sliders WHERE id = $1', [req.params.id]);
         res.json({ success: true, message: "Banner berhasil dihapus!" });
     } catch(err) {
@@ -192,7 +218,7 @@ app.delete('/api/promos/:id', verifyAdmin, async (req, res) => {
     }
 });
 
-// 3. Edit Produk (Sekarang Menerima Berat)
+// 3. Edit Produk (Menerima Berat)
 app.put('/api/products/:id', verifyAdmin, async (req, res) => {
     const { title, price, capital_price, stock, category, weight } = req.body;
     try {
@@ -237,7 +263,7 @@ app.get('/api/orders/me', verifyToken, async (req, res) => {
     }
 });
 
-// 3. Admin Melihat Semua Pesanan (Untuk persiapan Admin Panel nanti)
+// 3. Admin Melihat Semua Pesanan
 app.get('/api/orders', verifyAdmin, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM orders ORDER BY created_at DESC');
@@ -265,7 +291,6 @@ app.put('/api/orders/:id', verifyAdmin, async (req, res) => {
 // 5. Hapus Pesanan (Bisa dieksekusi oleh Admin atau Pembeli)
 app.delete('/api/orders/:id', verifyAdmin, async (req, res) => {
     try {
-        // Logika Pintar: Jika Admin, hapus bebas. Jika Pembeli, hanya bisa hapus miliknya sendiri.
         if (req.user.role === 'admin') {
             await pool.query('DELETE FROM orders WHERE id = $1', [req.params.id]);
         } else {
@@ -277,8 +302,5 @@ app.delete('/api/orders/:id', verifyAdmin, async (req, res) => {
         res.status(500).json({ success: false, message: "Gagal menghapus pesanan" });
     }
 });
-
-
-
 
 app.listen(PORT, () => { console.log(`🚀 Server belidikita berjalan di port ${PORT}`); });
