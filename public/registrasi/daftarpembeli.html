@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* CSS SAMA SEPERTI LOGIN */
         body { background-color: #f4f7fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .auth-card { background: #fff; width: 90%; max-width: 400px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
         .back-btn { display: flex; align-items: center; color: #888; text-decoration: none; font-size: 12px; font-weight: 600; margin-bottom: 20px; }
@@ -19,6 +18,11 @@
         .btn-auth { width: 100%; padding: 14px; background: #00AA5B; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; }
         .toggle-text { margin-top: 20px; font-size: 12px; color: #666; }
         .toggle-text a { color: #1976D2; font-weight: 800; text-decoration: none; }
+        
+        #customToast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 25px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; font-size: 13px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: opacity 0.3s, bottom 0.3s; opacity: 0; }
+        #customToast.show { visibility: visible; opacity: 1; bottom: 50px; }
+        #customToast.success { background-color: #00AA5B; }
+        #customToast.error { background-color: #ff3b30; }
     </style>
 </head>
 <body>
@@ -58,7 +62,16 @@
         </form>
     </div>
 
+    <div id="customToast"></div>
+
     <script>
+        function showToast(msg, type = 'error') {
+            const toast = document.getElementById("customToast");
+            toast.innerText = msg;
+            toast.className = type + " show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
         let tempEmail = "";
 
         document.getElementById('formRegister').addEventListener('submit', async (e) => {
@@ -67,11 +80,7 @@
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Memproses...";
 
             tempEmail = document.getElementById('regEmail').value;
-            const bodyData = { 
-                name: document.getElementById('regName').value, 
-                email: tempEmail, 
-                password: document.getElementById('regPassword').value 
-            };
+            const bodyData = { name: document.getElementById('regName').value, email: tempEmail, password: document.getElementById('regPassword').value };
 
             try {
                 const res = await fetch('/api/register', {
@@ -82,14 +91,14 @@
                 const data = await res.json();
 
                 if(data.success) {
-                    alert("✅ Sukses! Cek Email kamu untuk melihat kode OTP (Cek folder Spam jika tidak ada).");
+                    showToast("Cek Email/Spam untuk kode OTP!", "success");
                     document.getElementById('registerSection').style.display = 'none';
                     document.getElementById('otpSection').style.display = 'block';
                 } else {
-                    alert("❌ Gagal: " + data.message);
+                    showToast(data.message, "error");
                 }
             } catch(err) {
-                alert("❌ Gagal menyambung ke server!");
+                showToast("Server sibuk! Coba lagi nanti.", "error");
             } finally {
                 btn.innerHTML = "KIRIM KODE OTP";
             }
@@ -97,6 +106,9 @@
 
         document.getElementById('formOTP').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btn = document.getElementById('btnVerifyOTP');
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Memverifikasi...";
+
             const bodyData = { email: tempEmail, otp: document.getElementById('otpCode').value };
 
             try {
@@ -108,13 +120,15 @@
                 const data = await res.json();
 
                 if(data.success) {
-                    alert("✅ Akun berhasil diaktifkan! Silakan Login.");
-                    window.location.href = 'loginpembeli.html';
+                    showToast("Akun aktif! Silakan Login.", "success");
+                    setTimeout(() => { window.location.href = 'loginpembeli.html'; }, 1500);
                 } else {
-                    alert("❌ Gagal: " + data.message);
+                    showToast(data.message, "error");
                 }
             } catch(err) {
-                alert("❌ Gagal menyambung ke server!");
+                showToast("Server sibuk! Coba lagi nanti.", "error");
+            } finally {
+                btn.innerHTML = "VERIFIKASI OTP";
             }
         });
     </script>
