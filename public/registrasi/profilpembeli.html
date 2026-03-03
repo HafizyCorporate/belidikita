@@ -28,8 +28,8 @@
     <div class="header-profile">
         <a href="../dashboardutama.html" class="btn-back-home"><i class="fas fa-arrow-left"></i></a>
         <div class="avatar"><i class="fas fa-user"></i></div>
-        <div class="profile-name">Pengguna Belidikita</div>
-        <div class="profile-email">pembeli@gmail.com</div>
+        <div class="profile-name" id="profileName">Memuat Nama...</div>
+        <div class="profile-email" id="profileEmail">Memuat Email...</div>
     </div>
 
     <div class="profile-menu">
@@ -50,11 +50,37 @@
     <a href="#" class="btn-logout" onclick="logout(event)"><i class="fas fa-sign-out-alt"></i> Keluar dari Akun</a>
 
     <script>
-        // Cek apakah user memang punya token, jika tidak usir ke login
-        if(!localStorage.getItem('token')) {
-            window.location.href = 'loginpembeli.html';
-        }
+        // ✅ LOGIKA BARU: Tarik data asli dari Server/Database saat halaman dibuka
+        document.addEventListener("DOMContentLoaded", async () => {
+            const token = localStorage.getItem('token');
+            if(!token) {
+                window.location.href = 'loginpembeli.html';
+                return;
+            }
 
+            try {
+                // Minta data profil ke server menggunakan token pembeli
+                const res = await fetch('/api/profile', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await res.json();
+                
+                if(result.success) {
+                    // Jika sukses, ubah tulisan "Memuat..." menjadi nama asli dari database
+                    document.getElementById('profileName').innerText = result.data.name;
+                    document.getElementById('profileEmail').innerText = result.data.email;
+                } else {
+                    // Jika token kadaluarsa atau tidak valid, usir ke login
+                    localStorage.removeItem('token');
+                    window.location.href = 'loginpembeli.html';
+                }
+            } catch (err) {
+                console.error("Gagal load profil", err);
+                document.getElementById('profileName').innerText = "Gagal Memuat";
+            }
+        });
+
+        // Logika Logout
         function logout(e) {
             e.preventDefault();
             if(confirm("Yakin ingin keluar dari akun?")) {
