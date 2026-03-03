@@ -33,14 +33,35 @@ document.addEventListener("DOMContentLoaded", () => {
         initDashboard();
     }
 
-    // ✅ FUNGSI BARU: Update Angka Merah (Badge) Keranjang di Pojok Kanan Atas
+    // FUNGSI UPDATE BADGE KERANJANG
     function updateCartBadge() {
         let cart = JSON.parse(localStorage.getItem('belidikita_cart')) || [];
         let total = cart.reduce((sum, item) => sum + item.qty, 0);
         let badge = document.querySelector('.cart-badge');
         if(badge) badge.innerText = total;
     }
-    updateCartBadge(); // Langsung jalankan saat web dibuka
+    updateCartBadge(); 
+
+    // ✅ FUNGSI BARU: SENSOR PEMBELI LOGIN (Ubah Teks Menu Akun jadi Nama Pembeli)
+    async function cekStatusPembeli() {
+        const token = localStorage.getItem('token');
+        // Pastikan ada token dan BUKAN token admin
+        if (token && !token.startsWith('token-admin-')) {
+            try {
+                const res = await fetch('/api/profile', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                if (result.success) {
+                    const menuAccountSpan = document.querySelector('#menuAccount span');
+                    if(menuAccountSpan) {
+                        // Ambil kata pertama dari nama (Contoh "Budi Santoso" jadi "Budi")
+                        menuAccountSpan.innerText = result.data.name.split(' ')[0];
+                    }
+                } else {
+                    localStorage.removeItem('token'); // Bersihkan jika token kadaluarsa
+                }
+            } catch (e) { console.error("Gagal cek status pembeli"); }
+        }
+    }
 
     async function loadPromoSlider() {
         const sliderWrapper = document.getElementById('promoSlider');
@@ -71,6 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function initDashboard() {
         loadPromoSlider();   
         loadRandomProducts(); 
+        cekStatusPembeli(); // ✅ Panggil sensor saat web selesai dimuat
     }
 
     const menuHome = document.getElementById('menuHome');
@@ -87,14 +109,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if(menuHome) menuHome.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuHome); window.scrollTo({ top: 0, behavior: 'smooth' }); });
     if(menuProduct) menuProduct.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuProduct); showToast("Membuka Katalog Produk...", "info"); });
     if(menuFeed) menuFeed.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuFeed); showToast("Fitur Video Feed segera hadir!", "info"); });
-    if(menuTransaction) menuTransaction.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuTransaction); showToast("Fitur Pesanan sedang dikembangkan", "info"); });
+    if(menuTransaction) menuTransaction.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuTransaction); window.location.href = 'registrasi/profilpembeli.html'; }); // ✅ Arahkan ke profil agar bisa lihat pesanan
 
-    // ✅ TOMBOL AKUN MENGARAH KE FOLDER REGISTRASI
+    // ✅ PERBAIKAN: ANTI NYANGKUT UNTUK TOMBOL AKUN
     if(menuAccount) {
         menuAccount.addEventListener('click', (e) => { 
             e.preventDefault(); setActiveNav(menuAccount); 
             const token = localStorage.getItem('token');
-            if (!token) {
+            // Jika token KOSONG atau token itu MILIK ADMIN, arahkan ke Login Pembeli
+            if (!token || token.startsWith('token-admin-')) {
                 window.location.href = 'registrasi/loginpembeli.html';
             } else {
                 window.location.href = 'registrasi/profilpembeli.html';
@@ -102,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ✅ TOMBOL ADMIN TETAP DI LUAR (login.html biasa)
+    // ✅ PERBAIKAN: TOMBOL ADMIN ANTI NYANGKUT
     const adminLoginIcon = document.getElementById('adminLoginIcon');
     if(adminLoginIcon) {
         adminLoginIcon.addEventListener('click', () => {
@@ -144,7 +167,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         const hCard = document.createElement('div');
                         hCard.className = 'h-card';
                         hCard.innerHTML = `<img src="${fotoBarang}" class="h-card-img" alt="Barang"><div class="h-card-info"><div class="h-card-row"><span class="h-card-title">${product.title}</span><span class="h-card-price" style="font-size:11px;">${priceRp}</span></div></div>`;
-                        // ✅ PERBAIKAN: Menambahkan 'product.price' (Harga Angka Asli) agar bisa dihitung di keranjang
                         hCard.addEventListener('click', () => bukaDetailProduk(fotoBarang, product.title, priceRp, deskripsiBarang, product.price));
                         if (product.category === 'laris' && larisList) larisList.appendChild(hCard);
                         if (product.category === 'keranjang' && cartList) cartList.appendChild(hCard);
@@ -153,7 +175,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     const card = document.createElement('div');
                     card.className = 'product-card';
                     card.innerHTML = `${product.media_url ? mediaTag : '<div class="product-media" style="display:flex; align-items:center; justify-content:center; color:#aaa;">No Media</div>'}<div class="product-info"><div class="product-title">${product.title}</div><div class="product-price">${priceRp}</div><div class="product-seller" style="color:#00AA5B; font-weight:bold;"><i class="fas fa-check-circle"></i> Belidikita Official</div></div>`;
-                    // ✅ PERBAIKAN: Menambahkan 'product.price' (Harga Angka Asli) agar bisa dihitung di keranjang
                     card.addEventListener('click', () => bukaDetailProduk(fotoBarang, product.title, priceRp, deskripsiBarang, product.price));
                     productList.appendChild(card);
                 });
@@ -171,10 +192,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const productModal = document.getElementById('productDetailModal');
     const closeDetailBtn = document.getElementById('closeDetailBtn');
     
-    // ✅ TAMBAHAN: Variabel memori sementara untuk produk yang sedang dilihat
     let currentProduct = null;
     
-    // ✅ PERBAIKAN: Fungsi ini sekarang menangkap 'hargaRaw' (harga angka murni tanpa Rp)
     function bukaDetailProduk(foto, nama, hargaStr, deskripsi, hargaRaw) {
         if(!productModal) return; 
         document.getElementById('detailImage').src = foto;
@@ -182,9 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('detailPrice').innerText = hargaStr;
         document.getElementById('detailDesc').innerText = deskripsi;
         
-        // Simpan data asli untuk dimasukkan ke keranjang nanti
         currentProduct = { foto: foto, nama: nama, harga: hargaRaw, qty: 1 };
-
         productModal.style.display = "block"; 
     }
 
@@ -194,24 +211,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if(btnAddToCart) {
         btnAddToCart.addEventListener('click', () => {
             if(!currentProduct) return;
-
-            // ✅ LOGIKA BARU: Simpan ke LocalStorage agar tidak hilang saat direfresh
             let cart = JSON.parse(localStorage.getItem('belidikita_cart')) || [];
-            
-            // Cek apakah barang yang sama sudah ada di keranjang?
             const existingItem = cart.find(item => item.nama === currentProduct.nama);
             if(existingItem) {
-                existingItem.qty += 1; // Jika ada, tambah jumlah barangnya
+                existingItem.qty += 1; 
             } else {
-                cart.push(currentProduct); // Jika baru, masukkan daftar
+                cart.push(currentProduct); 
             }
-
-            // Simpan kembali ke memori browser/HP
             localStorage.setItem('belidikita_cart', JSON.stringify(cart));
-
-            // Panggil fungsi perbarui angka badge merah di ikon keranjang
             updateCartBadge();
-
             showToast("Barang dimasukkan ke keranjang 🛒", "success");
             productModal.style.display = "none"; 
         });
@@ -222,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if(btnCheckout) {
         btnCheckout.addEventListener('click', () => {
             const token = localStorage.getItem('token');
-            if (!token) {
+            if (!token || token.startsWith('token-admin-')) {
                 showToast("Silakan Login atau Daftar akun dulu ya!", "error");
                 setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
                 return; 
