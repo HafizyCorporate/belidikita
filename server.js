@@ -247,5 +247,21 @@ app.get('/api/orders', verifyAdmin, async (req, res) => {
     }
 });
 
+// 4. Admin Update Status & Resi Pesanan
+app.put('/api/orders/:id', verifyAdmin, async (req, res) => {
+    const { status, resi } = req.body;
+    try {
+        await pool.query(
+            'UPDATE orders SET status=$1, resi=$2 WHERE id=$3',
+            [status, resi, req.params.id]
+        );
+        res.json({ success: true, message: "Pesanan berhasil diupdate!" });
+    } catch(err) {
+        console.error("🔥 Error Update Pesanan:", err);
+        res.status(500).json({ success: false, message: "Gagal mengupdate pesanan" });
+    }
+});
+
+
 
 app.listen(PORT, () => { console.log(`🚀 Server belidikita berjalan di port ${PORT}`); });
