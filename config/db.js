@@ -28,6 +28,7 @@ const initDB = async () => {
         ALTER TABLE products ADD COLUMN IF NOT EXISTS capital_price DECIMAL(12,2) DEFAULT 0;
         ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INT DEFAULT 0;
         ALTER TABLE products ALTER COLUMN media_url TYPE TEXT;
+        ALTER TABLE products ADD COLUMN IF NOT EXISTS weight INT DEFAULT 1000;
     `;
 
     try {
