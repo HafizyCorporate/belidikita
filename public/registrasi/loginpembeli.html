@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Masuk / Daftar - Belidikita</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f7fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .auth-card { background: #fff; width: 90%; max-width: 400px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+        .back-btn { display: flex; align-items: center; color: #888; text-decoration: none; font-size: 12px; font-weight: 600; margin-bottom: 20px; }
+        .back-btn i { margin-right: 5px; }
+        .auth-logo { width: 150px; margin-bottom: 10px; }
+        .auth-title { font-size: 20px; font-weight: 800; color: #0D47A1; margin-bottom: 5px; }
+        .auth-subtitle { font-size: 12px; color: #666; margin-bottom: 25px; }
+        
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; font-size: 11px; font-weight: 600; color: #555; margin-bottom: 5px; }
+        .input-group input { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; outline: none; font-family: 'Montserrat', sans-serif; font-size: 13px; background: #f9f9f9; transition: 0.3s; }
+        .input-group input:focus { border-color: #1976D2; background: #fff; box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1); }
+        
+        .btn-auth { width: 100%; padding: 14px; background: #1976D2; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(25, 118, 210, 0.3); }
+        .btn-auth:hover { background: #0D47A1; transform: translateY(-2px); }
+        
+        .toggle-text { margin-top: 20px; font-size: 12px; color: #666; }
+        .toggle-text span { color: #1976D2; font-weight: 800; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-card" id="loginForm">
+        <a href="../dashboardutama.html" class="back-btn"><i class="fas fa-arrow-left"></i> Kembali ke Toko</a>
+        <h1 class="auth-title">Selamat Datang!</h1>
+        <p class="auth-subtitle">Masuk untuk melanjutkan belanja</p>
+
+        <form onsubmit="handleAuth(event, 'login')">
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" placeholder="contoh@gmail.com" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="Masukkan password" required>
+            </div>
+            <button type="submit" class="btn-auth">MASUK SEKARANG</button>
+        </form>
+        <div class="toggle-text">Belum punya akun? <span onclick="toggleForm('register')">Daftar di sini</span></div>
+    </div>
+
+    <div class="auth-card" id="registerForm" style="display: none;">
+        <a href="../dashboardutama.html" class="back-btn"><i class="fas fa-arrow-left"></i> Kembali ke Toko</a>
+        <h1 class="auth-title">Buat Akun Baru</h1>
+        <p class="auth-subtitle">Daftar untuk menikmati kemudahan belanja</p>
+
+        <form onsubmit="handleAuth(event, 'register')">
+            <div class="input-group">
+                <label>Nama Lengkap</label>
+                <input type="text" id="regName" placeholder="Nama kamu" required>
+            </div>
+            <div class="input-group">
+                <label>Email</label>
+                <input type="email" id="regEmail" placeholder="contoh@gmail.com" required>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="regPassword" placeholder="Buat password" required>
+            </div>
+            <button type="submit" class="btn-auth">DAFTAR SEKARANG</button>
+        </form>
+        <div class="toggle-text">Sudah punya akun? <span onclick="toggleForm('login')">Masuk di sini</span></div>
+    </div>
+
+    <script>
+        function toggleForm(type) {
+            document.getElementById('loginForm').style.display = type === 'login' ? 'block' : 'none';
+            document.getElementById('registerForm').style.display = type === 'register' ? 'block' : 'none';
+        }
+
+        async function handleAuth(e, type) {
+            e.preventDefault();
+            // Catatan: Ini sementara mem-bypass login untuk demo sampai Backend Server.js kita update!
+            // Karena ini untuk pembeli, kita buat simulasi login sukses agar mereka bisa tes masuk profil.
+            
+            alert(type === 'login' ? "Sedang masuk ke akun..." : "Sedang mendaftarkan akun...");
+            
+            // SIMULASI SUKSES (Nanti kita sambungkan ke API betulan)
+            localStorage.setItem('token', 'token-dummy-pembeli');
+            window.location.href = 'profilpembeli.html';
+        }
+    </script>
+</body>
+</html>
