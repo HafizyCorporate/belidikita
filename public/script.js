@@ -80,34 +80,32 @@ document.addEventListener("DOMContentLoaded", () => {
     if(menuFeed) menuFeed.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuFeed); showToast("Fitur Video Feed segera hadir!", "info"); });
     if(menuTransaction) menuTransaction.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuTransaction); showToast("Fitur Pesanan sedang dikembangkan", "info"); });
 
-    // ✅ TOMBOL AKUN MENGARAH KE FOLDER REGISTRASI
+    // ✅ PERBAIKAN: TOMBOL AKUN LANGSUNG PINDAH TANPA POP-UP TEGURAN
     if(menuAccount) {
         menuAccount.addEventListener('click', (e) => { 
             e.preventDefault(); setActiveNav(menuAccount); 
             const token = localStorage.getItem('token');
             if (!token) {
-                showToast("Silakan Login atau Daftar akun dulu ya!", "error");
-                setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
+                window.location.href = 'registrasi/loginpembeli.html';
             } else {
-                showToast("Membuka profil...", "info");
-                setTimeout(() => window.location.href = 'registrasi/profilpembeli.html', 500);
+                window.location.href = 'registrasi/profilpembeli.html';
             }
         });
     }
 
-    // ✅ TOMBOL ADMIN TETAP DI LUAR (login.html biasa)
+    // ✅ PERBAIKAN: TOMBOL ADMIN ANTI NYANGKUT (Mendeteksi token-admin)
     const adminLoginIcon = document.getElementById('adminLoginIcon');
     if(adminLoginIcon) {
         adminLoginIcon.addEventListener('click', () => {
             const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = 'login.html'; 
-            } else {
+            if (token && token.startsWith('token-admin-')) {
                 if(confirm("Admin sudah masuk. Apakah ingin Logout?")) {
                     localStorage.removeItem('token');
                     showToast("Berhasil Logout!", "success");
                     setTimeout(() => location.reload(), 1000);
                 }
+            } else {
+                window.location.href = 'login.html'; 
             }
         });
     }
