@@ -7,24 +7,39 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #f4f4f4; font-family: 'Montserrat', sans-serif; padding-bottom: 70px; margin: 0; }
+        body { background-color: #f4f7fa; font-family: 'Montserrat', sans-serif; padding-bottom: 70px; margin: 0; }
         
-        /* Tombol Melayang ala Shopee (Back & Cart) */
+        /* Tombol Melayang ala Marketplace */
         .floating-header { position: fixed; top: 15px; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 15px; z-index: 100; pointer-events: none; }
         .btn-circle { pointer-events: auto; width: 35px; height: 35px; background: rgba(0,0,0,0.4); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; backdrop-filter: blur(5px); }
         .cart-wrapper { position: relative; }
         .cart-badge-detail { position: absolute; top: -5px; right: -5px; background: #ff3b30; color: #fff; font-size: 9px; font-weight: bold; padding: 2px 6px; border-radius: 10px; border: 2px solid #fff; }
 
-        /* Foto Produk Full */
-        .product-image-container { width: 100%; background: #fff; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .product-image-container img { width: 100%; height: 100%; object-fit: cover; }
+        /* SLIDER FOTO PRODUK */
+        .slider-container { width: 100%; position: relative; background: #fff; }
+        .product-image-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; aspect-ratio: 1/1; }
+        .product-image-slider::-webkit-scrollbar { display: none; }
+        .product-image-slider img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; scroll-snap-align: start; cursor: zoom-in; }
+        
+        /* Indikator Titik Slider */
+        .slider-dots { position: absolute; bottom: 15px; left: 0; width: 100%; display: flex; justify-content: center; gap: 5px; pointer-events: none; }
+        .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 50%; transition: 0.3s; }
+        .dot.active { background: #1976D2; width: 15px; border-radius: 10px; }
+
+        /* FULLSCREEN MODAL */
+        .fullscreen-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
+        .fullscreen-modal img { max-width: 100vw; max-height: 80vh; object-fit: contain; }
+        .close-fullscreen { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 30px; cursor: pointer; background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 
         /* Info Produk */
         .product-info-box { background: #fff; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .p-price { color: #ff5722; font-size: 24px; font-weight: 800; margin-bottom: 5px; }
+        .price-share-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .p-price { color: #ff5722; font-size: 24px; font-weight: 800; }
+        .btn-share { background: #f4f7fa; color: #333; border: none; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn-share:active { transform: scale(0.9); background: #e0e0e0; }
+        
         .p-title { font-size: 15px; font-weight: 600; color: #333; line-height: 1.4; margin-bottom: 10px; }
         .p-badges { display: flex; gap: 10px; }
-        .badge-mall { background: #d32f2f; color: #fff; font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: bold; }
         .badge-garansi { border: 1px solid #00AA5B; color: #00AA5B; font-size: 10px; padding: 3px 6px; border-radius: 4px; font-weight: bold; }
 
         /* Deskripsi */
@@ -33,7 +48,7 @@
         .desc-content { font-size: 13px; color: #555; line-height: 1.6; white-space: pre-wrap; }
 
         /* Bottom Bar Checkout */
-        .bottom-action-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #fff; display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100; }
+        .bottom-action-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 60px; background: #fff; display: flex; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); z-index: 100; }
         .btn-add-cart { flex: 1; background: #E1F5FE; color: #0D47A1; border: none; font-size: 13px; font-weight: 800; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; gap: 3px; border-right: 1px solid #fff;}
         .btn-add-cart i { font-size: 16px; }
         .btn-buy-now { flex: 1; background: #1976D2; color: #fff; border: none; font-size: 14px; font-weight: 800; cursor: pointer; }
@@ -56,17 +71,26 @@
         </a>
     </div>
 
-    <div class="product-image-container">
-        <img id="imgProduk" src="" alt="Memuat gambar...">
+    <div class="slider-container">
+        <div class="product-image-slider" id="imageSlider">
+            </div>
+        <div class="slider-dots" id="sliderDots"></div>
+    </div>
+
+    <div class="fullscreen-modal" id="fullscreenModal">
+        <span class="close-fullscreen" onclick="tutupFullscreen()">&times;</span>
+        <img id="fullscreenImg" src="" alt="Fullscreen">
     </div>
 
     <div class="product-info-box">
-        <div class="p-price" id="hargaProduk">Rp0</div>
+        <div class="price-share-row">
+            <div class="p-price" id="hargaProduk">Rp0</div>
+            <button class="btn-share" onclick="bagikanProduk()"><i class="fas fa-share-alt"></i></button>
+        </div>
         <div class="p-title" id="namaProduk">Memuat nama produk...</div>
         <div class="p-badges">
-            <span class="badge-mall"><i class="fas fa-check-circle"></i> Mall</span>
-            <span class="badge-garansi">100% Ori</span>
-        </div>
+            <span class="badge-garansi"><i class="fas fa-shield-alt"></i> Garansi Resmi</span>
+            </div>
     </div>
 
     <div class="product-desc-box">
@@ -91,20 +115,80 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // 1. Tarik Data dari Memori (Yang dikirim dari Dashboard Utama)
+        // 1. Tarik Data dari Memori (Dari Dashboard Utama)
         const dataProdukStr = localStorage.getItem('produk_detail');
-        if(!dataProdukStr) {
-            window.location.href = 'dashboardutama.html'; // Kalau kosong, usir ke depan
-        }
+        if(!dataProdukStr) window.location.href = 'dashboardutama.html';
         const produk = JSON.parse(dataProdukStr);
 
-        // 2. Pasang Data ke Layar
-        document.getElementById('imgProduk').src = produk.foto;
+        // Pasang Teks Info
         document.getElementById('namaProduk').innerText = produk.nama;
         document.getElementById('hargaProduk').innerText = produk.hargaStr;
         document.getElementById('descProduk').innerText = produk.deskripsi;
 
-        // 3. Update Angka Keranjang di Pojok Atas
+        // 2. KECERDASAN SLIDER FOTO
+        // (Sistem ini otomatis mendeteksi apakah fotonya 1 buah atau array banyak foto)
+        let daftarFoto = [];
+        try {
+            daftarFoto = JSON.parse(produk.foto); 
+            if(!Array.isArray(daftarFoto)) daftarFoto = [produk.foto];
+        } catch(e) {
+            daftarFoto = [produk.foto]; // Jika foto cuma 1 string biasa
+        }
+
+        const slider = document.getElementById('imageSlider');
+        const dotsContainer = document.getElementById('sliderDots');
+
+        daftarFoto.forEach((url, index) => {
+            // Masukkan gambar ke slider
+            const img = document.createElement('img');
+            img.src = url;
+            img.onclick = () => bukaFullscreen(url); // Klik untuk full screen
+            slider.appendChild(img);
+
+            // Buat titik indikator jika foto lebih dari 1
+            if(daftarFoto.length > 1) {
+                const dot = document.createElement('div');
+                dot.className = `dot ${index === 0 ? 'active' : ''}`;
+                dotsContainer.appendChild(dot);
+            }
+        });
+
+        // Logika geser titik indikator saat gambar di-scroll
+        slider.addEventListener('scroll', () => {
+            const scrollLeft = slider.scrollLeft;
+            const width = slider.clientWidth;
+            const activeIndex = Math.round(scrollLeft / width);
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((dot, idx) => {
+                dot.classList.toggle('active', idx === activeIndex);
+            });
+        });
+
+        // 3. LOGIKA FULLSCREEN
+        function bukaFullscreen(url) {
+            document.getElementById('fullscreenImg').src = url;
+            document.getElementById('fullscreenModal').style.display = 'flex';
+        }
+        function tutupFullscreen() {
+            document.getElementById('fullscreenModal').style.display = 'none';
+        }
+
+        // 4. LOGIKA TOMBOL SHARE (BAGIKAN)
+        function bagikanProduk() {
+            if (navigator.share) {
+                navigator.share({
+                    title: produk.nama,
+                    text: `Cek ${produk.nama} dengan harga ${produk.hargaStr} di Belidikita!`,
+                    url: window.location.href
+                }).catch(err => console.log("Gagal membagikan", err));
+            } else {
+                // Alternatif jika HP tidak mendukung fitur Share otomatis
+                navigator.clipboard.writeText(window.location.href);
+                showToast("Link produk berhasil disalin!", "success");
+            }
+        }
+
+        // 5. Update Angka Keranjang
         function updateBadge() {
             let cart = JSON.parse(localStorage.getItem('belidikita_cart')) || [];
             let total = cart.reduce((sum, item) => sum + item.qty, 0);
@@ -112,25 +196,41 @@
         }
         updateBadge();
 
-        // 4. Logika Tombol "Masukkan Keranjang"
+        // ==========================================
+        // ✅ 6. LOGIKA WAJIB LOGIN UNTUK KERANJANG
+        // ==========================================
         document.getElementById('btnTambahKeranjang').addEventListener('click', () => {
+            const token = localStorage.getItem('token');
+            // Cek apakah belum login ATAU yang login adalah admin
+            if (!token || token.startsWith('token-admin-')) {
+                showToast("Silakan Login Pembeli terlebih dahulu!", "error");
+                setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
+                return;
+            }
+
+            // Jika sudah login, masukkan ke keranjang
             let cart = JSON.parse(localStorage.getItem('belidikita_cart')) || [];
             const existingItem = cart.find(item => item.nama === produk.nama);
             if(existingItem) {
                 existingItem.qty += 1; 
             } else {
-                cart.push(produk); 
+                cart.push({
+                    foto: daftarFoto[0], // Ambil foto pertama saja untuk keranjang
+                    nama: produk.nama,
+                    harga: produk.harga,
+                    qty: 1
+                }); 
             }
             localStorage.setItem('belidikita_cart', JSON.stringify(cart));
             updateBadge();
             showToast("Barang ditambahkan ke keranjang 🛒", "success");
         });
 
-        // 5. Logika Tombol "Beli Sekarang"
+        // 7. Logika Beli Sekarang (Ke WA)
         document.getElementById('btnBeliLangsung').addEventListener('click', () => {
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) {
-                showToast("Silakan Login atau Daftar akun dulu ya!", "error");
+                showToast("Silakan Login Pembeli terlebih dahulu!", "error");
                 setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
                 return; 
             }
@@ -144,4 +244,3 @@
     </script>
 </body>
 </html>
-
