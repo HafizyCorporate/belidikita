@@ -76,7 +76,6 @@
         .bg-blue { background: #1976D2; }
         .c-label { font-size: 10px; color: #888; margin-top: 5px; font-weight: 600; }
 
-        /* CSS TOAST MODERN */
         #customToast {
             visibility: hidden; min-width: 250px; margin-left: -125px;
             background-color: #333; color: #fff; text-align: center;
@@ -108,7 +107,6 @@
         .btn-hapus { background: #ff3b30; }
         .img-preview { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
 
-        /* ✅ CSS BARU: MODAL KONFIRMASI MODERN (PENGGANTI ALERT BAWAAN HP) */
         .modal-confirm { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
         .confirm-box { background: #fff; padding: 30px 20px; border-radius: 15px; text-align: center; width: 90%; max-width: 320px; animation: popIn 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
@@ -226,6 +224,11 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Berat Barang (Gram)</label>
+                    <input type="number" id="prodWeight" placeholder="Contoh: 500 (1 Kg = 1000 Gram)" required>
+                </div>
+
+                <div class="form-group">
                     <label>Deskripsi Barang</label>
                     <textarea id="prodDesc" rows="3" placeholder="Jelaskan detail barangmu di sini..." required></textarea>
                 </div>
@@ -313,6 +316,10 @@
                             <option value="keranjang">🛒 Paling Banyak Diminati</option>
                         </select>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label>Berat Barang (Gram)</label>
+                    <input type="number" id="editProdWeight" required>
                 </div>
                 <button type="submit" class="btn-submit" id="btnSimpanEdit" style="background: #ff9800;"><i class="fas fa-save"></i> Simpan Perubahan</button>
             </form>
@@ -432,12 +439,14 @@
                         const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(prod.price);
                         const modalRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(prod.capital_price || 0);
                         const stok = prod.stock || 0;
+                        const weight = prod.weight || 1000; // Default 1000g jika belum diset
                         
                         let badgeClass = 'badge-biasa';
                         let badgeText = 'Biasa';
                         if(prod.category === 'laris') { badgeClass = 'badge-laris'; badgeText = '🔥 Laris'; }
                         else if(prod.category === 'keranjang') { badgeClass = 'badge-keranjang'; badgeText = '🛒 Diminati'; }
 
+                        // ✅ PERBAIKAN: Tombol Edit mengirimkan parameter `weight`
                         tbody.innerHTML += `
                             <tr>
                                 <td><span class="badge ${badgeClass}">${badgeText}</span></td>
@@ -446,7 +455,7 @@
                                 <td style="color:#ff5722; font-weight:bold;">${priceRp}</td>
                                 <td>${modalRp}</td>
                                 <td>
-                                    <button class="btn-aksi btn-edit" onclick="bukaEditProduk(${prod.id}, '${prod.title.replace(/'/g, "\\'")}', ${prod.capital_price || 0}, ${prod.price}, ${stok}, '${prod.category}')"><i class="fas fa-edit"></i> Edit</button>
+                                    <button class="btn-aksi btn-edit" onclick="bukaEditProduk(${prod.id}, '${prod.title.replace(/'/g, "\\'")}', ${prod.capital_price || 0}, ${prod.price}, ${stok}, '${prod.category}', ${weight})"><i class="fas fa-edit"></i> Edit</button>
                                     <button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('products', ${prod.id})"><i class="fas fa-trash"></i> Hapus</button>
                                 </td>
                             </tr>
@@ -499,8 +508,8 @@
             formData.append('stock', document.getElementById('prodStock').value); 
             formData.append('category', document.getElementById('prodCategory').value); 
             formData.append('description', document.getElementById('prodDesc').value);
+            formData.append('weight', document.getElementById('prodWeight').value); // ✅ TAMBAHAN BERAT
             
-            // ✅ PERBAIKAN FASE 2: Logika Mengangkut Banyak File Sekaligus
             const files = document.getElementById('prodMedia').files;
             for (let i = 0; i < files.length; i++) {
                 formData.append('media', files[i]);
@@ -558,13 +567,15 @@
             }
         });
 
-        function bukaEditProduk(id, title, capital, price, stock, category) {
+        // ✅ PERBAIKAN: Fungsi Buka Edit Menerima Parameter Berat
+        function bukaEditProduk(id, title, capital, price, stock, category, weight) {
             document.getElementById('editProdId').value = id;
             document.getElementById('editProdName').value = title;
             document.getElementById('editProdCapital').value = capital;
             document.getElementById('editProdPrice').value = price;
             document.getElementById('editProdStock').value = stock;
             document.getElementById('editProdCategory').value = category;
+            document.getElementById('editProdWeight').value = weight; // ✅ Pasang data berat
             
             document.getElementById('modalEditProduk').style.display = 'block';
         }
@@ -580,7 +591,8 @@
                 capital_price: document.getElementById('editProdCapital').value,
                 price: document.getElementById('editProdPrice').value,
                 stock: document.getElementById('editProdStock').value,
-                category: document.getElementById('editProdCategory').value
+                category: document.getElementById('editProdCategory').value,
+                weight: document.getElementById('editProdWeight').value // ✅ Kirim data berat
             };
 
             try {
