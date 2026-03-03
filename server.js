@@ -253,20 +253,20 @@ app.post('/api/orders', verifyToken, async (req, res) => {
     }
 });
 
-// 2. Pembeli Melihat Riwayat Pesanannya Sendiri
+// ✅ 2. Pembeli Melihat Riwayat Pesanannya Sendiri (Tembok: is_hidden_buyer)
 app.get('/api/orders/me', verifyToken, async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC', [req.user.id]);
+        const result = await pool.query('SELECT * FROM orders WHERE user_id = $1 AND is_hidden_buyer = FALSE ORDER BY created_at DESC', [req.user.id]);
         res.json({ success: true, data: result.rows });
     } catch(err) {
         res.status(500).json({ success: false, message: "Gagal memuat riwayat" });
     }
 });
 
-// 3. Admin Melihat Semua Pesanan
+// ✅ 3. Admin Melihat Semua Pesanan (Tembok: is_hidden_admin)
 app.get('/api/orders', verifyAdmin, async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM orders ORDER BY created_at DESC');
+        const result = await pool.query('SELECT * FROM orders WHERE is_hidden_admin = FALSE ORDER BY created_at DESC');
         res.json({ success: true, data: result.rows });
     } catch(err) {
         res.status(500).json({ success: false, message: "Gagal memuat semua pesanan" });
@@ -288,15 +288,18 @@ app.put('/api/orders/:id', verifyAdmin, async (req, res) => {
     }
 });
 
-// 5. Hapus Pesanan (Bisa dieksekusi oleh Admin atau Pembeli)
+// ✅ 5. Hapus Pesanan (BENAR-BENAR TERPISAH: Soft Delete)
 app.delete('/api/orders/:id', verifyAdmin, async (req, res) => {
     try {
         if (req.user.role === 'admin') {
-            await pool.query('DELETE FROM orders WHERE id = $1', [req.params.id]);
+            // ADMIN HAPUS: Cuma sembunyikan dari layar Admin, di HP pembeli tetap ada.
+            await pool.query('UPDATE orders SET is_hidden_admin = TRUE WHERE id = $1', [req.params.id]);
+            res.json({ success: true, message: "Pesanan berhasil dibersihkan dari layar Admin!" });
         } else {
-            await pool.query('DELETE FROM orders WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+            // PEMBELI HAPUS: Cuma sembunyikan dari layar Pembeli, di layar Admin tetap ada.
+            await pool.query('UPDATE orders SET is_hidden_buyer = TRUE WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+            res.json({ success: true, message: "Riwayat pesanan berhasil dibersihkan dari layar Anda!" });
         }
-        res.json({ success: true, message: "Pesanan berhasil dihapus dari Database!" });
     } catch(err) {
         console.error("🔥 Error Hapus Pesanan:", err);
         res.status(500).json({ success: false, message: "Gagal menghapus pesanan" });
