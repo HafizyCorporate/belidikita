@@ -108,6 +108,57 @@ const verifyAdmin = (req, res, next) => {
 app.get('/api/profile', verifyToken, getProfile);
 app.put('/api/profile', verifyToken, updateProfile);
 
+// ✅ TAMBAHAN: API UNTUK SIMPAN DAN AMBIL ALAMAT PEMBELI
+app.get('/api/address', verifyToken, async (req, res) => {
+    try {
+        // Otomatis bikin tabel alamat kalau belum ada
+        await pool.query(`CREATE TABLE IF NOT EXISTS user_addresses (
+            user_id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+            nama_penerima VARCHAR(100),
+            nomor_wa VARCHAR(20),
+            alamat_lengkap TEXT
+        )`);
+
+        const result = await pool.query('SELECT * FROM user_addresses WHERE user_id = $1', [req.user.id]);
+        if (result.rows.length > 0) {
+            res.json({ success: true, data: result.rows[0] });
+        } else {
+            res.json({ success: true, data: null });
+        }
+    } catch (err) {
+        console.error("🔥 Error Ambil Alamat:", err);
+        res.status(500).json({ success: false, message: "Gagal mengambil alamat." });
+    }
+});
+
+app.post('/api/address', verifyToken, async (req, res) => {
+    const { nama, wa, detail } = req.body;
+    try {
+        await pool.query(`CREATE TABLE IF NOT EXISTS user_addresses (
+            user_id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+            nama_penerima VARCHAR(100),
+            nomor_wa VARCHAR(20),
+            alamat_lengkap TEXT
+        )`);
+
+        // Logika menimpa data jika alamat sudah pernah diisi (UPSERT)
+        const query = `
+            INSERT INTO user_addresses (user_id, nama_penerima, nomor_wa, alamat_lengkap)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (user_id) DO UPDATE 
+            SET nama_penerima = EXCLUDED.nama_penerima,
+                nomor_wa = EXCLUDED.nomor_wa,
+                alamat_lengkap = EXCLUDED.alamat_lengkap
+            RETURNING *;
+        `;
+        const result = await pool.query(query, [req.user.id, nama, wa, detail]);
+        res.json({ success: true, message: "Alamat berhasil disimpan permanen!", data: result.rows[0] });
+    } catch (err) {
+        console.error("🔥 Error Simpan Alamat:", err);
+        res.status(500).json({ success: false, message: "Gagal menyimpan alamat di server." });
+    }
+});
+
 // ✅ PAKAI verifyAdmin AGAR TIDAK DITOLAK
 app.post('/api/products', verifyAdmin, upload.single('media'), uploadProduct);
 app.post('/api/promos', verifyAdmin, upload.single('media'), uploadPromo); 
