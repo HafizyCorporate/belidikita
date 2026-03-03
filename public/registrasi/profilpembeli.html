@@ -69,34 +69,7 @@
         </div>
 
         <div id="secRiwayat" class="animate-fade-up">
-            <div class="glass-card rounded-2xl p-4 mb-3">
-                <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-3">
-                    <span class="text-xs font-bold text-gray-500"><i class="fas fa-store text-brand mr-1"></i> Belidikita Official</span>
-                    <span class="text-[10px] font-bold bg-blue-100 text-brand px-2 py-1 rounded">SEDANG DIKIRIM</span>
-                </div>
-                <div class="flex gap-3 items-center mb-3">
-                    <div class="w-14 h-14 bg-gray-200 rounded-lg flex-shrink-0">
-                        <img src="https://via.placeholder.com/150" class="w-full h-full object-cover rounded-lg" alt="Barang">
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold text-gray-800 line-clamp-1">Sepatu Sneakers Kece</h4>
-                        <p class="text-xs text-gray-500">1 Barang</p>
-                    </div>
-                </div>
-                <div class="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-100">
-                    <p class="text-[11px] text-gray-500 font-semibold mb-1">Kurir: <span class="text-brand">J&T Express</span></p>
-                    <p class="text-xs font-extrabold text-gray-800 flex justify-between items-center">
-                        <span>No. Resi: JP1234567890</span>
-                        <button onclick="salinResi('JP1234567890')" class="text-brand text-[10px] bg-blue-100 px-2 py-1 rounded"><i class="fas fa-copy"></i> Salin</button>
-                    </p>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-xs font-semibold text-gray-500">Total Belanja</span>
-                    <span class="text-sm font-extrabold text-orange-500">Rp 162.000</span>
-                </div>
-            </div>
-
-            <div class="text-center py-10 opacity-50 hidden">
+            <div class="text-center py-10 opacity-50 hidden" id="emptyRiwayat">
                 <i class="fas fa-box-open text-4xl mb-3"></i>
                 <p class="text-xs font-bold">Belum ada pesanan.</p>
             </div>
@@ -181,25 +154,21 @@
         // LOGIKA PINDAH TABS MENU
         // ==========================================
         function bukaTab(namaTab) {
-            // Reset semua tombol tab
             const tabs = ['tabRiwayat', 'tabAlamat', 'tabPengaturan'];
             tabs.forEach(t => {
                 document.getElementById(t).className = "flex-1 py-2.5 text-xs font-bold text-gray-500 hover:text-brand transition";
             });
 
-            // Sembunyikan semua konten
             const secs = ['secRiwayat', 'secAlamat', 'secPengaturan'];
             secs.forEach(s => {
                 document.getElementById(s).classList.add('hidden');
                 document.getElementById(s).classList.remove('animate-fade-up');
             });
 
-            // Aktifkan yang diklik
             document.getElementById('tab' + namaTab).className = "flex-1 py-2.5 text-xs font-bold bg-white shadow-sm rounded-xl text-brand transition";
             const targetSec = document.getElementById('sec' + namaTab);
             targetSec.classList.remove('hidden');
             
-            // Trik memicu ulang animasi CSS
             void targetSec.offsetWidth; 
             targetSec.classList.add('animate-fade-up');
         }
@@ -259,7 +228,6 @@
         // ==========================================
         async function loadProfileData() {
             try {
-                // 1. Load Info Akun Dasar
                 const resProf = await fetch('/api/profile', { headers: { 'Authorization': `Bearer ${token}` } });
                 const resultProf = await resProf.json();
                 if (resultProf.success) {
@@ -268,17 +236,12 @@
                     document.getElementById('displayEmail').innerText = data.email;
                     if(data.bio) document.getElementById('displayBio').innerText = `"${data.bio}"`;
                     
-                    // Taruh di Form Pengaturan
                     document.getElementById('inputEditNama').value = data.name;
                     if(data.bio) document.getElementById('inputEditBio').value = data.bio;
-                    
                     document.getElementById('avatarImg').src = `https://ui-avatars.com/api/?name=${data.name}&background=E1F5FE&color=0D47A1&bold=true`;
-                    
-                    // Taruh nama ke Form Alamat otomatis
                     document.getElementById('inputNamaPenerima').value = data.name;
                 }
 
-                // 2. Load Alamat Tersimpan
                 const resAddr = await fetch('/api/address', { headers: { 'Authorization': `Bearer ${token}` } });
                 const resultAddr = await resAddr.json();
                 if (resultAddr.success && resultAddr.data) {
@@ -346,7 +309,7 @@
                 const data = await res.json();
                 if (data.success) {
                     showToast("Profil berhasil diperbarui!", "success");
-                    loadProfileData(); // Refresh UI Atas
+                    loadProfileData(); 
                 } else {
                     showToast("Gagal update profil", "error");
                 }
@@ -354,7 +317,7 @@
             finally { btn.innerHTML = '<i class="fas fa-user-edit"></i> Update Profil'; }
         });
 
-                // ==========================================
+        // ==========================================
         // LOAD RIWAYAT PESANAN DARI DATABASE
         // ==========================================
         async function loadRiwayatPesanan() {
@@ -364,15 +327,16 @@
                 const result = await res.json();
 
                 if(result.success && result.data.length > 0) {
-                    containerRiwayat.innerHTML = ''; // Bersihkan desain dummy
+                    containerRiwayat.innerHTML = ''; 
 
                     result.data.forEach(order => {
-                        // Bongkar data barang
-                        const items = JSON.parse(order.items);
-                        const barangPertama = items[0]; // Tampilkan 1 barang saja sbg cover
+                        let items = [];
+                        try { items = JSON.parse(order.items); } catch(e) {}
+                        
+                        // Validasi jika array items kosong
+                        const barangPertama = items.length > 0 ? items[0] : { foto: 'https://via.placeholder.com/150', nama: 'Barang', qty: 1 };
                         const sisaBarang = items.length > 1 ? ` + ${items.length - 1} barang lainnya` : '';
                         
-                        // Warna Status
                         let statusColor = "bg-yellow-100 text-yellow-700";
                         if(order.status === 'Diproses') statusColor = "bg-blue-100 text-blue-700";
                         if(order.status === 'Dikirim') statusColor = "bg-purple-100 text-purple-700";
@@ -384,7 +348,10 @@
                             <div class="glass-card rounded-2xl p-4 mb-3">
                                 <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-3">
                                     <span class="text-xs font-bold text-gray-500"><i class="fas fa-store text-brand mr-1"></i> Order #ORD-${order.id}</span>
-                                    <span class="text-[10px] font-bold ${statusColor} px-2 py-1 rounded uppercase">${order.status}</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] font-bold ${statusColor} px-2 py-1 rounded uppercase">${order.status}</span>
+                                        <button onclick="hapusPesananKu(${order.id})" class="text-red-500 bg-red-50 w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-100 transition" title="Hapus Riwayat"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                                    </div>
                                 </div>
                                 <div class="flex gap-3 items-center mb-3">
                                     <div class="w-14 h-14 bg-gray-200 rounded-lg flex-shrink-0">
@@ -419,10 +386,31 @@
                 }
             } catch (err) { console.error("Gagal load riwayat", err); }
         }
-        
-        // Panggil fungsinya saat web dibuka
         loadRiwayatPesanan();
 
+        // ==========================================
+        // ✅ FUNGSI PEMBELI MENGHAPUS RIWAYAT PESANAN
+        // ==========================================
+        async function hapusPesananKu(id) {
+            if(!confirm("Yakin ingin menghapus riwayat pesanan ini?")) return;
+            
+            try {
+                const res = await fetch(`/api/orders/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                if(data.success) {
+                    showToast("Riwayat pesanan berhasil dihapus! 🧹", "success");
+                    loadRiwayatPesanan(); // Otomatis refresh daftar riwayat
+                } else {
+                    showToast(data.message, "error");
+                }
+            } catch(e) {
+                showToast("Gagal menghapus pesanan", "error");
+            }
+        }
 
         // LOGOUT
         document.getElementById('btnLogout').addEventListener('click', () => {
