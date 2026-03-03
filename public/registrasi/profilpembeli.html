@@ -4,128 +4,110 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Profil Saya - Belidikita</title>
-    <link rel="stylesheet" href="../style.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,800" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'sans-serif'] },
+                    colors: { brand: '#0D47A1', accent: '#00AA5B', light: '#E1F5FE' }
+                }
+            }
+        }
+    </script>
     <style>
-        body { background-color: #f4f7fa; font-family: 'Montserrat', sans-serif; }
-        .header-profile { background: #1976D2; color: #fff; padding: 30px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; }
-        .btn-back-home { position: absolute; top: 20px; left: 20px; color: #fff; font-size: 20px; text-decoration: none; }
-        .avatar { width: 80px; height: 80px; background: #fff; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 30px; color: #1976D2; box-shadow: 0 4px 10px rgba(0,0,0,0.2); overflow: hidden; }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; display: none; } 
-        .profile-name { font-size: 18px; font-weight: 800; margin-bottom: 5px; }
-        .profile-email { font-size: 12px; opacity: 0.8; }
+        /* Animasi Kustom & Glassmorphism */
+        body { background: linear-gradient(135deg, #f4f7fa 0%, #e0f2fe 100%); min-height: 100vh; padding-bottom: 80px; }
+        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .input-modern { background: #f8fafc; border: 1px solid #e2e8f0; transition: all 0.3s ease; }
+        .input-modern:focus { background: #fff; border-color: #0D47A1; box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.1); outline: none; }
         
-        .profile-menu { margin: 20px; background: #fff; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; }
-        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #eee; text-decoration: none; color: #333; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .menu-item:hover { background: #f9f9f9; }
-        .menu-item:last-child { border-bottom: none; }
-        .menu-item i.icon-left { font-size: 18px; color: #1976D2; width: 30px; text-align: center; margin-right: 10px; }
-        .menu-item i.icon-right { color: #ccc; font-size: 14px; }
-        
-        .btn-logout { margin: 20px; padding: 15px; background: #ff3b30; color: #fff; text-align: center; border-radius: 12px; font-weight: 800; display: block; text-decoration: none; box-shadow: 0 4px 10px rgba(255, 59, 48, 0.2); }
+        /* Animasi Masuk */
+        @keyframes fadeUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeUp 0.6s ease forwards; }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
 
-        .modal-profil { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-        .modal-content-profil { background-color: #fff; margin: 15vh auto; padding: 20px; border-radius: 15px; width: 90%; max-width: 400px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: slideUp 0.3s ease; }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .close-modal { position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 24px; font-weight: bold; cursor: pointer; }
-        .modal-title { font-size: 18px; font-weight: 800; color: #0D47A1; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        
-        .form-group { margin-bottom: 12px; text-align: left; }
-        .form-group label { display: block; font-size: 11px; font-weight: 600; color: #555; margin-bottom: 5px; }
-        .form-group input, .form-group textarea { width: 100%; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Montserrat', sans-serif; font-size: 12px; outline: none; background: #f9f9f9; }
-        .form-group input:focus, .form-group textarea:focus { border-color: #1976D2; background: #fff; }
-        .btn-save { width: 100%; padding: 12px; background: #00AA5B; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-
-        #customToast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 25px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; font-size: 13px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: opacity 0.3s, bottom 0.3s; opacity: 0; }
-        #customToast.show { visibility: visible; opacity: 1; bottom: 50px; }
+        /* Toast Modern */
+        #customToast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 25px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 80px; font-size: 13px; font-weight: 600; transition: opacity 0.3s, bottom 0.3s; opacity: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.2);}
+        #customToast.show { visibility: visible; opacity: 1; bottom: 100px; }
         #customToast.success { background-color: #00AA5B; }
         #customToast.error { background-color: #ff3b30; }
     </style>
 </head>
-<body>
+<body class="text-gray-800 relative">
 
-    <div class="header-profile">
-        <a href="../dashboardutama.html" class="btn-back-home"><i class="fas fa-arrow-left"></i></a>
-        <div class="avatar" id="avatarContainer">
-            <i class="fas fa-user" id="avatarIcon"></i>
-            <img id="avatarImage" src="" alt="Foto Profil">
-        </div>
-        <div class="profile-name" id="profileName">Memuat...</div>
-        <div class="profile-email" id="profileEmail">Memuat Email...</div>
-    </div>
-
-    <div class="profile-menu">
-        <div class="menu-item" onclick="bukaModal('modalAlamat')">
-            <div style="display:flex; align-items:center;"><i class="fas fa-map-marker-alt icon-left"></i> Alamat Pengiriman</div>
-            <i class="fas fa-chevron-right icon-right"></i>
-        </div>
-        <div class="menu-item" onclick="bukaModal('modalPesanan')">
-            <div style="display:flex; align-items:center;"><i class="fas fa-box icon-left"></i> Riwayat Pesanan</div>
-            <i class="fas fa-chevron-right icon-right"></i>
-        </div>
-        <div class="menu-item" onclick="bukaModal('modalPengaturan')">
-            <div style="display:flex; align-items:center;"><i class="fas fa-cog icon-left"></i> Pengaturan Akun</div>
-            <i class="fas fa-chevron-right icon-right"></i>
+    <div class="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm">
+        <div class="max-w-md mx-auto px-5 py-4 flex items-center justify-between">
+            <button onclick="window.location.href='../dashboardutama.html'" class="w-10 h-10 rounded-full bg-light text-brand flex justify-center items-center hover:scale-105 transition-transform">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="text-lg font-extrabold text-brand">Profil Akun</h1>
+            <button id="btnLogout" class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex justify-center items-center hover:scale-105 transition-transform">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
         </div>
     </div>
 
-    <a href="#" class="btn-logout" onclick="logout(event)"><i class="fas fa-sign-out-alt"></i> Keluar dari Akun</a>
-
-    <div id="modalAlamat" class="modal-profil">
-        <div class="modal-content-profil">
-            <span class="close-modal" onclick="tutupModal('modalAlamat')">&times;</span>
-            <h2 class="modal-title"><i class="fas fa-truck"></i> Alamat Rumah</h2>
-            <form id="formAlamat">
-                <div class="form-group">
-                    <label>Nama Penerima</label>
-                    <input type="text" id="alamatNama" placeholder="Contoh: Budi Santoso" required>
+    <main class="max-w-md mx-auto pt-24 px-5">
+        
+        <div class="glass-card rounded-3xl p-6 mb-6 animate-fade-up text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-brand to-blue-400 opacity-20"></div>
+            <div class="relative z-10">
+                <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-brand to-accent p-1 shadow-lg mb-3">
+                    <img src="https://ui-avatars.com/api/?name=User&background=fff&color=0D47A1" id="avatarImg" class="w-full h-full rounded-full border-2 border-white object-cover" alt="Avatar">
                 </div>
-                <div class="form-group">
-                    <label>Nomor WhatsApp</label>
-                    <input type="number" id="alamatWA" placeholder="Contoh: 081234567890" required>
-                </div>
-                <div class="form-group">
-                    <label>Alamat Lengkap (Jalan, RT/RW, Patokan)</label>
-                    <textarea id="alamatDetail" rows="3" placeholder="Contoh: Jl. Mawar No. 12, Pagar Hitam" required></textarea>
-                </div>
-                <button type="submit" class="btn-save" id="btnSimpanAlamat"><i class="fas fa-save"></i> Simpan Alamat</button>
-            </form>
-        </div>
-    </div>
-
-    <div id="modalPesanan" class="modal-profil">
-        <div class="modal-content-profil">
-            <span class="close-modal" onclick="tutupModal('modalPesanan')">&times;</span>
-            <h2 class="modal-title"><i class="fas fa-shopping-bag"></i> Riwayat Pesanan</h2>
-            <div style="text-align: center; padding: 20px 0; color: #888;">
-                <i class="fas fa-box-open" style="font-size: 40px; color: #ddd; margin-bottom: 10px;"></i>
-                <p style="font-size: 12px;">Belum ada riwayat pesanan.</p>
-                <p style="font-size: 10px; margin-top: 5px; color: #aaa;">(Sistem WA Checkout aktif)</p>
+                <h2 id="displayNama" class="text-xl font-extrabold text-gray-800">Memuat...</h2>
+                <p id="displayEmail" class="text-xs font-semibold text-gray-500 mb-2">Memuat...</p>
+                <span class="inline-block px-3 py-1 bg-accent/10 text-accent text-xs font-bold rounded-full"><i class="fas fa-check-circle mr-1"></i> Member Aktif</span>
             </div>
         </div>
-    </div>
 
-    <div id="modalPengaturan" class="modal-profil">
-        <div class="modal-content-profil">
-            <span class="close-modal" onclick="tutupModal('modalPengaturan')">&times;</span>
-            <h2 class="modal-title"><i class="fas fa-user-edit"></i> Edit Profil</h2>
-            <form id="formPengaturan">
-                <div class="form-group">
-                    <label>Link Foto Profil (URL Image)</label>
-                    <input type="text" id="aturFoto" placeholder="Masukkan link foto (opsional)">
+        <div class="glass-card rounded-3xl p-6 mb-6 animate-fade-up delay-100">
+            <h3 class="text-sm font-extrabold text-brand border-b border-gray-100 pb-3 mb-4 flex items-center">
+                <i class="fas fa-map-marker-alt mr-2 text-lg"></i> Alamat Pengiriman (Siap RajaOngkir)
+            </h3>
+            
+            <form id="formProfil" class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Nama Penerima</label>
+                        <input type="text" id="inputNama" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" placeholder="Contoh: Budi Santoso" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 mb-1">No. WhatsApp</label>
+                        <input type="number" id="inputWA" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" placeholder="0812..." required>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Ubah Nama Akun</label>
-                    <input type="text" id="aturNama" placeholder="Nama baru kamu" required>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Provinsi</label>
+                    <select id="selectProvinsi" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold appearance-none cursor-pointer" required>
+                        <option value="">-- Pilih Provinsi --</option>
+                    </select>
                 </div>
-                <div class="form-group">
-                    <label>Metode Pembayaran Pilihan</label>
-                    <input type="text" id="aturBank" placeholder="Contoh: BCA / Dana / COD">
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Kota / Kabupaten</label>
+                    <select id="selectKota" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold appearance-none cursor-pointer" disabled required>
+                        <option value="">-- Pilih Kota --</option>
+                    </select>
                 </div>
-                <button type="submit" class="btn-save" id="btnSimpanPengaturan" style="background:#1976D2;"><i class="fas fa-check-circle"></i> Perbarui Akun</button>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Detail Jalan & Patokan</label>
+                    <textarea id="inputDetail" rows="2" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" placeholder="Contoh: Jl. Mawar No 10, RT 01/02, Pagar Merah" required></textarea>
+                </div>
+
+                <button type="submit" id="btnSimpan" class="w-full bg-brand hover:bg-blue-800 text-white font-extrabold rounded-xl py-4 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all mt-2">
+                    <i class="fas fa-save mr-2"></i> SIMPAN ALAMAT
+                </button>
             </form>
         </div>
-    </div>
+
+    </main>
 
     <div id="customToast"></div>
 
@@ -137,127 +119,151 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        function bukaModal(idModal) { document.getElementById(idModal).style.display = 'block'; }
-        function tutupModal(idModal) { document.getElementById(idModal).style.display = 'none'; }
-        window.onclick = function(event) { if (event.target.classList.contains('modal-profil')) { event.target.style.display = "none"; } }
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast("Silakan login terlebih dahulu", "error");
+            setTimeout(() => window.location.href = 'loginpembeli.html', 1500);
+        }
 
-        // ✅ TARIK DATA PROFIL DAN ALAMAT DARI DATABASE SERVER
-        document.addEventListener("DOMContentLoaded", async () => {
-            const token = localStorage.getItem('token');
-            if(!token || token.startsWith('token-admin-')) { window.location.href = 'loginpembeli.html'; return; }
+        // ==========================================
+        // 1. API WILAYAH INDONESIA (EMSIFA)
+        // ==========================================
+        const selectProvinsi = document.getElementById('selectProvinsi');
+        const selectKota = document.getElementById('selectKota');
+        
+        let namaProvinsiTerpilih = "";
+        let namaKotaTerpilih = "";
 
-            try {
-                // 1. Tarik Data Profil Utama
-                const resProfile = await fetch('/api/profile', { headers: { 'Authorization': `Bearer ${token}` } });
-                const resultProfile = await resProfile.json();
-                
-                if(resultProfile.success) {
-                    document.getElementById('profileName').innerText = resultProfile.data.name;
-                    document.getElementById('profileEmail').innerText = resultProfile.data.email;
-                    document.getElementById('aturNama').value = resultProfile.data.name;
-                    
-                    if(resultProfile.data.avatar_url) {
-                        document.getElementById('avatarIcon').style.display = 'none';
-                        document.getElementById('avatarImage').style.display = 'block';
-                        document.getElementById('avatarImage').src = resultProfile.data.avatar_url;
-                        document.getElementById('aturFoto').value = resultProfile.data.avatar_url;
-                    }
-                } else {
-                    localStorage.removeItem('token');
-                    window.location.href = 'loginpembeli.html';
-                }
+        // Ambil Data Provinsi
+        fetch('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json')
+            .then(res => res.json())
+            .then(data => {
+                data.forEach(prov => {
+                    const option = document.createElement('option');
+                    option.value = prov.id;
+                    option.text = prov.name;
+                    selectProvinsi.appendChild(option);
+                });
+            });
 
-                // 2. Tarik Data Alamat dari Server Database
-                const resAddress = await fetch('/api/address', { headers: { 'Authorization': `Bearer ${token}` } });
-                const addrData = await resAddress.json();
-                if(addrData.success && addrData.data) {
-                    document.getElementById('alamatNama').value = addrData.data.nama_penerima;
-                    document.getElementById('alamatWA').value = addrData.data.nomor_wa;
-                    document.getElementById('alamatDetail').value = addrData.data.alamat_lengkap;
-                }
+        // Jika Provinsi Dipilih -> Ambil Kota
+        selectProvinsi.addEventListener('change', function() {
+            const provId = this.value;
+            namaProvinsiTerpilih = this.options[this.selectedIndex].text;
+            
+            selectKota.innerHTML = '<option value="">-- Sedang Memuat Kota... --</option>';
+            selectKota.disabled = true;
 
-            } catch (err) {
-                console.error("Gagal terhubung ke database", err);
-                document.getElementById('profileName').innerText = "Gagal Memuat";
+            if(provId) {
+                fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provId}.json`)
+                    .then(res => res.json())
+                    .then(data => {
+                        selectKota.innerHTML = '<option value="">-- Pilih Kota --</option>';
+                        data.forEach(kota => {
+                            const option = document.createElement('option');
+                            option.value = kota.id; // Nanti ID ini yg dipakai RajaOngkir
+                            option.text = kota.name;
+                            selectKota.appendChild(option);
+                        });
+                        selectKota.disabled = false;
+                    });
+            } else {
+                selectKota.innerHTML = '<option value="">-- Pilih Kota --</option>';
             }
         });
 
-        // ✅ LOGIKA SIMPAN ALAMAT (MENEMBAK API DATABASE SERVER)
-        document.getElementById('formAlamat').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const token = localStorage.getItem('token');
-            const btn = document.getElementById('btnSimpanAlamat');
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
+        selectKota.addEventListener('change', function() {
+            namaKotaTerpilih = this.options[this.selectedIndex].text;
+        });
 
-            const bodyData = {
-                nama: document.getElementById('alamatNama').value,
-                wa: document.getElementById('alamatWA').value,
-                detail: document.getElementById('alamatDetail').value
-            };
+        // ==========================================
+        // 2. LOAD DATA PROFIL & ALAMAT LAMA
+        // ==========================================
+        async function loadProfile() {
+            try {
+                // Load Info Dasar
+                const resProfile = await fetch('/api/profile', { headers: { 'Authorization': `Bearer ${token}` } });
+                const resultProfile = await resProfile.json();
+                
+                if (resultProfile.success) {
+                    document.getElementById('displayNama').innerText = resultProfile.data.name;
+                    document.getElementById('displayEmail').innerText = resultProfile.data.email;
+                    document.getElementById('inputNama').value = resultProfile.data.name;
+                    
+                    // Ganti foto profil berdasarkan inisial nama
+                    document.getElementById('avatarImg').src = `https://ui-avatars.com/api/?name=${resultProfile.data.name}&background=E1F5FE&color=0D47A1&bold=true`;
+                }
+
+                // Load Alamat (Jika sudah ada)
+                const resAddr = await fetch('/api/address', { headers: { 'Authorization': `Bearer ${token}` } });
+                const resultAddr = await resAddr.json();
+                
+                if (resultAddr.success && resultAddr.data) {
+                    document.getElementById('inputNama').value = resultAddr.data.nama_penerima;
+                    document.getElementById('inputWA').value = resultAddr.data.nomor_wa;
+                    
+                    // Karena sistem lama tidak memisah kota/provinsi, kita letakkan sisanya di Detail
+                    document.getElementById('inputDetail').value = resultAddr.data.alamat_lengkap;
+                }
+            } catch (err) {
+                console.error("Gagal memuat data", err);
+            }
+        }
+        loadProfile();
+
+        // ==========================================
+        // 3. SIMPAN ALAMAT (SIAP UNTUK CHECKOUT)
+        // ==========================================
+        document.getElementById('formProfil').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSimpan');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyimpan...';
+
+            const nama = document.getElementById('inputNama').value;
+            const wa = document.getElementById('inputWA').value;
+            const detailJalan = document.getElementById('inputDetail').value;
+
+            // Cek Dropdown
+            if(!selectProvinsi.value || !selectKota.value) {
+                showToast("Provinsi dan Kota Wajib Dipilih!", "error");
+                btn.innerHTML = '<i class="fas fa-save mr-2"></i> SIMPAN ALAMAT';
+                return;
+            }
+
+            // Gabungkan Format Alamat agar kompatibel dengan sistem Server yang lama
+            // Format: "Jl. Mawar No 10, KOTA BANDUNG, JAWA BARAT"
+            const alamatGabungan = `${detailJalan}, ${namaKotaTerpilih}, ${namaProvinsiTerpilih}`;
 
             try {
                 const res = await fetch('/api/address', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(bodyData)
+                    body: JSON.stringify({ nama: nama, wa: wa, detail: alamatGabungan })
                 });
+                
                 const data = await res.json();
-
-                if(data.success) {
-                    showToast("✅ Alamat tersimpan permanen di Server!", "success");
-                    tutupModal('modalAlamat');
+                if (data.success) {
+                    showToast("Alamat berhasil diperbarui! 🎉", "success");
+                    // Lempar kembali ke checkout jika dia berasal dari sana
+                    setTimeout(() => {
+                        window.history.back(); // Kembali ke halaman sebelumnya
+                    }, 1500);
                 } else {
-                    showToast("Gagal menyimpan alamat", "error");
+                    showToast(data.message, "error");
                 }
-            } catch(err) {
-                showToast("Server Error", "error");
+            } catch (err) {
+                showToast("Gagal terhubung ke server", "error");
             } finally {
-                btn.innerHTML = "<i class='fas fa-save'></i> Simpan Alamat";
+                btn.innerHTML = '<i class="fas fa-save mr-2"></i> SIMPAN ALAMAT';
             }
         });
 
-        // ✅ LOGIKA SIMPAN PENGATURAN (MENEMBAK API DATABASE SERVER)
-        document.getElementById('formPengaturan').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const token = localStorage.getItem('token');
-            const btn = document.getElementById('btnSimpanPengaturan');
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Memperbarui...";
-
-            const bodyData = {
-                name: document.getElementById('aturNama').value,
-                avatar_url: document.getElementById('aturFoto').value,
-                bio: document.getElementById('aturBank').value 
-            };
-
-            try {
-                const res = await fetch('/api/profile', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(bodyData)
-                });
-                const data = await res.json();
-
-                if(data.success) {
-                    showToast("✅ Profil berhasil diperbarui!", "success");
-                    tutupModal('modalPengaturan');
-                    setTimeout(() => location.reload(), 1000); 
-                } else {
-                    showToast("Gagal: " + data.message, "error");
-                }
-            } catch(err) {
-                showToast("Gagal menyambung ke server", "error");
-            } finally {
-                btn.innerHTML = "<i class='fas fa-check-circle'></i> Perbarui Akun";
-            }
+        // Logout
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            showToast("Berhasil Logout", "success");
+            setTimeout(() => window.location.href = '../dashboardutama.html', 1000);
         });
-
-        function logout(e) {
-            e.preventDefault();
-            if(confirm("Yakin ingin keluar dari akun?")) {
-                localStorage.removeItem('token');
-                window.location.href = '../dashboardutama.html';
-            }
-        }
     </script>
 </body>
 </html>
