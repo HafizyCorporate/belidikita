@@ -164,4 +164,45 @@ app.post('/api/products', verifyAdmin, upload.single('media'), uploadProduct);
 app.post('/api/promos', verifyAdmin, upload.single('media'), uploadPromo); 
 app.post('/api/forum', verifyToken, createPost);
 
+// ==========================================
+// 🔥 API BARU: HAPUS DAN EDIT (KHUSUS ADMIN)
+// ==========================================
+
+// 1. Hapus Produk
+app.delete('/api/products/:id', verifyAdmin, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM products WHERE id = $1', [req.params.id]);
+        res.json({ success: true, message: "Produk berhasil dihapus!" });
+    } catch(err) {
+        console.error("🔥 Error Hapus Produk:", err);
+        res.status(500).json({ success: false, message: "Gagal menghapus produk" });
+    }
+});
+
+// 2. Hapus Banner Promo
+app.delete('/api/promos/:id', verifyAdmin, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM promos WHERE id = $1', [req.params.id]);
+        res.json({ success: true, message: "Banner berhasil dihapus!" });
+    } catch(err) {
+        console.error("🔥 Error Hapus Banner:", err);
+        res.status(500).json({ success: false, message: "Gagal menghapus banner" });
+    }
+});
+
+// 3. Edit Produk (Nama, Harga, Stok, Kategori)
+app.put('/api/products/:id', verifyAdmin, async (req, res) => {
+    const { title, price, capital_price, stock, category } = req.body;
+    try {
+        await pool.query(
+            'UPDATE products SET title=$1, price=$2, capital_price=$3, stock=$4, category=$5 WHERE id=$6',
+            [title, price, capital_price, stock, category, req.params.id]
+        );
+        res.json({ success: true, message: "Produk berhasil diubah!" });
+    } catch(err) { 
+        console.error("🔥 Error Edit Produk:", err);
+        res.status(500).json({ success: false, message: "Gagal mengedit produk" }); 
+    }
+});
+
 app.listen(PORT, () => { console.log(`🚀 Server belidikita berjalan di port ${PORT}`); });
