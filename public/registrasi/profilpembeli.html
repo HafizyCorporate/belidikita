@@ -354,6 +354,76 @@
             finally { btn.innerHTML = '<i class="fas fa-user-edit"></i> Update Profil'; }
         });
 
+                // ==========================================
+        // LOAD RIWAYAT PESANAN DARI DATABASE
+        // ==========================================
+        async function loadRiwayatPesanan() {
+            const containerRiwayat = document.getElementById('secRiwayat');
+            try {
+                const res = await fetch('/api/orders/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+
+                if(result.success && result.data.length > 0) {
+                    containerRiwayat.innerHTML = ''; // Bersihkan desain dummy
+
+                    result.data.forEach(order => {
+                        // Bongkar data barang
+                        const items = JSON.parse(order.items);
+                        const barangPertama = items[0]; // Tampilkan 1 barang saja sbg cover
+                        const sisaBarang = items.length > 1 ? ` + ${items.length - 1} barang lainnya` : '';
+                        
+                        // Warna Status
+                        let statusColor = "bg-yellow-100 text-yellow-700";
+                        if(order.status === 'Diproses') statusColor = "bg-blue-100 text-blue-700";
+                        if(order.status === 'Dikirim') statusColor = "bg-purple-100 text-purple-700";
+                        if(order.status === 'Selesai') statusColor = "bg-green-100 text-green-700";
+
+                        const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
+
+                        containerRiwayat.innerHTML += `
+                            <div class="glass-card rounded-2xl p-4 mb-3">
+                                <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-3">
+                                    <span class="text-xs font-bold text-gray-500"><i class="fas fa-store text-brand mr-1"></i> Order #ORD-${order.id}</span>
+                                    <span class="text-[10px] font-bold ${statusColor} px-2 py-1 rounded uppercase">${order.status}</span>
+                                </div>
+                                <div class="flex gap-3 items-center mb-3">
+                                    <div class="w-14 h-14 bg-gray-200 rounded-lg flex-shrink-0">
+                                        <img src="${barangPertama.foto}" class="w-full h-full object-cover rounded-lg" alt="Barang">
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-gray-800 line-clamp-1">${barangPertama.nama}</h4>
+                                        <p class="text-[11px] text-gray-500">${barangPertama.qty} Barang ${sisaBarang}</p>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-100">
+                                    <p class="text-[11px] text-gray-500 font-semibold mb-1">Kurir: <span class="text-brand">${order.shipping_courier}</span></p>
+                                    <p class="text-xs font-extrabold text-gray-800 flex justify-between items-center">
+                                        <span>Resi: ${order.resi}</span>
+                                        ${order.resi !== '-' ? `<button onclick="salinResi('${order.resi}')" class="text-brand text-[10px] bg-blue-100 px-2 py-1 rounded"><i class="fas fa-copy"></i> Salin</button>` : ''}
+                                    </p>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xs font-semibold text-gray-500">Total Tagihan</span>
+                                    <span class="text-sm font-extrabold text-orange-500">${formatRp}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    containerRiwayat.innerHTML = `
+                        <div class="text-center py-10 opacity-50">
+                            <i class="fas fa-box-open text-4xl mb-3"></i>
+                            <p class="text-xs font-bold">Belum ada pesanan.</p>
+                        </div>
+                    `;
+                }
+            } catch (err) { console.error("Gagal load riwayat", err); }
+        }
+        
+        // Panggil fungsinya saat web dibuka
+        loadRiwayatPesanan();
+
+
         // LOGOUT
         document.getElementById('btnLogout').addEventListener('click', () => {
             localStorage.removeItem('token');
