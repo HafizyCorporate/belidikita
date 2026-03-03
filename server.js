@@ -179,6 +179,7 @@ app.delete('/api/products/:id', verifyAdmin, async (req, res) => {
     }
 });
 
+
 // 2. Hapus Banner Promo
 app.delete('/api/promos/:id', verifyAdmin, async (req, res) => {
     try {
