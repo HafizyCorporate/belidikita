@@ -237,18 +237,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const productModal = document.getElementById('productDetailModal');
     const closeDetailBtn = document.getElementById('closeDetailBtn');
     
-    let currentProduct = null;
-    
-    function bukaDetailProduk(foto, nama, hargaStr, deskripsi, hargaRaw) {
-        if(!productModal) return; 
-        document.getElementById('detailImage').src = foto;
-        document.getElementById('detailTitle').innerText = nama;
-        document.getElementById('detailPrice').innerText = hargaStr;
-        document.getElementById('detailDesc').innerText = deskripsi;
+        function bukaDetailProduk(foto, nama, hargaStr, deskripsi, hargaRaw) {
+        // 1. Bungkus data barang yang ditekan
+        const dataProduk = { 
+            foto: foto, 
+            nama: nama, 
+            hargaStr: hargaStr, 
+            deskripsi: deskripsi, 
+            harga: hargaRaw, // Harus 'harga' agar sinkron dengan sistem keranjang
+            qty: 1 
+        };
         
-        currentProduct = { foto: foto, nama: nama, harga: hargaRaw, qty: 1 };
-        productModal.style.display = "block"; 
+        // 2. Simpan sementara ke memori (sebagai 'produk_detail')
+        localStorage.setItem('produk_detail', JSON.stringify(dataProduk));
+        
+        // 3. Langsung lompat ke halaman ala Shopee!
+        window.location.href = 'detailproduk.html';
     }
+
 
     if(closeDetailBtn) { closeDetailBtn.addEventListener('click', () => { productModal.style.display = "none"; }); }
 
