@@ -6,6 +6,18 @@
     <title>Belidikita - Toko Online Resmi</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ✅ CSS BARU: MODAL KONFIRMASI MODERN (PENGGANTI ALERT ADMIN) */
+        .modal-confirm { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .confirm-box { background: #fff; padding: 30px 20px; border-radius: 15px; text-align: center; width: 90%; max-width: 320px; animation: popIn 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .confirm-box i { font-size: 45px; color: #1976D2; margin-bottom: 15px; }
+        .confirm-box h3 { font-size: 18px; color: #333; margin-bottom: 10px; font-weight: 800; }
+        .confirm-box p { font-size: 12px; color: #666; margin-bottom: 25px; line-height: 1.5; }
+        .confirm-btn-group { display: flex; gap: 10px; justify-content: center; }
+        .btn-batal { flex: 1; padding: 12px; background: #eee; color: #555; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .btn-yakin { flex: 1; padding: 12px; background: #ff3b30; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 59, 48, 0.3); }
+    </style>
 </head>
 <body class="no-scroll"> 
     
@@ -127,6 +139,17 @@
         </div>
     </div>
 
+    <div id="modalConfirmAdmin" class="modal-confirm">
+        <div class="confirm-box">
+            <i class="fas fa-user-shield"></i>
+            <h3>Status: Admin Aktif</h3>
+            <p>Anda sedang login sebagai Admin. Apakah Anda ingin keluar dari panel Admin sekarang?</p>
+            <div class="confirm-btn-group">
+                <button class="btn-batal" id="btnBatalAdmin">Batal</button>
+                <button class="btn-yakin" id="btnYakinAdmin">Ya, Keluar</button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
