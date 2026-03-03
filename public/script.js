@@ -15,12 +15,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const mainContent = document.getElementById('mainContent');
     const bottomNav = document.getElementById('bottomNav');
 
-    // ✅ SENSOR JALUR VIP DARI ADMIN PANEL
+    // ==========================================
+    // ✅ LOGIKA BARU: ANIMASI HANYA 1X SAJA 
+    // ==========================================
     const skipSplash = sessionStorage.getItem('skipSplash');
+    const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
 
     if(splashScreen) {
-        if(skipSplash === 'true') {
-            // JIKA BAWA TIKET VIP: Langsung buka toko tanpa animasi
+        if(skipSplash === 'true' || hasSeenSplash === 'true') {
+            // JIKA BAWA TIKET VIP ATAU SUDAH NONTON: Langsung buka toko tanpa animasi
             splashScreen.style.display = "none";
             document.body.classList.remove('no-scroll'); 
             topHeader.classList.remove('hidden');
@@ -40,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     topHeader.classList.remove('hidden');
                     mainContent.classList.remove('hidden');
                     bottomNav.classList.remove('hidden');
+                    sessionStorage.setItem('hasSeenSplash', 'true'); // Tandai bahwa dia sudah nonton animasi
                     initDashboard(); 
                 }, 1000); 
             }, 4500); 
@@ -140,22 +144,48 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ✅ PERBAIKAN: TOMBOL ADMIN ANTI NYANGKUT
+    // ==========================================
+    // ✅ LOGIKA BARU: TOMBOL ADMIN ANTI NYANGKUT & POP-UP MODERN
+    // ==========================================
     const adminLoginIcon = document.getElementById('adminLoginIcon');
+    const modalConfirmAdmin = document.getElementById('modalConfirmAdmin');
+    const btnBatalAdmin = document.getElementById('btnBatalAdmin');
+    const btnYakinAdmin = document.getElementById('btnYakinAdmin');
+
     if(adminLoginIcon) {
         adminLoginIcon.addEventListener('click', () => {
             const token = localStorage.getItem('token');
+            
+            // Cek apakah benar-benar ada admin yang sedang login
             if (token && token.startsWith('token-admin-')) {
-                if(confirm("Admin sudah masuk. Apakah ingin Logout?")) {
-                    localStorage.removeItem('token');
-                    showToast("Berhasil Logout!", "success");
-                    setTimeout(() => location.reload(), 1000);
-                }
+                // JIKA LOGIN ADMIN: Munculkan pop-up konfirmasi yang elegan
+                modalConfirmAdmin.style.display = 'flex'; 
             } else {
+                // JIKA BELUM LOGIN ADMIN: Langsung pindah ke halaman login.html tanpa banyak tanya
                 window.location.href = 'login.html'; 
             }
         });
     }
+
+    // Tombol BATAL di dalam Pop-up Admin
+    if(btnBatalAdmin) {
+        btnBatalAdmin.addEventListener('click', () => {
+            modalConfirmAdmin.style.display = 'none'; // Tutup pop-up
+        });
+    }
+
+    // Tombol YA, KELUAR! di dalam Pop-up Admin
+    if(btnYakinAdmin) {
+        btnYakinAdmin.addEventListener('click', () => {
+            localStorage.removeItem('token'); // Hapus token admin dari memori
+            modalConfirmAdmin.style.display = 'none'; // Tutup pop-up
+            showToast("Berhasil Logout dari Admin!", "success");
+            
+            // Refresh halaman agar kembali jadi pembeli biasa
+            setTimeout(() => location.reload(), 1000); 
+        });
+    }
+    // ==========================================
 
     async function loadRandomProducts() {
         const productList = document.getElementById('randomProductList');
