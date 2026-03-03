@@ -207,5 +207,45 @@ app.put('/api/products/:id', verifyAdmin, async (req, res) => {
     }
 });
 
+// ==========================================
+// 🛒 API PEMESANAN (ORDER & RESI)
+// ==========================================
+
+// 1. Pembeli Membuat Pesanan Baru (Checkout)
+app.post('/api/orders', verifyToken, async (req, res) => {
+    const { customer_name, customer_wa, shipping_address, items, total_price, shipping_courier, shipping_cost, payment_method } = req.body;
+    try {
+        const result = await pool.query(
+            `INSERT INTO orders (user_id, customer_name, customer_wa, shipping_address, items, total_price, shipping_courier, shipping_cost, payment_method) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`,
+            [req.user.id, customer_name, customer_wa, shipping_address, items, total_price, shipping_courier, shipping_cost, payment_method]
+        );
+        res.json({ success: true, message: "Pesanan berhasil masuk ke database!", order_id: result.rows[0].id });
+    } catch(err) {
+        console.error("🔥 Error Buat Pesanan:", err);
+        res.status(500).json({ success: false, message: "Gagal menyimpan pesanan" });
+    }
+});
+
+// 2. Pembeli Melihat Riwayat Pesanannya Sendiri
+app.get('/api/orders/me', verifyToken, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC', [req.user.id]);
+        res.json({ success: true, data: result.rows });
+    } catch(err) {
+        res.status(500).json({ success: false, message: "Gagal memuat riwayat" });
+    }
+});
+
+// 3. Admin Melihat Semua Pesanan (Untuk persiapan Admin Panel nanti)
+app.get('/api/orders', verifyAdmin, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM orders ORDER BY created_at DESC');
+        res.json({ success: true, data: result.rows });
+    } catch(err) {
+        res.status(500).json({ success: false, message: "Gagal memuat semua pesanan" });
+    }
+});
+
 
 app.listen(PORT, () => { console.log(`🚀 Server belidikita berjalan di port ${PORT}`); });
