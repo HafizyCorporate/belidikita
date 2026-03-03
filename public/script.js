@@ -15,20 +15,35 @@ document.addEventListener("DOMContentLoaded", () => {
     const mainContent = document.getElementById('mainContent');
     const bottomNav = document.getElementById('bottomNav');
 
+    // ✅ SENSOR JALUR VIP DARI ADMIN PANEL
+    const skipSplash = sessionStorage.getItem('skipSplash');
+
     if(splashScreen) {
-        setTimeout(() => {
-            splashScreen.style.transition = "opacity 1s ease";
-            splashScreen.style.opacity = "0";
+        if(skipSplash === 'true') {
+            // JIKA BAWA TIKET VIP: Langsung buka toko tanpa animasi
+            splashScreen.style.display = "none";
+            document.body.classList.remove('no-scroll'); 
+            topHeader.classList.remove('hidden');
+            mainContent.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+            sessionStorage.removeItem('skipSplash'); // Buang tiket setelah dipakai
+            initDashboard();
+        } else {
+            // JIKA PENGUNJUNG BARU BIASA: Putar animasi 4.5 detik
             setTimeout(() => {
-                splashScreen.classList.add('hide');
-                splashScreen.style.display = "none";
-                document.body.classList.remove('no-scroll'); 
-                topHeader.classList.remove('hidden');
-                mainContent.classList.remove('hidden');
-                bottomNav.classList.remove('hidden');
-                initDashboard(); 
-            }, 1000); 
-        }, 4500); 
+                splashScreen.style.transition = "opacity 1s ease";
+                splashScreen.style.opacity = "0";
+                setTimeout(() => {
+                    splashScreen.classList.add('hide');
+                    splashScreen.style.display = "none";
+                    document.body.classList.remove('no-scroll'); 
+                    topHeader.classList.remove('hidden');
+                    mainContent.classList.remove('hidden');
+                    bottomNav.classList.remove('hidden');
+                    initDashboard(); 
+                }, 1000); 
+            }, 4500); 
+        }
     } else {
         initDashboard();
     }
