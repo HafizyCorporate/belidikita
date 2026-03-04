@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Toko Official - Belidikita</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,800" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
+        
+        body { 
+            background: linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%); 
+            color: #333; padding-bottom: 30px; min-height: 100vh;
+            background-image: radial-gradient(#81D4FA 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* --- DEKORASI RAMADHAN MELAYANG --- */
+        .ramadhan-decor { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .lantern {
+            position: absolute; top: -10px; width: 35px; height: 50px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="%23FFD700" d="M112 0c-17.7 0-32 14.3-32 32v16h224V32c0-17.7-14.3-32-32-32H112zM0 96c0-17.7 14.3-32 32-32h320c17.7 0 32 14.3 32 32v64H0V96zm48 96h288v192c0 35.3-28.7 64-64 64H112c-35.3 0-64-28.7-64-64V192zm144 288c53 0 96 43 96 96H96c0-53 43-96 96-96z"/></svg>') no-repeat center center;
+            transform-origin: top center; filter: drop-shadow(0px 5px 10px rgba(255, 215, 0, 0.4));
+        }
+        .lantern.left { left: 5%; animation: swing 3s ease-in-out infinite alternate; }
+        .lantern.right { right: 80%; animation: swing 4s ease-in-out infinite alternate-reverse; width: 25px; height: 40px; }
+        @keyframes swing { 0% { transform: rotate(10deg); } 100% { transform: rotate(-10deg); } }
+
+        /* --- HEADER TOKO (MELAYANG) --- */
+        .header-store { 
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
+            padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(13, 71, 161, 0.1); 
+            position: sticky; top: 0; z-index: 100;
+            border-bottom: 2px solid #81D4FA;
+        }
+        .header-store i { font-size: 20px; color: #0D47A1; cursor: pointer; transition: transform 0.2s; }
+        .header-store i:active { transform: scale(0.8); }
+        .search-bar { flex: 1; margin: 0 15px; background: #f4f9ff; border: 2px solid #E1F5FE; border-radius: 20px; padding: 8px 15px; display: flex; align-items: center; }
+        .search-bar input { border: none; background: transparent; outline: none; width: 100%; font-size: 12px; font-weight: 600; color: #0D47A1; margin-left: 8px; }
+
+        /* --- KONTEN UTAMA --- */
+        .content-wrapper { position: relative; z-index: 10; max-width: 600px; margin: 0 auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+        
+        /* 1. KARTU PROFIL TOKO */
+        .store-profile-card { 
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
+            padding: 20px; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(13, 71, 161, 0.1); 
+            border: 2px solid #fff; animation: fadeUp 0.5s ease forwards;
+            position: relative; overflow: hidden;
+        }
+        .store-bg-accent { position: absolute; top: 0; left: 0; width: 100%; height: 70px; background: linear-gradient(135deg, #0D47A1, #81D4FA); opacity: 0.1; }
+        
+        .store-info-top { display: flex; gap: 15px; align-items: center; position: relative; z-index: 2; }
+        .store-avatar { width: 65px; height: 65px; background: linear-gradient(135deg, #FF9800, #FFD700); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 30px; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); border: 3px solid #fff;}
+        .store-name-box { flex: 1; }
+        .store-name-box h2 { font-size: 16px; font-weight: 800; color: #0D47A1; margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+        .badge-mall { background: #ff3b30; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 800; letter-spacing: 0.5px; }
+        .store-status { font-size: 11px; color: #00AA5B; font-weight: 700; }
+        
+        .store-stats { display: flex; justify-content: space-around; margin-top: 20px; padding-top: 15px; border-top: 2px dashed #E1F5FE; position: relative; z-index: 2; }
+        .stat-item { text-align: center; }
+        .stat-num { font-size: 15px; font-weight: 800; color: #0D47A1; }
+        .stat-label { font-size: 10px; color: #888; font-weight: 600; margin-top: 2px; }
+
+        .btn-follow { width: 100%; margin-top: 15px; background: #0D47A1; color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 5px 15px rgba(13, 71, 161, 0.3); transition: 0.2s; position: relative; z-index: 2; }
+        .btn-follow:active { transform: scale(0.95); }
+
+        /* 2. VOUCHER TOKO (BISA DIKLAIM) */
+        .voucher-section { margin-top: 5px; animation: fadeUp 0.6s ease forwards; opacity: 0;}
+        .section-title { font-size: 14px; font-weight: 800; color: #0D47A1; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        
+        .voucher-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; scroll-behavior: smooth; }
+        .voucher-scroll::-webkit-scrollbar { display: none; }
+        
+        .voucher-card { 
+            min-width: 220px; background: linear-gradient(135deg, #FF9800, #F57C00); 
+            border-radius: 12px; display: flex; color: #fff; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+            position: relative; overflow: hidden;
+        }
+        /* Efek sobekan tiket */
+        .voucher-card::before, .voucher-card::after { content: ''; position: absolute; width: 15px; height: 15px; background: #f4f7fa; border-radius: 50%; top: 50%; transform: translateY(-50%); z-index: 2; }
+        .voucher-card::before { left: -8px; }
+        .voucher-card::after { right: 65px; }
+
+        .v-left { padding: 12px 15px; flex: 1; border-right: 2px dashed rgba(255,255,255,0.4); }
+        .v-left h4 { font-size: 14px; font-weight: 800; margin-bottom: 2px; }
+        .v-left p { font-size: 10px; opacity: 0.9; font-weight: 600; }
+        .v-right { padding: 12px; display: flex; align-items: center; justify-content: center; width: 75px; cursor: pointer; transition: 0.2s; background: rgba(0,0,0,0.1); }
+        .v-right:active { background: rgba(0,0,0,0.2); }
+        .v-right span { font-size: 11px; font-weight: 800; text-transform: uppercase; }
+
+        /* 3. TABS TOKO */
+        .store-tabs { display: flex; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 15px; padding: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 5px; animation: fadeUp 0.7s ease forwards; opacity: 0;}
+        .tab-btn { flex: 1; padding: 12px; text-align: center; font-size: 12px; font-weight: 800; color: #888; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+        .tab-btn.active { background: #E1F5FE; color: #0D47A1; }
+
+        /* 4. GRID PRODUK */
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; animation: fadeUp 0.8s ease forwards; opacity: 0; }
+        .product-card { background: rgba(255,255,255,0.9); border: 2px solid #E1F5FE; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: transform 0.2s; cursor: pointer; }
+        .product-card:active { transform: scale(0.95); }
+        .product-card img { width: 100%; height: 160px; object-fit: cover; border-bottom: 2px solid #E1F5FE; }
+        .product-info { padding: 12px; display: flex; flex-direction: column; flex-grow: 1; }
+        .product-title { font-size: 12px; font-weight: 700; color: #0D47A1; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .product-price { color: #FF9800; font-weight: 800; font-size: 15px; margin-bottom: 8px; }
+        .p-sold-rating { display: flex; justify-content: space-between; font-size: 10px; color: #888; font-weight: 600; margin-top: auto; }
+
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* TOAST */
+        #customToast { visibility: hidden; min-width: 280px; margin-left: -140px; background: rgba(13, 71, 161, 0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 9999; left: 50%; bottom: -50px; font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; }
+        #customToast.show { visibility: visible; opacity: 1; bottom: 40px; }
+        #customToast.success { background: rgba(0, 170, 91, 0.95); border-color: #A5D6A7; }
+    </style>
+</head>
+<body>
+
+    <div class="ramadhan-decor">
+        <div class="lantern left"></div>
+        <div class="lantern right"></div>
+    </div>
+
+    <div class="header-store">
+        <i class="fas fa-arrow-left" onclick="history.back()"></i>
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Cari di toko ini...">
+        </div>
+        <i class="fas fa-ellipsis-v"></i>
+    </div>
+
+    <div class="content-wrapper">
+        
+        <div class="store-profile-card">
+            <div class="store-bg-accent"></div>
+            <div class="store-info-top">
+                <div class="store-avatar"><i class="fas fa-store"></i></div>
+                <div class="store-name-box">
+                    <h2>Belidikita Official <span class="badge-mall">MALL</span></h2>
+                    <div class="store-status"><i class="fas fa-circle" style="font-size:8px;"></i> Aktif 2 menit lalu</div>
+                    <div style="font-size:10px; color:#888; font-weight:600; margin-top:2px;"><i class="fas fa-map-marker-alt"></i> Kota Bandung</div>
+                </div>
+            </div>
+
+            <div class="store-stats">
+                <div class="stat-item">
+                    <div class="stat-num" id="totalStoreProducts">0</div>
+                    <div class="stat-label">Produk</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">4.9</div>
+                    <div class="stat-label">Penilaian</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">98%</div>
+                    <div class="stat-label">Chat Dibalas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">12RB</div>
+                    <div class="stat-label">Pengikut</div>
+                </div>
+            </div>
+
+            <button class="btn-follow" id="btnFollowToko" onclick="followToko()"><i class="fas fa-plus"></i> Ikuti Toko</button>
+        </div>
+
+        <div class="voucher-section">
+            <div class="section-title"><i class="fas fa-ticket-alt" style="color:#FF9800;"></i> Voucher Toko Spesial</div>
+            <div class="voucher-scroll">
+                <div class="voucher-card">
+                    <div class="v-left">
+                        <h4>Diskon Rp50RB</h4>
+                        <p>Min. Belanja Rp200RB</p>
+                    </div>
+                    <div class="v-right" onclick="klaimVoucher('RAMADHAN50')">
+                        <span>KLAIM</span>
+                    </div>
+                </div>
+                <div class="voucher-card" style="background: linear-gradient(135deg, #00AA5B, #00c853);">
+                    <div class="v-left">
+                        <h4>Gratis Ongkir</h4>
+                        <p>Ke Seluruh Indonesia</p>
+                    </div>
+                    <div class="v-right" onclick="klaimVoucher('ONGKIRGRATIS')">
+                        <span>KLAIM</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="store-tabs">
+            <div class="tab-btn active">Beranda</div>
+            <div class="tab-btn">Semua Produk</div>
+            <div class="tab-btn">Kategori</div>
+        </div>
+
+        <div class="product-grid" id="storeProductList">
+            <p style="text-align:center; width:100%; grid-column: span 2; color:#888; font-weight:600; padding: 20px;"><i class="fas fa-spinner fa-spin text-brand mr-2"></i> Memuat etalase toko...</p>
+        </div>
+
+    </div>
+
+    <div id="customToast"></div>
+
+    <script>
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById("customToast");
+            toast.innerText = msg;
+            toast.className = type + " show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        // 1. Fungsi Klaim Voucher Pintar (Otomatis Copy)
+        function klaimVoucher(kode) {
+            navigator.clipboard.writeText(kode);
+            showToast(`Voucher ${kode} diklaim & disalin! Gunakan saat Checkout.`, "success");
+        }
+
+        // 2. Fungsi Animasi Ikuti Toko
+        function followToko() {
+            const btn = document.getElementById('btnFollowToko');
+            if(btn.innerText.includes("Mengikuti")) {
+                btn.innerHTML = "<i class='fas fa-plus'></i> Ikuti Toko";
+                btn.style.background = "#0D47A1";
+                showToast("Batal mengikuti toko.", "error");
+            } else {
+                btn.innerHTML = "<i class='fas fa-check'></i> Mengikuti";
+                btn.style.background = "#00AA5B";
+                showToast("Berhasil mengikuti Belidikita Official!", "success");
+            }
+        }
+
+        // 3. Tarik Semua Produk ke Etalase Toko
+        async function loadStoreProducts() {
+            try {
+                const res = await fetch('/api/products');
+                const result = await res.json();
+                const container = document.getElementById('storeProductList');
+
+                if (result.success && result.data.length > 0) {
+                    container.innerHTML = '';
+                    
+                    // ✅ Update Angka Total Produk di Header Toko secara Otomatis!
+                    document.getElementById('totalStoreProducts').innerText = result.data.length;
+
+                    result.data.forEach(p => {
+                        // Kecerdsan Foto Cloudinary
+                        let arrFoto = [];
+                        try { 
+                            arrFoto = JSON.parse(p.media_url); 
+                            if (!Array.isArray(arrFoto)) arrFoto = [p.media_url];
+                        } catch(e) { arrFoto = [p.media_url]; }
+                        
+                        const imgUrl = arrFoto[0] || 'https://via.placeholder.com/150';
+                        const hargaRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.price);
+
+                        // Siapkan Object untuk dibawa ke halaman Detail
+                        const prodObj = {
+                            id: p.id,
+                            nama: p.title,
+                            harga: p.price,
+                            hargaStr: hargaRp,
+                            deskripsi: p.description,
+                            foto: p.media_url, // Kirim foto mentah
+                            seller_name: p.seller_name || 'Belidikita Official',
+                            weight: p.weight || 1000
+                        };
+                        const strObj = encodeURIComponent(JSON.stringify(prodObj));
+
+                        // Generate Angka Terjual Dummy agar terlihat ramai (Matematika dari ID)
+                        const terjual = (p.id * 17 % 500) + 10;
+
+                        container.innerHTML += `
+                            <div class="product-card" onclick="bukaDetail('${strObj}')">
+                                <img src="${imgUrl}" alt="Produk" loading="lazy">
+                                <div class="product-info">
+                                    <h3 class="product-title">${p.title}</h3>
+                                    <div class="product-price">${hargaRp}</div>
+                                    <div class="p-sold-rating">
+                                        <span><i class="fas fa-star" style="color:#FFD700;"></i> 4.9</span>
+                                        <span>${terjual} Terjual</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    document.getElementById('totalStoreProducts').innerText = "0";
+                    container.innerHTML = '<p style="text-align:center; width:100%; grid-column: span 2; color:#888;">Toko ini belum mengupload barang.</p>';
+                }
+            } catch (err) {
+                document.getElementById('storeProductList').innerHTML = '<p style="text-align:center; width:100%; grid-column: span 2; color:red;">Gagal memuat produk toko.</p>';
+            }
+        }
+
+        // Fungsi klik produk
+        function bukaDetail(encodedObj) {
+            const decodedObj = decodeURIComponent(encodedObj);
+            localStorage.setItem('produk_detail', decodedObj);
+            window.location.href = 'detailproduk.html';
+        }
+
+        // Eksekusi pemuatan data
+        loadStoreProducts();
+    </script>
+</body>
+</html>
