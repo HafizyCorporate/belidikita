@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Profil Saya - Belidikita</title>
+    <title>Profil Saya - Edisi Ramadhan</title>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,800" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,30 +18,70 @@
         }
     </script>
     <style>
-        body { background: linear-gradient(135deg, #f4f7fa 0%, #e0f2fe 100%); min-height: 100vh; padding-bottom: 80px; }
-        .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .input-modern { background: #f8fafc; border: 1px solid #e2e8f0; transition: all 0.3s ease; }
-        .input-modern:focus { background: #fff; border-color: #0D47A1; box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.1); outline: none; }
-        
-        @keyframes fadeUp { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
-        .animate-fade-up { animation: fadeUp 0.4s ease forwards; }
+        body { 
+            background: linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%); 
+            min-height: 100vh; padding-bottom: 80px; 
+            background-image: radial-gradient(#81D4FA 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
 
-        /* Toast Modern */
-        #customToast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 25px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 80px; font-size: 13px; font-weight: 600; transition: opacity 0.3s, bottom 0.3s; opacity: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.2);}
-        #customToast.show { visibility: visible; opacity: 1; bottom: 100px; }
-        #customToast.success { background-color: #00AA5B; }
-        #customToast.error { background-color: #ff3b30; }
+        /* --- DEKORASI RAMADHAN MELAYANG --- */
+        .ramadhan-decor { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .lantern {
+            position: absolute; top: -10px; width: 35px; height: 50px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="%23FFD700" d="M112 0c-17.7 0-32 14.3-32 32v16h224V32c0-17.7-14.3-32-32-32H112zM0 96c0-17.7 14.3-32 32-32h320c17.7 0 32 14.3 32 32v64H0V96zm48 96h288v192c0 35.3-28.7 64-64 64H112c-35.3 0-64-28.7-64-64V192zm144 288c53 0 96 43 96 96H96c0-53 43-96 96-96z"/></svg>') no-repeat center center;
+            transform-origin: top center; filter: drop-shadow(0px 5px 10px rgba(255, 215, 0, 0.4));
+        }
+        .lantern.left { left: 5%; animation: swing 3s ease-in-out infinite alternate; }
+        .lantern.right { right: 5%; animation: swing 4s ease-in-out infinite alternate-reverse; width: 25px; height: 40px; }
+        @keyframes swing { 0% { transform: rotate(10deg); } 100% { transform: rotate(-10deg); } }
+        
+        .moon-icon { position: absolute; top: 8vh; right: -5vw; font-size: 150px; color: rgba(255, 215, 0, 0.15); animation: floatMoon 6s ease-in-out infinite alternate; z-index: 0; }
+        @keyframes floatMoon { 0% { transform: translateY(0) rotate(-10deg); } 100% { transform: translateY(-20px) rotate(5deg); } }
+
+        /* --- ELEMEN UTAMA --- */
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px); border: 2px solid #fff; box-shadow: 0 10px 30px rgba(13, 71, 161, 0.1); position: relative; z-index: 10; }
+        .input-modern { background: #f4f9ff; border: 2px solid #E1F5FE; transition: all 0.3s ease; }
+        .input-modern:focus { background: #fff; border-color: #0D47A1; box-shadow: 0 5px 15px rgba(13, 71, 161, 0.1); outline: none; transform: translateY(-2px); }
+        
+        @keyframes fadeUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        /* --- TOAST MODERN BOUNCY --- */
+        #customToast {
+            visibility: hidden; min-width: 280px; margin-left: -140px;
+            background: rgba(13, 71, 161, 0.95); backdrop-filter: blur(10px);
+            color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 30px; padding: 16px 20px; position: fixed;
+            z-index: 9999; left: 50%; bottom: -50px; 
+            font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: visibility 0.4s, opacity 0.4s, bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            opacity: 0;
+        }
+        #customToast.show { visibility: visible; opacity: 1; bottom: 85px; }
+        #customToast.success { background: rgba(0, 170, 91, 0.95); border-color: #A5D6A7; }
+        #customToast.error { background: rgba(255, 59, 48, 0.95); border-color: #FFCDD2; }
+
+        /* --- MODAL (POP-UP RETUR) BOUNCY --- */
+        .modal-content-bouncy { animation: popModal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popModal { 0% { transform: scale(0.7) translateY(50px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
     </style>
 </head>
 <body class="text-gray-800 relative">
 
-    <div class="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm">
+    <div class="ramadhan-decor">
+        <i class="fas fa-moon moon-icon"></i>
+        <div class="lantern left"></div>
+        <div class="lantern right"></div>
+    </div>
+
+    <div class="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-light">
         <div class="max-w-md mx-auto px-5 py-4 flex items-center justify-between">
-            <button onclick="window.location.href='../dashboardutama.html'" class="w-10 h-10 rounded-full bg-light text-brand flex justify-center items-center hover:scale-105 transition-transform">
+            <button onclick="window.location.href='../dashboardutama.html'" class="w-10 h-10 rounded-full bg-light text-brand flex justify-center items-center hover:bg-brand hover:text-white transition-all shadow-sm">
                 <i class="fas fa-arrow-left"></i>
             </button>
-            <h1 class="text-lg font-extrabold text-brand">Profil Akun</h1>
-            <button id="btnLogout" class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex justify-center items-center hover:scale-105 transition-transform" title="Keluar">
+            <h1 class="text-lg font-extrabold text-brand"><i class="fas fa-user-circle mr-2"></i>Profil Akun</h1>
+            <button id="btnLogout" class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex justify-center items-center hover:bg-red-500 hover:text-white transition-all shadow-sm" title="Keluar">
                 <i class="fas fa-sign-out-alt"></i>
             </button>
         </div>
@@ -52,81 +92,82 @@
         <div class="glass-card rounded-3xl p-6 mb-6 text-center relative overflow-hidden animate-fade-up">
             <div class="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-brand to-blue-400 opacity-20"></div>
             <div class="relative z-10">
-                <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-brand to-accent p-1 shadow-lg mb-3">
+                <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-yellow-400 to-brand p-1 shadow-lg mb-3">
                     <img src="https://ui-avatars.com/api/?name=User&background=fff&color=0D47A1" id="avatarImg" class="w-full h-full rounded-full border-2 border-white object-cover" alt="Avatar">
                 </div>
-                <h2 id="displayNama" class="text-xl font-extrabold text-gray-800">Memuat...</h2>
-                <p id="displayEmail" class="text-xs font-semibold text-gray-500 mb-1">Memuat...</p>
+                <h2 id="displayNama" class="text-xl font-extrabold text-brand">Memuat...</h2>
+                <p id="displayEmail" class="text-xs font-semibold text-gray-500 mb-1"><i class="fas fa-envelope mr-1"></i>Memuat...</p>
                 <p id="displayBio" class="text-xs text-gray-500 italic mb-2">"Belum ada bio"</p>
-                <span class="inline-block px-3 py-1 bg-accent/10 text-accent text-xs font-bold rounded-full"><i class="fas fa-check-circle mr-1"></i> Member Aktif</span>
+                <span class="inline-block px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-extrabold rounded-full shadow-sm"><i class="fas fa-star mr-1"></i> Member Spesial</span>
             </div>
         </div>
 
-        <div class="flex space-x-2 bg-white/50 p-1 rounded-2xl mb-4 backdrop-blur-md shadow-sm animate-fade-up" style="animation-delay: 0.1s;">
-            <button id="tabRiwayat" class="flex-1 py-2.5 text-xs font-bold bg-white shadow-sm rounded-xl text-brand transition" onclick="bukaTab('Riwayat')"><i class="fas fa-box mr-1"></i> Riwayat</button>
-            <button id="tabAlamat" class="flex-1 py-2.5 text-xs font-bold text-gray-500 hover:text-brand transition" onclick="bukaTab('Alamat')"><i class="fas fa-map-marker-alt mr-1"></i> Alamat</button>
-            <button id="tabPengaturan" class="flex-1 py-2.5 text-xs font-bold text-gray-500 hover:text-brand transition" onclick="bukaTab('Pengaturan')"><i class="fas fa-cog mr-1"></i> Profil</button>
+        <div class="flex space-x-2 bg-white/70 p-1.5 rounded-2xl mb-5 backdrop-blur-md shadow-sm border border-white animate-fade-up" style="animation-delay: 0.1s;">
+            <button id="tabRiwayat" class="flex-1 py-3 text-[11px] font-extrabold bg-brand shadow-md rounded-xl text-white transition-all transform scale-105" onclick="bukaTab('Riwayat')"><i class="fas fa-shopping-bag block text-lg mb-1"></i> Riwayat</button>
+            <button id="tabAlamat" class="flex-1 py-3 text-[11px] font-extrabold text-gray-500 hover:text-brand transition-all" onclick="bukaTab('Alamat')"><i class="fas fa-map-marked-alt block text-lg mb-1"></i> Alamat</button>
+            <button id="tabPengaturan" class="flex-1 py-3 text-[11px] font-extrabold text-gray-500 hover:text-brand transition-all" onclick="bukaTab('Pengaturan')"><i class="fas fa-user-edit block text-lg mb-1"></i> Profil</button>
         </div>
 
-        <div id="secRiwayat" class="animate-fade-up">
+        <div id="secRiwayat" class="animate-fade-up" style="animation-delay: 0.2s;">
             <div class="text-center py-10 opacity-50 hidden" id="emptyRiwayat">
-                <i class="fas fa-box-open text-4xl mb-3"></i>
-                <p class="text-xs font-bold">Belum ada pesanan.</p>
+                <i class="fas fa-box-open text-5xl mb-3 text-brand"></i>
+                <p class="text-xs font-bold text-gray-500">Belum ada pesanan untuk lebaran.</p>
             </div>
         </div>
 
         <div id="secAlamat" class="hidden">
-            <div class="glass-card rounded-3xl p-6 mb-6">
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-lg mb-4">
-                    <p class="text-[10px] text-yellow-700 font-bold"><i class="fas fa-info-circle"></i> Pastikan alamat diisi lengkap untuk perhitungan ongkir otomatis.</p>
+            <div class="glass-card rounded-3xl p-6 mb-6 border border-light">
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-lg mb-4 shadow-sm">
+                    <p class="text-[10px] text-yellow-700 font-bold"><i class="fas fa-truck-fast mr-1"></i> Isi alamat lengkap agar kurir tidak nyasar saat antar paket!</p>
                 </div>
                 <form id="formAlamat" class="space-y-4">
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Nama Penerima</label>
+                            <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-user mr-1"></i> Penerima</label>
                             <input type="text" id="inputNamaPenerima" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" required>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">No. WhatsApp</label>
+                            <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fab fa-whatsapp mr-1"></i> No. WA</label>
                             <input type="number" id="inputWA" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" required>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Provinsi</label>
-                        <select id="selectProvinsi" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold appearance-none" required>
+                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-map mr-1"></i> Provinsi</label>
+                        <select id="selectProvinsi" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold appearance-none bg-white" required>
                             <option value="">-- Pilih Provinsi --</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Kota / Kabupaten</label>
-                        <select id="selectKota" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold appearance-none" disabled required>
+                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-city mr-1"></i> Kota / Kab</label>
+                        <select id="selectKota" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold appearance-none bg-white" disabled required>
                             <option value="">-- Pilih Kota --</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Detail Jalan & Patokan</label>
-                        <textarea id="inputDetail" rows="2" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" placeholder="Contoh: Jl. Mawar No 10..." required></textarea>
+                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-home mr-1"></i> Detail Jalan</label>
+                        <textarea id="inputDetail" rows="2" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" placeholder="Contoh: Jl. Mawar No 10 (Samping Masjid)" required></textarea>
                     </div>
-                    <button type="submit" id="btnSimpanAlamat" class="w-full bg-brand hover:bg-blue-800 text-white font-extrabold rounded-xl py-3 shadow-lg transition-all mt-2">
-                        <i class="fas fa-save mr-1"></i> Simpan Alamat
+                    <button type="submit" id="btnSimpanAlamat" class="w-full bg-gradient-to-r from-brand to-blue-500 text-white font-extrabold rounded-xl py-3.5 shadow-lg hover:shadow-xl transition-all mt-2 transform hover:-translate-y-1">
+                        <i class="fas fa-save mr-1"></i> Simpan Alamat Pengiriman
                     </button>
                 </form>
             </div>
         </div>
 
         <div id="secPengaturan" class="hidden">
-            <div class="glass-card rounded-3xl p-6 mb-6">
+            <div class="glass-card rounded-3xl p-6 mb-6 border border-light">
+                <h3 class="text-sm font-extrabold text-brand mb-4 border-b border-light pb-2"><i class="fas fa-id-card mr-1"></i> Info Personal</h3>
                 <form id="formPengaturanProfil" class="space-y-4">
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Nama Tampilan</label>
+                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-signature mr-1"></i> Nama Tampilan</label>
                         <input type="text" id="inputEditNama" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" required>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Bio Singkat</label>
+                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-quote-left mr-1"></i> Bio Singkat</label>
                         <input type="text" id="inputEditBio" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" placeholder="Tulis sesuatu tentangmu...">
                     </div>
-                    <button type="submit" id="btnSimpanProfil" class="w-full bg-gray-800 hover:bg-black text-white font-extrabold rounded-xl py-3 shadow-lg transition-all mt-2">
-                        <i class="fas fa-user-edit mr-1"></i> Update Profil
+                    <button type="submit" id="btnSimpanProfil" class="w-full bg-gray-800 text-white font-extrabold rounded-xl py-3.5 shadow-lg hover:bg-black transition-all mt-2 transform hover:-translate-y-1">
+                        <i class="fas fa-user-edit mr-1"></i> Perbarui Profil Saya
                     </button>
                 </form>
             </div>
@@ -134,26 +175,27 @@
 
     </main>
 
-    <div id="modalRetur" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); align-items:center; justify-content:center;">
-        <div style="background:#fff; padding:20px; border-radius:15px; width:90%; max-width:400px; position:relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-            <span onclick="document.getElementById('modalRetur').style.display='none'" style="position:absolute; right:20px; top:15px; font-size:24px; cursor:pointer; color:#888;">&times;</span>
-            <h2 style="color:#ff3b30; font-size:18px; margin-bottom:15px; font-weight:800;"><i class="fas fa-box-open"></i> Ajukan Retur Barang</h2>
+    <div id="modalRetur" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,40,80,0.7); backdrop-filter:blur(5px); align-items:center; justify-content:center; padding: 20px;">
+        <div class="modal-content-bouncy" style="background:#fff; padding:25px 20px; border-radius:20px; width:100%; max-width:400px; position:relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 3px solid #ff3b30;">
+            <button onclick="document.getElementById('modalRetur').style.display='none'" style="position:absolute; right:15px; top:15px; background:#ffebee; color:#ff3b30; border:none; width:35px; height:35px; border-radius:50%; font-size:18px; font-weight:bold; cursor:pointer; transition:0.2s;"><i class="fas fa-times"></i></button>
             
-            <div style="background:#FFFDE7; border-left:4px solid #FBC02D; padding:10px; font-size:11px; margin-bottom:15px; border-radius:6px;">
-                <b style="color:#E65100;">SYARAT WAJIB:</b><br>Harap lampirkan foto/video UNBOXING paket dari sebelum kardus/lakban dibuka hingga terlihat kerusakannya tanpa jeda!
+            <h2 style="color:#ff3b30; font-size:20px; margin-bottom:15px; font-weight:800; text-align:center;"><i class="fas fa-box-open mr-2"></i> Ajukan Retur</h2>
+            
+            <div style="background:#FFFDE7; border-left:4px solid #FBC02D; padding:12px; font-size:11px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+                <b style="color:#E65100;"><i class="fas fa-exclamation-triangle mr-1"></i> SYARAT MUTLAK:</b><br>Harap lampirkan foto/video UNBOXING paket dari sebelum kardus/lakban dibuka hingga terlihat kerusakannya tanpa jeda!
             </div>
 
             <form id="formRetur">
                 <input type="hidden" id="returOrderId">
                 <div style="margin-bottom:15px;">
-                    <label style="font-size:12px; font-weight:bold; color:#555;">Alasan Retur / Kerusakan</label>
-                    <textarea id="returReason" rows="3" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; outline:none; font-family:'Montserrat', sans-serif; font-size:12px;" placeholder="Jelaskan detail kerusakannya..." required></textarea>
+                    <label style="display:block; font-size:11px; font-weight:800; color:#0D47A1; margin-bottom:5px; text-transform:uppercase;"><i class="fas fa-comment-dots mr-1"></i> Alasan Kerusakan</label>
+                    <textarea id="returReason" rows="3" style="width:100%; padding:12px; border:2px solid #E1F5FE; border-radius:12px; outline:none; font-family:'Montserrat', sans-serif; font-size:13px; font-weight:600; background:#fbfdff;" placeholder="Jelaskan secara detail..." required></textarea>
                 </div>
-                <div style="margin-bottom:15px;">
-                    <label style="font-size:12px; font-weight:bold; color:#555;">Upload Video/Foto Unboxing</label>
-                    <input type="file" id="returProof" accept="video/*, image/*" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; font-size:12px;" required>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; font-size:11px; font-weight:800; color:#0D47A1; margin-bottom:5px; text-transform:uppercase;"><i class="fas fa-video mr-1"></i> Bukti Video / Foto</label>
+                    <input type="file" id="returProof" accept="video/*, image/*" style="width:100%; padding:10px; border:2px dashed #B3E5FC; border-radius:12px; font-size:12px; background:#fff; font-weight:600;" required>
                 </div>
-                <button type="submit" id="btnSubmitRetur" style="width:100%; padding:12px; background:#ff3b30; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-family:'Montserrat', sans-serif;"><i class="fas fa-paper-plane mr-1"></i> Kirim Pengajuan</button>
+                <button type="submit" id="btnSubmitRetur" style="width:100%; padding:14px; background:linear-gradient(135deg, #ff3b30, #d32f2f); color:#fff; border:none; border-radius:12px; font-weight:800; font-size:14px; cursor:pointer; font-family:'Montserrat', sans-serif; box-shadow:0 5px 15px rgba(255,59,48,0.4); transition:0.3s;"><i class="fas fa-paper-plane mr-1"></i> KIRIM PENGAJUAN RETUR</button>
             </form>
         </div>
     </div>
@@ -180,7 +222,7 @@
         function bukaTab(namaTab) {
             const tabs = ['tabRiwayat', 'tabAlamat', 'tabPengaturan'];
             tabs.forEach(t => {
-                document.getElementById(t).className = "flex-1 py-2.5 text-xs font-bold text-gray-500 hover:text-brand transition";
+                document.getElementById(t).className = "flex-1 py-3 text-[11px] font-extrabold text-gray-500 hover:text-brand transition-all";
             });
 
             const secs = ['secRiwayat', 'secAlamat', 'secPengaturan'];
@@ -189,7 +231,10 @@
                 document.getElementById(s).classList.remove('animate-fade-up');
             });
 
-            document.getElementById('tab' + namaTab).className = "flex-1 py-2.5 text-xs font-bold bg-white shadow-sm rounded-xl text-brand transition";
+            // Tab Aktif
+            const activeTab = document.getElementById('tab' + namaTab);
+            activeTab.className = "flex-1 py-3 text-[11px] font-extrabold bg-brand shadow-md rounded-xl text-white transition-all transform scale-105";
+            
             const targetSec = document.getElementById('sec' + namaTab);
             targetSec.classList.remove('hidden');
             
@@ -257,7 +302,7 @@
                 if (resultProf.success) {
                     const data = resultProf.data;
                     document.getElementById('displayNama').innerText = data.name;
-                    document.getElementById('displayEmail').innerText = data.email;
+                    document.getElementById('displayEmail').innerHTML = `<i class="fas fa-envelope mr-1"></i> ${data.email}`;
                     if(data.bio) document.getElementById('displayBio').innerText = `"${data.bio}"`;
                     
                     document.getElementById('inputEditNama').value = data.name;
@@ -283,11 +328,11 @@
         document.getElementById('formAlamat').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanAlamat');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...';
 
             if(!selectProvinsi.value || !selectKota.value) {
                 showToast("Pilih Provinsi dan Kota dari menu yang tersedia!", "error");
-                btn.innerHTML = '<i class="fas fa-save"></i> Simpan Alamat';
+                btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan Alamat Pengiriman';
                 return;
             }
 
@@ -308,7 +353,7 @@
                     showToast("Alamat berhasil diupdate! 🎉", "success");
                 }
             } catch (err) { showToast("Gagal simpan alamat", "error"); }
-            finally { btn.innerHTML = '<i class="fas fa-save"></i> Simpan Alamat'; }
+            finally { btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan Alamat Pengiriman'; }
         });
 
         // ==========================================
@@ -317,7 +362,7 @@
         document.getElementById('formPengaturanProfil').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanProfil');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Updating...';
 
             const payload = {
                 name: document.getElementById('inputEditNama').value,
@@ -338,7 +383,7 @@
                     showToast("Gagal update profil", "error");
                 }
             } catch (err) { showToast("Server Error", "error"); }
-            finally { btn.innerHTML = '<i class="fas fa-user-edit"></i> Update Profil'; }
+            finally { btn.innerHTML = '<i class="fas fa-user-edit mr-1"></i> Perbarui Profil Saya'; }
         });
 
         // ==========================================
@@ -357,63 +402,62 @@
                         let items = [];
                         try { items = JSON.parse(order.items); } catch(e) {}
                         
-                        // Validasi jika array items kosong
                         const barangPertama = items.length > 0 ? items[0] : { foto: 'https://via.placeholder.com/150', nama: 'Barang', qty: 1 };
                         const sisaBarang = items.length > 1 ? ` + ${items.length - 1} barang lainnya` : '';
                         
-                        let statusColor = "bg-yellow-100 text-yellow-700";
-                        if(order.status === 'Diproses') statusColor = "bg-blue-100 text-blue-700";
-                        if(order.status === 'Dikirim') statusColor = "bg-purple-100 text-purple-700";
-                        if(order.status === 'Selesai') statusColor = "bg-green-100 text-green-700";
-                        if(order.status.includes('Retur')) statusColor = "bg-red-100 text-red-700 font-extrabold"; // Warna Khusus Retur
+                        let statusColor = "bg-yellow-100 text-yellow-700 border border-yellow-200";
+                        if(order.status === 'Diproses') statusColor = "bg-blue-100 text-blue-700 border border-blue-200";
+                        if(order.status === 'Dikirim') statusColor = "bg-purple-100 text-purple-700 border border-purple-200";
+                        if(order.status === 'Selesai') statusColor = "bg-green-100 text-green-700 border border-green-200";
+                        if(order.status.includes('Retur')) statusColor = "bg-red-100 text-red-700 font-extrabold border border-red-200 shadow-sm";
 
                         const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
 
-                        // ✅ LOGIKA TOMBOL RETUR: Muncul Jika Dikirim/Selesai dan Belum Pernah Diretur
                         let btnReturHtml = '';
                         if ((order.status === 'Dikirim' || order.status === 'Selesai') && !order.status.includes('Retur')) {
-                            btnReturHtml = `<button onclick="bukaModalRetur(${order.id})" class="mt-4 w-full py-2.5 bg-red-50 text-red-500 text-xs font-bold rounded-xl border border-red-100 hover:bg-red-100 transition"><i class="fas fa-undo mr-1"></i> Ajukan Retur Barang</button>`;
+                            btnReturHtml = `<button onclick="bukaModalRetur(${order.id})" class="mt-4 w-full py-2.5 bg-white text-red-500 text-xs font-extrabold rounded-xl border-2 border-red-100 hover:bg-red-50 transition transform hover:scale-[1.02]"><i class="fas fa-undo mr-1"></i> Ajukan Retur Barang</button>`;
                         } else if (order.status.includes('Retur')) {
-                            btnReturHtml = `<div class="mt-4 w-full py-2 bg-gray-100 text-gray-500 text-xs font-bold rounded-xl text-center"><i class="fas fa-info-circle mr-1"></i> ${order.status}</div>`;
+                            btnReturHtml = `<div class="mt-4 w-full py-2.5 bg-gray-50 text-gray-500 text-xs font-bold rounded-xl text-center border border-gray-200"><i class="fas fa-info-circle mr-1"></i> Status: ${order.status}</div>`;
                         }
 
                         containerRiwayat.innerHTML += `
-                            <div class="glass-card rounded-2xl p-4 mb-3">
-                                <div class="flex justify-between items-center border-b border-gray-100 pb-2 mb-3">
-                                    <span class="text-xs font-bold text-gray-500"><i class="fas fa-store text-brand mr-1"></i> Order #ORD-${order.id}</span>
+                            <div class="glass-card rounded-2xl p-4 mb-4 border border-light">
+                                <div class="flex justify-between items-center border-b border-light pb-3 mb-3">
+                                    <span class="text-xs font-extrabold text-brand"><i class="fas fa-store mr-1"></i> Belidikita Official</span>
                                     <div class="flex items-center gap-2">
-                                        <span class="text-[10px] font-bold ${statusColor} px-2 py-1 rounded uppercase">${order.status}</span>
-                                        <button onclick="hapusPesananKu(${order.id})" class="text-red-500 bg-red-50 w-6 h-6 rounded-full flex items-center justify-center hover:bg-red-100 transition" title="Hapus Riwayat"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                                        <span class="text-[10px] font-bold ${statusColor} px-2.5 py-1 rounded-md uppercase tracking-wide">${order.status}</span>
+                                        <button onclick="hapusPesananKu(${order.id})" class="text-red-400 bg-red-50 w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition-all shadow-sm" title="Hapus Riwayat"><i class="fas fa-trash-alt text-[10px]"></i></button>
                                     </div>
                                 </div>
                                 <div class="flex gap-3 items-center mb-3">
-                                    <div class="w-14 h-14 bg-gray-200 rounded-lg flex-shrink-0">
-                                        <img src="${barangPertama.foto}" class="w-full h-full object-cover rounded-lg" alt="Barang">
+                                    <div class="w-16 h-16 bg-white rounded-lg flex-shrink-0 border border-light p-1 shadow-sm">
+                                        <img src="${barangPertama.foto}" class="w-full h-full object-cover rounded-md" alt="Barang">
                                     </div>
-                                    <div>
-                                        <h4 class="text-sm font-bold text-gray-800 line-clamp-1">${barangPertama.nama}</h4>
-                                        <p class="text-[11px] text-gray-500">${barangPertama.qty} Barang ${sisaBarang}</p>
+                                    <div class="flex-grow">
+                                        <h4 class="text-sm font-extrabold text-gray-800 line-clamp-1">${barangPertama.nama}</h4>
+                                        <p class="text-[11px] text-gray-500 font-semibold mt-1"><i class="fas fa-box mr-1"></i>${barangPertama.qty} Barang ${sisaBarang}</p>
                                     </div>
                                 </div>
-                                <div class="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-100">
-                                    <p class="text-[11px] text-gray-500 font-semibold mb-1">Kurir: <span class="text-brand">${order.shipping_courier}</span></p>
+                                <div class="bg-blue-50/50 rounded-lg p-3 mb-3 border border-blue-100">
+                                    <p class="text-[11px] text-gray-500 font-bold mb-1"><i class="fas fa-truck mr-1"></i> Kurir: <span class="text-brand">${order.shipping_courier}</span></p>
                                     <p class="text-xs font-extrabold text-gray-800 flex justify-between items-center">
-                                        <span>Resi: ${order.resi}</span>
-                                        ${order.resi !== '-' ? `<button onclick="salinResi('${order.resi}')" class="text-brand text-[10px] bg-blue-100 px-2 py-1 rounded"><i class="fas fa-copy"></i> Salin</button>` : ''}
+                                        <span><i class="fas fa-barcode mr-1 text-gray-400"></i> ${order.resi}</span>
+                                        ${order.resi !== '-' ? `<button onclick="salinResi('${order.resi}')" class="text-brand text-[10px] bg-blue-100 px-3 py-1 rounded-md hover:bg-brand hover:text-white transition"><i class="fas fa-copy mr-1"></i> Salin</button>` : ''}
                                     </p>
                                 </div>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-xs font-semibold text-gray-500">Total Tagihan</span>
-                                    <span class="text-sm font-extrabold text-orange-500">${formatRp}</span>
+                                <div class="flex justify-between items-center pt-1">
+                                    <span class="text-xs font-bold text-gray-500">Total Belanja</span>
+                                    <span class="text-base font-extrabold text-orange-500">${formatRp}</span>
                                 </div>
-                                ${btnReturHtml} </div>
+                                ${btnReturHtml}
+                            </div>
                         `;
                     });
                 } else {
                     containerRiwayat.innerHTML = `
                         <div class="text-center py-10 opacity-50">
-                            <i class="fas fa-box-open text-4xl mb-3"></i>
-                            <p class="text-xs font-bold">Belum ada pesanan.</p>
+                            <i class="fas fa-shopping-bag text-6xl mb-4 text-brand"></i>
+                            <p class="text-sm font-bold text-gray-600">Belum ada pesanan.</p>
                         </div>
                     `;
                 }
@@ -422,7 +466,7 @@
         loadRiwayatPesanan();
 
         // ==========================================
-        // ✅ FUNGSI PEMBELI MENGHAPUS RIWAYAT PESANAN
+        // FUNGSI PEMBELI MENGHAPUS RIWAYAT PESANAN
         // ==========================================
         async function hapusPesananKu(id) {
             if(!confirm("Yakin ingin menghapus riwayat pesanan ini?")) return;
@@ -435,8 +479,8 @@
                 const data = await res.json();
                 
                 if(data.success) {
-                    showToast("Riwayat pesanan berhasil dihapus! 🧹", "success");
-                    loadRiwayatPesanan(); // Otomatis refresh daftar riwayat
+                    showToast("Riwayat pesanan dibersihkan! 🧹", "success");
+                    loadRiwayatPesanan(); 
                 } else {
                     showToast(data.message, "error");
                 }
@@ -446,7 +490,7 @@
         }
 
         // ==========================================
-        // ✅ FUNGSI EKSEKUSI PENGAJUAN RETUR
+        // FUNGSI EKSEKUSI PENGAJUAN RETUR
         // ==========================================
         function bukaModalRetur(id_pesanan) {
             document.getElementById('returOrderId').value = id_pesanan;
@@ -456,7 +500,7 @@
         document.getElementById('formRetur').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmitRetur');
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengupload Video...";
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin mr-1'></i> Mengupload Video...";
             btn.disabled = true;
 
             const id_pesanan = document.getElementById('returOrderId').value;
@@ -468,22 +512,22 @@
                 const res = await fetch(`/api/orders/${id_pesanan}/return`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData // ✅ Menggunakan FormData, bukan JSON
+                    body: formData 
                 });
                 
                 const data = await res.json();
                 if(data.success) {
-                    showToast("Pengajuan retur & bukti berhasil dikirim!", "success");
+                    showToast("Pengajuan retur dikirim!", "success");
                     document.getElementById('modalRetur').style.display = 'none';
                     document.getElementById('formRetur').reset();
-                    loadRiwayatPesanan(); // Refresh kartu pesanan
+                    loadRiwayatPesanan(); 
                 } else {
                     showToast("Gagal: " + data.message, "error");
                 }
             } catch(err) {
-                showToast("Server Error saat mengupload video!", "error");
+                showToast("Server Error saat upload video!", "error");
             } finally {
-                btn.innerHTML = "<i class='fas fa-paper-plane mr-1'></i> Kirim Pengajuan";
+                btn.innerHTML = "<i class='fas fa-paper-plane mr-1'></i> KIRIM PENGAJUAN RETUR";
                 btn.disabled = false;
             }
         });
