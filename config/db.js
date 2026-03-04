@@ -44,17 +44,21 @@ const initDB = async () => {
 
         
     // 3. Modifikasi tabel jika ada kolom baru (Tanpa menghapus data lama)
-    const alterTables = `
+        const alterTables = `
         ALTER TABLE products ADD COLUMN IF NOT EXISTS category VARCHAR(50) DEFAULT 'biasa';
         ALTER TABLE products ADD COLUMN IF NOT EXISTS capital_price DECIMAL(12,2) DEFAULT 0;
         ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INT DEFAULT 0;
         ALTER TABLE products ALTER COLUMN media_url TYPE TEXT;
         ALTER TABLE products ADD COLUMN IF NOT EXISTS weight INT DEFAULT 1000;
         
-        -- ✅ TAMBAHAN: TEMBOK PEMISAH HAPUS
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_hidden_buyer BOOLEAN DEFAULT FALSE; 
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_hidden_admin BOOLEAN DEFAULT FALSE;
+        
+        -- ✅ TAMBAHAN: Kolom Retur dan Link Video/Foto Bukti Unboxing
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_reason TEXT;
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_media TEXT;
     `;
+
 
 
     try {
