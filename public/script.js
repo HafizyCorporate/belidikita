@@ -23,16 +23,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if(splashScreen) {
         if(skipSplash === 'true' || hasSeenSplash === 'true') {
-            // JIKA BAWA TIKET VIP ATAU SUDAH NONTON: Langsung buka toko tanpa animasi
             splashScreen.style.display = "none";
             document.body.classList.remove('no-scroll'); 
             topHeader.classList.remove('hidden');
             mainContent.classList.remove('hidden');
             bottomNav.classList.remove('hidden');
-            sessionStorage.removeItem('skipSplash'); // Buang tiket setelah dipakai
+            sessionStorage.removeItem('skipSplash'); 
             initDashboard();
         } else {
-            // JIKA PENGUNJUNG BARU BIASA: Putar animasi 4.5 detik
             setTimeout(() => {
                 splashScreen.style.transition = "opacity 1s ease";
                 splashScreen.style.opacity = "0";
@@ -43,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     topHeader.classList.remove('hidden');
                     mainContent.classList.remove('hidden');
                     bottomNav.classList.remove('hidden');
-                    sessionStorage.setItem('hasSeenSplash', 'true'); // Tandai bahwa dia sudah nonton animasi
+                    sessionStorage.setItem('hasSeenSplash', 'true'); 
                     initDashboard(); 
                 }, 1000); 
             }, 4500); 
@@ -52,7 +50,6 @@ document.addEventListener("DOMContentLoaded", () => {
         initDashboard();
     }
 
-    // FUNGSI UPDATE BADGE KERANJANG
     function updateCartBadge() {
         let cart = JSON.parse(localStorage.getItem('belidikita_cart')) || [];
         let total = cart.reduce((sum, item) => sum + item.qty, 0);
@@ -61,10 +58,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     updateCartBadge(); 
 
-    // ✅ FUNGSI BARU: SENSOR PEMBELI LOGIN (Ubah Teks Menu Akun jadi Nama Pembeli)
     async function cekStatusPembeli() {
         const token = localStorage.getItem('token');
-        // Pastikan ada token dan BUKAN token admin
         if (token && !token.startsWith('token-admin-')) {
             try {
                 const res = await fetch('/api/profile', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -72,11 +67,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (result.success) {
                     const menuAccountSpan = document.querySelector('#menuAccount span');
                     if(menuAccountSpan) {
-                        // Ambil kata pertama dari nama (Contoh "Budi Santoso" jadi "Budi")
                         menuAccountSpan.innerText = result.data.name.split(' ')[0];
                     }
                 } else {
-                    localStorage.removeItem('token'); // Bersihkan jika token kadaluarsa
+                    localStorage.removeItem('token'); 
                 }
             } catch (e) { console.error("Gagal cek status pembeli"); }
         }
@@ -111,12 +105,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function initDashboard() {
         loadPromoSlider();   
         loadRandomProducts(); 
-        cekStatusPembeli(); // ✅ Panggil sensor saat web selesai dimuat
+        cekStatusPembeli(); 
     }
 
-    // ==========================================
-    // 🚀 LOGIKA MENU BAWAH (BOTTOM NAV)
-    // ==========================================
     const menuHome = document.getElementById('menuHome');
     const menuProduct = document.getElementById('menuProduct');
     const menuFeed = document.getElementById('menuFeed');
@@ -132,7 +123,6 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault(); setActiveNav(menuHome); window.scrollTo({ top: 0, behavior: 'smooth' }); 
     });
     
-    // ✅ KABEL KE HALAMAN TOKO
     if(menuProduct) menuProduct.addEventListener('click', (e) => { 
         e.preventDefault(); setActiveNav(menuProduct); 
         window.location.href = 'toko.html'; 
@@ -143,13 +133,11 @@ document.addEventListener("DOMContentLoaded", () => {
         showToast("Fitur Video Feed segera hadir!", "info"); 
     });
     
-    // ✅ KABEL KE HALAMAN RIWAYAT
     if(menuTransaction) menuTransaction.addEventListener('click', (e) => { 
         e.preventDefault(); setActiveNav(menuTransaction); 
         window.location.href = 'registrasi/profilpembeli.html'; 
     });
 
-    // ✅ KABEL KE HALAMAN PROFIL / LOGIN
     if(menuAccount) {
         menuAccount.addEventListener('click', (e) => { 
             e.preventDefault(); setActiveNav(menuAccount); 
@@ -162,9 +150,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ==========================================
-    // ✅ LOGIKA BARU: TOMBOL ADMIN ANTI NYANGKUT & POP-UP MODERN
-    // ==========================================
     const adminLoginIcon = document.getElementById('adminLoginIcon');
     const modalConfirmAdmin = document.getElementById('modalConfirmAdmin');
     const btnBatalAdmin = document.getElementById('btnBatalAdmin');
@@ -173,37 +158,24 @@ document.addEventListener("DOMContentLoaded", () => {
     if(adminLoginIcon) {
         adminLoginIcon.addEventListener('click', () => {
             const token = localStorage.getItem('token');
-            
-            // Cek apakah benar-benar ada admin yang sedang login
             if (token && token.startsWith('token-admin-')) {
-                // JIKA LOGIN ADMIN: Munculkan pop-up konfirmasi yang elegan
                 modalConfirmAdmin.style.display = 'flex'; 
             } else {
-                // JIKA BELUM LOGIN ADMIN: Langsung pindah ke halaman login.html tanpa banyak tanya
                 window.location.href = 'login.html'; 
             }
         });
     }
 
-    // Tombol BATAL di dalam Pop-up Admin
-    if(btnBatalAdmin) {
-        btnBatalAdmin.addEventListener('click', () => {
-            modalConfirmAdmin.style.display = 'none'; // Tutup pop-up
-        });
-    }
+    if(btnBatalAdmin) { btnBatalAdmin.addEventListener('click', () => { modalConfirmAdmin.style.display = 'none'; }); }
 
-    // Tombol YA, KELUAR! di dalam Pop-up Admin
     if(btnYakinAdmin) {
         btnYakinAdmin.addEventListener('click', () => {
-            localStorage.removeItem('token'); // Hapus token admin dari memori
-            modalConfirmAdmin.style.display = 'none'; // Tutup pop-up
+            localStorage.removeItem('token'); 
+            modalConfirmAdmin.style.display = 'none'; 
             showToast("Berhasil Logout dari Admin!", "success");
-            
-            // Refresh halaman agar kembali jadi pembeli biasa
             setTimeout(() => location.reload(), 1000); 
         });
     }
-    // ==========================================
 
     async function loadRandomProducts() {
         const productList = document.getElementById('randomProductList');
@@ -224,28 +196,54 @@ document.addEventListener("DOMContentLoaded", () => {
                     const deskripsiBarang = product.description || "Deskripsi belum tersedia.";
                     const isVideo = product.media_type === 'video';
                     
-                    // ✅ PINTAR MEMILIH FOTO SAMPUL (Ambil foto pertama dari kumpulan foto)
                     let fotoUtama = product.media_url;
                     try {
                         const parsedMedia = JSON.parse(product.media_url);
-                        if (Array.isArray(parsedMedia) && parsedMedia.length > 0) {
-                            fotoUtama = parsedMedia[0];
-                        }
-                    } catch(e) {} // Jika bukan array (kodingan lama), biarkan saja
+                        if (Array.isArray(parsedMedia) && parsedMedia.length > 0) { fotoUtama = parsedMedia[0]; }
+                    } catch(e) {} 
 
                     const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video+Produk' : (fotoUtama || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
                     const mediaTag = isVideo ? `<video src="${fotoBarang}" class="product-media" style="object-fit:cover;"></video>` : `<img src="${fotoBarang}" class="product-media" alt="${product.title}">`;
 
-                    // Generate ID untuk terjual dummy (konsisten dari ID asli agar sama dengan halaman toko/detail)
                     const terjual = (product.id * 17 % 500) + 10;
+
+                    // ✅ MENGAMBIL SEMUA DNA GROSIR & VARIAN
+                    const pId = product.id;
+                    const pUrl = product.media_url;
+                    const pTitle = product.title;
+                    const pDesc = deskripsiBarang;
+                    const pPrice = product.price;
+                    const pWeight = product.weight;
+                    const pSeller = product.seller_name;
+                    const pUnit = product.unit;
+                    const pVarTitle = product.variant_title;
+                    const pVarOpt = product.variant_options;
+                    const pWsPrice = product.wholesale_price;
+                    const pWsMin = product.wholesale_min_qty;
+
+                    // Lencana Grosir di Beranda
+                    let badgeGrosirHorizontal = '';
+                    let badgeGrosirKotak = '';
+                    if(pWsPrice > 0 && pWsMin > 0) {
+                        badgeGrosirHorizontal = `<div style="font-size:8px; color:#fff; background:#4CAF50; padding:2px 4px; border-radius:3px; position:absolute; top:5px; right:5px;"><i class="fas fa-tags"></i> Grosir</div>`;
+                        badgeGrosirKotak = `<div style="position:absolute; top:5px; left:5px; background:#4CAF50; color:#fff; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;"><i class="fas fa-tags"></i> GROSIR</div>`;
+                    }
 
                     if (product.category === 'laris' || product.category === 'keranjang') {
                         const hCard = document.createElement('div');
                         hCard.className = 'h-card';
-                        hCard.innerHTML = `<img src="${fotoBarang}" class="h-card-img" alt="Barang"><div class="h-card-info"><div class="h-card-row"><span class="h-card-title">${product.title}</span><span class="h-card-price" style="font-size:11px;">${priceRp}</span></div></div>`;
-                        
-                        // ✅ MENGIRIM DATA LENGKAP KE DETAIL PRODUK (TERMASUK ID DAN SELLER NAME)
-                        hCard.addEventListener('click', () => bukaDetailProduk(product.id, product.media_url, product.title, priceRp, deskripsiBarang, product.price, product.weight, product.seller_name));
+                        hCard.style.position = 'relative';
+                        hCard.innerHTML = `
+                            ${badgeGrosirHorizontal}
+                            <img src="${fotoBarang}" class="h-card-img" alt="Barang">
+                            <div class="h-card-info">
+                                <div class="h-card-row">
+                                    <span class="h-card-title">${product.title}</span>
+                                    <span class="h-card-price" style="font-size:11px;">${priceRp}</span>
+                                </div>
+                            </div>
+                        `;
+                        hCard.addEventListener('click', () => bukaDetailProduk(pId, pUrl, pTitle, priceRp, pDesc, pPrice, pWeight, pSeller, pUnit, pVarTitle, pVarOpt, pWsPrice, pWsMin));
                         
                         if (product.category === 'laris' && larisList) larisList.appendChild(hCard);
                         if (product.category === 'keranjang' && cartList) cartList.appendChild(hCard);
@@ -253,7 +251,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const card = document.createElement('div');
                     card.className = 'product-card';
+                    card.style.position = 'relative';
                     card.innerHTML = `
+                        ${badgeGrosirKotak}
                         ${fotoUtama ? mediaTag : '<div class="product-media" style="display:flex; align-items:center; justify-content:center; color:#aaa;">No Media</div>'}
                         <div class="product-info">
                             <div class="product-title">${product.title}</div>
@@ -264,12 +264,10 @@ document.addEventListener("DOMContentLoaded", () => {
                             </div>
                         </div>`;
                     
-                    // ✅ MENGIRIM DATA LENGKAP KE DETAIL PRODUK
-                    card.addEventListener('click', () => bukaDetailProduk(product.id, product.media_url, product.title, priceRp, deskripsiBarang, product.price, product.weight, product.seller_name));
+                    card.addEventListener('click', () => bukaDetailProduk(pId, pUrl, pTitle, priceRp, pDesc, pPrice, pWeight, pSeller, pUnit, pVarTitle, pVarOpt, pWsPrice, pWsMin));
                     
                     productList.appendChild(card);
                 });
-
 
                 if(larisList && larisList.innerHTML === '') larisList.innerHTML = '<p style="padding:15px; font-size:12px; color:#888;">Belum ada barang di etalase ini.</p>';
                 if(cartList && cartList.innerHTML === '') cartList.innerHTML = '<p style="padding:15px; font-size:12px; color:#888;">Belum ada barang di etalase ini.</p>';
@@ -284,8 +282,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const productModal = document.getElementById('productDetailModal');
     const closeDetailBtn = document.getElementById('closeDetailBtn');
     
-    // ✅ PERBAIKAN: MEMBAWA ID DAN SELLER NAME AGAR BISA DIBACA DI HALAMAN DETAIL/TOKO
-    function bukaDetailProduk(id, foto, nama, hargaStr, deskripsi, hargaRaw, beratRaw, sellerName) {
+    // ✅ FUNGSI KLIK MENGANGKUT SEMUA DATA GROSIR & VARIAN
+    function bukaDetailProduk(id, foto, nama, hargaStr, deskripsi, hargaRaw, beratRaw, sellerName, unit, vTitle, vOpt, wsPrice, wsMin) {
         const dataProduk = { 
             id: id,
             foto: foto, 
@@ -295,27 +293,28 @@ document.addEventListener("DOMContentLoaded", () => {
             harga: hargaRaw, 
             weight: beratRaw || 1000, 
             seller_name: sellerName || "Belidikita Official",
-            qty: 1 
+            qty: 1,
+            unit: unit || 'Pcs',
+            variant_title: vTitle || '',
+            variant_options: vOpt || '',
+            wholesale_price: wsPrice || 0,
+            wholesale_min_qty: wsMin || 0
         };
         
         localStorage.setItem('produk_detail', JSON.stringify(dataProduk));
         window.location.href = 'detailproduk.html';
     }
 
-
     if(closeDetailBtn) { closeDetailBtn.addEventListener('click', () => { productModal.style.display = "none"; }); }
 
+    // FUNGSI LAIN (Tidak Dihapus)
     const btnAddToCart = document.getElementById('btnAddToCart');
     if(btnAddToCart) {
         btnAddToCart.addEventListener('click', () => {
             if(!currentProduct) return;
             let cart = JSON.parse(localStorage.getItem('belidikita_cart')) || [];
             const existingItem = cart.find(item => item.nama === currentProduct.nama);
-            if(existingItem) {
-                existingItem.qty += 1; 
-            } else {
-                cart.push(currentProduct); 
-            }
+            if(existingItem) { existingItem.qty += 1; } else { cart.push(currentProduct); }
             localStorage.setItem('belidikita_cart', JSON.stringify(cart));
             updateCartBadge();
             showToast("Barang dimasukkan ke keranjang 🛒", "success");
