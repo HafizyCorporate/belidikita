@@ -40,17 +40,31 @@ const getAllProducts = async (req, res) => {
     } catch (err) { res.status(500).json({ success: false, message: "Server Error" }); }
 };
 
-// ✅ 1. FUNGSI BARU UPLOAD SLIDER PROMO
+// ✅ 1. FUNGSI UPLOAD SLIDER PROMO (CLOUDINARY FIX)
 const uploadPromo = async (req, res) => {
-    // 🔥 PERUBAHAN CLOUDINARY: Menggunakan req.file.path
-    const media_url = req.file ? req.file.path : null;
-    
-    if (!media_url) return res.status(400).json({ success: false, message: "Foto promo wajib ada!" });
     try {
+        // 1. Pelebar Kolom Otomatis: Pastikan database kuat menampung URL Cloudinary yang panjang
+        await pool.query(`ALTER TABLE promo_sliders ALTER COLUMN media_url TYPE TEXT;`);
+        
+        // 2. Ambil URL ajaib dari Cloudinary
+        const media_url = req.file ? req.file.path : null;
+        
+        // 3. Cek apakah gambar berhasil diproses
+        if (!media_url) {
+            return res.status(400).json({ success: false, message: "Foto promo gagal diproses oleh Cloudinary!" });
+        }
+        
+        // 4. Masukkan ke Database
         const newPromo = await pool.query('INSERT INTO promo_sliders (media_url) VALUES ($1) RETURNING *', [media_url]);
         res.json({ success: true, message: "Banner Promo Berhasil Diunggah!", data: newPromo.rows[0] });
-    } catch (err) { res.status(500).json({ success: false, message: "Server Error" }); }
+        
+    } catch (err) { 
+        // Logika Pintar: Agar error di Railway kelihatan aslinya, bukan sekadar [object Object]
+        console.error("🔥 BONGKAR ERROR BANNER:", err);
+        res.status(500).json({ success: false, message: "Gagal menyimpan Banner ke Database." }); 
+    }
 };
+
 
 // ✅ 2. FUNGSI BARU AMBIL SLIDER PROMO (Maksimal 5 Promo Terbaru)
 const getPromos = async (req, res) => {
