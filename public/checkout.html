@@ -22,14 +22,18 @@
         .address-box strong { color: #333; }
 
         /* Produk */
-        .product-item { display: flex; gap: 15px; align-items: center; margin-bottom: 10px; }
+        .product-item { display: flex; gap: 15px; align-items: center; margin-bottom: 10px; position: relative;}
         .product-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; }
         .product-detail { flex: 1; }
         .product-detail h4 { font-size: 13px; font-weight: 600; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .product-detail .price { color: #ff5722; font-weight: 800; font-size: 14px; }
+        .product-detail .price { color: #ff5722; font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap;}
         .product-detail .qty { font-size: 12px; color: #888; float: right; font-weight: bold; background: #f4f7fa; padding: 2px 6px; border-radius: 4px;}
+        
+        /* ✅ Label Info Grosir */
+        .grosir-badge { font-size: 9px; background: #E8F5E9; color: #00AA5B; padding: 2px 5px; border-radius: 4px; border: 1px solid #C8E6C9; margin-top: 2px; display: inline-block; font-weight: bold;}
+        .harga-coret { text-decoration: line-through; color: #aaa; font-size: 10px; font-weight: 600; }
 
-        /* ✅ CSS BARU KHUSUS KUPON */
+        /* KUPON */
         .coupon-box { display: flex; gap: 10px; align-items: center; }
         .coupon-box input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 12px; font-weight: bold; text-transform: uppercase; }
         .coupon-box input:focus { border-color: #0D47A1; }
@@ -207,11 +211,10 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // Variabel Kalkulasi Matematika
         let subtotal = 0;
         let ongkir = 0;
-        let diskonKupon = 0; // ✅ VARIABEL BARU
-        let currentCouponType = null; // ✅ VARIABEL BARU
+        let diskonKupon = 0; 
+        let currentCouponType = null; 
         let totalAkhir = 0;
         let totalBeratGram = 0; 
         let totalKg = 1; 
@@ -223,7 +226,6 @@
 
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
 
-        // 1. CEK ALAMAT & CEGAT JIKA KOSONG
         async function fetchAddress() {
             try {
                 const res = await fetch('/api/address', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -242,7 +244,7 @@
             } catch (err) { console.error(err); }
         }
 
-        // 2. LOAD BARANG & HITUNG BERAT TOTAL
+        // ✅ LOGIKA BARU: MENGHITUNG DISKON GROSIR JIKA MEMENUHI SYARAT QTY
         function loadCheckoutItems() {
             const dataStr = sessionStorage.getItem('belidikita_checkout');
             if(!dataStr) { window.location.href = 'dashboardutama.html'; return; }
@@ -252,16 +254,33 @@
             container.innerHTML = '';
             
             items.forEach(item => {
-                subtotal += (item.harga * item.qty);
+                let hargaFinal = item.harga;
+                let infoGrosirHTML = '';
+
+                // CEK DNA GROSIR DARI ITEM KERANJANG
+                if (item.wholesale_price && item.wholesale_min_qty && item.qty >= item.wholesale_min_qty) {
+                    hargaFinal = item.wholesale_price; // Banting harga jadi murah!
+                    // Tampilkan coretan harga asli dan lencana Grosir
+                    infoGrosirHTML = `<div class="grosir-badge"><i class="fas fa-tags"></i> Harga Grosir Aktif!</div>`;
+                    item.hargaAwalDicoret = item.harga; // Simpan untuk dikirim ke WA nanti
+                }
+                
+                // Pastikan item update dengan harga final agar saat dikirim ke WA / DB harganya valid
+                item.hargaTerpakai = hargaFinal; 
+
+                subtotal += (hargaFinal * item.qty);
                 let beratPerBarang = item.weight ? item.weight : 1000; 
                 totalBeratGram += (beratPerBarang * item.qty);
+
+                const tampilanHargaCorek = infoGrosirHTML ? `<span class="harga-coret">${formatRp(item.harga)}</span>` : '';
 
                 container.innerHTML += `
                     <div class="product-item">
                         <img src="${item.foto}" alt="Foto">
                         <div class="product-detail">
                             <h4>${item.nama}</h4>
-                            <span class="price">${formatRp(item.harga)}</span>
+                            <span class="price">${formatRp(hargaFinal)} ${tampilanHargaCorek}</span>
+                            ${infoGrosirHTML}
                             <span class="qty">x${item.qty}</span>
                         </div>
                     </div>
@@ -280,7 +299,6 @@
             hitungTotal();
         }
 
-        // ✅ 3. FUNGSI BARU: CEK KUPON KE SERVER
         async function cekKupon() {
             const kode = document.getElementById('inputKupon').value.toUpperCase().trim();
             const msgBox = document.getElementById('couponMessage');
@@ -292,7 +310,6 @@
             btn.disabled = true;
 
             try {
-                // Tembak API ke server
                 const res = await fetch('/api/coupons/check', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -332,32 +349,28 @@
             } finally {
                 btn.innerHTML = "Terapkan";
                 btn.disabled = false;
-                hitungTotal(); // Kalkulasi ulang dengan diskon
+                hitungTotal(); 
             }
         }
 
-        // 4. KALKULASI TOTAL (✅ DIUBAH SEDIKIT UNTUK MENGURANGI DISKON KUPON)
         function hitungTotal() {
             totalAkhir = (subtotal + ongkir) - diskonKupon;
-            if(totalAkhir < 0) totalAkhir = 0; // Jaga-jaga agar tidak minus
+            if(totalAkhir < 0) totalAkhir = 0; 
 
             document.getElementById('txtSubtotal').innerText = formatRp(subtotal);
             document.getElementById('txtOngkir').innerText = formatRp(ongkir);
-            document.getElementById('txtDiskon').innerText = "-" + formatRp(diskonKupon); // Tampilkan diskon
+            document.getElementById('txtDiskon').innerText = "-" + formatRp(diskonKupon); 
             
             document.getElementById('txtTotalAkhir').innerText = formatRp(totalAkhir);
             document.getElementById('bottomTotal').innerText = formatRp(totalAkhir);
         }
 
-        // 5. DETEKSI KLIK EKPEDISI (✅ DIUBAH SEDIKIT UNTUK UPDATE GRATIS ONGKIR)
         document.querySelectorAll('input[name="shipping"]').forEach(radio => {
             radio.addEventListener('change', function() {
                 let baseCost = parseInt(this.getAttribute('data-base')); 
                 ongkir = baseCost * totalKg; 
                 
-                // Jika sedang pakai kupon gratis ongkir, potongannya juga ikut menyesuaikan ekspedisi
                 if(currentCouponType === 'ongkir') { diskonKupon = ongkir; }
-                
                 hitungTotal();
             });
         });
@@ -382,12 +395,20 @@
             const pengiriman = shippingSelected.value;
             const pembayaran = paymentSelected.value;
 
-            // A. DATA UNTUK DISIMPAN KE DATABASE
+            // ✅ UBAH STRUKTUR ITEMS SEBELUM DISIMPAN KE DB (Bawa harga grosirnya)
+            const savedItems = items.map(item => ({
+                id: item.id,
+                nama: item.nama,
+                qty: item.qty,
+                harga_asli: item.harga, // Ini harga eceran
+                harga_final: item.hargaTerpakai // Ini bisa harga eceran, bisa harga grosir
+            }));
+
             const orderPayload = {
                 customer_name: userInfo.nama,
                 customer_wa: userInfo.wa,
                 shipping_address: userInfo.alamat,
-                items: JSON.stringify(items), 
+                items: JSON.stringify(savedItems), // Simpan Array yang sudah dimodif 
                 total_price: totalAkhir,
                 shipping_courier: pengiriman,
                 shipping_cost: ongkir,
@@ -403,13 +424,16 @@
                 const dbResult = await res.json();
 
                 if(dbResult.success) {
-                    // B. DATA UNTUK DIKIRIM KE WA (✅ TAMBAH INFO DISKON JIKA ADA)
                     let pesanWA = `*INVOICE PESANAN BARU* 🛒\n*ID Pesanan:* #ORD-${dbResult.order_id}\n\n`;
                     pesanWA += `*Data Penerima:*\nNama: ${userInfo.nama}\nNo WA: ${userInfo.wa}\nAlamat: ${userInfo.alamat}\n\n`;
                     pesanWA += `*Daftar Barang:*\n`;
+                    
+                    // ✅ CETAK INVOICE WA DENGAN INFO GROSIR JIKA ADA
                     items.forEach(item => {
-                        pesanWA += `- ${item.nama} (x${item.qty}) = ${formatRp(item.harga * item.qty)}\n`;
+                        let infoPromo = item.hargaAwalDicoret ? ` *(Grosir)*` : '';
+                        pesanWA += `- ${item.nama}${infoPromo} (x${item.qty}) = ${formatRp(item.hargaTerpakai * item.qty)}\n`;
                     });
+                    
                     pesanWA += `\n*Pengiriman:* ${pengiriman} (${formatRp(ongkir)})\n`;
                     if (diskonKupon > 0) { pesanWA += `*Diskon Kupon:* -${formatRp(diskonKupon)}\n`; }
                     pesanWA += `*Pembayaran:* ${pembayaran}\n\n`;
@@ -421,38 +445,29 @@
 
                     showToast("Pesanan Disimpan! Meneruskan ke WhatsApp...", "success");
                     sessionStorage.removeItem('belidikita_checkout'); 
+                    sessionStorage.removeItem('belidikita_cart'); // Kosongkan keranjang juga
                     
-                    setTimeout(() => {
-                        window.location.href = linkWA;
-                    }, 1500);
+                    setTimeout(() => { window.location.href = linkWA; }, 1500);
                 }
             } catch(err) {
                 showToast("Gagal memproses pesanan. Periksa koneksi.", "error");
-                btn.innerHTML = "Buat Pesanan";
-                btn.disabled = false;
+                btn.innerHTML = "Buat Pesanan"; btn.disabled = false;
             }
         });
 
-                       // Jalankan
         fetchAddress();
         loadCheckoutItems();
 
-        // ✅ LOGIKA BARU: AUTO-CENTANG EKSPEDISI DARI HALAMAN PRODUK
         const prefShipping = sessionStorage.getItem('belidikita_pref_shipping');
         if (prefShipping) {
-            // Cari radio button yang nilainya sama dengan pilihan di halaman sebelumnya
             const radioToSelect = document.querySelector(`input[name="shipping"][value="${prefShipping}"]`);
             if (radioToSelect) {
-                radioToSelect.checked = true; // Centang otomatis
-                
-                // Hitung langsung ongkirnya
+                radioToSelect.checked = true; 
                 let baseCost = parseInt(radioToSelect.getAttribute('data-base')); 
                 ongkir = baseCost * totalKg; 
                 hitungTotal();
             }
         }
-
-
     </script>
 </body>
 </html>
