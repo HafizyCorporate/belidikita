@@ -238,6 +238,52 @@ app.put('/api/products/:id', verifyAdmin, async (req, res) => {
 });
 
 // ==========================================
+// 🎟️ API KUPON DISKON (UNTUK CHECKOUT)
+// ==========================================
+app.post('/api/coupons/check', async (req, res) => {
+    const { code } = req.body;
+    try {
+        // Cari kupon di database yang kodenya sama persis dan statusnya TRUE (Aktif)
+        const result = await pool.query('SELECT * FROM coupons WHERE code = $1 AND is_active = TRUE', [code.toUpperCase()]);
+        
+        if (result.rows.length > 0) {
+            res.json({ success: true, data: result.rows[0] });
+        } else {
+            res.json({ success: false, message: "Kupon tidak valid, kedaluwarsa, atau tidak ditemukan!" });
+        }
+    } catch(err) {
+        console.error("🔥 Error Cek Kupon:", err);
+        res.status(500).json({ success: false, message: "Server error saat mengecek kupon." });
+    }
+});
+
+// ✅ API UNTUK ADMIN MENGELOLA KUPON (Tambah/Hapus Kupon)
+app.get('/api/coupons', verifyAdmin, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM coupons ORDER BY created_at DESC');
+        res.json({ success: true, data: result.rows });
+    } catch(err) { res.status(500).json({ success: false }); }
+});
+
+app.post('/api/coupons', verifyAdmin, async (req, res) => {
+    const { code, discount_type, discount_value } = req.body;
+    try {
+        await pool.query(
+            'INSERT INTO coupons (code, discount_type, discount_value) VALUES ($1, $2, $3)',
+            [code.toUpperCase(), discount_type, discount_value]
+        );
+        res.json({ success: true, message: "Kupon berhasil dibuat!" });
+    } catch(err) { res.status(500).json({ success: false, message: "Kode kupon mungkin sudah ada!" }); }
+});
+
+app.delete('/api/coupons/:id', verifyAdmin, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM coupons WHERE id = $1', [req.params.id]);
+        res.json({ success: true, message: "Kupon dihapus!" });
+    } catch(err) { res.status(500).json({ success: false }); }
+});
+
+// ==========================================
 // 🛒 API PEMESANAN (ORDER & RESI)
 // ==========================================
 
