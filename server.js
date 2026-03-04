@@ -306,6 +306,39 @@ app.delete('/api/orders/:id', verifyAdmin, async (req, res) => {
     }
 });
 
+// ✅ 6. Pembeli Mengajukan Retur (WAJIB UPLOAD BUKTI UNBOXING)
+app.put('/api/orders/:id/return', verifyToken, upload.single('proof'), async (req, res) => {
+    const { reason } = req.body;
+    
+    // Tangkap URL Video/Foto dari Cloudinary
+    const proof_url = req.file ? req.file.path : null;
+
+    if (!proof_url) {
+        return res.status(400).json({ success: false, message: "Bukti video/foto unboxing dari sebelum paket dibuka WAJIB dilampirkan!" });
+    }
+
+    if (!reason) {
+        return res.status(400).json({ success: false, message: "Alasan retur wajib diisi!" });
+    }
+
+    try {
+        const cekOrder = await pool.query('SELECT status FROM orders WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+        if (cekOrder.rows.length === 0) return res.status(404).json({ success: false, message: "Pesanan tidak ditemukan!" });
+
+        // Update status, alasan, dan simpan link bukti videonya
+        await pool.query(
+            "UPDATE orders SET status = 'Ajukan Retur', return_reason = $1, return_media = $2 WHERE id = $3",
+            [reason, proof_url, req.params.id]
+        );
+        
+        res.json({ success: true, message: "Pengajuan retur & bukti berhasil dikirim ke Admin!" });
+    } catch(err) {
+        console.error("🔥 Error Retur:", err);
+        res.status(500).json({ success: false, message: "Gagal mengajukan retur" });
+    }
+});
+
+
 // ==========================================
 // 🚨 PENANGKAP ERROR GLOBAL (BONGKAR [object Object])
 // ==========================================
