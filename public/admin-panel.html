@@ -67,14 +67,6 @@
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); overflow: auto; }
         .modal-content { background-color: #fefefe; margin: 10% auto; padding: 20px; border-radius: 15px; width: 90%; max-width: 500px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .close-modal { position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
-        
-        .css-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 120px; border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 25px; padding-top: 20px; }
-        .chart-col { display: flex; flex-direction: column; align-items: center; width: 12%; height: 100%; justify-content: flex-end; }
-        .c-val { font-size: 10px; font-weight: bold; margin-bottom: 4px; color: #555; }
-        .c-bar { width: 100%; border-radius: 4px 4px 0 0; }
-        .bg-green { background: #00AA5B; }
-        .bg-blue { background: #1976D2; }
-        .c-label { font-size: 10px; color: #888; margin-top: 5px; font-weight: 600; }
 
         #customToast {
             visibility: hidden; min-width: 250px; margin-left: -125px;
@@ -88,7 +80,6 @@
         #customToast.show { visibility: visible; opacity: 1; bottom: 80px; }
         #customToast.success { background-color: #00AA5B; }
         #customToast.error { background-color: #ff3b30; }
-        #customToast.info { background-color: #1976D2; }
 
         .upload-warning {
             background: #FFFDE7; border-left: 4px solid #FBC02D; color: #F57F17;
@@ -125,9 +116,7 @@
         <h2><i class="fas fa-store"></i> Belidikita</h2>
         <a href="#" class="active"><i class="fas fa-chart-pie"></i> Dasbor</a>
         <a href="#pesananSection"><i class="fas fa-shopping-cart"></i> Pesanan Masuk</a>
-        
         <a href="#kuponSection"><i class="fas fa-ticket-alt"></i> Kelola Kupon</a>
-        
         <a href="#promoSection"><i class="fas fa-images"></i> Upload Banner</a>
         <a href="#uploadSection"><i class="fas fa-upload"></i> Upload Barang</a>
         <a href="#stokSection"><i class="fas fa-boxes"></i> Daftar Stok</a>
@@ -179,8 +168,6 @@
                 </table>
             </div>
         </div>
-
-        <button class="btn-buka-grafik" onclick="document.getElementById('grafikModal').style.display='block'"><i class="fas fa-chart-bar"></i> Lihat Grafik Toko</button>
 
         <div class="box" id="kuponSection" style="border-top: 4px solid #00AA5B;">
             <h3><i class="fas fa-ticket-alt"></i> Kelola Kupon Diskon</h3>
@@ -273,17 +260,45 @@
                     </div>
                 </div>
 
+                <div class="grid-2" style="background: #f4f9ff; padding: 15px; border-radius: 12px; border: 1px dashed #81D4FA; margin-bottom: 12px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="color:#0D47A1;"><i class="fas fa-list"></i> Kategori Produk (Filter)</label>
+                        <select id="mainCategory" required onchange="ubahSubKategori()">
+                            <option value="">-- Pilih Kategori --</option>
+                            <option value="Sembako">Sembako & Kebutuhan Rumah</option>
+                            <option value="Fashion">Fashion</option>
+                            <option value="Elektronik">Elektronik</option>
+                            <option value="Rumah Tangga">Peralatan Rumah Tangga</option>
+                            <option value="Beauty">Beauty & Skincare</option>
+                            <option value="Ibu & Bayi">Ibu & Bayi</option>
+                            <option value="Komputer">Komputer & Aksesoris</option>
+                            <option value="Otomotif">Otomotif</option>
+                            <option value="Olahraga">Olahraga & Outdoor</option>
+                            <option value="Makanan">Makanan & Minuman</option>
+                            <option value="Buku">Buku & Alat Tulis</option>
+                            <option value="Mainan">Mainan & Hobi</option>
+                            <option value="Ibadah">Perlengkapan Ibadah</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="color:#0D47A1;"><i class="fas fa-tags"></i> Sub Kategori</label>
+                        <select id="subCategory" required>
+                            <option value="">-- Pilih Sub Kategori --</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="grid-2">
                     <div class="form-group">
                         <label>Stok Awal</label>
                         <input type="number" id="prodStock" placeholder="Contoh: 50" required>
                     </div>
                     <div class="form-group">
-                        <label>Kategori Etalase Depan</label>
+                        <label>Penempatan Etalase Depan</label>
                         <select id="prodCategory" required>
-                            <option value="biasa">Barang Biasa</option>
-                            <option value="laris">🔥 Top Laris</option>
-                            <option value="keranjang">🛒 Paling Banyak Diminati</option>
+                            <option value="biasa">Barang Biasa (Hanya tampil di Daftar)</option>
+                            <option value="laris">🔥 Flash Sale Ramadhan</option>
+                            <option value="keranjang">🛒 Paling Dicari</option>
                         </select>
                     </div>
                 </div>
@@ -311,7 +326,7 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Kategori</th>
+                            <th>Etalase</th>
                             <th>Nama Barang</th>
                             <th>Stok</th>
                             <th>Harga Jual</th>
@@ -381,11 +396,11 @@
                         <input type="number" id="editProdStock" required>
                     </div>
                     <div class="form-group">
-                        <label>Ubah Kategori</label>
+                        <label>Penempatan Etalase Depan</label>
                         <select id="editProdCategory" required>
                             <option value="biasa">Barang Biasa</option>
-                            <option value="laris">🔥 Top Laris</option>
-                            <option value="keranjang">🛒 Paling Banyak Diminati</option>
+                            <option value="laris">🔥 Flash Sale</option>
+                            <option value="keranjang">🛒 Paling Dicari</option>
                         </select>
                     </div>
                 </div>
@@ -454,14 +469,41 @@
         if(document.getElementById('btnKeluarHP')) document.getElementById('btnKeluarHP').addEventListener('click', doLogout);
 
         // ==========================================
-        // ✅ FETCH DATA PESANAN MASUK (ORDER)
+        // ✅ DICTIONARY KATEGORI UNTUK ADMIN PANEL
         // ==========================================
+        const kamusAdminKategori = {
+            'Sembako': ['Beras, minyak, gula', 'Mie instan', 'Telur', 'Air galon', 'Gas LPG'],
+            'Fashion': ['Baju pria / wanita / anak', 'Celana', 'Jaket', 'Hijab', 'Sepatu', 'Tas'],
+            'Elektronik': ['HP & aksesoris', 'Charger', 'Headset', 'Powerbank', 'Smartwatch'],
+            'Rumah Tangga': ['Alat dapur', 'Dispenser', 'Rice cooker', 'Blender', 'Peralatan kebersihan'],
+            'Beauty': ['Skincare', 'Makeup', 'Parfum', 'Bodycare', 'Haircare'],
+            'Ibu & Bayi': ['Popok', 'Susu', 'Baju bayi', 'Perlengkapan makan bayi'],
+            'Komputer': ['Keyboard', 'Mouse', 'Laptop', 'Flashdisk', 'Harddisk'],
+            'Otomotif': ['Oli', 'Aksesoris motor', 'Helm', 'Ban', 'Lampu kendaraan'],
+            'Olahraga': ['Sepatu olahraga', 'Alat gym', 'Jersey', 'Tenda', 'Botol minum'],
+            'Makanan': ['Snack', 'Frozen food', 'Kopi', 'Minuman kekinian'],
+            'Buku': ['Buku sekolah', 'Novel', 'ATK', 'Perlengkapan kantor'],
+            'Mainan': ['Mainan anak', 'Action figure', 'Puzzle', 'Alat musik'],
+            'Ibadah': ['Sajadah', 'Mukena', 'Sarung', 'Al-Qur’an']
+        };
+
+        function ubahSubKategori() {
+            const main = document.getElementById('mainCategory').value;
+            const subSelect = document.getElementById('subCategory');
+            subSelect.innerHTML = '<option value="">-- Pilih Sub Kategori --</option>';
+            if(main && kamusAdminKategori[main]) {
+                kamusAdminKategori[main].forEach(sub => {
+                    subSelect.innerHTML += `<option value="${sub}">${sub}</option>`;
+                });
+            }
+        }
+
+        // FETCH DATA PESANAN
         async function fetchOrders() {
             try {
                 const res = await fetch('/api/orders', { headers: { 'Authorization': `Bearer ${token}` } });
                 const result = await res.json();
                 const tbody = document.getElementById('tableBodyOrders');
-                
                 if (result.success && result.data.length > 0) {
                     tbody.innerHTML = '';
                     document.getElementById('totalPesanan').innerText = result.data.length + " Pesanan"; 
@@ -469,7 +511,6 @@
                     result.data.forEach(order => {
                         let items = [];
                         try { items = JSON.parse(order.items); } catch(e){}
-                        
                         const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
                         
                         let statusColor = "color: #ff9800;"; 
@@ -481,7 +522,6 @@
                         let returnBadge = '';
                         if (order.return_reason) {
                             let mediaLink = order.return_media ? `<br><a href="${order.return_media}" target="_blank" style="font-size:10px; background:#1976D2; color:#fff; padding:4px 8px; border-radius:4px; display:inline-block; margin-top:5px; text-decoration:none;"><i class="fas fa-play-circle"></i> Lihat Bukti Unboxing</a>` : '';
-                            
                             returnBadge = `<br><span style="font-size:10px; background:#ffebee; color:#c62828; padding:3px 6px; border-radius:4px; display:inline-block; margin-top:5px;"><i class="fas fa-exclamation-circle"></i> Alasan: ${order.return_reason}</span>${mediaLink}`;
                         }
 
@@ -505,9 +545,7 @@
             } catch (err) { console.error("Gagal load pesanan", err); }
         }
 
-        // ==========================================
-        // ✅ FUNGSI KLIK PROSES PESANAN & INPUT RESI
-        // ==========================================
+        // FUNGSI KLIK PROSES PESANAN & INPUT RESI
         function bukaProsesPesanan(id, status, resi) {
             document.getElementById('prosesOrderId').value = id;
             document.getElementById('prosesOrderStatus').value = status;
@@ -521,45 +559,29 @@
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
 
             const id = document.getElementById('prosesOrderId').value;
-            const payload = {
-                status: document.getElementById('prosesOrderStatus').value,
-                resi: document.getElementById('prosesOrderResi').value || '-'
-            };
+            const payload = { status: document.getElementById('prosesOrderStatus').value, resi: document.getElementById('prosesOrderResi').value || '-' };
 
             try {
-                const res = await fetch(`/api/orders/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(payload)
-                });
+                const res = await fetch(`/api/orders/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
                 const data = await res.json();
-                
                 if(data.success) {
                     showToast("Status Pesanan Diperbarui!", "success");
                     document.getElementById('modalProsesPesanan').style.display = 'none';
                     fetchOrders(); 
-                } else {
-                    showToast("Gagal: " + data.message, "error");
-                }
-            } catch(err) {
-                showToast("Server Error saat mengupdate resi!", "error");
-            } finally {
-                btn.innerHTML = "<i class='fas fa-paper-plane'></i> Simpan & Perbarui Pembeli";
-            }
+                } else { showToast("Gagal: " + data.message, "error"); }
+            } catch(err) { showToast("Server Error saat mengupdate resi!", "error"); } 
+            finally { btn.innerHTML = "<i class='fas fa-paper-plane'></i> Simpan & Perbarui Pembeli"; }
         });
 
-
-        // ------------------- LOGIKA LAMA -------------------
+        // FETCH PRODUCTS
         async function fetchProducts() {
             try {
                 const res = await fetch('/api/products');
                 const result = await res.json();
                 const tbody = document.getElementById('tableBodyProducts');
-                
                 if (result.success && result.data.length > 0) {
                     tbody.innerHTML = '';
                     document.getElementById('totalProduk').innerText = result.data.length + " Barang";
-                    
                     result.data.forEach(prod => {
                         const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(prod.price);
                         const stok = prod.stock || 0;
@@ -589,6 +611,7 @@
             } catch (err) { console.error("Gagal load tabel", err); }
         }
 
+        // FETCH PROMOS & COUPONS
         async function fetchPromos() {
             try {
                 const res = await fetch('/api/promos');
@@ -597,20 +620,12 @@
                 if (result.success && result.data.length > 0) {
                     tbody.innerHTML = '';
                     result.data.forEach(promo => {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td><img src="${promo.media_url}" class="img-preview" alt="Banner"></td>
-                                <td><button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('promos', ${promo.id})"><i class="fas fa-trash"></i> Hapus</button></td>
-                            </tr>
-                        `;
+                        tbody.innerHTML += `<tr><td><img src="${promo.media_url}" class="img-preview" alt="Banner"></td><td><button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('promos', ${promo.id})"><i class="fas fa-trash"></i> Hapus</button></td></tr>`;
                     });
                 } else { tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Belum ada banner promo.</td></tr>'; }
             } catch (err) { console.error("Gagal load promo", err); }
         }
 
-        // ==========================================
-        // ✅ LOGIKA BARU: MENAMPILKAN DAFTAR KUPON
-        // ==========================================
         async function fetchCoupons() {
             try {
                 const res = await fetch('/api/coupons', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -622,42 +637,20 @@
                         const nilaiRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(kupon.discount_value);
                         const infoNilai = kupon.discount_type === 'ongkir' ? 'Gratis Ongkir' : `Diskon ${nilaiRp}`;
                         const statusBadge = kupon.is_active ? '<span style="color:#00AA5B; font-weight:bold;">Aktif</span>' : '<span style="color:#ff3b30; font-weight:bold;">Mati</span>';
-
-                        tbody.innerHTML += `
-                            <tr>
-                                <td><b><i class="fas fa-ticket-alt" style="color:#FF9800;"></i> ${kupon.code}</b></td>
-                                <td>${infoNilai}</td>
-                                <td>${statusBadge}</td>
-                                <td>
-                                    <button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('coupons', ${kupon.id})"><i class="fas fa-trash"></i> Hapus</button>
-                                </td>
-                            </tr>
-                        `;
+                        tbody.innerHTML += `<tr><td><b><i class="fas fa-ticket-alt" style="color:#FF9800;"></i> ${kupon.code}</b></td><td>${infoNilai}</td><td>${statusBadge}</td><td><button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('coupons', ${kupon.id})"><i class="fas fa-trash"></i> Hapus</button></td></tr>`;
                     });
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Belum ada kupon yang dibuat.</td></tr>';
-                }
+                } else { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Belum ada kupon yang dibuat.</td></tr>'; }
             } catch (err) { console.error("Gagal load kupon", err); }
         }
 
-        // Panggil Semua Tabel Saat Admin Masuk
-        fetchProducts();
-        fetchPromos();
-        fetchOrders(); 
-        fetchCoupons(); // ✅ Panggil Tabel Kupon
+        fetchProducts(); fetchPromos(); fetchOrders(); fetchCoupons(); 
 
-        let targetHapusTipe = "";
-        let targetHapusId = "";
-        function konfirmasiHapus(tipe, id) {
-            targetHapusTipe = tipe; targetHapusId = id;
-            document.getElementById('modalConfirm').style.display = 'flex'; 
-        }
+        let targetHapusTipe = ""; let targetHapusId = "";
+        function konfirmasiHapus(tipe, id) { targetHapusTipe = tipe; targetHapusId = id; document.getElementById('modalConfirm').style.display = 'flex'; }
         function tutupConfirm() { document.getElementById('modalConfirm').style.display = 'none'; }
         
         document.getElementById('btnEksekusiHapus').addEventListener('click', async () => {
-            tutupConfirm(); 
-            const btn = document.getElementById('btnEksekusiHapus');
-            btn.innerHTML = "Memproses...";
+            tutupConfirm(); const btn = document.getElementById('btnEksekusiHapus'); btn.innerHTML = "Memproses...";
             try {
                 const res = await fetch(`/api/${targetHapusTipe}/${targetHapusId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await res.json();
@@ -666,64 +659,47 @@
                     if(targetHapusTipe === 'products') fetchProducts();
                     if(targetHapusTipe === 'promos') fetchPromos();
                     if(targetHapusTipe === 'orders') fetchOrders(); 
-                    if(targetHapusTipe === 'coupons') fetchCoupons(); // ✅ Refresh tabel kupon jika yang dihapus adalah kupon
+                    if(targetHapusTipe === 'coupons') fetchCoupons(); 
                 } else { showToast("❌ Gagal: " + (data.message || "Tolak oleh server"), "error"); }
-            } catch(err) { showToast("❌ Server Error", "error"); } 
-            finally { btn.innerHTML = "Ya, Hapus!"; }
+            } catch(err) { showToast("❌ Server Error", "error"); } finally { btn.innerHTML = "Ya, Hapus!"; }
         });
 
-        // ==========================================
-        // ✅ LOGIKA BARU: BIKIN KUPON DISKON
-        // ==========================================
-        // Efek UI: Sembunyikan nilai Rp jika tipe kupon adalah 'Gratis Ongkir'
         document.getElementById('kuponType').addEventListener('change', function() {
-            if(this.value === 'ongkir') {
-                document.getElementById('groupKuponValue').style.display = 'none';
-                document.getElementById('kuponValue').value = 0;
-            } else {
-                document.getElementById('groupKuponValue').style.display = 'block';
-            }
+            if(this.value === 'ongkir') { document.getElementById('groupKuponValue').style.display = 'none'; document.getElementById('kuponValue').value = 0;
+            } else { document.getElementById('groupKuponValue').style.display = 'block'; }
         });
 
         document.getElementById('formUploadKupon').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btnSimpanKupon'); 
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
-            
-            const payload = {
-                code: document.getElementById('kuponCode').value,
-                discount_type: document.getElementById('kuponType').value,
-                discount_value: document.getElementById('kuponValue').value || 0
-            };
-
+            const btn = document.getElementById('btnSimpanKupon'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
+            const payload = { code: document.getElementById('kuponCode').value, discount_type: document.getElementById('kuponType').value, discount_value: document.getElementById('kuponValue').value || 0 };
             try {
-                const res = await fetch('/api/coupons', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
-                    body: JSON.stringify(payload) 
-                });
+                const res = await fetch('/api/coupons', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
                 const data = await res.json();
-                if(data.success) {
-                    showToast("✅ Kupon berhasil dibuat!", "success");
-                    document.getElementById('formUploadKupon').reset();
-                    // Reset UI kembali ke normal
-                    document.getElementById('groupKuponValue').style.display = 'block';
-                    fetchCoupons(); // Refresh tabel
-                } else { showToast("Gagal: " + data.message, "error"); }
-            } catch(err) { showToast("Server Error", "error"); } 
-            finally { btn.innerHTML = "<i class='fas fa-plus'></i> Buat Kupon Baru"; }
+                if(data.success) { showToast("✅ Kupon berhasil dibuat!", "success"); document.getElementById('formUploadKupon').reset(); document.getElementById('groupKuponValue').style.display = 'block'; fetchCoupons(); } 
+                else { showToast("Gagal: " + data.message, "error"); }
+            } catch(err) { showToast("Server Error", "error"); } finally { btn.innerHTML = "<i class='fas fa-plus'></i> Buat Kupon Baru"; }
         });
 
+        // ✅ UPLOAD BARANG DENGAN SMART INJECTION DESKRIPSI
         document.getElementById('formUploadBarang').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanBarang'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengupload...";
+            
+            const mainCat = document.getElementById('mainCategory').value;
+            const subCat = document.getElementById('subCategory').value;
+            const originalDesc = document.getElementById('prodDesc').value;
+            
+            // INJEKSI: Memasukkan kategori sebagai Tag Spesial di deskripsi agar bisa disaring otomatis
+            const finalDesc = `[Kategori: ${mainCat} - ${subCat}]\n\n${originalDesc}`;
+
             const formData = new FormData();
             formData.append('title', document.getElementById('prodName').value);
             formData.append('capital_price', document.getElementById('prodCapital').value); 
             formData.append('price', document.getElementById('prodPrice').value); 
             formData.append('stock', document.getElementById('prodStock').value); 
             formData.append('category', document.getElementById('prodCategory').value); 
-            formData.append('description', document.getElementById('prodDesc').value);
+            formData.append('description', finalDesc); // Kirim deskripsi yang sudah disuntik
             formData.append('weight', document.getElementById('prodWeight').value);
             
             const files = document.getElementById('prodMedia').files;
@@ -735,6 +711,7 @@
                 if(data.success) {
                     showToast("✅ Barang berhasil di-upload!", "success");
                     document.getElementById('formUploadBarang').reset();
+                    document.getElementById('subCategory').innerHTML = '<option value="">-- Pilih Sub Kategori --</option>'; // Reset Sub
                     fetchProducts(); 
                 } else { showToast("Gagal: " + data.message, "error"); }
             } catch(err) { showToast("Upload gagal!", "error"); } 
@@ -744,17 +721,13 @@
         document.getElementById('formUploadPromo').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanPromo'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengupload Banner...";
-            const formData = new FormData();
-            formData.append('media', document.getElementById('promoMedia').files[0]);
+            const formData = new FormData(); formData.append('media', document.getElementById('promoMedia').files[0]);
             try {
                 const res = await fetch('/api/promos', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
                 const data = await res.json();
-                if(data.success) {
-                    showToast("✅ Banner Promo berhasil dipasang!", "success");
-                    document.getElementById('formUploadPromo').reset(); fetchPromos(); 
-                } else { showToast("Gagal: " + data.message, "error"); }
-            } catch(err) { showToast("Upload Banner gagal!", "error"); } 
-            finally { btn.innerHTML = "<i class='fas fa-cloud-upload-alt'></i> Pasang Banner Promo"; }
+                if(data.success) { showToast("✅ Banner Promo berhasil dipasang!", "success"); document.getElementById('formUploadPromo').reset(); fetchPromos(); } 
+                else { showToast("Gagal: " + data.message, "error"); }
+            } catch(err) { showToast("Upload Banner gagal!", "error"); } finally { btn.innerHTML = "<i class='fas fa-cloud-upload-alt'></i> Pasang Banner Promo"; }
         });
 
         function bukaEditProduk(id, title, capital, price, stock, category, weight) {
@@ -777,12 +750,9 @@
             try {
                 const res = await fetch(`/api/products/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(bodyData) });
                 const data = await res.json();
-                if(data.success) {
-                    showToast("✅ Barang berhasil diupdate!", "success");
-                    document.getElementById('modalEditProduk').style.display = 'none'; fetchProducts(); 
-                } else { showToast("Gagal: " + data.message, "error"); }
-            } catch(err) { showToast("Server Error saat mengedit!", "error"); } 
-            finally { btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan"; }
+                if(data.success) { showToast("✅ Barang berhasil diupdate!", "success"); document.getElementById('modalEditProduk').style.display = 'none'; fetchProducts(); } 
+                else { showToast("Gagal: " + data.message, "error"); }
+            } catch(err) { showToast("Server Error saat mengedit!", "error"); } finally { btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan"; }
         });
     </script>
 </body>
