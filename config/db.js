@@ -63,12 +63,13 @@ const initDB = async () => {
             asset_name VARCHAR(200) NOT NULL,
             category VARCHAR(100),
             quantity INT DEFAULT 0,
+            unit VARCHAR(50) DEFAULT 'Unit',
             condition VARCHAR(50) DEFAULT 'Baik',
             notes TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
-        -- ✅ RUANG KARANTINA RESMI DENGAN DNA BARU (SATUAN & VARIAN)
+        -- ✅ RUANG KARANTINA DENGAN TAMBAHAN DNA GROSIR (RUDAL 2)
         CREATE TABLE IF NOT EXISTS draft_products (
             id SERIAL PRIMARY KEY,
             title VARCHAR(200) NOT NULL,
@@ -82,6 +83,8 @@ const initDB = async () => {
             unit VARCHAR(50) DEFAULT 'Pcs',
             variant_title VARCHAR(100),
             variant_options TEXT,
+            wholesale_price DECIMAL(12,2) DEFAULT 0,
+            wholesale_min_qty INT DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
     `;
@@ -95,15 +98,20 @@ const initDB = async () => {
         ALTER TABLE products ADD COLUMN IF NOT EXISTS weight INT DEFAULT 1000;
         ALTER TABLE products ADD COLUMN IF NOT EXISTS sold_count INT DEFAULT 0;
         
-        -- ✅ RUDAL 1: SUNTIKAN KOLOM SATUAN DAN VARIAN BUNGLON DI TABEL UTAMA
         ALTER TABLE products ADD COLUMN IF NOT EXISTS unit VARCHAR(50) DEFAULT 'Pcs';
         ALTER TABLE products ADD COLUMN IF NOT EXISTS variant_title VARCHAR(100);
         ALTER TABLE products ADD COLUMN IF NOT EXISTS variant_options TEXT;
+        
+        -- ✅ RUDAL 2: SUNTIKAN KOLOM GROSIR DI TABEL UTAMA
+        ALTER TABLE products ADD COLUMN IF NOT EXISTS wholesale_price DECIMAL(12,2) DEFAULT 0;
+        ALTER TABLE products ADD COLUMN IF NOT EXISTS wholesale_min_qty INT DEFAULT 0;
         
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_hidden_buyer BOOLEAN DEFAULT FALSE; 
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_hidden_admin BOOLEAN DEFAULT FALSE;
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_reason TEXT;
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_media TEXT;
+        
+        ALTER TABLE internal_assets ADD COLUMN IF NOT EXISTS unit VARCHAR(50) DEFAULT 'Unit';
     `;
 
     try {
