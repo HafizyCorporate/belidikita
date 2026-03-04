@@ -306,4 +306,21 @@ app.delete('/api/orders/:id', verifyAdmin, async (req, res) => {
     }
 });
 
+// ==========================================
+// 🚨 PENANGKAP ERROR GLOBAL (BONGKAR [object Object])
+// ==========================================
+app.use((err, req, res, next) => {
+    console.error("🔥 ERROR TERDETEKSI DARI MESIN UPLOAD:");
+    console.error(JSON.stringify(err, null, 2)); 
+    console.error("PESAN ERROR:", err.message);
+    
+    res.status(500).json({ 
+        success: false, 
+        message: "Gagal Upload: " + (err.message || "Kesalahan pada Cloudinary") 
+    });
+});
+
+app.listen(PORT, () => { console.log(`🚀 Server belidikita berjalan di port ${PORT}`); });
+
+
 app.listen(PORT, () => { console.log(`🚀 Server belidikita berjalan di port ${PORT}`); });
