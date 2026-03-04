@@ -125,6 +125,9 @@
         <h2><i class="fas fa-store"></i> Belidikita</h2>
         <a href="#" class="active"><i class="fas fa-chart-pie"></i> Dasbor</a>
         <a href="#pesananSection"><i class="fas fa-shopping-cart"></i> Pesanan Masuk</a>
+        
+        <a href="#kuponSection"><i class="fas fa-ticket-alt"></i> Kelola Kupon</a>
+        
         <a href="#promoSection"><i class="fas fa-images"></i> Upload Banner</a>
         <a href="#uploadSection"><i class="fas fa-upload"></i> Upload Barang</a>
         <a href="#stokSection"><i class="fas fa-boxes"></i> Daftar Stok</a>
@@ -178,6 +181,46 @@
         </div>
 
         <button class="btn-buka-grafik" onclick="document.getElementById('grafikModal').style.display='block'"><i class="fas fa-chart-bar"></i> Lihat Grafik Toko</button>
+
+        <div class="box" id="kuponSection" style="border-top: 4px solid #00AA5B;">
+            <h3><i class="fas fa-ticket-alt"></i> Kelola Kupon Diskon</h3>
+            <form id="formUploadKupon" style="margin-bottom: 20px;">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Kode Kupon (Tanpa Spasi)</label>
+                        <input type="text" id="kuponCode" placeholder="Contoh: RAMADHAN50" required style="text-transform: uppercase;">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipe Diskon</label>
+                        <select id="kuponType" required>
+                            <option value="nominal">Potongan Harga (Nominal Rp)</option>
+                            <option value="ongkir">Gratis / Potongan Ongkir</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" id="groupKuponValue">
+                    <label>Nilai Diskon (Rp)</label>
+                    <input type="number" id="kuponValue" placeholder="Contoh: 50000" value="0">
+                </div>
+                <button type="submit" class="btn-submit" id="btnSimpanKupon" style="background: #00AA5B;"><i class="fas fa-plus"></i> Buat Kupon Baru</button>
+            </form>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kode Kupon</th>
+                            <th>Tipe & Nilai</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBodyCoupons">
+                        <tr><td colspan="4" style="text-align:center;">Memuat data kupon dari Server...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
         <div class="box" id="promoSection" style="border-top: 4px solid #FFD700;">
             <h3><i class="fas fa-images"></i> Upload Banner Promo Depan</h3>
@@ -370,8 +413,10 @@
     <div class="mobile-nav">
         <a href="#" class="active"><i class="fas fa-chart-pie"></i><span>Dasbor</span></a>
         <a href="#pesananSection"><i class="fas fa-shopping-cart"></i><span>Pesanan</span></a>
+        
+        <a href="#kuponSection"><i class="fas fa-ticket-alt"></i><span>Kupon</span></a>
+        
         <a href="#uploadSection"><i class="fas fa-upload"></i><span>Upload</span></a>
-        <a href="#stokSection"><i class="fas fa-boxes"></i><span>Stok</span></a>
         <a href="#" id="btnKeluarHP"><i class="fas fa-sign-out-alt"></i><span>Keluar</span></a>
     </div>
 
@@ -419,7 +464,7 @@
                 
                 if (result.success && result.data.length > 0) {
                     tbody.innerHTML = '';
-                    document.getElementById('totalPesanan').innerText = result.data.length + " Pesanan"; // Update Info Kotak Atas
+                    document.getElementById('totalPesanan').innerText = result.data.length + " Pesanan"; 
                     
                     result.data.forEach(order => {
                         let items = [];
@@ -427,14 +472,12 @@
                         
                         const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
                         
-                        // ✅ PERBAIKAN LOGIKA WARNA STATUS UNTUK RETUR
-                        let statusColor = "color: #ff9800;"; // Menunggu Pembayaran (Orange)
-                        if(order.status === 'Diproses') statusColor = "color: #0D47A1;"; // Biru
-                        if(order.status === 'Dikirim') statusColor = "color: #9c27b0;"; // Ungu
-                        if(order.status === 'Selesai') statusColor = "color: #00AA5B;"; // Hijau
-                        if(order.status.includes('Retur')) statusColor = "color: #ff3b30; font-weight: 800;"; // Merah untuk Retur!
+                        let statusColor = "color: #ff9800;"; 
+                        if(order.status === 'Diproses') statusColor = "color: #0D47A1;"; 
+                        if(order.status === 'Dikirim') statusColor = "color: #9c27b0;"; 
+                        if(order.status === 'Selesai') statusColor = "color: #00AA5B;"; 
+                        if(order.status.includes('Retur')) statusColor = "color: #ff3b30; font-weight: 800;"; 
 
-                        // ✅ TAMPILKAN ALASAN DAN TOMBOL NONTON BUKTI VIDEO
                         let returnBadge = '';
                         if (order.return_reason) {
                             let mediaLink = order.return_media ? `<br><a href="${order.return_media}" target="_blank" style="font-size:10px; background:#1976D2; color:#fff; padding:4px 8px; border-radius:4px; display:inline-block; margin-top:5px; text-decoration:none;"><i class="fas fa-play-circle"></i> Lihat Bukti Unboxing</a>` : '';
@@ -442,7 +485,6 @@
                             returnBadge = `<br><span style="font-size:10px; background:#ffebee; color:#c62828; padding:3px 6px; border-radius:4px; display:inline-block; margin-top:5px;"><i class="fas fa-exclamation-circle"></i> Alasan: ${order.return_reason}</span>${mediaLink}`;
                         }
 
-                        // ✅ TOMBOL HAPUS DIKEMBALIKAN KE SINI
                         tbody.innerHTML += `
                             <tr>
                                 <td><b>#ORD-${order.id}</b><br><span style="font-size:10px; color:#666;">${order.customer_name}</span></td>
@@ -495,7 +537,7 @@
                 if(data.success) {
                     showToast("Status Pesanan Diperbarui!", "success");
                     document.getElementById('modalProsesPesanan').style.display = 'none';
-                    fetchOrders(); // Refresh tabel otomatis
+                    fetchOrders(); 
                 } else {
                     showToast("Gagal: " + data.message, "error");
                 }
@@ -566,10 +608,43 @@
             } catch (err) { console.error("Gagal load promo", err); }
         }
 
+        // ==========================================
+        // ✅ LOGIKA BARU: MENAMPILKAN DAFTAR KUPON
+        // ==========================================
+        async function fetchCoupons() {
+            try {
+                const res = await fetch('/api/coupons', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                const tbody = document.getElementById('tableBodyCoupons');
+                if (result.success && result.data.length > 0) {
+                    tbody.innerHTML = '';
+                    result.data.forEach(kupon => {
+                        const nilaiRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(kupon.discount_value);
+                        const infoNilai = kupon.discount_type === 'ongkir' ? 'Gratis Ongkir' : `Diskon ${nilaiRp}`;
+                        const statusBadge = kupon.is_active ? '<span style="color:#00AA5B; font-weight:bold;">Aktif</span>' : '<span style="color:#ff3b30; font-weight:bold;">Mati</span>';
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><b><i class="fas fa-ticket-alt" style="color:#FF9800;"></i> ${kupon.code}</b></td>
+                                <td>${infoNilai}</td>
+                                <td>${statusBadge}</td>
+                                <td>
+                                    <button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('coupons', ${kupon.id})"><i class="fas fa-trash"></i> Hapus</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Belum ada kupon yang dibuat.</td></tr>';
+                }
+            } catch (err) { console.error("Gagal load kupon", err); }
+        }
+
         // Panggil Semua Tabel Saat Admin Masuk
         fetchProducts();
         fetchPromos();
-        fetchOrders(); // ✅ Panggil Tabel Pesanan
+        fetchOrders(); 
+        fetchCoupons(); // ✅ Panggil Tabel Kupon
 
         let targetHapusTipe = "";
         let targetHapusId = "";
@@ -590,12 +665,53 @@
                     showToast("✅ Berhasil dihapus!", "success");
                     if(targetHapusTipe === 'products') fetchProducts();
                     if(targetHapusTipe === 'promos') fetchPromos();
-                    
-                    // ✅ TAMBAHAN LOGIKA: Agar tabel pesanan langsung update saat dihapus
                     if(targetHapusTipe === 'orders') fetchOrders(); 
+                    if(targetHapusTipe === 'coupons') fetchCoupons(); // ✅ Refresh tabel kupon jika yang dihapus adalah kupon
                 } else { showToast("❌ Gagal: " + (data.message || "Tolak oleh server"), "error"); }
             } catch(err) { showToast("❌ Server Error", "error"); } 
             finally { btn.innerHTML = "Ya, Hapus!"; }
+        });
+
+        // ==========================================
+        // ✅ LOGIKA BARU: BIKIN KUPON DISKON
+        // ==========================================
+        // Efek UI: Sembunyikan nilai Rp jika tipe kupon adalah 'Gratis Ongkir'
+        document.getElementById('kuponType').addEventListener('change', function() {
+            if(this.value === 'ongkir') {
+                document.getElementById('groupKuponValue').style.display = 'none';
+                document.getElementById('kuponValue').value = 0;
+            } else {
+                document.getElementById('groupKuponValue').style.display = 'block';
+            }
+        });
+
+        document.getElementById('formUploadKupon').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSimpanKupon'); 
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
+            
+            const payload = {
+                code: document.getElementById('kuponCode').value,
+                discount_type: document.getElementById('kuponType').value,
+                discount_value: document.getElementById('kuponValue').value || 0
+            };
+
+            try {
+                const res = await fetch('/api/coupons', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+                    body: JSON.stringify(payload) 
+                });
+                const data = await res.json();
+                if(data.success) {
+                    showToast("✅ Kupon berhasil dibuat!", "success");
+                    document.getElementById('formUploadKupon').reset();
+                    // Reset UI kembali ke normal
+                    document.getElementById('groupKuponValue').style.display = 'block';
+                    fetchCoupons(); // Refresh tabel
+                } else { showToast("Gagal: " + data.message, "error"); }
+            } catch(err) { showToast("Server Error", "error"); } 
+            finally { btn.innerHTML = "<i class='fas fa-plus'></i> Buat Kupon Baru"; }
         });
 
         document.getElementById('formUploadBarang').addEventListener('submit', async (e) => {
