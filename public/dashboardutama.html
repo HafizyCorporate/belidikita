@@ -3,29 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Belidikita - Toko Online Resmi</title>
+    <title>Belidikita - Toko Online Resmi Spesial Ramadhan</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        /* ✅ CSS BARU: MODAL KONFIRMASI MODERN (PENGGANTI ALERT ADMIN) */
-        .modal-confirm { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-        .confirm-box { background: #fff; padding: 30px 20px; border-radius: 15px; text-align: center; width: 90%; max-width: 320px; animation: popIn 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        .confirm-box i { font-size: 45px; color: #1976D2; margin-bottom: 15px; }
-        .confirm-box h3 { font-size: 18px; color: #333; margin-bottom: 10px; font-weight: 800; }
-        .confirm-box p { font-size: 12px; color: #666; margin-bottom: 25px; line-height: 1.5; }
-        .confirm-btn-group { display: flex; gap: 10px; justify-content: center; }
-        .btn-batal { flex: 1; padding: 12px; background: #eee; color: #555; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
-        .btn-yakin { flex: 1; padding: 12px; background: #ff3b30; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 59, 48, 0.3); }
-    </style>
 </head>
 <body class="no-scroll"> 
     
+    <div class="ramadhan-decor" id="ramadhanDecor">
+        <div class="lantern left"></div>
+        <div class="lantern right"></div>
+        <div class="stars-container"></div>
+    </div>
+
     <div id="splashScreen" class="splash-screen">
-        <div class="sun"><div class="sun-beam"></div></div>
+        <div class="moon-ramadhan">
+            <i class="fas fa-star-and-crescent"></i>
+        </div>
         <div class="splash-text-container">
             <img src="assets/nama_logo_kamu.png" alt="Logo" class="splash-logo" onerror="this.style.display='none'">
-            <p class="brand-slogan">Belanja pintar, Jualan lancar</p>
+            <p class="brand-slogan">Marhaban Ya Ramadhan<br><span style="font-size: 14px; font-weight: 600;">Belanja pintar, Jualan lancar</span></p>
         </div>
         <div class="loop-wrapper">
             <div class="anim-scaler">
@@ -45,37 +41,36 @@
         </div>
         <div class="header-search">
             <i class="fas fa-search"></i>
-            <input type="text" placeholder="Cari di belidikita...">
+            <input type="text" placeholder="Cari untuk sahur & buka...">
         </div>
         <div class="header-admin" id="adminLoginIcon">
             <i class="fas fa-user-shield"></i>
         </div>
-                <div class="header-cart" style="cursor: pointer;" onclick="window.location.href='keranjang.html'">
+        <div class="header-cart" style="cursor: pointer;" onclick="window.location.href='keranjang.html'">
             <i class="fas fa-shopping-cart"></i>
             <span class="cart-badge">0</span>
         </div>
-
     </header>
 
     <main id="mainContent" class="hidden">
         
         <div class="slider-container">
             <div class="slider-wrapper" id="promoSlider">
-                <div class="slide" style="background: linear-gradient(45deg, #FF9A9E, #FECFEF);">
-                    <h3>Promo Spesial Belidikita!</h3><p>Diskon hingga 50%</p>
+                <div class="slide" style="background: linear-gradient(135deg, #0D47A1, #81D4FA);">
+                    <h3>🌙 Berkah Ramadhan!</h3><p>Diskon spesial hingga 50%</p>
                 </div>
-                <div class="slide" style="background: linear-gradient(45deg, #a18cd1, #fbc2eb);">
-                    <h3>Barang Baru Datang</h3><p>Cek koleksi terbaru kami</p>
+                <div class="slide" style="background: linear-gradient(135deg, #00AA5B, #B2DFDB);">
+                    <h3>Baju Muslim & Takjil</h3><p>Cek koleksi terbaru kami</p>
                 </div>
-                <div class="slide" style="background: linear-gradient(45deg, #84fab0, #8fd3f4);">
-                    <h3>Gratis Ongkir</h3><p>Ke seluruh Indonesia</p>
+                <div class="slide" style="background: linear-gradient(135deg, #FF9800, #FFCC80);">
+                    <h3>Gratis Ongkir</h3><p>Ke seluruh pelosok negeri</p>
                 </div>
             </div>
         </div>
 
         <section class="scroll-section">
             <div class="section-header">
-                <h2>🔥 Top Barang Laris</h2>
+                <h2>🔥 Flash Sale Ramadhan</h2>
                 <a href="#">Lihat Semua</a>
             </div>
             <div class="horizontal-scroll" id="topSellingList"></div>
@@ -83,7 +78,7 @@
 
         <section class="scroll-section">
             <div class="section-header">
-                <h2>🛒 Paling Banyak Diminati</h2>
+                <h2>🛒 Paling Dicari Buat Lebaran</h2>
             </div>
             <div class="horizontal-scroll" id="topCartList"></div>
         </section>
@@ -97,12 +92,12 @@
             </div>
         </section>
         
-        <div style="height: 80px;"></div>
+        <div style="height: 90px;"></div>
     </main>
 
     <nav id="bottomNav" class="hidden">
         <a href="#" class="nav-item active" id="menuHome">
-            <i class="fas fa-home"></i><span>Beranda</span>
+            <i class="fas fa-mosque"></i><span>Beranda</span>
         </a>
         <a href="#" class="nav-item" id="menuProduct">
             <i class="fas fa-box-open"></i><span>Katalog</span>
@@ -111,18 +106,19 @@
             <i class="fas fa-play-circle"></i><span>Video</span>
         </a>
         <a href="#" class="nav-item" id="menuTransaction">
-            <i class="fas fa-receipt"></i><span>Cek Pesanan</span>
+            <i class="fas fa-receipt"></i><span>Pesanan</span>
         </a>
         <a href="#" class="nav-item" id="menuAccount">
             <i class="fas fa-user"></i><span>Akun</span>
         </a>
     </nav>
 
-        <div id="productDetailModal" class="modal" style="display: none;">
+    <div id="productDetailModal" class="modal" style="display: none;">
         <div class="modal-content product-detail-box">
             <button id="closeDetailBtn" class="close-detail-btn">&times;</button>
             <div class="detail-img-box">
                 <img id="detailImage" src="" alt="Foto Barang">
+                <div class="ramadhan-badge">Spesial Ramadhan</div>
             </div>
             <h2 id="detailTitle">Nama Barang</h2>
             <h3 id="detailPrice">Rp0</h3>
@@ -151,6 +147,9 @@
         </div>
     </div>
 
+    <div id="customToast"></div>
+
     <script src="script.js"></script>
 </body>
 </html>
+
