@@ -433,9 +433,26 @@
             }
         });
 
-        // Jalankan saat web dibuka
+                       // Jalankan
         fetchAddress();
         loadCheckoutItems();
+
+        // ✅ LOGIKA BARU: AUTO-CENTANG EKSPEDISI DARI HALAMAN PRODUK
+        const prefShipping = sessionStorage.getItem('belidikita_pref_shipping');
+        if (prefShipping) {
+            // Cari radio button yang nilainya sama dengan pilihan di halaman sebelumnya
+            const radioToSelect = document.querySelector(`input[name="shipping"][value="${prefShipping}"]`);
+            if (radioToSelect) {
+                radioToSelect.checked = true; // Centang otomatis
+                
+                // Hitung langsung ongkirnya
+                let baseCost = parseInt(radioToSelect.getAttribute('data-base')); 
+                ongkir = baseCost * totalKg; 
+                hitungTotal();
+            }
+        }
+
+
     </script>
 </body>
 </html>
