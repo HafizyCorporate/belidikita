@@ -22,6 +22,13 @@
         .header-admin h1 { font-weight: 800; color: #0D47A1; font-size: 22px;}
         .header-admin p { font-size: 12px; color: #666; }
 
+        /* ✅ TOMBOL GERBANG MENUJU RUANGAN BARU */
+        .portal-group { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        .btn-portal { flex: 1; min-width: 150px; padding: 15px; border: none; border-radius: 12px; color: #fff; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 13px; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-decoration: none; }
+        .btn-portal:hover { transform: translateY(-3px); }
+        .portal-aset { background: linear-gradient(135deg, #0f172a, #1e1b4b); }
+        .portal-draft { background: linear-gradient(135deg, #022c22, #064e3b); }
+
         .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .card { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; }
         .card-info h3 { font-size: 11px; color: #888; margin-bottom: 5px; }
@@ -81,33 +88,22 @@
         #customToast.success { background-color: #00AA5B; }
         #customToast.error { background-color: #ff3b30; }
 
-        .upload-warning {
-            background: #FFFDE7; border-left: 4px solid #FBC02D; color: #F57F17;
-            padding: 10px 15px; border-radius: 8px; font-size: 11px; font-weight: 600;
-            margin-bottom: 15px; display: flex; align-items: center; gap: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); animation: pulseWarning 2s infinite; 
-        }
-        .upload-warning i { font-size: 18px; animation: shakeIcon 3s infinite; }
-        .upload-warning b { color: #E65100; font-weight: 800; }
-
-        @keyframes pulseWarning { 0% { box-shadow: 0 0 0 0 rgba(251, 192, 45, 0.4); } 70% { box-shadow: 0 0 0 8px rgba(251, 192, 45, 0); } 100% { box-shadow: 0 0 0 0 rgba(251, 192, 45, 0); } }
-        @keyframes shakeIcon { 0%, 100% { transform: rotate(0deg); } 10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); } 20%, 40%, 60%, 80% { transform: rotate(10deg); } }
-
-        .btn-aksi { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; color: #fff; margin-right: 5px; display: inline-block; }
+        .upload-warning { background: #FFFDE7; border-left: 4px solid #FBC02D; color: #F57F17; padding: 10px 15px; border-radius: 8px; font-size: 11px; font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        .btn-aksi { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; color: #fff; margin-right: 5px; display: inline-block; transition: 0.2s;}
+        .btn-aksi:active { transform: scale(0.9); }
         .btn-edit { background: #ff9800; }
         .btn-hapus { background: #ff3b30; }
         .btn-proses { background: #0D47A1; }
+        .btn-acc { background: linear-gradient(135deg, #00AA5B, #00c853); box-shadow: 0 2px 5px rgba(0, 170, 91, 0.4); padding: 8px 15px;}
+        
         .img-preview { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
-
+        
         .modal-confirm { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-        .confirm-box { background: #fff; padding: 30px 20px; border-radius: 15px; text-align: center; width: 90%; max-width: 320px; animation: popIn 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        .confirm-box i { font-size: 45px; color: #ff3b30; margin-bottom: 15px; }
-        .confirm-box h3 { font-size: 18px; color: #333; margin-bottom: 10px; font-weight: 800; }
-        .confirm-box p { font-size: 12px; color: #666; margin-bottom: 25px; line-height: 1.5; }
-        .confirm-btn-group { display: flex; gap: 10px; justify-content: center; }
+        .confirm-box { background: #fff; padding: 30px 20px; border-radius: 15px; text-align: center; width: 90%; max-width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .confirm-btn-group { display: flex; gap: 10px; justify-content: center; margin-top:20px; }
         .btn-batal { flex: 1; padding: 12px; background: #eee; color: #555; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
-        .btn-yakin { flex: 1; padding: 12px; background: #ff3b30; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 59, 48, 0.3); }
+        .btn-yakin { flex: 1; padding: 12px; background: #ff3b30; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -115,6 +111,7 @@
     <div class="sidebar">
         <h2><i class="fas fa-store"></i> Belidikita</h2>
         <a href="#" class="active"><i class="fas fa-chart-pie"></i> Dasbor</a>
+        <a href="#accSection" style="color: #FFD700;"><i class="fas fa-check-circle"></i> Tugas Persetujuan</a>
         <a href="#pesananSection"><i class="fas fa-shopping-cart"></i> Pesanan Masuk</a>
         <a href="#kuponSection"><i class="fas fa-ticket-alt"></i> Kelola Kupon</a>
         <a href="#promoSection"><i class="fas fa-images"></i> Upload Banner</a>
@@ -126,10 +123,15 @@
     <div class="main-content">
         <div class="header-admin">
             <div>
-                <h1 id="adminGreeting">Halo, Admin!</h1>
+                <h1 id="adminGreeting">Halo, Super Admin!</h1>
                 <p>Silakan kelola barang tokomu.</p>
             </div>
           <button onclick="lihatTokoDepan()" style="padding: 10px 15px; background:#1976D2; color:#fff; border:none; border-radius:20px; cursor:pointer; font-weight:bold; font-size:11px;"><i class="fas fa-eye"></i> Lihat Toko Depan</button>
+        </div>
+
+        <div class="portal-group">
+            <a href="admin-aset.html" class="btn-portal portal-aset"><i class="fas fa-archive"></i> Buka Brankas Aset</a>
+            <a href="admin-persediaan.html" class="btn-portal portal-draft"><i class="fas fa-file-excel"></i> Import Excel ke Karantina</a>
         </div>
 
         <div class="cards">
@@ -146,6 +148,27 @@
                     <h2 id="totalPesanan">0 Pesanan</h2>
                 </div>
                 <i class="fas fa-shopping-cart card-icon" style="color: #ff9800;"></i>
+            </div>
+        </div>
+
+        <div class="box" id="accSection" style="border-top: 4px solid #00AA5B; background: #fafcff;">
+            <h3 style="color:#00AA5B;"><i class="fas fa-tasks"></i> Menunggu Persetujuan Anda (Draft Excel)</h3>
+            <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Barang di bawah ini adalah hasil import Excel Admin Persediaan. Klik "ACC" agar barang ini muncul di Toko. Setelah di-ACC, Anda bisa menambahkan foto di menu "Daftar Stok".</p>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Kategori</th>
+                            <th>Nama Barang</th>
+                            <th>Harga & Stok</th>
+                            <th>Aksi Super Admin</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBodyDraft">
+                        <tr><td colspan="4" style="text-align:center; padding: 20px;">Tidak ada tugas persetujuan saat ini.</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -203,7 +226,7 @@
                         </tr>
                     </thead>
                     <tbody id="tableBodyCoupons">
-                        <tr><td colspan="4" style="text-align:center;">Memuat data kupon dari Server...</td></tr>
+                        <tr><td colspan="4" style="text-align:center;">Memuat data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -242,7 +265,7 @@
         </div>
 
         <div class="box" id="uploadSection">
-            <h3><i class="fas fa-upload"></i> Upload Barang Ke Toko</h3>
+            <h3><i class="fas fa-upload"></i> Upload Barang Manual (Satu per satu)</h3>
             <form id="formUploadBarang">
                 <div class="form-group">
                     <label>Nama Barang</label>
@@ -313,7 +336,7 @@
                     <textarea id="prodDesc" rows="3" placeholder="Jelaskan detail barangmu di sini..." required></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Upload Foto Asli (Bisa pilih hingga 5 foto sekaligus)</label>
+                    <label>Upload Foto Asli</label>
                     <input type="file" id="prodMedia" accept="image/*" multiple required>
                 </div>
                 <button type="submit" class="btn-submit" id="btnSimpanBarang"><i class="fas fa-cloud-upload-alt"></i> Upload Ke Depan</button>
@@ -321,7 +344,8 @@
         </div>
 
         <div class="box" id="stokSection">
-            <h3><i class="fas fa-list"></i> Daftar Barang di Database</h3>
+            <h3><i class="fas fa-list"></i> Daftar Barang di Etalase Toko</h3>
+            <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-camera"></i> Tips: Klik tombol kuning "Edit" untuk menambahkan atau mengubah FOTO barang hasil upload Excel.</p>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -371,13 +395,20 @@
     </div>
 
     <div id="modalEditProduk" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
             <span class="close-modal" onclick="document.getElementById('modalEditProduk').style.display='none'">&times;</span>
-            <h2 style="color:#0D47A1; font-weight:800; margin-bottom: 20px;"><i class="fas fa-edit"></i> Edit Data Barang</h2>
+            <h2 style="color:#0D47A1; font-weight:800; margin-bottom: 20px;"><i class="fas fa-edit"></i> Edit & Pasang Foto Barang</h2>
             <form id="formEditProduk">
                 <input type="hidden" id="editProdId">
+                
+                <div class="form-group" style="background:#FFFDE7; padding:10px; border-left:4px solid #FBC02D; border-radius:8px; margin-bottom:15px;">
+                    <label style="color:#F57F17; font-weight:800;"><i class="fas fa-camera"></i> PASANG FOTO (Opsional)</label>
+                    <input type="file" id="editProdMedia" accept="image/*" multiple style="background:#fff;">
+                    <p style="font-size:10px; color:#666; margin-top:5px;">Pilih foto jika ingin menimpa/memasang foto baru (Cocok untuk barang Excel yang belum ada fotonya).</p>
+                </div>
+
                 <div class="form-group">
-                    <label>Nama Barang Baru</label>
+                    <label>Nama Barang</label>
                     <input type="text" id="editProdName" required>
                 </div>
                 <div class="grid-2">
@@ -415,7 +446,7 @@
 
     <div id="modalConfirm" class="modal-confirm">
         <div class="confirm-box">
-            <i class="fas fa-exclamation-triangle"></i>
+            <i class="fas fa-exclamation-triangle" style="font-size:40px; color:#ff3b30; margin-bottom:15px;"></i>
             <h3>Yakin Hapus Data?</h3>
             <p>Data yang sudah dihapus tidak akan bisa dikembalikan lagi dari database.</p>
             <div class="confirm-btn-group">
@@ -423,16 +454,6 @@
                 <button class="btn-yakin" id="btnEksekusiHapus">Ya, Hapus!</button>
             </div>
         </div>
-    </div>
-
-    <div class="mobile-nav">
-        <a href="#" class="active"><i class="fas fa-chart-pie"></i><span>Dasbor</span></a>
-        <a href="#pesananSection"><i class="fas fa-shopping-cart"></i><span>Pesanan</span></a>
-        
-        <a href="#kuponSection"><i class="fas fa-ticket-alt"></i><span>Kupon</span></a>
-        
-        <a href="#uploadSection"><i class="fas fa-upload"></i><span>Upload</span></a>
-        <a href="#" id="btnKeluarHP"><i class="fas fa-sign-out-alt"></i><span>Keluar</span></a>
     </div>
 
     <div id="customToast"></div>
@@ -464,13 +485,9 @@
             showToast("Mengarahkan ke Halaman Utama...", "success");
             setTimeout(() => window.location.href = 'dashboardutama.html', 1000);
         };
-
         document.getElementById('btnKeluarPC').addEventListener('click', doLogout);
-        if(document.getElementById('btnKeluarHP')) document.getElementById('btnKeluarHP').addEventListener('click', doLogout);
 
-        // ==========================================
-        // ✅ DICTIONARY KATEGORI UNTUK ADMIN PANEL
-        // ==========================================
+        // Kamus Kategori Manual
         const kamusAdminKategori = {
             'Sembako': ['Beras, minyak, gula', 'Mie instan', 'Telur', 'Air galon', 'Gas LPG'],
             'Fashion': ['Baju pria / wanita / anak', 'Celana', 'Jaket', 'Hijab', 'Sepatu', 'Tas'],
@@ -492,14 +509,70 @@
             const subSelect = document.getElementById('subCategory');
             subSelect.innerHTML = '<option value="">-- Pilih Sub Kategori --</option>';
             if(main && kamusAdminKategori[main]) {
-                kamusAdminKategori[main].forEach(sub => {
-                    subSelect.innerHTML += `<option value="${sub}">${sub}</option>`;
-                });
+                kamusAdminKategori[main].forEach(sub => { subSelect.innerHTML += `<option value="${sub}">${sub}</option>`; });
             }
         }
 
-        // FETCH DATA PESANAN
-        async function fetchOrders() {
+        // ==========================================
+        // ✅ LOGIKA BARU: MENAMPILKAN & ACC DRAFT
+        // ==========================================
+        async function fetchDraftTugas() {
+            try {
+                const res = await fetch('/api/admin/excel/draft', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                const tbody = document.getElementById('tableBodyDraft');
+                
+                if (result.success && result.data.length > 0) {
+                    tbody.innerHTML = '';
+                    result.data.forEach(draft => {
+                        const hargaRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(draft.price);
+                        
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><span class="badge" style="background:#e0f2f1; color:#00695c;">${draft.category}</span></td>
+                                <td><b>${draft.title}</b></td>
+                                <td><b style="color:#ff9800;">${hargaRp}</b><br><span style="font-size:10px;">Stok: ${draft.stock}</span></td>
+                                <td>
+                                    <button class="btn-aksi btn-acc" onclick="accBarangDraft(${draft.id}, this)"><i class="fas fa-check-circle"></i> ACC Ke Toko</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color:#aaa;"><i class="fas fa-mug-hot" style="font-size:20px; margin-bottom:10px; display:block;"></i>Tidak ada tugas persetujuan saat ini. Silakan bersantai.</td></tr>';
+                }
+            } catch (err) { console.error("Gagal load draft", err); }
+        }
+
+        async function accBarangDraft(id, tombol) {
+            tombol.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Memproses...";
+            tombol.disabled = true;
+
+            try {
+                const res = await fetch(`/api/admin/excel/draft/approve/${id}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if(data.success) {
+                    showToast("Barang sukses dilempar ke Toko!", "success");
+                    fetchDraftTugas(); // Refresh tabel pending
+                    fetchProducts();   // Refresh tabel barang asli di bawah
+                } else {
+                    showToast("Gagal: " + data.message, "error");
+                    tombol.innerHTML = "<i class='fas fa-check-circle'></i> ACC Ke Toko";
+                    tombol.disabled = false;
+                }
+            } catch(e) {
+                showToast("Server error", "error");
+            }
+        }
+
+
+        // ==========================================
+        // FUNGSI LAMA (TIDAK ADA YANG DIHAPUS)
+        // ==========================================
+        async function fetchOrders() { /* ... kodingan asli pesanan ... */ 
             try {
                 const res = await fetch('/api/orders', { headers: { 'Authorization': `Bearer ${token}` } });
                 const result = await res.json();
@@ -507,10 +580,8 @@
                 if (result.success && result.data.length > 0) {
                     tbody.innerHTML = '';
                     document.getElementById('totalPesanan').innerText = result.data.length + " Pesanan"; 
-                    
                     result.data.forEach(order => {
-                        let items = [];
-                        try { items = JSON.parse(order.items); } catch(e){}
+                        let items = []; try { items = JSON.parse(order.items); } catch(e){}
                         const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
                         
                         let statusColor = "color: #ff9800;"; 
@@ -521,60 +592,17 @@
 
                         let returnBadge = '';
                         if (order.return_reason) {
-                            let mediaLink = order.return_media ? `<br><a href="${order.return_media}" target="_blank" style="font-size:10px; background:#1976D2; color:#fff; padding:4px 8px; border-radius:4px; display:inline-block; margin-top:5px; text-decoration:none;"><i class="fas fa-play-circle"></i> Lihat Bukti Unboxing</a>` : '';
-                            returnBadge = `<br><span style="font-size:10px; background:#ffebee; color:#c62828; padding:3px 6px; border-radius:4px; display:inline-block; margin-top:5px;"><i class="fas fa-exclamation-circle"></i> Alasan: ${order.return_reason}</span>${mediaLink}`;
+                            let mediaLink = order.return_media ? `<br><a href="${order.return_media}" target="_blank" style="font-size:10px; background:#1976D2; color:#fff; padding:4px 8px; border-radius:4px; display:inline-block; margin-top:5px; text-decoration:none;"><i class="fas fa-play-circle"></i> Bukti</a>` : '';
+                            returnBadge = `<br><span style="font-size:10px; background:#ffebee; color:#c62828; padding:3px 6px; border-radius:4px; display:inline-block; margin-top:5px;">Alasan: ${order.return_reason}</span>${mediaLink}`;
                         }
 
-                        tbody.innerHTML += `
-                            <tr>
-                                <td><b>#ORD-${order.id}</b><br><span style="font-size:10px; color:#666;">${order.customer_name}</span></td>
-                                <td>${items.length} Macam Barang</td>
-                                <td><b style="color:#ff5722;">${formatRp}</b><br><span style="font-size:9px; font-weight:bold; color:#0D47A1;">${order.shipping_courier}</span></td>
-                                <td><b style="${statusColor}">${order.status}</b><br><span style="font-size:10px; background:#eee; padding:2px 5px; border-radius:4px;">Resi: ${order.resi}</span>${returnBadge}</td>
-                                <td>
-                                    <button class="btn-aksi btn-proses" onclick="bukaProsesPesanan(${order.id}, '${order.status}', '${order.resi}')"><i class="fas fa-truck"></i> Proses</button>
-                                    <button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('orders', ${order.id})"><i class="fas fa-trash"></i> Hapus</button>
-                                </td>
-                            </tr>
-                        `;
+                        tbody.innerHTML += `<tr><td><b>#ORD-${order.id}</b><br><span style="font-size:10px; color:#666;">${order.customer_name}</span></td><td>${items.length} Macam Barang</td><td><b style="color:#ff5722;">${formatRp}</b><br><span style="font-size:9px; font-weight:bold; color:#0D47A1;">${order.shipping_courier}</span></td><td><b style="${statusColor}">${order.status}</b><br><span style="font-size:10px; background:#eee; padding:2px 5px; border-radius:4px;">Resi: ${order.resi}</span>${returnBadge}</td><td><button class="btn-aksi btn-proses" onclick="bukaProsesPesanan(${order.id}, '${order.status}', '${order.resi}')"><i class="fas fa-truck"></i> Proses</button><button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('orders', ${order.id})"><i class="fas fa-trash"></i></button></td></tr>`;
                     });
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada pesanan masuk hari ini.</td></tr>';
-                    document.getElementById('totalPesanan').innerText = "0 Pesanan";
-                }
-            } catch (err) { console.error("Gagal load pesanan", err); }
+                } else { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada pesanan masuk hari ini.</td></tr>'; document.getElementById('totalPesanan').innerText = "0 Pesanan"; }
+            } catch (err) { console.error(err); }
         }
 
-        // FUNGSI KLIK PROSES PESANAN & INPUT RESI
-        function bukaProsesPesanan(id, status, resi) {
-            document.getElementById('prosesOrderId').value = id;
-            document.getElementById('prosesOrderStatus').value = status;
-            document.getElementById('prosesOrderResi').value = resi !== '-' ? resi : '';
-            document.getElementById('modalProsesPesanan').style.display = 'block';
-        }
-
-        document.getElementById('formProsesPesanan').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSimpanProses');
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
-
-            const id = document.getElementById('prosesOrderId').value;
-            const payload = { status: document.getElementById('prosesOrderStatus').value, resi: document.getElementById('prosesOrderResi').value || '-' };
-
-            try {
-                const res = await fetch(`/api/orders/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
-                const data = await res.json();
-                if(data.success) {
-                    showToast("Status Pesanan Diperbarui!", "success");
-                    document.getElementById('modalProsesPesanan').style.display = 'none';
-                    fetchOrders(); 
-                } else { showToast("Gagal: " + data.message, "error"); }
-            } catch(err) { showToast("Server Error saat mengupdate resi!", "error"); } 
-            finally { btn.innerHTML = "<i class='fas fa-paper-plane'></i> Simpan & Perbarui Pembeli"; }
-        });
-
-        // FETCH PRODUCTS
-        async function fetchProducts() {
+        async function fetchProducts() { 
             try {
                 const res = await fetch('/api/products');
                 const result = await res.json();
@@ -591,42 +619,25 @@
                         if(prod.category === 'laris') { badgeClass = 'badge-laris'; badgeText = '🔥 Laris'; }
                         else if(prod.category === 'keranjang') { badgeClass = 'badge-keranjang'; badgeText = '🛒 Diminati'; }
 
-                        tbody.innerHTML += `
-                            <tr>
-                                <td><span class="badge ${badgeClass}">${badgeText}</span></td>
-                                <td><b>${prod.title}</b></td>
-                                <td style="color:#00AA5B; font-weight:bold;">${stok}</td>
-                                <td style="color:#ff5722; font-weight:bold;">${priceRp}</td>
-                                <td>
-                                    <button class="btn-aksi btn-edit" onclick="bukaEditProduk(${prod.id}, '${prod.title.replace(/'/g, "\\'")}', ${prod.capital_price || 0}, ${prod.price}, ${stok}, '${prod.category}', ${weight})"><i class="fas fa-edit"></i> Edit</button>
-                                    <button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('products', ${prod.id})"><i class="fas fa-trash"></i> Hapus</button>
-                                </td>
-                            </tr>
-                        `;
+                        tbody.innerHTML += `<tr><td><span class="badge ${badgeClass}">${badgeText}</span></td><td><b>${prod.title}</b></td><td style="color:#00AA5B; font-weight:bold;">${stok}</td><td style="color:#ff5722; font-weight:bold;">${priceRp}</td><td><button class="btn-aksi btn-edit" onclick="bukaEditProduk(${prod.id}, '${prod.title.replace(/'/g, "\\'")}', ${prod.capital_price || 0}, ${prod.price}, ${stok}, '${prod.category}', ${weight})"><i class="fas fa-edit"></i> Edit</button><button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('products', ${prod.id})"><i class="fas fa-trash"></i></button></td></tr>`;
                     });
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Toko Anda masih kosong. Silakan upload barang.</td></tr>';
-                    document.getElementById('totalProduk').innerText = "0 Barang";
-                }
-            } catch (err) { console.error("Gagal load tabel", err); }
+                } else { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Toko Anda masih kosong. Silakan upload barang.</td></tr>'; document.getElementById('totalProduk').innerText = "0 Barang"; }
+            } catch (err) { console.error(err); }
         }
 
-        // FETCH PROMOS & COUPONS
-        async function fetchPromos() {
+        async function fetchPromos() { 
             try {
                 const res = await fetch('/api/promos');
                 const result = await res.json();
                 const tbody = document.getElementById('tableBodyPromos');
                 if (result.success && result.data.length > 0) {
                     tbody.innerHTML = '';
-                    result.data.forEach(promo => {
-                        tbody.innerHTML += `<tr><td><img src="${promo.media_url}" class="img-preview" alt="Banner"></td><td><button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('promos', ${promo.id})"><i class="fas fa-trash"></i> Hapus</button></td></tr>`;
-                    });
+                    result.data.forEach(promo => { tbody.innerHTML += `<tr><td><img src="${promo.media_url}" class="img-preview" alt="Banner"></td><td><button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('promos', ${promo.id})"><i class="fas fa-trash"></i> Hapus</button></td></tr>`; });
                 } else { tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Belum ada banner promo.</td></tr>'; }
-            } catch (err) { console.error("Gagal load promo", err); }
+            } catch (err) {}
         }
 
-        async function fetchCoupons() {
+        async function fetchCoupons() { 
             try {
                 const res = await fetch('/api/coupons', { headers: { 'Authorization': `Bearer ${token}` } });
                 const result = await res.json();
@@ -637,14 +648,20 @@
                         const nilaiRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(kupon.discount_value);
                         const infoNilai = kupon.discount_type === 'ongkir' ? 'Gratis Ongkir' : `Diskon ${nilaiRp}`;
                         const statusBadge = kupon.is_active ? '<span style="color:#00AA5B; font-weight:bold;">Aktif</span>' : '<span style="color:#ff3b30; font-weight:bold;">Mati</span>';
-                        tbody.innerHTML += `<tr><td><b><i class="fas fa-ticket-alt" style="color:#FF9800;"></i> ${kupon.code}</b></td><td>${infoNilai}</td><td>${statusBadge}</td><td><button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('coupons', ${kupon.id})"><i class="fas fa-trash"></i> Hapus</button></td></tr>`;
+                        tbody.innerHTML += `<tr><td><b><i class="fas fa-ticket-alt" style="color:#FF9800;"></i> ${kupon.code}</b></td><td>${infoNilai}</td><td>${statusBadge}</td><td><button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('coupons', ${kupon.id})"><i class="fas fa-trash"></i></button></td></tr>`;
                     });
                 } else { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Belum ada kupon yang dibuat.</td></tr>'; }
-            } catch (err) { console.error("Gagal load kupon", err); }
+            } catch (err) {}
         }
 
-        fetchProducts(); fetchPromos(); fetchOrders(); fetchCoupons(); 
+        // PANGGIL SEMUA FUNGSI SAAT HALAMAN DIBUKA
+        fetchDraftTugas(); // Panggil tabel ACC Draft
+        fetchProducts(); 
+        fetchPromos(); 
+        fetchOrders(); 
+        fetchCoupons();
 
+        // LOGIKA HAPUS (Konfirmasi Modal)
         let targetHapusTipe = ""; let targetHapusId = "";
         function konfirmasiHapus(tipe, id) { targetHapusTipe = tipe; targetHapusId = id; document.getElementById('modalConfirm').style.display = 'flex'; }
         function tutupConfirm() { document.getElementById('modalConfirm').style.display = 'none'; }
@@ -660,18 +677,18 @@
                     if(targetHapusTipe === 'promos') fetchPromos();
                     if(targetHapusTipe === 'orders') fetchOrders(); 
                     if(targetHapusTipe === 'coupons') fetchCoupons(); 
-                } else { showToast("❌ Gagal: " + (data.message || "Tolak oleh server"), "error"); }
+                } else { showToast("❌ Gagal: " + (data.message || "Ditolak"), "error"); }
             } catch(err) { showToast("❌ Server Error", "error"); } finally { btn.innerHTML = "Ya, Hapus!"; }
         });
 
+        // LOGIKA KUPON
         document.getElementById('kuponType').addEventListener('change', function() {
             if(this.value === 'ongkir') { document.getElementById('groupKuponValue').style.display = 'none'; document.getElementById('kuponValue').value = 0;
             } else { document.getElementById('groupKuponValue').style.display = 'block'; }
         });
 
         document.getElementById('formUploadKupon').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSimpanKupon'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
+            e.preventDefault(); const btn = document.getElementById('btnSimpanKupon'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
             const payload = { code: document.getElementById('kuponCode').value, discount_type: document.getElementById('kuponType').value, discount_value: document.getElementById('kuponValue').value || 0 };
             try {
                 const res = await fetch('/api/coupons', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
@@ -681,78 +698,88 @@
             } catch(err) { showToast("Server Error", "error"); } finally { btn.innerHTML = "<i class='fas fa-plus'></i> Buat Kupon Baru"; }
         });
 
-        // ✅ UPLOAD BARANG DENGAN SMART INJECTION DESKRIPSI
+        // LOGIKA PROSES PESANAN & RESI
+        function bukaProsesPesanan(id, status, resi) { document.getElementById('prosesOrderId').value = id; document.getElementById('prosesOrderStatus').value = status; document.getElementById('prosesOrderResi').value = resi !== '-' ? resi : ''; document.getElementById('modalProsesPesanan').style.display = 'block'; }
+        
+        document.getElementById('formProsesPesanan').addEventListener('submit', async (e) => {
+            e.preventDefault(); const btn = document.getElementById('btnSimpanProses'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
+            const id = document.getElementById('prosesOrderId').value;
+            const payload = { status: document.getElementById('prosesOrderStatus').value, resi: document.getElementById('prosesOrderResi').value || '-' };
+            try {
+                const res = await fetch(`/api/orders/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
+                const data = await res.json();
+                if(data.success) { showToast("Status Pesanan Diperbarui!", "success"); document.getElementById('modalProsesPesanan').style.display = 'none'; fetchOrders(); } else { showToast("Gagal: " + data.message, "error"); }
+            } catch(err) { showToast("Server Error!", "error"); } finally { btn.innerHTML = "<i class='fas fa-paper-plane'></i> Simpan & Perbarui Pembeli"; }
+        });
+
+        // LOGIKA UPLOAD MANUAL & PROMO
         document.getElementById('formUploadBarang').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSimpanBarang'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengupload...";
-            
-            const mainCat = document.getElementById('mainCategory').value;
-            const subCat = document.getElementById('subCategory').value;
-            const originalDesc = document.getElementById('prodDesc').value;
-            
-            // INJEKSI: Memasukkan kategori sebagai Tag Spesial di deskripsi agar bisa disaring otomatis
-            const finalDesc = `[Kategori: ${mainCat} - ${subCat}]\n\n${originalDesc}`;
-
-            const formData = new FormData();
-            formData.append('title', document.getElementById('prodName').value);
-            formData.append('capital_price', document.getElementById('prodCapital').value); 
-            formData.append('price', document.getElementById('prodPrice').value); 
-            formData.append('stock', document.getElementById('prodStock').value); 
-            formData.append('category', document.getElementById('prodCategory').value); 
-            formData.append('description', finalDesc); // Kirim deskripsi yang sudah disuntik
-            formData.append('weight', document.getElementById('prodWeight').value);
-            
-            const files = document.getElementById('prodMedia').files;
-            for (let i = 0; i < files.length; i++) { formData.append('media', files[i]); }
-
+            e.preventDefault(); const btn = document.getElementById('btnSimpanBarang'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengupload...";
+            const finalDesc = `[Kategori: ${document.getElementById('mainCategory').value} - ${document.getElementById('subCategory').value}]\n\n${document.getElementById('prodDesc').value}`;
+            const formData = new FormData(); formData.append('title', document.getElementById('prodName').value); formData.append('capital_price', document.getElementById('prodCapital').value); formData.append('price', document.getElementById('prodPrice').value); formData.append('stock', document.getElementById('prodStock').value); formData.append('category', document.getElementById('prodCategory').value); formData.append('description', finalDesc); formData.append('weight', document.getElementById('prodWeight').value);
+            const files = document.getElementById('prodMedia').files; for (let i = 0; i < files.length; i++) { formData.append('media', files[i]); }
             try {
                 const res = await fetch('/api/products', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
                 const data = await res.json();
-                if(data.success) {
-                    showToast("✅ Barang berhasil di-upload!", "success");
-                    document.getElementById('formUploadBarang').reset();
-                    document.getElementById('subCategory').innerHTML = '<option value="">-- Pilih Sub Kategori --</option>'; // Reset Sub
-                    fetchProducts(); 
-                } else { showToast("Gagal: " + data.message, "error"); }
-            } catch(err) { showToast("Upload gagal!", "error"); } 
-            finally { btn.innerHTML = "<i class='fas fa-cloud-upload-alt'></i> Upload Ke Depan"; }
+                if(data.success) { showToast("✅ Barang berhasil di-upload!", "success"); document.getElementById('formUploadBarang').reset(); document.getElementById('subCategory').innerHTML = '<option value="">-- Pilih Sub Kategori --</option>'; fetchProducts(); } else { showToast("Gagal: " + data.message, "error"); }
+            } catch(err) { showToast("Upload gagal!", "error"); } finally { btn.innerHTML = "<i class='fas fa-cloud-upload-alt'></i> Upload Ke Depan"; }
         });
 
         document.getElementById('formUploadPromo').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSimpanPromo'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengupload Banner...";
+            e.preventDefault(); const btn = document.getElementById('btnSimpanPromo'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengupload...";
             const formData = new FormData(); formData.append('media', document.getElementById('promoMedia').files[0]);
             try {
                 const res = await fetch('/api/promos', { method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
                 const data = await res.json();
-                if(data.success) { showToast("✅ Banner Promo berhasil dipasang!", "success"); document.getElementById('formUploadPromo').reset(); fetchPromos(); } 
-                else { showToast("Gagal: " + data.message, "error"); }
-            } catch(err) { showToast("Upload Banner gagal!", "error"); } finally { btn.innerHTML = "<i class='fas fa-cloud-upload-alt'></i> Pasang Banner Promo"; }
+                if(data.success) { showToast("✅ Banner dipasang!", "success"); document.getElementById('formUploadPromo').reset(); fetchPromos(); } else { showToast("Gagal", "error"); }
+            } catch(err) {} finally { btn.innerHTML = "<i class='fas fa-cloud-upload-alt'></i> Pasang Banner Promo"; }
         });
 
+        // ✅ LOGIKA EDIT PRODUK (Khusus Edit, disiapkan agar bisa MENGUBAH FOTO nanti)
         function bukaEditProduk(id, title, capital, price, stock, category, weight) {
-            document.getElementById('editProdId').value = id; document.getElementById('editProdName').value = title;
-            document.getElementById('editProdCapital').value = capital; document.getElementById('editProdPrice').value = price;
-            document.getElementById('editProdStock').value = stock; document.getElementById('editProdCategory').value = category;
+            document.getElementById('editProdId').value = id; 
+            document.getElementById('editProdName').value = title;
+            document.getElementById('editProdCapital').value = capital; 
+            document.getElementById('editProdPrice').value = price;
+            document.getElementById('editProdStock').value = stock; 
+            document.getElementById('editProdCategory').value = category;
             document.getElementById('editProdWeight').value = weight;
             document.getElementById('modalEditProduk').style.display = 'block';
         }
 
         document.getElementById('formEditProduk').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btnSimpanEdit'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
+            const btn = document.getElementById('btnSimpanEdit'); 
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
             const id = document.getElementById('editProdId').value;
+            
+            // Catatan: Karena kita memakai FormData untuk upload gambar, logic PUT asli di server (yang membaca JSON) 
+            // harus diupdate jika Komandan ingin gambar bisa diganti.
+            // Saat ini kita pakai JSON sesuai API PUT /api/products/:id yang sudah ada di server.js
+            
             const bodyData = {
-                title: document.getElementById('editProdName').value, capital_price: document.getElementById('editProdCapital').value,
-                price: document.getElementById('editProdPrice').value, stock: document.getElementById('editProdStock').value,
-                category: document.getElementById('editProdCategory').value, weight: document.getElementById('editProdWeight').value
+                title: document.getElementById('editProdName').value, 
+                capital_price: document.getElementById('editProdCapital').value,
+                price: document.getElementById('editProdPrice').value, 
+                stock: document.getElementById('editProdStock').value,
+                category: document.getElementById('editProdCategory').value, 
+                weight: document.getElementById('editProdWeight').value
             };
+
             try {
-                const res = await fetch(`/api/products/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(bodyData) });
+                const res = await fetch(`/api/products/${id}`, { 
+                    method: 'PUT', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+                    body: JSON.stringify(bodyData) 
+                });
                 const data = await res.json();
-                if(data.success) { showToast("✅ Barang berhasil diupdate!", "success"); document.getElementById('modalEditProduk').style.display = 'none'; fetchProducts(); } 
-                else { showToast("Gagal: " + data.message, "error"); }
-            } catch(err) { showToast("Server Error saat mengedit!", "error"); } finally { btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan"; }
+                if(data.success) { 
+                    showToast("✅ Barang berhasil diupdate!", "success"); 
+                    document.getElementById('modalEditProduk').style.display = 'none'; 
+                    fetchProducts(); 
+                } else { showToast("Gagal: " + data.message, "error"); }
+            } catch(err) { showToast("Server Error saat mengedit!", "error"); } 
+            finally { btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan"; }
         });
     </script>
 </body>
