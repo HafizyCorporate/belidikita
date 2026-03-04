@@ -66,8 +66,12 @@
         .btn-share:active { transform: scale(0.9); }
         .p-title { font-size: 16px; font-weight: 800; color: #0D47A1; line-height: 1.4; margin-bottom: 10px; }
         
-        /* ✅ Lencana Harga Grosir */
-        .promo-grosir { font-size: 11px; font-weight: 800; color: #00AA5B; background: #E8F5E9; padding: 4px 8px; border-radius: 6px; display: inline-block; margin-bottom: 10px; border: 1px dashed #4CAF50;}
+        /* Lencana Harga Grosir */
+        .promo-grosir { font-size: 11px; font-weight: 800; color: #00AA5B; background: #E8F5E9; padding: 4px 8px; border-radius: 6px; display: inline-block; margin-bottom: 5px; border: 1px dashed #4CAF50;}
+
+        /* ✅ KOTAK TIPS HEMAT BARU */
+        .box-estimasi { background: #FFF9C4; border: 1px dashed #F57F17; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 11px; color: #E65100; line-height: 1.5; font-weight: 600; display: none; }
+        .box-estimasi b { font-weight: 800; }
 
         /* RATING, TERJUAL & BERAT */
         .p-stats { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; color: #666; margin-bottom: 12px; }
@@ -76,7 +80,7 @@
         .p-stats .weight { background: #F3E5F5; color: #6A1B9A; padding: 3px 8px; border-radius: 6px; border: 1px solid #E1BEE7;}
 
         /* UKURAN / VARIAN BARANG (BUNGLON) */
-        .variant-box { display: none; } /* Default sembunyi, hanya muncul kalau ada varian */
+        .variant-box { display: none; } 
         .variant-box h4 { font-size: 13px; font-weight: 800; color: #0D47A1; margin-bottom: 10px; border-bottom: 1px dashed #E1F5FE; padding-bottom: 8px; display: flex; align-items: center; gap: 6px; }
         .variant-options { display: flex; gap: 10px; flex-wrap: wrap; }
         .v-opt { padding: 8px 16px; border: 2px solid #E1F5FE; border-radius: 10px; font-size: 13px; font-weight: 800; color: #555; cursor: pointer; transition: 0.2s; background: #fafcff; }
@@ -173,7 +177,10 @@
                 <div class="p-price" id="hargaProduk">Rp0</div>
                 <button class="btn-share" onclick="bagikanProduk()"><i class="fas fa-share-alt"></i></button>
             </div>
+            
             <div id="promoGrosir" class="promo-grosir" style="display: none;"></div>
+            
+            <div id="estimasiGrosir" class="box-estimasi"></div>
 
             <div class="p-title" id="namaProduk">Memuat nama produk...</div>
             
@@ -186,7 +193,8 @@
 
         <div class="glass-box variant-box" id="boxVarian">
             <h4 id="judulVarian"><i class="fas fa-tags"></i> Pilih Varian</h4>
-            <div class="variant-options" id="pilihanVarianContainer"></div>
+            <div class="variant-options" id="pilihanVarianContainer">
+                </div>
         </div>
 
         <div class="glass-box shipping-box">
@@ -249,13 +257,14 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
+        // 1. Tarik Data dari Memori (Dari Dashboard Utama)
         const dataProdukStr = localStorage.getItem('produk_detail');
         if(!dataProdukStr) window.location.href = 'dashboardutama.html';
         const produk = JSON.parse(dataProdukStr);
 
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
 
-        // ✅ TAMPILKAN HARGA & INFO GROSIR JIKA ADA
+        // ✅ TAMPILKAN HARGA & INFO GROSIR & BOX ESTIMASI HEMAT
         const satuanTampil = produk.unit || 'Pcs';
         document.getElementById('hargaProduk').innerHTML = `${produk.hargaStr} <span style="font-size:12px; font-weight:600; color:#888;">/ ${satuanTampil}</span>`;
         
@@ -263,6 +272,17 @@
             const elPromo = document.getElementById('promoGrosir');
             elPromo.style.display = 'inline-block';
             elPromo.innerHTML = `<i class="fas fa-percent"></i> Beli Min ${produk.wholesale_min_qty} Harga Jadi ${formatRp(produk.wholesale_price)}/${satuanTampil}`;
+
+            // LOGIKA ESTIMASI HEMAT (MATEMATIKA MARKETING)
+            const totalSatuan = produk.harga * produk.wholesale_min_qty;
+            const totalGrosir = produk.wholesale_price * produk.wholesale_min_qty;
+            const hemat = totalSatuan - totalGrosir;
+            
+            if(hemat > 0) {
+                const elEstimasi = document.getElementById('estimasiGrosir');
+                elEstimasi.style.display = 'block';
+                elEstimasi.innerHTML = `<i class="fas fa-fire" style="color:#ff3b30; font-size:14px; margin-right:5px; vertical-align:middle;"></i> <b>Trik Hemat:</b> Beli ${produk.wholesale_min_qty} ${satuanTampil} cukup bayar <b>${formatRp(totalGrosir)}</b> <i>(Kamu hemat ${formatRp(hemat)} dari harga asli ${formatRp(totalSatuan)})</i>. Yuk borong!`;
+            }
         }
         
         document.getElementById('namaProduk').innerText = produk.nama;
@@ -270,7 +290,7 @@
         document.getElementById('txtBerat').innerHTML = `<i class="fas fa-weight-hanging mr-1"></i> ${produk.weight || 1000} Gram`;
         document.getElementById('namaTokoAsli').innerText = produk.seller_name || "Belidikita Official";
 
-        // ✅ LOGIKA VARIAN BUNGLON
+        // LOGIKA VARIAN BUNGLON
         let ukuranTerpilih = null;
         const boxVarian = document.getElementById('boxVarian');
         let butuhVarian = false; 
@@ -316,7 +336,6 @@
         }
         fetchUlasanAsli();
 
-        // KECERDASAN SLIDER FOTO
         let daftarFoto = [];
         try {
             daftarFoto = JSON.parse(produk.foto); 
@@ -352,7 +371,6 @@
         }
         updateBadge();
 
-        // ✅ TAMBAH KERANJANG (BAWA DNA GROSIR KE KERANJANG)
         document.getElementById('btnTambahKeranjang').addEventListener('click', () => {
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) { showToast("Silakan Login Pembeli terlebih dahulu!", "error"); setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500); return; }
@@ -373,8 +391,8 @@
                     harga: produk.harga,
                     qty: 1,
                     weight: produk.weight || 1000,
-                    wholesale_price: produk.wholesale_price || 0, // Bawa DNA Grosir
-                    wholesale_min_qty: produk.wholesale_min_qty || 0 // Bawa DNA Grosir
+                    wholesale_price: produk.wholesale_price || 0, 
+                    wholesale_min_qty: produk.wholesale_min_qty || 0
                 }); 
             }
             localStorage.setItem('belidikita_cart', JSON.stringify(cart));
@@ -382,7 +400,6 @@
             showToast("Barang ditambahkan ke keranjang 🛒", "success");
         });
 
-        // ✅ BELI LANGSUNG (BAWA DNA GROSIR KE CHECKOUT)
         document.getElementById('btnBeliLangsung').addEventListener('click', () => {
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) { showToast("Silakan Login Pembeli terlebih dahulu!", "error"); setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500); return; }
@@ -408,7 +425,6 @@
             window.location.href = 'checkout.html';
         });
 
-        // FETCH BARANG SEJENIS (BAWA DNA GROSIR)
         async function loadSimilarProducts() {
             try {
                 const res = await fetch('/api/products'); const data = await res.json();
@@ -426,7 +442,7 @@
                         const prodObj = { 
                             id: p.id, nama: p.title, harga: p.price, hargaStr: hargaRp, deskripsi: p.description, foto: p.media_url, weight: p.weight || 1000,
                             unit: p.unit || 'Pcs', variant_title: p.variant_title || '', variant_options: p.variant_options || '',
-                            wholesale_price: p.wholesale_price || 0, wholesale_min_qty: p.wholesale_min_qty || 0 // DNA Grosir Rekomendasi
+                            wholesale_price: p.wholesale_price || 0, wholesale_min_qty: p.wholesale_min_qty || 0 
                         };
                         const strObj = encodeURIComponent(JSON.stringify(prodObj));
 
