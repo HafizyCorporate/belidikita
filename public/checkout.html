@@ -27,11 +27,16 @@
         .product-detail { flex: 1; }
         .product-detail h4 { font-size: 13px; font-weight: 600; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .product-detail .price { color: #ff5722; font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap;}
-        .product-detail .qty { font-size: 12px; color: #888; float: right; font-weight: bold; background: #f4f7fa; padding: 2px 6px; border-radius: 4px;}
         
         /* ✅ Label Info Grosir */
         .grosir-badge { font-size: 9px; background: #E8F5E9; color: #00AA5B; padding: 2px 5px; border-radius: 4px; border: 1px solid #C8E6C9; margin-top: 2px; display: inline-block; font-weight: bold;}
         .harga-coret { text-decoration: line-through; color: #aaa; font-size: 10px; font-weight: 600; }
+
+        /* ✅ TOMBOL QTY CHECKOUT BARU */
+        .qty-control-checkout { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; background: #fff; height: 30px;}
+        .qty-control-checkout button { width: 25px; height: 100%; background: #f4f7fa; border: none; font-size: 14px; font-weight: bold; color: #0D47A1; cursor: pointer; }
+        .qty-control-checkout button:active { background: #E1F5FE; }
+        .qty-control-checkout input { width: 35px; height: 100%; text-align: center; border: none; border-left: 1px solid #ddd; border-right: 1px solid #ddd; font-size: 12px; font-weight: 800; outline: none; background: #fff;}
 
         /* KUPON */
         .coupon-box { display: flex; gap: 10px; align-items: center; }
@@ -244,36 +249,41 @@
             } catch (err) { console.error(err); }
         }
 
-        // ✅ LOGIKA BARU: MENGHITUNG DISKON GROSIR JIKA MEMENUHI SYARAT QTY
+        // ✅ LOGIKA BARU: TOMBOL QTY DI CHECKOUT + KALKULASI GROSIR REAL-TIME
         function loadCheckoutItems() {
             const dataStr = sessionStorage.getItem('belidikita_checkout');
             if(!dataStr) { window.location.href = 'dashboardutama.html'; return; }
             
             items = JSON.parse(dataStr);
+            
+            // RESET VARIABEL SEBELUM DIHITUNG ULANG
+            subtotal = 0;
+            totalBeratGram = 0;
+
             const container = document.getElementById('checkoutItems');
             container.innerHTML = '';
             
-            items.forEach(item => {
+            items.forEach((item, index) => {
                 let hargaFinal = item.harga;
                 let infoGrosirHTML = '';
 
-                // CEK DNA GROSIR DARI ITEM KERANJANG
+                // CEK DNA GROSIR DARI ITEM
                 if (item.wholesale_price && item.wholesale_min_qty && item.qty >= item.wholesale_min_qty) {
                     hargaFinal = item.wholesale_price; // Banting harga jadi murah!
-                    // Tampilkan coretan harga asli dan lencana Grosir
                     infoGrosirHTML = `<div class="grosir-badge"><i class="fas fa-tags"></i> Harga Grosir Aktif!</div>`;
-                    item.hargaAwalDicoret = item.harga; // Simpan untuk dikirim ke WA nanti
+                    item.hargaAwalDicoret = item.harga;
+                } else {
+                    item.hargaAwalDicoret = null; // Hapus coretan jika jumlah dikurangi
                 }
                 
-                // Pastikan item update dengan harga final agar saat dikirim ke WA / DB harganya valid
                 item.hargaTerpakai = hargaFinal; 
-
                 subtotal += (hargaFinal * item.qty);
                 let beratPerBarang = item.weight ? item.weight : 1000; 
                 totalBeratGram += (beratPerBarang * item.qty);
 
                 const tampilanHargaCorek = infoGrosirHTML ? `<span class="harga-coret">${formatRp(item.harga)}</span>` : '';
 
+                // TAMPILAN PRODUK BESERTA TOMBOL PLUS MINUS
                 container.innerHTML += `
                     <div class="product-item">
                         <img src="${item.foto}" alt="Foto">
@@ -281,7 +291,11 @@
                             <h4>${item.nama}</h4>
                             <span class="price">${formatRp(hargaFinal)} ${tampilanHargaCorek}</span>
                             ${infoGrosirHTML}
-                            <span class="qty">x${item.qty}</span>
+                        </div>
+                        <div class="qty-control-checkout">
+                            <button onclick="ubahQtyCheckout(${index}, -1)">-</button>
+                            <input type="text" value="${item.qty}" readonly>
+                            <button onclick="ubahQtyCheckout(${index}, 1)">+</button>
                         </div>
                     </div>
                 `;
@@ -296,7 +310,36 @@
             document.getElementById('labelJNT').innerText = formatRp(12000 * totalKg);
             document.getElementById('labelSicepat').innerText = formatRp(14000 * totalKg);
 
+            // Jika kurir sudah terpilih, otomatis sesuaikan ongkir dengan berat yang baru
+            const selectedShipping = document.querySelector('input[name="shipping"]:checked');
+            if(selectedShipping) {
+                let baseCost = parseInt(selectedShipping.getAttribute('data-base')); 
+                ongkir = baseCost * totalKg; 
+                if(currentCouponType === 'ongkir') { diskonKupon = ongkir; }
+            }
+
             hitungTotal();
+        }
+
+        // ✅ FUNGSI UBAH JUMLAH (QTY) LANGSUNG DARI HALAMAN CHECKOUT
+        window.ubahQtyCheckout = function(index, delta) {
+            items[index].qty += delta;
+            
+            if(items[index].qty <= 0) {
+                // Hapus barang dari daftar jika qty 0
+                items.splice(index, 1);
+            }
+            
+            if(items.length === 0) {
+                // Jika keranjang habis, usir ke halaman utama
+                sessionStorage.removeItem('belidikita_checkout');
+                window.location.href = 'dashboardutama.html';
+                return;
+            }
+
+            // Simpan perubahan ke memori, lalu panggil ulang tampilan
+            sessionStorage.setItem('belidikita_checkout', JSON.stringify(items));
+            loadCheckoutItems(); 
         }
 
         async function cekKupon() {
@@ -375,7 +418,6 @@
             });
         });
 
-        // 6. SIMPAN KE DATABASE LALU BUAT PESANAN KE WA
         document.getElementById('btnBuatPesanan').addEventListener('click', async () => {
             if(userInfo.wa === "-") {
                 document.getElementById('modalConfirmAddress').style.display = 'flex'; 
@@ -395,20 +437,19 @@
             const pengiriman = shippingSelected.value;
             const pembayaran = paymentSelected.value;
 
-            // ✅ UBAH STRUKTUR ITEMS SEBELUM DISIMPAN KE DB (Bawa harga grosirnya)
             const savedItems = items.map(item => ({
                 id: item.id,
                 nama: item.nama,
                 qty: item.qty,
-                harga_asli: item.harga, // Ini harga eceran
-                harga_final: item.hargaTerpakai // Ini bisa harga eceran, bisa harga grosir
+                harga_asli: item.harga,
+                harga_final: item.hargaTerpakai 
             }));
 
             const orderPayload = {
                 customer_name: userInfo.nama,
                 customer_wa: userInfo.wa,
                 shipping_address: userInfo.alamat,
-                items: JSON.stringify(savedItems), // Simpan Array yang sudah dimodif 
+                items: JSON.stringify(savedItems), 
                 total_price: totalAkhir,
                 shipping_courier: pengiriman,
                 shipping_cost: ongkir,
@@ -428,7 +469,6 @@
                     pesanWA += `*Data Penerima:*\nNama: ${userInfo.nama}\nNo WA: ${userInfo.wa}\nAlamat: ${userInfo.alamat}\n\n`;
                     pesanWA += `*Daftar Barang:*\n`;
                     
-                    // ✅ CETAK INVOICE WA DENGAN INFO GROSIR JIKA ADA
                     items.forEach(item => {
                         let infoPromo = item.hargaAwalDicoret ? ` *(Grosir)*` : '';
                         pesanWA += `- ${item.nama}${infoPromo} (x${item.qty}) = ${formatRp(item.hargaTerpakai * item.qty)}\n`;
@@ -445,7 +485,7 @@
 
                     showToast("Pesanan Disimpan! Meneruskan ke WhatsApp...", "success");
                     sessionStorage.removeItem('belidikita_checkout'); 
-                    sessionStorage.removeItem('belidikita_cart'); // Kosongkan keranjang juga
+                    sessionStorage.removeItem('belidikita_cart'); 
                     
                     setTimeout(() => { window.location.href = linkWA; }, 1500);
                 }
