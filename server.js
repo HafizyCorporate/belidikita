@@ -388,6 +388,64 @@ app.put('/api/orders/:id/return', verifyToken, upload.single('proof'), async (re
     }
 });
 
+// ==========================================
+// ⭐ API ULASAN & JUMLAH TERJUAL (REAL)
+// ==========================================
+
+// 1. Ambil Ulasan untuk ditampilkan di Detail Produk
+app.get('/api/reviews/:product_id', async (req, res) => {
+    try {
+        const productId = req.params.product_id;
+        
+        // Tarik semua ulasan yang terhubung dengan produk ini + Nama Pembelinya
+        const reviewQuery = await pool.query(`
+            SELECT r.*, u.name as user_name 
+            FROM product_reviews r 
+            JOIN users u ON r.user_id = u.id 
+            WHERE r.product_id = $1 
+            ORDER BY r.created_at DESC
+        `, [productId]);
+        
+        // Tarik angka "Terjual" asli dari tabel produk
+        const productQuery = await pool.query('SELECT sold_count FROM products WHERE id = $1', [productId]);
+        const terjual = productQuery.rows.length > 0 ? productQuery.rows[0].sold_count : 0;
+
+        const reviews = reviewQuery.rows;
+        let rataRata = 0;
+        
+        // Rumus Matematika: Hitung rata-rata Bintang
+        if (reviews.length > 0) {
+            const totalBintang = reviews.reduce((sum, rev) => sum + rev.rating, 0);
+            rataRata = (totalBintang / reviews.length).toFixed(1); // Format 1 angka di belakang koma (misal: 4.8)
+        }
+
+        res.json({ 
+            success: true, 
+            rata_rata: rataRata, 
+            terjual: terjual, 
+            data: reviews 
+        });
+    } catch (err) {
+        console.error("🔥 Error Get Reviews:", err);
+        res.status(500).json({ success: false, message: "Gagal memuat ulasan" });
+    }
+});
+
+// 2. Pembeli Mengirim Ulasan Baru
+app.post('/api/reviews', verifyToken, async (req, res) => {
+    const { product_id, rating, comment } = req.body;
+    try {
+        await pool.query(
+            'INSERT INTO product_reviews (product_id, user_id, rating, comment) VALUES ($1, $2, $3, $4)',
+            [product_id, req.user.id, rating, comment]
+        );
+        res.json({ success: true, message: "Terima kasih! Ulasan Anda berhasil disimpan." });
+    } catch (err) {
+        console.error("🔥 Error Post Review:", err);
+        res.status(500).json({ success: false, message: "Gagal mengirim ulasan" });
+    }
+});
+
 
 // ==========================================
 // 🚨 PENANGKAP ERROR GLOBAL (BONGKAR [object Object])
