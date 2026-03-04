@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs'); // Untuk membaca file/folder
 const bcrypt = require('bcrypt'); // Untuk cek password pembeli
 const jwt = require('jsonwebtoken'); // Untuk bikin tiket masuk pembeli
+const xlsx = require('xlsx'); // ✅ ALAT BARU: PEMBACA EXCEL
 require('dotenv').config();
 
 // ==========================================
@@ -13,28 +14,27 @@ const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
 
-// Masukkan Kunci Cloudinary (Disarankan menggunakan Variables di Railway, tapi ini disematkan sebagai cadangan)
+// Masukkan Kunci Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME || 'dbct8tltw', 
   api_key: process.env.CLOUDINARY_API_KEY || '419391893671787', 
   api_secret: process.env.CLOUDINARY_API_SECRET || 'vOzR16hMqiAADm5gBm60-_ntTgU' 
 });
 
-// Atur Gudang Penyimpanan ke Cloudinary
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'belidikita_images', // Folder otomatis di Cloudinary
-    // ✅ 1. Tambahkan format video (mp4, mov, avi)
+    folder: 'belidikita_images', 
     allowedFormats: ['jpeg', 'png', 'jpg', 'webp', 'mp4', 'mov', 'avi', 'mkv'], 
-    // ✅ 2. WAJIB DITAMBAHKAN: Beritahu Cloudinary agar menerima semua jenis file (termasuk video)
     resource_type: 'auto' 
   },
 });
 
-
-// Jadikan 'upload' sebagai alat pengangkut (MENGGANTIKAN multer/upload lokal sebelumnya)
 const upload = multer({ storage: storage });
+
+// ✅ ALAT KHUSUS: PENGANGKUT FILE EXCEL (Disimpan di memori sementara, tidak ke Cloudinary)
+const uploadExcel = multer({ storage: multer.memoryStorage() });
+
 // ==========================================
 
 // --- INJEKSI AUTO-DB ---
@@ -55,7 +55,6 @@ const PORT = process.env.PORT || 8080;
 
 initDB();
 
-// ✅ PENGAMANAN: Folder uploads lokal tetap dibiarkan untuk berjaga-jaga (meski sekarang pakai Cloudinary)
 const uploadDir = path.join(__dirname, 'public/uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -67,7 +66,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.static(path.join(__dirname, 'public')));
-// Jika ada file lama di folder lokal, tetap bisa diakses lewat /uploads
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'dashboardutama.html')); });
@@ -103,13 +101,11 @@ app.post('/api/login', async (req, res) => {
             return res.status(401).json({ success: false, message: "Email atau password salah!" });
         }
 
-        // Cek kecocokan sandi pembeli
         const validPassword = await bcrypt.compare(password, user.rows[0].password);
         if (!validPassword) {
             return res.status(401).json({ success: false, message: "Email atau password salah!" });
         }
 
-        // Bikin tiket JWT untuk pembeli
         const JWT_SECRET = process.env.JWT_SECRET || 'rahasia_belidikita_super_aman';
         const token = jwt.sign({ id: user.rows[0].id, role: user.rows[0].role }, JWT_SECRET, { expiresIn: '7d' });
 
@@ -140,10 +136,8 @@ const verifyAdmin = (req, res, next) => {
 app.get('/api/profile', verifyToken, getProfile);
 app.put('/api/profile', verifyToken, updateProfile);
 
-// ✅ TAMBAHAN: API UNTUK SIMPAN DAN AMBIL ALAMAT PEMBELI
 app.get('/api/address', verifyToken, async (req, res) => {
     try {
-        // Otomatis bikin tabel alamat kalau belum ada
         await pool.query(`CREATE TABLE IF NOT EXISTS user_addresses (
             user_id INT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
             nama_penerima VARCHAR(100),
@@ -173,7 +167,6 @@ app.post('/api/address', verifyToken, async (req, res) => {
             alamat_lengkap TEXT
         )`);
 
-        // Logika menimpa data jika alamat sudah pernah diisi (UPSERT)
         const query = `
             INSERT INTO user_addresses (user_id, nama_penerima, nomor_wa, alamat_lengkap)
             VALUES ($1, $2, $3, $4)
@@ -191,7 +184,6 @@ app.post('/api/address', verifyToken, async (req, res) => {
     }
 });
 
-// ✅ UPLOAD CLOUDINARY: Rute ini sekarang menggunakan multer "upload" versi awan
 app.post('/api/products', verifyAdmin, upload.array('media', 5), uploadProduct);
 app.post('/api/promos', verifyAdmin, upload.single('media'), uploadPromo); 
 app.post('/api/forum', verifyToken, createPost);
@@ -199,8 +191,6 @@ app.post('/api/forum', verifyToken, createPost);
 // ==========================================
 // 🔥 API BARU: HAPUS DAN EDIT (KHUSUS ADMIN)
 // ==========================================
-
-// 1. Hapus Produk
 app.delete('/api/products/:id', verifyAdmin, async (req, res) => {
     try {
         await pool.query('DELETE FROM products WHERE id = $1', [req.params.id]);
@@ -211,7 +201,6 @@ app.delete('/api/products/:id', verifyAdmin, async (req, res) => {
     }
 });
 
-// 2. Hapus Banner Promo
 app.delete('/api/promos/:id', verifyAdmin, async (req, res) => {
     try {
         await pool.query('DELETE FROM promo_sliders WHERE id = $1', [req.params.id]);
@@ -222,7 +211,6 @@ app.delete('/api/promos/:id', verifyAdmin, async (req, res) => {
     }
 });
 
-// 3. Edit Produk (Menerima Berat)
 app.put('/api/products/:id', verifyAdmin, async (req, res) => {
     const { title, price, capital_price, stock, category, weight } = req.body;
     try {
@@ -243,9 +231,7 @@ app.put('/api/products/:id', verifyAdmin, async (req, res) => {
 app.post('/api/coupons/check', async (req, res) => {
     const { code } = req.body;
     try {
-        // Cari kupon di database yang kodenya sama persis dan statusnya TRUE (Aktif)
         const result = await pool.query('SELECT * FROM coupons WHERE code = $1 AND is_active = TRUE', [code.toUpperCase()]);
-        
         if (result.rows.length > 0) {
             res.json({ success: true, data: result.rows[0] });
         } else {
@@ -257,7 +243,6 @@ app.post('/api/coupons/check', async (req, res) => {
     }
 });
 
-// ✅ API UNTUK ADMIN MENGELOLA KUPON (Tambah/Hapus Kupon)
 app.get('/api/coupons', verifyAdmin, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM coupons ORDER BY created_at DESC');
@@ -286,8 +271,6 @@ app.delete('/api/coupons/:id', verifyAdmin, async (req, res) => {
 // ==========================================
 // 🛒 API PEMESANAN (ORDER & RESI)
 // ==========================================
-
-// 1. Pembeli Membuat Pesanan Baru (Checkout)
 app.post('/api/orders', verifyToken, async (req, res) => {
     const { customer_name, customer_wa, shipping_address, items, total_price, shipping_courier, shipping_cost, payment_method } = req.body;
     try {
@@ -303,7 +286,6 @@ app.post('/api/orders', verifyToken, async (req, res) => {
     }
 });
 
-// ✅ 2. Pembeli Melihat Riwayat Pesanannya Sendiri (Tembok: is_hidden_buyer)
 app.get('/api/orders/me', verifyToken, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM orders WHERE user_id = $1 AND is_hidden_buyer = FALSE ORDER BY created_at DESC', [req.user.id]);
@@ -313,7 +295,6 @@ app.get('/api/orders/me', verifyToken, async (req, res) => {
     }
 });
 
-// ✅ 3. Admin Melihat Semua Pesanan (Tembok: is_hidden_admin)
 app.get('/api/orders', verifyAdmin, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM orders WHERE is_hidden_admin = FALSE ORDER BY created_at DESC');
@@ -323,7 +304,6 @@ app.get('/api/orders', verifyAdmin, async (req, res) => {
     }
 });
 
-// 4. Admin Update Status & Resi Pesanan
 app.put('/api/orders/:id', verifyAdmin, async (req, res) => {
     const { status, resi } = req.body;
     try {
@@ -338,15 +318,12 @@ app.put('/api/orders/:id', verifyAdmin, async (req, res) => {
     }
 });
 
-// ✅ 5. Hapus Pesanan (BENAR-BENAR TERPISAH: Soft Delete)
 app.delete('/api/orders/:id', verifyAdmin, async (req, res) => {
     try {
         if (req.user.role === 'admin') {
-            // ADMIN HAPUS: Cuma sembunyikan dari layar Admin, di HP pembeli tetap ada.
             await pool.query('UPDATE orders SET is_hidden_admin = TRUE WHERE id = $1', [req.params.id]);
             res.json({ success: true, message: "Pesanan berhasil dibersihkan dari layar Admin!" });
         } else {
-            // PEMBELI HAPUS: Cuma sembunyikan dari layar Pembeli, di layar Admin tetap ada.
             await pool.query('UPDATE orders SET is_hidden_buyer = TRUE WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
             res.json({ success: true, message: "Riwayat pesanan berhasil dibersihkan dari layar Anda!" });
         }
@@ -356,31 +333,21 @@ app.delete('/api/orders/:id', verifyAdmin, async (req, res) => {
     }
 });
 
-// ✅ 6. Pembeli Mengajukan Retur (WAJIB UPLOAD BUKTI UNBOXING)
 app.put('/api/orders/:id/return', verifyToken, upload.single('proof'), async (req, res) => {
     const { reason } = req.body;
-    
-    // Tangkap URL Video/Foto dari Cloudinary
     const proof_url = req.file ? req.file.path : null;
 
-    if (!proof_url) {
-        return res.status(400).json({ success: false, message: "Bukti video/foto unboxing dari sebelum paket dibuka WAJIB dilampirkan!" });
-    }
-
-    if (!reason) {
-        return res.status(400).json({ success: false, message: "Alasan retur wajib diisi!" });
-    }
+    if (!proof_url) return res.status(400).json({ success: false, message: "Bukti video/foto unboxing dari sebelum paket dibuka WAJIB dilampirkan!" });
+    if (!reason) return res.status(400).json({ success: false, message: "Alasan retur wajib diisi!" });
 
     try {
         const cekOrder = await pool.query('SELECT status FROM orders WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
         if (cekOrder.rows.length === 0) return res.status(404).json({ success: false, message: "Pesanan tidak ditemukan!" });
 
-        // Update status, alasan, dan simpan link bukti videonya
         await pool.query(
             "UPDATE orders SET status = 'Ajukan Retur', return_reason = $1, return_media = $2 WHERE id = $3",
             [reason, proof_url, req.params.id]
         );
-        
         res.json({ success: true, message: "Pengajuan retur & bukti berhasil dikirim ke Admin!" });
     } catch(err) {
         console.error("🔥 Error Retur:", err);
@@ -391,13 +358,9 @@ app.put('/api/orders/:id/return', verifyToken, upload.single('proof'), async (re
 // ==========================================
 // ⭐ API ULASAN & JUMLAH TERJUAL (REAL)
 // ==========================================
-
-// 1. Ambil Ulasan untuk ditampilkan di Detail Produk
 app.get('/api/reviews/:product_id', async (req, res) => {
     try {
         const productId = req.params.product_id;
-        
-        // Tarik semua ulasan yang terhubung dengan produk ini + Nama Pembelinya
         const reviewQuery = await pool.query(`
             SELECT r.*, u.name as user_name 
             FROM product_reviews r 
@@ -406,32 +369,24 @@ app.get('/api/reviews/:product_id', async (req, res) => {
             ORDER BY r.created_at DESC
         `, [productId]);
         
-        // Tarik angka "Terjual" asli dari tabel produk
         const productQuery = await pool.query('SELECT sold_count FROM products WHERE id = $1', [productId]);
         const terjual = productQuery.rows.length > 0 ? productQuery.rows[0].sold_count : 0;
 
         const reviews = reviewQuery.rows;
         let rataRata = 0;
         
-        // Rumus Matematika: Hitung rata-rata Bintang
         if (reviews.length > 0) {
             const totalBintang = reviews.reduce((sum, rev) => sum + rev.rating, 0);
-            rataRata = (totalBintang / reviews.length).toFixed(1); // Format 1 angka di belakang koma (misal: 4.8)
+            rataRata = (totalBintang / reviews.length).toFixed(1); 
         }
 
-        res.json({ 
-            success: true, 
-            rata_rata: rataRata, 
-            terjual: terjual, 
-            data: reviews 
-        });
+        res.json({ success: true, rata_rata: rataRata, terjual: terjual, data: reviews });
     } catch (err) {
         console.error("🔥 Error Get Reviews:", err);
         res.status(500).json({ success: false, message: "Gagal memuat ulasan" });
     }
 });
 
-// 2. Pembeli Mengirim Ulasan Baru
 app.post('/api/reviews', verifyToken, async (req, res) => {
     const { product_id, rating, comment } = req.body;
     try {
@@ -446,9 +401,128 @@ app.post('/api/reviews', verifyToken, async (req, res) => {
     }
 });
 
+// ==========================================
+// 🟢 API BARU: RUANG KARANTINA & UPLOAD EXCEL
+// ==========================================
+
+// 1. Upload Excel Aset Internal
+app.post('/api/admin/excel/aset', verifyAdmin, uploadExcel.single('file_excel'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ success: false, message: "File Excel tidak ditemukan!" });
+
+        // Baca file excel dari memori
+        const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0]; // Ambil sheet pertama
+        const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+        if (data.length === 0) return res.status(400).json({ success: false, message: "File Excel kosong!" });
+
+        let berhasil = 0;
+        // Looping dan masukkan ke tabel internal_assets
+        for (let row of data) {
+            // Asumsi header Excel: Kode_Aset, Nama_Aset, Kategori, Jumlah, Kondisi, Catatan
+            const kode = row['Kode_Aset'] || '-';
+            const nama = row['Nama_Aset'];
+            const kategori = row['Kategori'] || 'Umum';
+            const qty = parseInt(row['Jumlah']) || 0;
+            const kondisi = row['Kondisi'] || 'Baik';
+            const notes = row['Catatan'] || '';
+
+            if (nama) {
+                await pool.query(
+                    'INSERT INTO internal_assets (asset_code, asset_name, category, quantity, condition, notes) VALUES ($1, $2, $3, $4, $5, $6)',
+                    [kode, nama, kategori, qty, kondisi, notes]
+                );
+                berhasil++;
+            }
+        }
+
+        res.json({ success: true, message: `Berhasil mengimport ${berhasil} data aset internal!` });
+    } catch (err) {
+        console.error("🔥 Error Import Excel Aset:", err);
+        res.status(500).json({ success: false, message: "Gagal memproses file Excel." });
+    }
+});
+
+// 2. Upload Excel Draft Persediaan (Barang Karantina)
+app.post('/api/admin/excel/draft', verifyAdmin, uploadExcel.single('file_excel'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ success: false, message: "File Excel tidak ditemukan!" });
+
+        // Bikin tabel karantina dulu kalau belum ada
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS draft_products (
+                id SERIAL PRIMARY KEY,
+                title VARCHAR(200) NOT NULL,
+                description TEXT,
+                price DECIMAL(12,2) NOT NULL,
+                capital_price DECIMAL(12,2) DEFAULT 0,
+                stock INT DEFAULT 0,
+                category VARCHAR(50) DEFAULT 'biasa',
+                weight INT DEFAULT 1000,
+                status VARCHAR(20) DEFAULT 'Pending',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+
+        if (data.length === 0) return res.status(400).json({ success: false, message: "File Excel kosong!" });
+
+        let berhasil = 0;
+        for (let row of data) {
+            // Asumsi header Excel: Nama_Barang, Harga_Modal, Harga_Jual, Stok, Kategori, Berat, Deskripsi
+            const nama = row['Nama_Barang'];
+            const modal = parseFloat(row['Harga_Modal']) || 0;
+            const jual = parseFloat(row['Harga_Jual']) || 0;
+            const stok = parseInt(row['Stok']) || 0;
+            const kategori = row['Kategori'] || 'biasa';
+            const berat = parseInt(row['Berat']) || 1000;
+            const deskripsi = row['Deskripsi'] || 'Barang baru dari Excel.';
+
+            if (nama && jual > 0) {
+                await pool.query(
+                    'INSERT INTO draft_products (title, capital_price, price, stock, category, weight, description) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+                    [nama, modal, jual, stok, kategori, berat, deskripsi]
+                );
+                berhasil++;
+            }
+        }
+
+        res.json({ success: true, message: `Berhasil menyimpan ${berhasil} barang ke ruang karantina!` });
+    } catch (err) {
+        console.error("🔥 Error Import Excel Draft:", err);
+        res.status(500).json({ success: false, message: "Gagal memproses file Excel." });
+    }
+});
+
+
+// 3. Lihat Daftar Aset Internal (Hanya untuk Admin)
+app.get('/api/admin/excel/aset', verifyAdmin, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM internal_assets ORDER BY created_at DESC');
+        res.json({ success: true, data: result.rows });
+    } catch (err) { 
+        res.status(500).json({ success: false, message: "Gagal memuat data aset." }); 
+    }
+});
+
+// 4. Lihat Daftar Draft Persediaan (Ruang Karantina)
+app.get('/api/admin/excel/draft', verifyAdmin, async (req, res) => {
+    try {
+        // Hanya tampilkan yang statusnya masih 'Pending'
+        const result = await pool.query("SELECT * FROM draft_products WHERE status = 'Pending' ORDER BY created_at DESC");
+        res.json({ success: true, data: result.rows });
+    } catch (err) { 
+        res.status(500).json({ success: false, message: "Gagal memuat data karantina." }); 
+    }
+});
+
 
 // ==========================================
-// 🚨 PENANGKAP ERROR GLOBAL (BONGKAR [object Object])
+// 🚨 PENANGKAP ERROR GLOBAL
 // ==========================================
 app.use((err, req, res, next) => {
     console.error("🔥 ERROR TERDETEKSI DARI MESIN UPLOAD:");
