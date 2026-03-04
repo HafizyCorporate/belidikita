@@ -114,6 +114,9 @@ document.addEventListener("DOMContentLoaded", () => {
         cekStatusPembeli(); // ✅ Panggil sensor saat web selesai dimuat
     }
 
+    // ==========================================
+    // 🚀 LOGIKA MENU BAWAH (BOTTOM NAV)
+    // ==========================================
     const menuHome = document.getElementById('menuHome');
     const menuProduct = document.getElementById('menuProduct');
     const menuFeed = document.getElementById('menuFeed');
@@ -125,17 +128,32 @@ document.addEventListener("DOMContentLoaded", () => {
         if(clickedMenu) clickedMenu.classList.add('active');
     }
 
-    if(menuHome) menuHome.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuHome); window.scrollTo({ top: 0, behavior: 'smooth' }); });
-    if(menuProduct) menuProduct.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuProduct); showToast("Membuka Katalog Produk...", "info"); });
-    if(menuFeed) menuFeed.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuFeed); showToast("Fitur Video Feed segera hadir!", "info"); });
-    if(menuTransaction) menuTransaction.addEventListener('click', (e) => { e.preventDefault(); setActiveNav(menuTransaction); window.location.href = 'registrasi/profilpembeli.html'; }); // ✅ Arahkan ke profil agar bisa lihat pesanan
+    if(menuHome) menuHome.addEventListener('click', (e) => { 
+        e.preventDefault(); setActiveNav(menuHome); window.scrollTo({ top: 0, behavior: 'smooth' }); 
+    });
+    
+    // ✅ KABEL KE HALAMAN TOKO
+    if(menuProduct) menuProduct.addEventListener('click', (e) => { 
+        e.preventDefault(); setActiveNav(menuProduct); 
+        window.location.href = 'toko.html'; 
+    });
+    
+    if(menuFeed) menuFeed.addEventListener('click', (e) => { 
+        e.preventDefault(); setActiveNav(menuFeed); 
+        showToast("Fitur Video Feed segera hadir!", "info"); 
+    });
+    
+    // ✅ KABEL KE HALAMAN RIWAYAT
+    if(menuTransaction) menuTransaction.addEventListener('click', (e) => { 
+        e.preventDefault(); setActiveNav(menuTransaction); 
+        window.location.href = 'registrasi/profilpembeli.html'; 
+    });
 
-    // ✅ PERBAIKAN: ANTI NYANGKUT UNTUK TOMBOL AKUN
+    // ✅ KABEL KE HALAMAN PROFIL / LOGIN
     if(menuAccount) {
         menuAccount.addEventListener('click', (e) => { 
             e.preventDefault(); setActiveNav(menuAccount); 
             const token = localStorage.getItem('token');
-            // Jika token KOSONG atau token itu MILIK ADMIN, arahkan ke Login Pembeli
             if (!token || token.startsWith('token-admin-')) {
                 window.location.href = 'registrasi/loginpembeli.html';
             } else {
@@ -218,13 +236,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video+Produk' : (fotoUtama || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
                     const mediaTag = isVideo ? `<video src="${fotoBarang}" class="product-media" style="object-fit:cover;"></video>` : `<img src="${fotoBarang}" class="product-media" alt="${product.title}">`;
 
+                    // Generate ID untuk terjual dummy (konsisten dari ID asli agar sama dengan halaman toko/detail)
+                    const terjual = (product.id * 17 % 500) + 10;
+
                     if (product.category === 'laris' || product.category === 'keranjang') {
                         const hCard = document.createElement('div');
                         hCard.className = 'h-card';
                         hCard.innerHTML = `<img src="${fotoBarang}" class="h-card-img" alt="Barang"><div class="h-card-info"><div class="h-card-row"><span class="h-card-title">${product.title}</span><span class="h-card-price" style="font-size:11px;">${priceRp}</span></div></div>`;
                         
-                        // ✅ PERBAIKAN: Mengirimkan product.weight (Berat Barang)
-                        hCard.addEventListener('click', () => bukaDetailProduk(product.media_url, product.title, priceRp, deskripsiBarang, product.price, product.weight));
+                        // ✅ MENGIRIM DATA LENGKAP KE DETAIL PRODUK (TERMASUK ID DAN SELLER NAME)
+                        hCard.addEventListener('click', () => bukaDetailProduk(product.id, product.media_url, product.title, priceRp, deskripsiBarang, product.price, product.weight, product.seller_name));
                         
                         if (product.category === 'laris' && larisList) larisList.appendChild(hCard);
                         if (product.category === 'keranjang' && cartList) cartList.appendChild(hCard);
@@ -232,10 +253,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const card = document.createElement('div');
                     card.className = 'product-card';
-                    card.innerHTML = `${fotoUtama ? mediaTag : '<div class="product-media" style="display:flex; align-items:center; justify-content:center; color:#aaa;">No Media</div>'}<div class="product-info"><div class="product-title">${product.title}</div><div class="product-price">${priceRp}</div><div class="product-seller" style="color:#00AA5B; font-weight:bold;"><i class="fas fa-check-circle"></i> Belidikita Official</div></div>`;
+                    card.innerHTML = `
+                        ${fotoUtama ? mediaTag : '<div class="product-media" style="display:flex; align-items:center; justify-content:center; color:#aaa;">No Media</div>'}
+                        <div class="product-info">
+                            <div class="product-title">${product.title}</div>
+                            <div class="product-price">${priceRp}</div>
+                            <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; font-weight: 600; margin-top: auto;">
+                                <span><i class="fas fa-star" style="color:#FFD700;"></i> 4.9</span>
+                                <span>${terjual} Terjual</span>
+                            </div>
+                        </div>`;
                     
-                    // ✅ PERBAIKAN: Mengirimkan product.weight (Berat Barang)
-                    card.addEventListener('click', () => bukaDetailProduk(product.media_url, product.title, priceRp, deskripsiBarang, product.price, product.weight));
+                    // ✅ MENGIRIM DATA LENGKAP KE DETAIL PRODUK
+                    card.addEventListener('click', () => bukaDetailProduk(product.id, product.media_url, product.title, priceRp, deskripsiBarang, product.price, product.weight, product.seller_name));
                     
                     productList.appendChild(card);
                 });
@@ -254,23 +284,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const productModal = document.getElementById('productDetailModal');
     const closeDetailBtn = document.getElementById('closeDetailBtn');
     
-    // ✅ PERBAIKAN: MENANGKAP PARAMETER BERAT (beratRaw)
-    function bukaDetailProduk(foto, nama, hargaStr, deskripsi, hargaRaw, beratRaw) {
-        // 1. Bungkus data barang yang ditekan beserta beratnya
+    // ✅ PERBAIKAN: MEMBAWA ID DAN SELLER NAME AGAR BISA DIBACA DI HALAMAN DETAIL/TOKO
+    function bukaDetailProduk(id, foto, nama, hargaStr, deskripsi, hargaRaw, beratRaw, sellerName) {
         const dataProduk = { 
+            id: id,
             foto: foto, 
             nama: nama, 
             hargaStr: hargaStr, 
             deskripsi: deskripsi, 
             harga: hargaRaw, 
-            weight: beratRaw || 1000, // Jika belum diset di admin, otomatis anggap 1000 gram (1 Kg)
+            weight: beratRaw || 1000, 
+            seller_name: sellerName || "Belidikita Official",
             qty: 1 
         };
         
-        // 2. Simpan sementara ke memori (sebagai 'produk_detail')
         localStorage.setItem('produk_detail', JSON.stringify(dataProduk));
-        
-        // 3. Langsung lompat ke halaman ala Shopee!
         window.location.href = 'detailproduk.html';
     }
 
@@ -295,7 +323,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ✅ TOMBOL CHECKOUT MENGARAH KE FOLDER REGISTRASI
     const btnCheckout = document.getElementById('btnCheckout');
     if(btnCheckout) {
         btnCheckout.addEventListener('click', () => {
