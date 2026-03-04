@@ -39,6 +39,16 @@ const initDB = async () => {
             resi VARCHAR(100) DEFAULT '-',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        -- ✅ TAMBAHAN BARU: TABEL UNTUK MENYIMPAN KUPON DARI ADMIN
+        CREATE TABLE IF NOT EXISTS coupons (
+            id SERIAL PRIMARY KEY,
+            code VARCHAR(50) UNIQUE NOT NULL,
+            discount_type VARCHAR(20) NOT NULL, -- Isinya: 'nominal' atau 'ongkir'
+            discount_value DECIMAL(12,2) DEFAULT 0,
+            is_active BOOLEAN DEFAULT TRUE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
     `;
 
 
