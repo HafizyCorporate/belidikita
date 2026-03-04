@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brankas Aset Internal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,800" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] } } } }
+    </script>
+    <style>
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); color: white; min-height: 100vh; overflow-x: hidden; }
+        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .bouncy-hover:hover { transform: translateY(-5px) scale(1.02); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        /* Lentera Melayang */
+        .lantern { position: absolute; top: -10px; width: 40px; height: 60px; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="%23fbbf24" d="M112 0c-17.7 0-32 14.3-32 32v16h224V32c0-17.7-14.3-32-32-32H112zM0 96c0-17.7 14.3-32 32-32h320c17.7 0 32 14.3 32 32v64H0V96zm48 96h288v192c0 35.3-28.7 64-64 64H112c-35.3 0-64-28.7-64-64V192zm144 288c53 0 96 43 96 96H96c0-53 43-96 96-96z"/></svg>') no-repeat center center; filter: drop-shadow(0px 5px 15px rgba(251, 191, 36, 0.5)); transform-origin: top center; }
+        .lantern-l { left: 10%; animation: swing 3s ease-in-out infinite alternate; }
+        .lantern-r { right: 10%; animation: swing 4s ease-in-out infinite alternate-reverse; width: 30px; height: 45px;}
+        @keyframes swing { 0% { transform: rotate(12deg); } 100% { transform: rotate(-12deg); } }
+
+        /* Custom Scrollbar untuk tabel */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(251, 191, 36, 0.5); border-radius: 10px; }
+    </style>
+</head>
+<body class="p-6">
+    <div class="lantern lantern-l"></div>
+    <div class="lantern lantern-r"></div>
+
+    <div class="max-w-6xl mx-auto relative z-10 pt-10">
+        <div class="flex justify-between items-center mb-8 bg-white/10 p-4 rounded-2xl backdrop-blur-md shadow-lg border border-white/10">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-extrabold text-yellow-400"><i class="fas fa-boxes mr-2"></i> Brankas Aset Internal</h1>
+                <p class="text-sm text-gray-300 mt-1"><i class="fas fa-lock text-xs mr-1"></i> Area Rahasia - Tidak terlihat oleh pembeli</p>
+            </div>
+            <button onclick="window.location.href='admin-panel.html'" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-5 rounded-xl transition bouncy-hover border border-slate-600 shadow-xl">
+                <i class="fas fa-arrow-left mr-2"></i> Markas Pusat
+            </button>
+        </div>
+
+        <div class="glass p-6 rounded-3xl mb-8 shadow-2xl bouncy-hover">
+            <h2 class="text-xl font-extrabold mb-4 text-yellow-300"><i class="fas fa-file-excel mr-2"></i> Import Excel Aset</h2>
+            <div class="bg-blue-900/40 border-l-4 border-yellow-400 p-4 rounded-lg mb-5">
+                <p class="text-xs text-gray-300"><b>Format Header (Baris 1) WAJIB:</b> Kode_Aset | Nama_Aset | Kategori | Jumlah | Kondisi | Catatan</p>
+            </div>
+            <form id="formUploadAset" class="flex flex-col md:flex-row gap-4 items-center">
+                <input type="file" id="fileExcelAset" accept=".xlsx, .xls" required class="flex-1 w-full text-sm text-gray-300 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-extrabold file:bg-yellow-400 file:text-slate-900 hover:file:bg-yellow-300 cursor-pointer bg-slate-800 rounded-xl border border-slate-700">
+                <button type="submit" id="btnSubmitAset" class="w-full md:w-auto bg-gradient-to-r from-yellow-500 to-yellow-600 text-slate-900 font-extrabold py-3 px-8 rounded-xl shadow-lg hover:shadow-yellow-500/50 transition transform hover:scale-105">
+                    <i class="fas fa-cloud-upload-alt mr-2"></i> Import Data
+                </button>
+            </form>
+        </div>
+
+        <div class="glass p-6 rounded-3xl shadow-2xl">
+            <h2 class="text-lg font-extrabold mb-4 text-white"><i class="fas fa-list mr-2"></i> Daftar Inventaris Perusahaan</h2>
+            <div class="overflow-x-auto rounded-xl">
+                <table class="w-full text-left border-collapse whitespace-nowrap">
+                    <thead>
+                        <tr class="bg-slate-800 text-yellow-400 text-sm">
+                            <th class="p-4 rounded-tl-xl">Kode</th>
+                            <th class="p-4">Nama Aset</th>
+                            <th class="p-4">Kategori</th>
+                            <th class="p-4 text-center">Jumlah</th>
+                            <th class="p-4 text-center">Kondisi</th>
+                            <th class="p-4 rounded-tr-xl">Catatan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelAset" class="text-sm text-gray-300 divide-y divide-white/10">
+                        <tr><td colspan="6" class="p-6 text-center text-gray-400">Sedang memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastNotif" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-2xl border border-slate-600 transition-all duration-300 opacity-0 translate-y-10 z-50 font-bold flex items-center gap-3">
+        <i class="fas fa-info-circle text-yellow-400"></i> <span id="toastMsg">Notifikasi</span>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token || !token.startsWith('token-admin-')) window.location.href = 'login.html';
+
+        function showToast(msg) {
+            const toast = document.getElementById('toastNotif');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('opacity-0', 'translate-y-10');
+            setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-10'); }, 3000);
+        }
+
+        async function loadAset() {
+            try {
+                const res = await fetch('/api/admin/excel/aset', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                const tbody = document.getElementById('tabelAset');
+                
+                if(result.success && result.data.length > 0) {
+                    tbody.innerHTML = '';
+                    result.data.forEach(item => {
+                        let warnaKondisi = item.condition.toLowerCase() === 'baik' ? 'text-green-400 bg-green-900/30' : 'text-red-400 bg-red-900/30';
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-white/5 transition">
+                                <td class="p-4 font-bold text-yellow-300">${item.asset_code}</td>
+                                <td class="p-4 font-semibold text-white">${item.asset_name}</td>
+                                <td class="p-4"><span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-xs border border-blue-700/50">${item.category}</span></td>
+                                <td class="p-4 text-center font-bold text-lg">${item.quantity}</td>
+                                <td class="p-4 text-center"><span class="px-3 py-1 rounded-full text-xs font-bold ${warnaKondisi}">${item.condition}</span></td>
+                                <td class="p-4 text-xs text-gray-400 max-w-[200px] truncate" title="${item.notes}">${item.notes || '-'}</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-gray-400"><i class="fas fa-box-open text-3xl block mb-2 opacity-50"></i>Brankas masih kosong. Silakan import Excel.</td></tr>';
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        document.getElementById('formUploadAset').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitAset');
+            const file = document.getElementById('fileExcelAset').files[0];
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
+            const formData = new FormData();
+            formData.append('file_excel', file);
+
+            try {
+                const res = await fetch('/api/admin/excel/aset', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                const data = await res.json();
+                showToast(data.message);
+                if(data.success) {
+                    document.getElementById('formUploadAset').reset();
+                    loadAset();
+                }
+            } catch(err) { showToast("Gagal terhubung ke server."); }
+            finally { btn.innerHTML = '<i class="fas fa-cloud-upload-alt mr-2"></i> Import Data'; }
+        });
+
+        loadAset();
+    </script>
+</body>
+</html>
