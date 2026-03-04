@@ -6,6 +6,35 @@
     <title>Belidikita - Toko Online Resmi Spesial Ramadhan</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        .cat-section { background: #fff; padding: 15px 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .cat-header { font-size: 14px; font-weight: 800; color: #0D47A1; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; padding-left: 5px; }
+        
+        /* Grid 5 Kolom Otomatis */
+        .cat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px 5px; justify-items: center; }
+        @media (max-width: 400px) { .cat-grid { grid-template-columns: repeat(4, 1fr); } }
+        
+        .cat-item { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; text-decoration: none; transition: transform 0.2s; width: 65px; }
+        .cat-item:active { transform: scale(0.9); }
+        .cat-icon-box { width: 45px; height: 45px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .cat-name { font-size: 9px; font-weight: 800; color: #555; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* Gradien Warna Ikon Kategori */
+        .bg-sembako { background: linear-gradient(135deg, #FF9800, #FFB74D); }
+        .bg-fashion { background: linear-gradient(135deg, #E91E63, #F06292); }
+        .bg-elektronik { background: linear-gradient(135deg, #2196F3, #64B5F6); }
+        .bg-rumah { background: linear-gradient(135deg, #00BCD4, #4DD0E1); }
+        .bg-beauty { background: linear-gradient(135deg, #9C27B0, #BA68C8); }
+        .bg-bayi { background: linear-gradient(135deg, #00AA5B, #81C784); }
+        .bg-komputer { background: linear-gradient(135deg, #607D8B, #90A4AE); }
+        .bg-otomotif { background: linear-gradient(135deg, #F44336, #E57373); }
+        .bg-olahraga { background: linear-gradient(135deg, #FF5722, #FF8A65); }
+        .bg-makanan { background: linear-gradient(135deg, #795548, #A1887F); }
+        .bg-buku { background: linear-gradient(135deg, #8BC34A, #AED581); }
+        .bg-mainan { background: linear-gradient(135deg, #FFEB3B, #FFF176); color: #e65100 !important; }
+        .bg-ibadah { background: linear-gradient(135deg, #0D47A1, #1976D2); }
+    </style>
 </head>
 <body class="no-scroll"> 
     
@@ -67,6 +96,66 @@
                 </div>
             </div>
         </div>
+
+        <section class="cat-section">
+            <div class="cat-header">
+                <i class="fas fa-th-large"></i> Kategori Pilihan
+            </div>
+            <div class="cat-grid">
+                <div class="cat-item" onclick="pilihKategoriUtama('Sembako')">
+                    <div class="cat-icon-box bg-sembako"><i class="fas fa-shopping-basket"></i></div>
+                    <span class="cat-name">Sembako</span>
+                </div>
+                <div class="cat-item" onclick="pilihKategoriUtama('Fashion')">
+                    <div class="cat-icon-box bg-fashion"><i class="fas fa-tshirt"></i></div>
+                    <span class="cat-name">Fashion</span>
+                </div>
+                <div class="cat-item" onclick="pilihKategoriUtama('Elektronik')">
+                    <div class="cat-icon-box bg-elektronik"><i class="fas fa-mobile-alt"></i></div>
+                    <span class="cat-name">Elektronik</span>
+                </div>
+                <div class="cat-item" onclick="pilihKategoriUtama('Rumah Tangga')">
+                    <div class="cat-icon-box bg-rumah"><i class="fas fa-blender"></i></div>
+                    <span class="cat-name">Peralatan Rumah</span>
+                </div>
+                <div class="cat-item" onclick="pilihKategoriUtama('Beauty')">
+                    <div class="cat-icon-box bg-beauty"><i class="fas fa-magic"></i></div>
+                    <span class="cat-name">Beauty & Care</span>
+                </div>
+                <div class="cat-item" onclick="pilihKategoriUtama('Ibu & Bayi')">
+                    <div class="cat-icon-box bg-bayi"><i class="fas fa-baby-carriage"></i></div>
+                    <span class="cat-name">Ibu & Bayi</span>
+                </div>
+                <div class="cat-item" onclick="pilihKategoriUtama('Komputer')">
+                    <div class="cat-icon-box bg-komputer"><i class="fas fa-laptop"></i></div>
+                    <span class="cat-name">Komputer</span>
+                </div>
+                <div class="cat-item" onclick="pilihKategoriUtama('Otomotif')">
+                    <div class="cat-icon-box bg-otomotif"><i class="fas fa-motorcycle"></i></div>
+                    <span class="cat-name">Otomotif</span>
+                </div>
+                <div class="cat-item" onclick="pilihKategoriUtama('Olahraga')">
+                    <div class="cat-icon-box bg-olahraga"><i class="fas fa-dumbbell"></i></div>
+                    <span class="cat-name">Olahraga</span>
+                </div>
+                <div class="cat-item" onclick="pilihKategoriUtama('Makanan')">
+                    <div class="cat-icon-box bg-makanan"><i class="fas fa-hamburger"></i></div>
+                    <span class="cat-name">Makanan</span>
+                </div>
+                <div class="cat-item" onclick="pilihKategoriUtama('Buku')">
+                    <div class="cat-icon-box bg-buku"><i class="fas fa-book"></i></div>
+                    <span class="cat-name">Buku & ATK</span>
+                </div>
+                <div class="cat-item" onclick="pilihKategoriUtama('Mainan')">
+                    <div class="cat-icon-box bg-mainan"><i class="fas fa-gamepad" style="color:#e65100;"></i></div>
+                    <span class="cat-name">Mainan</span>
+                </div>
+                <div class="cat-item" onclick="pilihKategoriUtama('Ibadah')">
+                    <div class="cat-icon-box bg-ibadah"><i class="fas fa-mosque"></i></div>
+                    <span class="cat-name">Alat Ibadah</span>
+                </div>
+            </div>
+        </section>
 
         <section class="scroll-section">
             <div class="section-header">
@@ -150,6 +239,25 @@
     <div id="customToast"></div>
 
     <script src="script.js"></script>
+
+    <script>
+        function pilihKategoriUtama(namaKategori) {
+            // Simpan kategori yang dipilih ke memori HP
+            sessionStorage.setItem('belidikita_kategori_aktif', namaKategori);
+            
+            // Tampilkan Toast Notifikasi
+            const toast = document.getElementById("customToast");
+            if(toast) {
+                toast.innerText = "Mencari produk " + namaKategori + "...";
+                toast.className = "info show";
+                setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
+            }
+            
+            // Lompat ke halaman Toko (katalog utama) untuk melihat hasil filternya
+            setTimeout(() => {
+                window.location.href = 'toko.html';
+            }, 800);
+        }
+    </script>
 </body>
 </html>
-
