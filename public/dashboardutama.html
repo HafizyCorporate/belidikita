@@ -275,7 +275,6 @@
     <script src="script.js"></script>
 
     <script>
-        // Database Kamus Sub-Kategori Sesuai Permintaan Komandan
         const kamusKategori = {
             'Sembako': ['Beras, minyak, gula', 'Mie instan', 'Telur', 'Air galon', 'Gas LPG'],
             'Fashion': ['Baju pria / wanita / anak', 'Celana', 'Jaket', 'Hijab', 'Sepatu', 'Tas'],
@@ -292,7 +291,6 @@
             'Ibadah': ['Sajadah', 'Mukena', 'Sarung', 'Al-Qur’an']
         };
 
-        // Fungsi 1: Munculkan Jendela Bawah (Bottom Sheet)
         function bukaSubKategori(mainCat) {
             document.getElementById('judulSubKategori').innerHTML = `<i class="fas fa-tags" style="color:#FF9800;"></i> Etalase ${mainCat}`;
             const container = document.getElementById('listSubKategori');
@@ -300,7 +298,6 @@
             
             const subs = kamusKategori[mainCat] || [];
             
-            // Opsi 1: Lihat Semua
             container.innerHTML += `
                 <div class="sub-cat-item" style="background:#E1F5FE; border-color:#81D4FA; color:#0D47A1;" onclick="saringProdukLangsung('${mainCat}', 'Semua')">
                     <span>Semua Produk ${mainCat}</span>
@@ -308,7 +305,6 @@
                 </div>
             `;
 
-            // Opsi 2: Daftar Sub-Kategori
             subs.forEach(sub => {
                 container.innerHTML += `
                     <div class="sub-cat-item" onclick="saringProdukLangsung('${mainCat}', '${sub}')">
@@ -322,13 +318,12 @@
             document.body.style.overflow = 'hidden'; 
         }
 
-        // Fungsi 2: Tutup Jendela
         function tutupSubKategori() {
             document.getElementById('modalSubKategori').style.display = 'none';
             document.body.style.overflow = 'auto'; 
         }
 
-        // ✅ Fungsi 3: FILTERING PINTAR DI HALAMAN YANG SAMA
+        // ✅ LOGIKA PENYARINGAN YANG MEMBAWA DNA GROSIR & VARIAN
         async function saringProdukLangsung(mainCat, subCat) {
             tutupSubKategori();
             
@@ -336,33 +331,26 @@
             const judulSection = document.getElementById('judulDaftarProduk');
             const teksPencarian = subCat === 'Semua' ? mainCat : subCat;
 
-            // 1. Animasi Loading & Ganti Judul
             judulSection.innerHTML = `📦 Hasil Pencarian: <span style="color:#FF9800;">${teksPencarian}</span>`;
             container.innerHTML = '<p style="text-align:center; width:100%; color:#0D47A1; grid-column:span 2; padding: 20px; font-weight:bold;"><i class="fas fa-spinner fa-spin mr-2"></i> Mengambil barang dari rak...</p>';
             
-            // 2. Scroll layar mulus ke area produk
             document.getElementById('bagianProdukUtama').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
             try {
-                // Tembak API
                 const res = await fetch('/api/products');
                 const result = await res.json();
 
                 if (result.success && result.data.length > 0) {
                     
-                    // Logika Cerdas Pencarian Teks (Kecuali nanti database sudah ada kolom sub kategori)
-                    // Ambil kata pertama saja agar pencarian lebih ampuh (Contoh: "Beras, minyak, gula" -> "beras")
                     let keyword = teksPencarian.toLowerCase().split(/[,\/ ]/)[0]; 
                     if(keyword === "buku" && subCat.includes("sekolah")) keyword = "sekolah";
 
-                    // Saring Data
                     const filteredData = result.data.filter(p => {
                         const title = (p.title || '').toLowerCase();
                         const desc = (p.description || '').toLowerCase();
                         return title.includes(keyword) || desc.includes(keyword);
                     });
 
-                    // 3. Tampilkan Hasil
                     if (filteredData.length > 0) {
                         container.innerHTML = '';
                         filteredData.forEach(product => {
@@ -379,18 +367,31 @@
                             const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video' : (fotoUtama || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
                             const mediaTag = isVideo ? `<video src="${fotoBarang}" class="product-media" style="object-fit:cover;"></video>` : `<img src="${fotoBarang}" class="product-media" alt="${product.title}">`;
                             
-                            const terjual = (product.id * 17 % 500) + 10; // Dummy terjual
+                            const terjual = (product.id * 17 % 500) + 10; 
 
+                            // ✅ PERBAIKAN: BAWA DNA GROSIR, VARIAN, & SATUAN SAAT DI-KLIK DARI HASIL PENCARIAN
                             const prodObj = {
                                 id: product.id, foto: fotoUtama, nama: product.title, 
                                 hargaStr: priceRp, deskripsi: deskripsiBarang, 
                                 harga: product.price, weight: product.weight || 1000, 
-                                seller_name: product.seller_name || "Belidikita Official", qty: 1 
+                                seller_name: product.seller_name || "Belidikita Official", qty: 1,
+                                unit: product.unit || 'Pcs',
+                                variant_title: product.variant_title || '',
+                                variant_options: product.variant_options || '',
+                                wholesale_price: product.wholesale_price || 0,
+                                wholesale_min_qty: product.wholesale_min_qty || 0
                             };
                             const strObj = encodeURIComponent(JSON.stringify(prodObj));
 
+                            // Tambahkan Lencana Grosir di card jika ada
+                            let labelGrosir = '';
+                            if(product.wholesale_price > 0 && product.wholesale_min_qty > 0) {
+                                labelGrosir = `<div style="position:absolute; top:5px; left:5px; background:#4CAF50; color:#fff; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;"><i class="fas fa-tags"></i> GROSIR</div>`;
+                            }
+
                             container.innerHTML += `
-                                <div class="product-card" onclick="bukaDetailGlobal('${strObj}')">
+                                <div class="product-card" onclick="bukaDetailGlobal('${strObj}')" style="position:relative;">
+                                    ${labelGrosir}
                                     ${mediaTag}
                                     <div class="product-info">
                                         <div class="product-title">${product.title}</div>
@@ -404,7 +405,6 @@
                             `;
                         });
                     } else {
-                        // Jika kosong
                         container.innerHTML = `
                             <div style="text-align:center; width:100%; grid-column:span 2; padding: 30px 10px;">
                                 <i class="fas fa-box-open" style="font-size: 40px; color: #ccc; margin-bottom: 10px;"></i>
@@ -417,7 +417,6 @@
             }
         }
 
-        // Fungsi Bantuan untuk Melompat ke Detail Produk (Tanpa mengganggu script.js)
         function bukaDetailGlobal(encodedObj) {
             const decodedObj = decodeURIComponent(encodedObj);
             localStorage.setItem('produk_detail', decodedObj);
