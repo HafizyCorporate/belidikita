@@ -25,9 +25,13 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'belidikita_images', // Folder otomatis di Cloudinary
-    allowedFormats: ['jpeg', 'png', 'jpg', 'webp'], 
+    // ✅ 1. Tambahkan format video (mp4, mov, avi)
+    allowedFormats: ['jpeg', 'png', 'jpg', 'webp', 'mp4', 'mov', 'avi', 'mkv'], 
+    // ✅ 2. WAJIB DITAMBAHKAN: Beritahu Cloudinary agar menerima semua jenis file (termasuk video)
+    resource_type: 'auto' 
   },
 });
+
 
 // Jadikan 'upload' sebagai alat pengangkut (MENGGANTIKAN multer/upload lokal sebelumnya)
 const upload = multer({ storage: storage });
