@@ -23,7 +23,6 @@ const initDB = async () => {
 
         CREATE TABLE IF NOT EXISTS promo_sliders ( id SERIAL PRIMARY KEY, media_url VARCHAR(255) NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP );
 
-        -- ✅ TABEL BARU: UNTUK MENYIMPAN RIWAYAT PESANAN DAN RESI
         CREATE TABLE IF NOT EXISTS orders (
             id SERIAL PRIMARY KEY,
             user_id INT REFERENCES users(id) ON DELETE CASCADE,
@@ -40,36 +39,72 @@ const initDB = async () => {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
-        -- ✅ TAMBAHAN BARU: TABEL UNTUK MENYIMPAN KUPON DARI ADMIN
         CREATE TABLE IF NOT EXISTS coupons (
             id SERIAL PRIMARY KEY,
             code VARCHAR(50) UNIQUE NOT NULL,
-            discount_type VARCHAR(20) NOT NULL, -- Isinya: 'nominal' atau 'ongkir'
+            discount_type VARCHAR(20) NOT NULL, 
             discount_value DECIMAL(12,2) DEFAULT 0,
             is_active BOOLEAN DEFAULT TRUE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE TABLE IF NOT EXISTS product_reviews (
+            id SERIAL PRIMARY KEY,
+            product_id INT REFERENCES products(id) ON DELETE CASCADE,
+            user_id INT REFERENCES users(id) ON DELETE CASCADE,
+            rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+            comment TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS internal_assets (
+            id SERIAL PRIMARY KEY,
+            asset_code VARCHAR(50),
+            asset_name VARCHAR(200) NOT NULL,
+            category VARCHAR(100),
+            quantity INT DEFAULT 0,
+            condition VARCHAR(50) DEFAULT 'Baik',
+            notes TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- ✅ RUANG KARANTINA RESMI DENGAN DNA BARU (SATUAN & VARIAN)
+        CREATE TABLE IF NOT EXISTS draft_products (
+            id SERIAL PRIMARY KEY,
+            title VARCHAR(200) NOT NULL,
+            description TEXT,
+            price DECIMAL(12,2) NOT NULL,
+            capital_price DECIMAL(12,2) DEFAULT 0,
+            stock INT DEFAULT 0,
+            category VARCHAR(50) DEFAULT 'biasa',
+            weight INT DEFAULT 1000,
+            status VARCHAR(20) DEFAULT 'Pending',
+            unit VARCHAR(50) DEFAULT 'Pcs',
+            variant_title VARCHAR(100),
+            variant_options TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
     `;
 
-
-        
-    // 3. Modifikasi tabel jika ada kolom baru (Tanpa menghapus data lama)
+    // Modifikasi tabel jika ada kolom baru (Tanpa menghapus data lama)
         const alterTables = `
         ALTER TABLE products ADD COLUMN IF NOT EXISTS category VARCHAR(50) DEFAULT 'biasa';
         ALTER TABLE products ADD COLUMN IF NOT EXISTS capital_price DECIMAL(12,2) DEFAULT 0;
         ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INT DEFAULT 0;
         ALTER TABLE products ALTER COLUMN media_url TYPE TEXT;
         ALTER TABLE products ADD COLUMN IF NOT EXISTS weight INT DEFAULT 1000;
+        ALTER TABLE products ADD COLUMN IF NOT EXISTS sold_count INT DEFAULT 0;
+        
+        -- ✅ RUDAL 1: SUNTIKAN KOLOM SATUAN DAN VARIAN BUNGLON DI TABEL UTAMA
+        ALTER TABLE products ADD COLUMN IF NOT EXISTS unit VARCHAR(50) DEFAULT 'Pcs';
+        ALTER TABLE products ADD COLUMN IF NOT EXISTS variant_title VARCHAR(100);
+        ALTER TABLE products ADD COLUMN IF NOT EXISTS variant_options TEXT;
         
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_hidden_buyer BOOLEAN DEFAULT FALSE; 
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS is_hidden_admin BOOLEAN DEFAULT FALSE;
-        
-        -- ✅ TAMBAHAN: Kolom Retur dan Link Video/Foto Bukti Unboxing
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_reason TEXT;
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_media TEXT;
     `;
-
-
 
     try {
         console.log("⏳ Sedang mencoba membangun tabel di Database...");
