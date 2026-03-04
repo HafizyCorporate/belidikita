@@ -29,6 +29,16 @@
         .product-detail .price { color: #ff5722; font-weight: 800; font-size: 14px; }
         .product-detail .qty { font-size: 12px; color: #888; float: right; font-weight: bold; background: #f4f7fa; padding: 2px 6px; border-radius: 4px;}
 
+        /* ✅ CSS BARU KHUSUS KUPON */
+        .coupon-box { display: flex; gap: 10px; align-items: center; }
+        .coupon-box input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .coupon-box input:focus { border-color: #0D47A1; }
+        .coupon-box button { background: #0D47A1; color: #fff; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .coupon-box button:active { transform: scale(0.95); }
+        #couponMessage { font-size: 11px; margin-top: 8px; font-weight: bold; display: none; }
+        .coupon-success { color: #00AA5B; }
+        .coupon-error { color: #ff3b30; }
+
         /* Pilihan Radio Custom */
         .option-group { display: flex; flex-direction: column; gap: 10px; }
         .option-label { display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; transition: 0.2s; }
@@ -92,6 +102,17 @@
 
     <div class="section">
         <div class="section-title">
+            <span><i class="fas fa-ticket-alt"></i> Kupon Diskon</span>
+        </div>
+        <div class="coupon-box">
+            <input type="text" id="inputKupon" placeholder="Masukkan Kode Kupon...">
+            <button onclick="cekKupon()">Terapkan</button>
+        </div>
+        <div id="couponMessage"></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">
             <span><i class="fas fa-truck"></i> Opsi Pengiriman</span>
         </div>
         <div class="option-group">
@@ -149,6 +170,10 @@
             <span>Total Ongkos Kirim</span>
             <span id="txtOngkir">Rp0</span>
         </div>
+        <div class="summary-row" id="rowDiskon" style="display: none; color: #00AA5B; font-weight: bold;">
+            <span>Potongan Kupon</span>
+            <span id="txtDiskon">-Rp0</span>
+        </div>
         <div class="summary-row total">
             <span>Total Pembayaran</span>
             <span id="txtTotalAkhir">Rp0</span>
@@ -185,9 +210,11 @@
         // Variabel Kalkulasi Matematika
         let subtotal = 0;
         let ongkir = 0;
+        let diskonKupon = 0; // ✅ VARIABEL BARU
+        let currentCouponType = null; // ✅ VARIABEL BARU
         let totalAkhir = 0;
         let totalBeratGram = 0; 
-        let totalKg = 1; // Minimal dianggap 1 Kg
+        let totalKg = 1; 
         let items = [];
         let userInfo = { nama: "Pembeli", wa: "-", alamat: "Alamat belum diatur." };
 
@@ -210,7 +237,7 @@
                     `;
                 } else {
                     document.getElementById('addressBox').innerHTML = `<p style="color:red; font-weight:bold;">Alamat belum diatur. Silakan atur di Profil Akun.</p>`;
-                    document.getElementById('modalConfirmAddress').style.display = 'flex'; // Munculkan pop-up paksaan
+                    document.getElementById('modalConfirmAddress').style.display = 'flex'; 
                 }
             } catch (err) { console.error(err); }
         }
@@ -226,7 +253,6 @@
             
             items.forEach(item => {
                 subtotal += (item.harga * item.qty);
-                // KECERDASAN BERAT: Jika barang belum ada berat dari DB, anggap 1 barang = 1000 gram
                 let beratPerBarang = item.weight ? item.weight : 1000; 
                 totalBeratGram += (beratPerBarang * item.qty);
 
@@ -242,14 +268,11 @@
                 `;
             });
 
-            // KALKULASI KG: (Misal 2500 gram jadi 3 Kg)
             totalKg = Math.ceil(totalBeratGram / 1000);
             if(totalKg === 0) totalKg = 1;
 
-            // Update info di layar
             document.getElementById('infoBeratLayar').innerText = `Total: ${totalKg} kg (${totalBeratGram} gr)`;
             
-            // Update harga ekspedisi sesuai berat (Base Harga x Jumlah Kg)
             document.getElementById('labelJNE').innerText = formatRp(15000 * totalKg);
             document.getElementById('labelJNT').innerText = formatRp(12000 * totalKg);
             document.getElementById('labelSicepat').innerText = formatRp(14000 * totalKg);
@@ -257,25 +280,89 @@
             hitungTotal();
         }
 
-        // 3. KALKULASI TOTAL
+        // ✅ 3. FUNGSI BARU: CEK KUPON KE SERVER
+        async function cekKupon() {
+            const kode = document.getElementById('inputKupon').value.toUpperCase().trim();
+            const msgBox = document.getElementById('couponMessage');
+            const btn = document.querySelector('.coupon-box button');
+            
+            if(!kode) return;
+
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i>";
+            btn.disabled = true;
+
+            try {
+                // Tembak API ke server
+                const res = await fetch('/api/coupons/check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: kode })
+                });
+                const result = await res.json();
+
+                if(result.success) {
+                    const kupon = result.data;
+                    currentCouponType = kupon.discount_type;
+                    
+                    if(kupon.discount_type === 'nominal') {
+                        diskonKupon = parseFloat(kupon.discount_value);
+                        msgBox.innerHTML = `<i class='fas fa-check-circle'></i> Berhasil! Diskon ${formatRp(diskonKupon)} diterapkan.`;
+                    } else if (kupon.discount_type === 'ongkir') {
+                        if(ongkir === 0) {
+                            showToast("Pilih Opsi Pengiriman dulu untuk Kupon Gratis Ongkir!", "error");
+                            btn.innerHTML = "Terapkan"; btn.disabled = false; return;
+                        }
+                        diskonKupon = ongkir; 
+                        msgBox.innerHTML = `<i class='fas fa-check-circle'></i> Berhasil! Gratis Ongkir diterapkan.`;
+                    }
+                    
+                    msgBox.className = "coupon-success";
+                    msgBox.style.display = "block";
+                    document.getElementById('rowDiskon').style.display = "flex";
+                } else {
+                    diskonKupon = 0;
+                    currentCouponType = null;
+                    msgBox.innerHTML = "<i class='fas fa-times-circle'></i> " + result.message;
+                    msgBox.className = "coupon-error";
+                    msgBox.style.display = "block";
+                    document.getElementById('rowDiskon').style.display = "none";
+                }
+            } catch(e) {
+                showToast("Gagal mengecek kupon. Cek koneksi internet.", "error");
+            } finally {
+                btn.innerHTML = "Terapkan";
+                btn.disabled = false;
+                hitungTotal(); // Kalkulasi ulang dengan diskon
+            }
+        }
+
+        // 4. KALKULASI TOTAL (✅ DIUBAH SEDIKIT UNTUK MENGURANGI DISKON KUPON)
         function hitungTotal() {
-            totalAkhir = subtotal + ongkir;
+            totalAkhir = (subtotal + ongkir) - diskonKupon;
+            if(totalAkhir < 0) totalAkhir = 0; // Jaga-jaga agar tidak minus
+
             document.getElementById('txtSubtotal').innerText = formatRp(subtotal);
             document.getElementById('txtOngkir').innerText = formatRp(ongkir);
+            document.getElementById('txtDiskon').innerText = "-" + formatRp(diskonKupon); // Tampilkan diskon
+            
             document.getElementById('txtTotalAkhir').innerText = formatRp(totalAkhir);
             document.getElementById('bottomTotal').innerText = formatRp(totalAkhir);
         }
 
-        // 4. DETEKSI KLIK EKPEDISI
+        // 5. DETEKSI KLIK EKPEDISI (✅ DIUBAH SEDIKIT UNTUK UPDATE GRATIS ONGKIR)
         document.querySelectorAll('input[name="shipping"]').forEach(radio => {
             radio.addEventListener('change', function() {
-                let baseCost = parseInt(this.getAttribute('data-base')); // Ambil harga dasar 1kg
-                ongkir = baseCost * totalKg; // Kalikan dengan total Kg
+                let baseCost = parseInt(this.getAttribute('data-base')); 
+                ongkir = baseCost * totalKg; 
+                
+                // Jika sedang pakai kupon gratis ongkir, potongannya juga ikut menyesuaikan ekspedisi
+                if(currentCouponType === 'ongkir') { diskonKupon = ongkir; }
+                
                 hitungTotal();
             });
         });
 
-                // 5. SIMPAN KE DATABASE LALU BUAT PESANAN KE WA
+        // 6. SIMPAN KE DATABASE LALU BUAT PESANAN KE WA
         document.getElementById('btnBuatPesanan').addEventListener('click', async () => {
             if(userInfo.wa === "-") {
                 document.getElementById('modalConfirmAddress').style.display = 'flex'; 
@@ -300,7 +387,7 @@
                 customer_name: userInfo.nama,
                 customer_wa: userInfo.wa,
                 shipping_address: userInfo.alamat,
-                items: JSON.stringify(items), // Bungkus barang jadi teks
+                items: JSON.stringify(items), 
                 total_price: totalAkhir,
                 shipping_courier: pengiriman,
                 shipping_cost: ongkir,
@@ -308,7 +395,6 @@
             };
 
             try {
-                // Tembak ke Database Server
                 const res = await fetch('/api/orders', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -317,7 +403,7 @@
                 const dbResult = await res.json();
 
                 if(dbResult.success) {
-                    // B. DATA UNTUK DIKIRIM KE WA (INVOICE PINTAR)
+                    // B. DATA UNTUK DIKIRIM KE WA (✅ TAMBAH INFO DISKON JIKA ADA)
                     let pesanWA = `*INVOICE PESANAN BARU* 🛒\n*ID Pesanan:* #ORD-${dbResult.order_id}\n\n`;
                     pesanWA += `*Data Penerima:*\nNama: ${userInfo.nama}\nNo WA: ${userInfo.wa}\nAlamat: ${userInfo.alamat}\n\n`;
                     pesanWA += `*Daftar Barang:*\n`;
@@ -325,11 +411,12 @@
                         pesanWA += `- ${item.nama} (x${item.qty}) = ${formatRp(item.harga * item.qty)}\n`;
                     });
                     pesanWA += `\n*Pengiriman:* ${pengiriman} (${formatRp(ongkir)})\n`;
+                    if (diskonKupon > 0) { pesanWA += `*Diskon Kupon:* -${formatRp(diskonKupon)}\n`; }
                     pesanWA += `*Pembayaran:* ${pembayaran}\n\n`;
                     pesanWA += `*TOTAL TAGIHAN: ${formatRp(totalAkhir)}*\n\n`;
                     pesanWA += `Mohon info nomor rekening / barcode pembayarannya ya Admin. Terima kasih!`;
 
-                    const nomorAdmin = "6282240400388"; // GANTI NOMOR WA KAMU
+                    const nomorAdmin = "6282240400388"; 
                     const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesanWA)}`;
 
                     showToast("Pesanan Disimpan! Meneruskan ke WhatsApp...", "success");
@@ -345,7 +432,6 @@
                 btn.disabled = false;
             }
         });
-
 
         // Jalankan saat web dibuka
         fetchAddress();
