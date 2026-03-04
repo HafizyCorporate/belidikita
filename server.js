@@ -429,7 +429,7 @@ app.post('/api/reviews', verifyToken, async (req, res) => {
 // 🟢 API BARU: RUANG KARANTINA & UPLOAD EXCEL
 // ==========================================
 
-// 1. Upload Excel Aset Internal
+// ✅ 1. Upload Excel Aset Internal (DENGAN PENANGKAP SATUAN)
 app.post('/api/admin/excel/aset', verifyAdmin, uploadExcel.single('file_excel'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ success: false, message: "File Excel tidak ditemukan!" });
@@ -446,13 +446,14 @@ app.post('/api/admin/excel/aset', verifyAdmin, uploadExcel.single('file_excel'),
             const nama = row['Nama_Aset'];
             const kategori = row['Kategori'] || 'Umum';
             const qty = parseInt(row['Jumlah']) || 0;
+            const satuan = row['Satuan'] || 'Unit'; // ✅ MENANGKAP SATUAN ASET
             const kondisi = row['Kondisi'] || 'Baik';
             const notes = row['Catatan'] || '';
 
             if (nama) {
                 await pool.query(
-                    'INSERT INTO internal_assets (asset_code, asset_name, category, quantity, condition, notes) VALUES ($1, $2, $3, $4, $5, $6)',
-                    [kode, nama, kategori, qty, kondisi, notes]
+                    'INSERT INTO internal_assets (asset_code, asset_name, category, quantity, unit, condition, notes) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+                    [kode, nama, kategori, qty, satuan, kondisi, notes]
                 );
                 berhasil++;
             }
@@ -465,7 +466,7 @@ app.post('/api/admin/excel/aset', verifyAdmin, uploadExcel.single('file_excel'),
     }
 });
 
-// ✅ 2. Upload Excel Draft Persediaan DENGAN DNA BARU
+// 2. Upload Excel Draft Persediaan DENGAN DNA BARU
 app.post('/api/admin/excel/draft', verifyAdmin, uploadExcel.single('file_excel'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ success: false, message: "File Excel tidak ditemukan!" });
@@ -478,7 +479,6 @@ app.post('/api/admin/excel/draft', verifyAdmin, uploadExcel.single('file_excel')
 
         let berhasil = 0;
         for (let row of data) {
-            // Header Excel BARU: Nama_Barang, Harga_Modal, Harga_Jual, Stok, Kategori, Berat, Deskripsi, Satuan_Jual, Judul_Varian, Pilihan_Varian
             const nama = row['Nama_Barang'];
             const modal = parseFloat(row['Harga_Modal']) || 0;
             const jual = parseFloat(row['Harga_Jual']) || 0;
@@ -487,7 +487,6 @@ app.post('/api/admin/excel/draft', verifyAdmin, uploadExcel.single('file_excel')
             const berat = parseInt(row['Berat']) || 1000;
             const deskripsi = row['Deskripsi'] || 'Barang baru dari Excel.';
             
-            // Tangkap DNA Varian & Satuan dari Excel
             const satuan = row['Satuan_Jual'] || 'Pcs';
             const judulVarian = row['Judul_Varian'] || '';
             const pilihanVarian = row['Pilihan_Varian'] || '';
@@ -531,7 +530,7 @@ app.get('/api/admin/excel/draft', verifyAdmin, async (req, res) => {
     }
 });
 
-// ✅ 5. Super Admin ACC Barang DENGAN DNA BARU
+// 5. Super Admin ACC Barang DENGAN DNA BARU
 app.post('/api/admin/excel/draft/approve/:id', verifyAdmin, async (req, res) => {
     try {
         const draftId = req.params.id;
@@ -541,7 +540,6 @@ app.post('/api/admin/excel/draft/approve/:id', verifyAdmin, async (req, res) => 
         
         const barang = cekDraft.rows[0];
 
-        // Suntikkan ke tabel products utama (Membawa unit dan variannya)
         await pool.query(
             `INSERT INTO products (title, capital_price, price, stock, category, weight, description, unit, variant_title, variant_options) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
