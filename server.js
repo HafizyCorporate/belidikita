@@ -321,6 +321,3 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => { console.log(`🚀 Server belidikita berjalan di port ${PORT}`); });
-
-
-app.listen(PORT, () => { console.log(`🚀 Server belidikita berjalan di port ${PORT}`); });
