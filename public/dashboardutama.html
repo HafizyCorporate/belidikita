@@ -11,7 +11,7 @@
         .cat-section { background: #fff; padding: 15px 10px 5px 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .cat-header { font-size: 14px; font-weight: 800; color: #0D47A1; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; padding-left: 5px; }
         
-        /* Grid Sliding 2 Baris ke Samping (Hemat Tempat) */
+        /* Grid Sliding 2 Baris ke Samping */
         .cat-grid { 
             display: grid; 
             grid-template-rows: repeat(2, 1fr); 
@@ -22,14 +22,13 @@
             scrollbar-width: none; 
             -webkit-overflow-scrolling: touch; 
         }
-        .cat-grid::-webkit-scrollbar { display: none; } /* Sembunyikan scrollbar agar rapi */
+        .cat-grid::-webkit-scrollbar { display: none; }
         
         .cat-item { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; text-decoration: none; transition: transform 0.2s; width: 70px; }
         .cat-item:active { transform: scale(0.9); }
         .cat-icon-box { width: 45px; height: 45px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
         .cat-name { font-size: 9px; font-weight: 800; color: #555; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* Gradien Warna Ikon Kategori */
         .bg-sembako { background: linear-gradient(135deg, #FF9800, #FFB74D); }
         .bg-fashion { background: linear-gradient(135deg, #E91E63, #F06292); }
         .bg-elektronik { background: linear-gradient(135deg, #2196F3, #64B5F6); }
@@ -43,6 +42,21 @@
         .bg-buku { background: linear-gradient(135deg, #8BC34A, #AED581); }
         .bg-mainan { background: linear-gradient(135deg, #FFEB3B, #FFF176); color: #e65100 !important; }
         .bg-ibadah { background: linear-gradient(135deg, #0D47A1, #1976D2); }
+
+        /* ✅ CSS MODAL BOTTOM SHEET (SUB-KATEGORI) */
+        .modal-bottom-sheet { display: none; position: fixed; z-index: 4000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,40,80,0.6); backdrop-filter: blur(3px); align-items: flex-end; justify-content: center; }
+        .bottom-sheet-content { background: #fff; width: 100%; max-width: 600px; border-radius: 25px 25px 0 0; padding: 25px 20px; animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; box-shadow: 0 -10px 30px rgba(0,0,0,0.2); max-height: 80vh; display: flex; flex-direction: column; }
+        @keyframes slideUp { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
+        
+        .bs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px dashed #E1F5FE; padding-bottom: 15px; flex-shrink: 0;}
+        .bs-title { font-size: 15px; font-weight: 800; color: #0D47A1; display: flex; align-items: center; gap: 8px; }
+        .bs-close { font-size: 18px; color: #ff3b30; cursor: pointer; font-weight: bold; background: #ffebee; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s;}
+        .bs-close:active { transform: scale(0.9); }
+        
+        .sub-cat-grid { display: grid; grid-template-columns: 1fr; gap: 10px; overflow-y: auto; padding-bottom: 20px; padding-right: 5px;}
+        .sub-cat-item { padding: 14px 18px; background: #fafcff; border: 2px solid #E1F5FE; border-radius: 12px; font-size: 13px; font-weight: 700; color: #555; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .sub-cat-item:active { transform: scale(0.97); background: #E1F5FE; border-color: #81D4FA; color: #0D47A1; }
+        .sub-cat-item i { color: #FF9800; font-size: 14px;}
     </style>
 </head>
 <body class="no-scroll"> 
@@ -111,57 +125,57 @@
                 <i class="fas fa-th-large"></i> Kategori Pilihan
             </div>
             <div class="cat-grid">
-                <div class="cat-item" onclick="pilihKategoriUtama('Sembako')">
+                <div class="cat-item" onclick="bukaSubKategori('Sembako')">
                     <div class="cat-icon-box bg-sembako"><i class="fas fa-shopping-basket"></i></div>
                     <span class="cat-name">Sembako</span>
                 </div>
-                <div class="cat-item" onclick="pilihKategoriUtama('Fashion')">
+                <div class="cat-item" onclick="bukaSubKategori('Fashion')">
                     <div class="cat-icon-box bg-fashion"><i class="fas fa-tshirt"></i></div>
                     <span class="cat-name">Fashion</span>
                 </div>
-                <div class="cat-item" onclick="pilihKategoriUtama('Elektronik')">
+                <div class="cat-item" onclick="bukaSubKategori('Elektronik')">
                     <div class="cat-icon-box bg-elektronik"><i class="fas fa-mobile-alt"></i></div>
                     <span class="cat-name">Elektronik</span>
                 </div>
-                <div class="cat-item" onclick="pilihKategoriUtama('Rumah Tangga')">
+                <div class="cat-item" onclick="bukaSubKategori('Rumah Tangga')">
                     <div class="cat-icon-box bg-rumah"><i class="fas fa-blender"></i></div>
-                    <span class="cat-name">Peralatan Rumah</span>
+                    <span class="cat-name">Rumah</span>
                 </div>
-                <div class="cat-item" onclick="pilihKategoriUtama('Beauty')">
+                <div class="cat-item" onclick="bukaSubKategori('Beauty')">
                     <div class="cat-icon-box bg-beauty"><i class="fas fa-magic"></i></div>
-                    <span class="cat-name">Beauty & Care</span>
+                    <span class="cat-name">Beauty</span>
                 </div>
-                <div class="cat-item" onclick="pilihKategoriUtama('Ibu & Bayi')">
+                <div class="cat-item" onclick="bukaSubKategori('Ibu & Bayi')">
                     <div class="cat-icon-box bg-bayi"><i class="fas fa-baby-carriage"></i></div>
-                    <span class="cat-name">Ibu & Bayi</span>
+                    <span class="cat-name">Bayi</span>
                 </div>
-                <div class="cat-item" onclick="pilihKategoriUtama('Komputer')">
+                <div class="cat-item" onclick="bukaSubKategori('Komputer')">
                     <div class="cat-icon-box bg-komputer"><i class="fas fa-laptop"></i></div>
                     <span class="cat-name">Komputer</span>
                 </div>
-                <div class="cat-item" onclick="pilihKategoriUtama('Otomotif')">
+                <div class="cat-item" onclick="bukaSubKategori('Otomotif')">
                     <div class="cat-icon-box bg-otomotif"><i class="fas fa-motorcycle"></i></div>
                     <span class="cat-name">Otomotif</span>
                 </div>
-                <div class="cat-item" onclick="pilihKategoriUtama('Olahraga')">
+                <div class="cat-item" onclick="bukaSubKategori('Olahraga')">
                     <div class="cat-icon-box bg-olahraga"><i class="fas fa-dumbbell"></i></div>
                     <span class="cat-name">Olahraga</span>
                 </div>
-                <div class="cat-item" onclick="pilihKategoriUtama('Makanan')">
+                <div class="cat-item" onclick="bukaSubKategori('Makanan')">
                     <div class="cat-icon-box bg-makanan"><i class="fas fa-hamburger"></i></div>
                     <span class="cat-name">Makanan</span>
                 </div>
-                <div class="cat-item" onclick="pilihKategoriUtama('Buku')">
+                <div class="cat-item" onclick="bukaSubKategori('Buku')">
                     <div class="cat-icon-box bg-buku"><i class="fas fa-book"></i></div>
                     <span class="cat-name">Buku & ATK</span>
                 </div>
-                <div class="cat-item" onclick="pilihKategoriUtama('Mainan')">
+                <div class="cat-item" onclick="bukaSubKategori('Mainan')">
                     <div class="cat-icon-box bg-mainan"><i class="fas fa-gamepad" style="color:#e65100;"></i></div>
                     <span class="cat-name">Mainan</span>
                 </div>
-                <div class="cat-item" onclick="pilihKategoriUtama('Ibadah')">
+                <div class="cat-item" onclick="bukaSubKategori('Ibadah')">
                     <div class="cat-icon-box bg-ibadah"><i class="fas fa-mosque"></i></div>
-                    <span class="cat-name">Alat Ibadah</span>
+                    <span class="cat-name">Ibadah</span>
                 </div>
             </div>
         </section>
@@ -181,12 +195,12 @@
             <div class="horizontal-scroll" id="topCartList"></div>
         </section>
 
-        <section class="grid-section">
+        <section class="grid-section" id="bagianProdukUtama">
             <div class="section-header">
-                <h2>📦 Jelajahi Semua Barang</h2>
+                <h2 id="judulDaftarProduk">📦 Jelajahi Semua Barang</h2>
             </div>
             <div class="product-grid" id="randomProductList">
-                <p style="text-align:center; width:100%; color:#888;">Memuat barang toko...</p>
+                <p style="text-align:center; width:100%; color:#888; grid-column: span 2;">Memuat barang toko...</p>
             </div>
         </section>
         
@@ -245,27 +259,169 @@
         </div>
     </div>
 
+    <div id="modalSubKategori" class="modal-bottom-sheet">
+        <div class="bottom-sheet-content">
+            <div class="bs-header">
+                <div class="bs-title" id="judulSubKategori"><i class="fas fa-tags"></i> Kategori</div>
+                <div class="bs-close" onclick="tutupSubKategori()"><i class="fas fa-times"></i></div>
+            </div>
+            <div class="sub-cat-grid" id="listSubKategori">
+                </div>
+        </div>
+    </div>
+
     <div id="customToast"></div>
 
     <script src="script.js"></script>
 
     <script>
-        function pilihKategoriUtama(namaKategori) {
-            // Simpan kategori yang dipilih ke memori HP
-            sessionStorage.setItem('belidikita_kategori_aktif', namaKategori);
+        // Database Kamus Sub-Kategori Sesuai Permintaan Komandan
+        const kamusKategori = {
+            'Sembako': ['Beras, minyak, gula', 'Mie instan', 'Telur', 'Air galon', 'Gas LPG'],
+            'Fashion': ['Baju pria / wanita / anak', 'Celana', 'Jaket', 'Hijab', 'Sepatu', 'Tas'],
+            'Elektronik': ['HP & aksesoris', 'Charger', 'Headset', 'Powerbank', 'Smartwatch'],
+            'Rumah Tangga': ['Alat dapur', 'Dispenser', 'Rice cooker', 'Blender', 'Peralatan kebersihan'],
+            'Beauty': ['Skincare', 'Makeup', 'Parfum', 'Bodycare', 'Haircare'],
+            'Ibu & Bayi': ['Popok', 'Susu', 'Baju bayi', 'Perlengkapan makan bayi'],
+            'Komputer': ['Keyboard', 'Mouse', 'Laptop', 'Flashdisk', 'Harddisk'],
+            'Otomotif': ['Oli', 'Aksesoris motor', 'Helm', 'Ban', 'Lampu kendaraan'],
+            'Olahraga': ['Sepatu olahraga', 'Alat gym', 'Jersey', 'Tenda', 'Botol minum'],
+            'Makanan': ['Snack', 'Frozen food', 'Kopi', 'Minuman kekinian'],
+            'Buku': ['Buku sekolah', 'Novel', 'ATK', 'Perlengkapan kantor'],
+            'Mainan': ['Mainan anak', 'Action figure', 'Puzzle', 'Alat musik'],
+            'Ibadah': ['Sajadah', 'Mukena', 'Sarung', 'Al-Qur’an']
+        };
+
+        // Fungsi 1: Munculkan Jendela Bawah (Bottom Sheet)
+        function bukaSubKategori(mainCat) {
+            document.getElementById('judulSubKategori').innerHTML = `<i class="fas fa-tags" style="color:#FF9800;"></i> Etalase ${mainCat}`;
+            const container = document.getElementById('listSubKategori');
+            container.innerHTML = '';
             
-            // Tampilkan Toast Notifikasi
-            const toast = document.getElementById("customToast");
-            if(toast) {
-                toast.innerText = "Mencari produk " + namaKategori + "...";
-                toast.className = "info show";
-                setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
+            const subs = kamusKategori[mainCat] || [];
+            
+            // Opsi 1: Lihat Semua
+            container.innerHTML += `
+                <div class="sub-cat-item" style="background:#E1F5FE; border-color:#81D4FA; color:#0D47A1;" onclick="saringProdukLangsung('${mainCat}', 'Semua')">
+                    <span>Semua Produk ${mainCat}</span>
+                    <i class="fas fa-chevron-right" style="color:#0D47A1;"></i>
+                </div>
+            `;
+
+            // Opsi 2: Daftar Sub-Kategori
+            subs.forEach(sub => {
+                container.innerHTML += `
+                    <div class="sub-cat-item" onclick="saringProdukLangsung('${mainCat}', '${sub}')">
+                        <span>${sub}</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                `;
+            });
+
+            document.getElementById('modalSubKategori').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        // Fungsi 2: Tutup Jendela
+        function tutupSubKategori() {
+            document.getElementById('modalSubKategori').style.display = 'none';
+            document.body.style.overflow = 'auto'; 
+        }
+
+        // ✅ Fungsi 3: FILTERING PINTAR DI HALAMAN YANG SAMA
+        async function saringProdukLangsung(mainCat, subCat) {
+            tutupSubKategori();
+            
+            const container = document.getElementById('randomProductList');
+            const judulSection = document.getElementById('judulDaftarProduk');
+            const teksPencarian = subCat === 'Semua' ? mainCat : subCat;
+
+            // 1. Animasi Loading & Ganti Judul
+            judulSection.innerHTML = `📦 Hasil Pencarian: <span style="color:#FF9800;">${teksPencarian}</span>`;
+            container.innerHTML = '<p style="text-align:center; width:100%; color:#0D47A1; grid-column:span 2; padding: 20px; font-weight:bold;"><i class="fas fa-spinner fa-spin mr-2"></i> Mengambil barang dari rak...</p>';
+            
+            // 2. Scroll layar mulus ke area produk
+            document.getElementById('bagianProdukUtama').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            try {
+                // Tembak API
+                const res = await fetch('/api/products');
+                const result = await res.json();
+
+                if (result.success && result.data.length > 0) {
+                    
+                    // Logika Cerdas Pencarian Teks (Kecuali nanti database sudah ada kolom sub kategori)
+                    // Ambil kata pertama saja agar pencarian lebih ampuh (Contoh: "Beras, minyak, gula" -> "beras")
+                    let keyword = teksPencarian.toLowerCase().split(/[,\/ ]/)[0]; 
+                    if(keyword === "buku" && subCat.includes("sekolah")) keyword = "sekolah";
+
+                    // Saring Data
+                    const filteredData = result.data.filter(p => {
+                        const title = (p.title || '').toLowerCase();
+                        const desc = (p.description || '').toLowerCase();
+                        return title.includes(keyword) || desc.includes(keyword);
+                    });
+
+                    // 3. Tampilkan Hasil
+                    if (filteredData.length > 0) {
+                        container.innerHTML = '';
+                        filteredData.forEach(product => {
+                            const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
+                            const deskripsiBarang = product.description || "Deskripsi belum tersedia.";
+                            
+                            let fotoUtama = product.media_url;
+                            try {
+                                const parsedMedia = JSON.parse(product.media_url);
+                                if (Array.isArray(parsedMedia) && parsedMedia.length > 0) fotoUtama = parsedMedia[0];
+                            } catch(e) {} 
+
+                            const isVideo = product.media_type === 'video';
+                            const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video' : (fotoUtama || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
+                            const mediaTag = isVideo ? `<video src="${fotoBarang}" class="product-media" style="object-fit:cover;"></video>` : `<img src="${fotoBarang}" class="product-media" alt="${product.title}">`;
+                            
+                            const terjual = (product.id * 17 % 500) + 10; // Dummy terjual
+
+                            const prodObj = {
+                                id: product.id, foto: fotoUtama, nama: product.title, 
+                                hargaStr: priceRp, deskripsi: deskripsiBarang, 
+                                harga: product.price, weight: product.weight || 1000, 
+                                seller_name: product.seller_name || "Belidikita Official", qty: 1 
+                            };
+                            const strObj = encodeURIComponent(JSON.stringify(prodObj));
+
+                            container.innerHTML += `
+                                <div class="product-card" onclick="bukaDetailGlobal('${strObj}')">
+                                    ${mediaTag}
+                                    <div class="product-info">
+                                        <div class="product-title">${product.title}</div>
+                                        <div class="product-price">${priceRp}</div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; font-weight: 600; margin-top: auto;">
+                                            <span><i class="fas fa-star" style="color:#FFD700;"></i> 4.9</span>
+                                            <span>${terjual} Terjual</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        // Jika kosong
+                        container.innerHTML = `
+                            <div style="text-align:center; width:100%; grid-column:span 2; padding: 30px 10px;">
+                                <i class="fas fa-box-open" style="font-size: 40px; color: #ccc; margin-bottom: 10px;"></i>
+                                <p style="color:#888; font-weight:600; font-size: 12px;">Maaf, produk <b>${teksPencarian}</b> belum ditambahkan oleh Admin.</p>
+                            </div>`;
+                    }
+                }
+            } catch (e) {
+                container.innerHTML = '<p style="text-align:center; width:100%; color:red; grid-column:span 2;">Gagal memuat barang dari server.</p>';
             }
-            
-            // Lompat ke halaman Toko (katalog utama) untuk melihat hasil filternya
-            setTimeout(() => {
-                window.location.href = 'toko.html';
-            }, 800);
+        }
+
+        // Fungsi Bantuan untuk Melompat ke Detail Produk (Tanpa mengganggu script.js)
+        function bukaDetailGlobal(encodedObj) {
+            const decodedObj = decodeURIComponent(encodedObj);
+            localStorage.setItem('produk_detail', decodedObj);
+            window.location.href = 'detailproduk.html';
         }
     </script>
 </body>
