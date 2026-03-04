@@ -134,6 +134,30 @@
 
     </main>
 
+    <div id="modalRetur" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:20px; border-radius:15px; width:90%; max-width:400px; position:relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <span onclick="document.getElementById('modalRetur').style.display='none'" style="position:absolute; right:20px; top:15px; font-size:24px; cursor:pointer; color:#888;">&times;</span>
+            <h2 style="color:#ff3b30; font-size:18px; margin-bottom:15px; font-weight:800;"><i class="fas fa-box-open"></i> Ajukan Retur Barang</h2>
+            
+            <div style="background:#FFFDE7; border-left:4px solid #FBC02D; padding:10px; font-size:11px; margin-bottom:15px; border-radius:6px;">
+                <b style="color:#E65100;">SYARAT WAJIB:</b><br>Harap lampirkan foto/video UNBOXING paket dari sebelum kardus/lakban dibuka hingga terlihat kerusakannya tanpa jeda!
+            </div>
+
+            <form id="formRetur">
+                <input type="hidden" id="returOrderId">
+                <div style="margin-bottom:15px;">
+                    <label style="font-size:12px; font-weight:bold; color:#555;">Alasan Retur / Kerusakan</label>
+                    <textarea id="returReason" rows="3" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; outline:none; font-family:'Montserrat', sans-serif; font-size:12px;" placeholder="Jelaskan detail kerusakannya..." required></textarea>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label style="font-size:12px; font-weight:bold; color:#555;">Upload Video/Foto Unboxing</label>
+                    <input type="file" id="returProof" accept="video/*, image/*" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; font-size:12px;" required>
+                </div>
+                <button type="submit" id="btnSubmitRetur" style="width:100%; padding:12px; background:#ff3b30; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-family:'Montserrat', sans-serif;"><i class="fas fa-paper-plane mr-1"></i> Kirim Pengajuan</button>
+            </form>
+        </div>
+    </div>
+
     <div id="customToast"></div>
 
     <script>
@@ -341,8 +365,17 @@
                         if(order.status === 'Diproses') statusColor = "bg-blue-100 text-blue-700";
                         if(order.status === 'Dikirim') statusColor = "bg-purple-100 text-purple-700";
                         if(order.status === 'Selesai') statusColor = "bg-green-100 text-green-700";
+                        if(order.status.includes('Retur')) statusColor = "bg-red-100 text-red-700 font-extrabold"; // Warna Khusus Retur
 
                         const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
+
+                        // ✅ LOGIKA TOMBOL RETUR: Muncul Jika Dikirim/Selesai dan Belum Pernah Diretur
+                        let btnReturHtml = '';
+                        if ((order.status === 'Dikirim' || order.status === 'Selesai') && !order.status.includes('Retur')) {
+                            btnReturHtml = `<button onclick="bukaModalRetur(${order.id})" class="mt-4 w-full py-2.5 bg-red-50 text-red-500 text-xs font-bold rounded-xl border border-red-100 hover:bg-red-100 transition"><i class="fas fa-undo mr-1"></i> Ajukan Retur Barang</button>`;
+                        } else if (order.status.includes('Retur')) {
+                            btnReturHtml = `<div class="mt-4 w-full py-2 bg-gray-100 text-gray-500 text-xs font-bold rounded-xl text-center"><i class="fas fa-info-circle mr-1"></i> ${order.status}</div>`;
+                        }
 
                         containerRiwayat.innerHTML += `
                             <div class="glass-card rounded-2xl p-4 mb-3">
@@ -373,7 +406,7 @@
                                     <span class="text-xs font-semibold text-gray-500">Total Tagihan</span>
                                     <span class="text-sm font-extrabold text-orange-500">${formatRp}</span>
                                 </div>
-                            </div>
+                                ${btnReturHtml} </div>
                         `;
                     });
                 } else {
@@ -411,6 +444,49 @@
                 showToast("Gagal menghapus pesanan", "error");
             }
         }
+
+        // ==========================================
+        // ✅ FUNGSI EKSEKUSI PENGAJUAN RETUR
+        // ==========================================
+        function bukaModalRetur(id_pesanan) {
+            document.getElementById('returOrderId').value = id_pesanan;
+            document.getElementById('modalRetur').style.display = 'flex';
+        }
+
+        document.getElementById('formRetur').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitRetur');
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengupload Video...";
+            btn.disabled = true;
+
+            const id_pesanan = document.getElementById('returOrderId').value;
+            const formData = new FormData();
+            formData.append('reason', document.getElementById('returReason').value);
+            formData.append('proof', document.getElementById('returProof').files[0]);
+
+            try {
+                const res = await fetch(`/api/orders/${id_pesanan}/return`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData // ✅ Menggunakan FormData, bukan JSON
+                });
+                
+                const data = await res.json();
+                if(data.success) {
+                    showToast("Pengajuan retur & bukti berhasil dikirim!", "success");
+                    document.getElementById('modalRetur').style.display = 'none';
+                    document.getElementById('formRetur').reset();
+                    loadRiwayatPesanan(); // Refresh kartu pesanan
+                } else {
+                    showToast("Gagal: " + data.message, "error");
+                }
+            } catch(err) {
+                showToast("Server Error saat mengupload video!", "error");
+            } finally {
+                btn.innerHTML = "<i class='fas fa-paper-plane mr-1'></i> Kirim Pengajuan";
+                btn.disabled = false;
+            }
+        });
 
         // LOGOUT
         document.getElementById('btnLogout').addEventListener('click', () => {
