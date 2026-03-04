@@ -34,14 +34,10 @@
         .card-info h2 { font-size: 18px; color: #333; font-weight: 800; }
         .card-icon { font-size: 30px; color: #1976D2; opacity: 0.2; }
 
-        .btn-buka-grafik { width: 100%; padding: 15px; background: #0D47A1; color: #fff; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; margin-bottom: 25px; font-size: 14px; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.2); transition: 0.2s;}
-        .btn-buka-grafik:hover { background: #1976D2; transform: translateY(-2px); }
-
         .box { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 25px;}
         .box h3 { font-size: 14px; font-weight: 800; margin-bottom: 15px; color: #0D47A1; border-bottom: 2px solid #f4f7fa; padding-bottom: 10px; }
         
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 12px; }
-        /* Grid untuk 3 kolom jika dibutuhkan (seperti Varian) */
         .grid-3 { display: grid; grid-template-columns: 1fr 1.5fr 1.5fr; gap: 10px; margin-bottom: 12px; } 
 
         .form-group { margin-bottom: 12px; }
@@ -78,15 +74,7 @@
         .modal-content { background-color: #fefefe; margin: 10% auto; padding: 20px; border-radius: 15px; width: 90%; max-width: 500px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .close-modal { position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
 
-        #customToast {
-            visibility: hidden; min-width: 250px; margin-left: -125px;
-            background-color: #333; color: #fff; text-align: center;
-            border-radius: 25px; padding: 16px; position: fixed;
-            z-index: 9999; left: 50%; bottom: 30px;
-            font-size: 13px; font-weight: 600;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: opacity 0.3s, bottom 0.3s; opacity: 0;
-        }
+        #customToast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 25px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; font-size: 13px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: opacity 0.3s, bottom 0.3s; opacity: 0; }
         #customToast.show { visibility: visible; opacity: 1; bottom: 80px; }
         #customToast.success { background-color: #00AA5B; }
         #customToast.error { background-color: #ff3b30; }
@@ -281,8 +269,19 @@
                         <input type="number" id="prodCapital" placeholder="Contoh: 100000" required>
                     </div>
                     <div class="form-group">
-                        <label>Harga Jual (Rp)</label>
+                        <label>Harga Jual Eceran (Rp)</label>
                         <input type="number" id="prodPrice" placeholder="Contoh: 150000" required>
+                    </div>
+                </div>
+
+                <div class="grid-2" style="background: #E8F5E9; padding: 15px; border-radius: 12px; border-left: 4px solid #4CAF50; margin-bottom: 12px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="color:#2E7D32;"><i class="fas fa-tags"></i> Harga Grosir (Opsional)</label>
+                        <input type="number" id="prodWholesalePrice" placeholder="Contoh: 130000" value="0">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="color:#2E7D32;"><i class="fas fa-boxes"></i> Min. Beli untuk Harga Grosir</label>
+                        <input type="number" id="prodWholesaleMin" placeholder="Contoh: 12" value="0">
                     </div>
                 </div>
 
@@ -336,11 +335,11 @@
                             <input type="text" id="prodUnit" placeholder="Pcs, Kg, Meter..." value="Pcs" required>
                         </div>
                         <div class="form-group" style="margin-bottom:0;">
-                            <label style="color:#F57F17;"><i class="fas fa-list-ul"></i> Judul Varian Pilihan (Opsional)</label>
+                            <label style="color:#F57F17;"><i class="fas fa-list-ul"></i> Judul Varian (Opsional)</label>
                             <input type="text" id="prodVariantTitle" placeholder="Contoh: Pilih Ukuran">
                         </div>
                         <div class="form-group" style="margin-bottom:0;">
-                            <label style="color:#F57F17;"><i class="fas fa-th-large"></i> Isi Varian (Pisahkan dgn koma)</label>
+                            <label style="color:#F57F17;"><i class="fas fa-th-large"></i> Isi Varian (Pisahkan koma)</label>
                             <input type="text" id="prodVariantOptions" placeholder="Contoh: S, M, L, XL">
                         </div>
                     </div>
@@ -442,6 +441,18 @@
                         <input type="number" id="editProdPrice" required>
                     </div>
                 </div>
+
+                <div class="grid-2" style="background: #E8F5E9; padding: 10px; border-radius: 8px; border-left: 4px solid #4CAF50; margin-bottom: 12px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="color:#2E7D32;">Harga Grosir Baru</label>
+                        <input type="number" id="editProdWholesalePrice" value="0">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="color:#2E7D32;">Min Beli Grosir Baru</label>
+                        <input type="number" id="editProdWholesaleMin" value="0">
+                    </div>
+                </div>
+
                 <div class="grid-2">
                     <div class="form-group">
                         <label>Stok Baru</label>
@@ -524,7 +535,6 @@
         };
         document.getElementById('btnKeluarPC').addEventListener('click', doLogout);
 
-        // Kamus Kategori Manual
         const kamusAdminKategori = {
             'Sembako': ['Beras, minyak, gula', 'Mie instan', 'Telur', 'Air galon', 'Gas LPG'],
             'Fashion': ['Baju pria / wanita / anak', 'Celana', 'Jaket', 'Hijab', 'Sepatu', 'Tas'],
@@ -626,7 +636,7 @@
             } catch (err) { console.error(err); }
         }
 
-        // ✅ UBAH: TAMPILKAN SATUAN (UNIT) DI TABEL PRODUK
+        // ✅ UBAH: MENGIRIM DNA GROSIR KE FUNGSI EDIT
         async function fetchProducts() { 
             try {
                 const res = await fetch('/api/products');
@@ -645,13 +655,19 @@
                         if(prod.category === 'laris') { badgeClass = 'badge-laris'; badgeText = '🔥 Laris'; }
                         else if(prod.category === 'keranjang') { badgeClass = 'badge-keranjang'; badgeText = '🛒 Diminati'; }
 
+                        // Info tambahan grosir di tabel jika ada
+                        let infoGrosir = '';
+                        if(prod.wholesale_price > 0 && prod.wholesale_min_qty > 0) {
+                            infoGrosir = `<br><span style="font-size:9px; color:#00AA5B; background:#E8F5E9; padding:2px 4px; border-radius:4px;">Grosir: Min ${prod.wholesale_min_qty}</span>`;
+                        }
+
                         tbody.innerHTML += `<tr>
                             <td><span class="badge ${badgeClass}">${badgeText}</span></td>
                             <td><b>${prod.title}</b></td>
                             <td style="color:#00AA5B; font-weight:bold;">${stok}</td>
-                            <td style="color:#ff5722; font-weight:bold;">${priceRp} / ${satuan}</td>
+                            <td style="color:#ff5722; font-weight:bold;">${priceRp} / ${satuan} ${infoGrosir}</td>
                             <td>
-                                <button class="btn-aksi btn-edit" onclick="bukaEditProduk(${prod.id}, '${prod.title.replace(/'/g, "\\'")}', ${prod.capital_price || 0}, ${prod.price}, ${stok}, '${prod.category}', ${weight}, '${satuan}', '${prod.variant_title || ''}', '${prod.variant_options || ''}')"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn-aksi btn-edit" onclick="bukaEditProduk(${prod.id}, '${prod.title.replace(/'/g, "\\'")}', ${prod.capital_price || 0}, ${prod.price}, ${stok}, '${prod.category}', ${weight}, '${satuan}', '${prod.variant_title || ''}', '${prod.variant_options || ''}', ${prod.wholesale_price || 0}, ${prod.wholesale_min_qty || 0})"><i class="fas fa-edit"></i> Edit</button>
                                 <button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('products', ${prod.id})"><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>`;
@@ -743,7 +759,7 @@
             } catch(err) { showToast("Server Error!", "error"); } finally { btn.innerHTML = "<i class='fas fa-paper-plane'></i> Simpan & Perbarui Pembeli"; }
         });
 
-        // ✅ UPLOAD MANUAL DENGAN BAWA DNA VARIAN & SATUAN
+        // ✅ UPLOAD MANUAL DENGAN BAWA DNA GROSIR
         document.getElementById('formUploadBarang').addEventListener('submit', async (e) => {
             e.preventDefault(); const btn = document.getElementById('btnSimpanBarang'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengupload...";
             
@@ -758,10 +774,13 @@
             formData.append('description', finalDesc); 
             formData.append('weight', document.getElementById('prodWeight').value);
             
-            // Masukkan DNA Baru
             formData.append('unit', document.getElementById('prodUnit').value);
             formData.append('variant_title', document.getElementById('prodVariantTitle').value);
             formData.append('variant_options', document.getElementById('prodVariantOptions').value);
+            
+            // Tambahan DNA Grosir
+            formData.append('wholesale_price', document.getElementById('prodWholesalePrice').value || 0);
+            formData.append('wholesale_min_qty', document.getElementById('prodWholesaleMin').value || 0);
 
             const files = document.getElementById('prodMedia').files; 
             for (let i = 0; i < files.length; i++) { formData.append('media', files[i]); }
@@ -783,8 +802,8 @@
             } catch(err) {} finally { btn.innerHTML = "<i class='fas fa-cloud-upload-alt'></i> Pasang Banner Promo"; }
         });
 
-        // ✅ EDIT PRODUK MENERIMA DNA VARIAN & SATUAN
-        function bukaEditProduk(id, title, capital, price, stock, category, weight, unit, varTitle, varOptions) {
+        // ✅ EDIT PRODUK MENERIMA DNA GROSIR
+        function bukaEditProduk(id, title, capital, price, stock, category, weight, unit, varTitle, varOptions, wsPrice, wsMin) {
             document.getElementById('editProdId').value = id; 
             document.getElementById('editProdName').value = title;
             document.getElementById('editProdCapital').value = capital; 
@@ -795,6 +814,11 @@
             document.getElementById('editProdUnit').value = unit || 'Pcs';
             document.getElementById('editProdVariantTitle').value = varTitle || '';
             document.getElementById('editProdVariantOptions').value = varOptions || '';
+            
+            // Info Grosir
+            document.getElementById('editProdWholesalePrice').value = wsPrice || 0;
+            document.getElementById('editProdWholesaleMin').value = wsMin || 0;
+
             document.getElementById('modalEditProduk').style.display = 'block';
         }
 
@@ -813,7 +837,9 @@
                 weight: document.getElementById('editProdWeight').value,
                 unit: document.getElementById('editProdUnit').value,
                 variant_title: document.getElementById('editProdVariantTitle').value,
-                variant_options: document.getElementById('editProdVariantOptions').value
+                variant_options: document.getElementById('editProdVariantOptions').value,
+                wholesale_price: document.getElementById('editProdWholesalePrice').value || 0,
+                wholesale_min_qty: document.getElementById('editProdWholesaleMin').value || 0
             };
 
             try {
