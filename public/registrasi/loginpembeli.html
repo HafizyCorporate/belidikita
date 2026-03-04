@@ -3,59 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Masuk - Belidikita</title>
+    <title>Masuk - Belidikita Spesial Ramadhan</title>
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #f4f7fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .auth-card { background: #fff; width: 90%; max-width: 400px; padding: 30px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
-        .back-btn { display: flex; align-items: center; color: #888; text-decoration: none; font-size: 12px; font-weight: 600; margin-bottom: 20px; }
-        .back-btn i { margin-right: 5px; }
-        .auth-title { font-size: 20px; font-weight: 800; color: #0D47A1; margin-bottom: 5px; }
-        .auth-subtitle { font-size: 12px; color: #666; margin-bottom: 25px; }
-        .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { display: block; font-size: 11px; font-weight: 600; color: #555; margin-bottom: 5px; }
-        .input-group input { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; outline: none; font-family: 'Montserrat', sans-serif; font-size: 13px; background: #f9f9f9; transition: 0.3s; }
-        .input-group input:focus { border-color: #1976D2; background: #fff; box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1); }
-        .forgot-link { display: block; text-align: right; font-size: 11px; color: #1976D2; text-decoration: none; font-weight: 600; margin-top: -5px; margin-bottom: 15px; }
-        .btn-auth { width: 100%; padding: 14px; background: #1976D2; color: #fff; border: none; border-radius: 10px; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(25, 118, 210, 0.3); }
-        .btn-auth:hover { background: #0D47A1; transform: translateY(-2px); }
-        .toggle-text { margin-top: 20px; font-size: 12px; color: #666; }
-        .toggle-text a { color: #1976D2; font-weight: 800; text-decoration: none; }
+        @import url('https://fonts.googleapis.com/css?family=Montserrat:400,600,800');
+        * { box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
         
-        /* CSS NOTIFIKASI TOAST */
-        #customToast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 25px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; font-size: 13px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: opacity 0.3s, bottom 0.3s; opacity: 0; }
-        #customToast.show { visibility: visible; opacity: 1; bottom: 50px; }
-        #customToast.success { background-color: #00AA5B; }
-        #customToast.error { background-color: #ff3b30; }
+        body { 
+            background: linear-gradient(135deg, #E1F5FE 0%, #81D4FA 100%); 
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; 
+            overflow: hidden; position: relative;
+        }
+
+        /* --- DEKORASI RAMADHAN --- */
+        .ramadhan-decor { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .lantern {
+            position: absolute; top: -10px; width: 45px; height: 65px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="%23FFD700" d="M112 0c-17.7 0-32 14.3-32 32v16h224V32c0-17.7-14.3-32-32-32H112zM0 96c0-17.7 14.3-32 32-32h320c17.7 0 32 14.3 32 32v64H0V96zm48 96h288v192c0 35.3-28.7 64-64 64H112c-35.3 0-64-28.7-64-64V192zm144 288c53 0 96 43 96 96H96c0-53 43-96 96-96z"/></svg>') no-repeat center center;
+            transform-origin: top center; filter: drop-shadow(0px 5px 15px rgba(255, 215, 0, 0.6));
+        }
+        .lantern.left { left: 15%; animation: swing 3.5s ease-in-out infinite alternate; }
+        .lantern.right { right: 15%; animation: swing 4.5s ease-in-out infinite alternate-reverse; width: 35px; height: 55px; }
+        @keyframes swing { 0% { transform: rotate(12deg); } 100% { transform: rotate(-12deg); } }
+        
+        .moon-icon { position: absolute; top: 5vh; right: 5vw; font-size: 80px; color: rgba(255, 215, 0, 0.4); filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8)); animation: floatMoon 4s ease-in-out infinite alternate; z-index: 0; }
+        @keyframes floatMoon { 0% { transform: translateY(0) rotate(-10deg); } 100% { transform: translateY(-15px) rotate(5deg); } }
+
+        /* --- KARTU LOGIN (GLASSMORPHISM) --- */
+        .auth-card { 
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px);
+            width: 90%; max-width: 400px; padding: 40px 25px; border-radius: 25px; 
+            box-shadow: 0 20px 50px rgba(13, 71, 161, 0.15); text-align: center; 
+            position: relative; z-index: 10; border: 2px solid #fff;
+            animation: popCard 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes popCard { 0% { transform: scale(0.8) translateY(30px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+
+        .auth-icon { font-size: 40px; color: #FFD700; margin-bottom: 15px; filter: drop-shadow(0 4px 10px rgba(255, 215, 0, 0.4)); animation: pulseIcon 2s infinite; }
+        @keyframes pulseIcon { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+        .back-btn { display: inline-flex; align-items: center; background: #E1F5FE; padding: 6px 12px; border-radius: 20px; color: #0D47A1; text-decoration: none; font-size: 11px; font-weight: 800; position: absolute; top: 20px; left: 20px; transition: 0.2s; }
+        .back-btn:hover { background: #0D47A1; color: #fff; transform: translateX(-3px); }
+        .back-btn i { margin-right: 5px; }
+
+        .auth-title { font-size: 22px; font-weight: 800; color: #0D47A1; margin-bottom: 5px; margin-top: 15px; text-shadow: 1px 1px 2px rgba(0,0,0,0.05); }
+        .auth-subtitle { font-size: 12px; color: #666; margin-bottom: 30px; font-weight: 600; }
+        
+        .input-group { margin-bottom: 18px; text-align: left; position: relative; }
+        .input-group label { display: block; font-size: 11px; font-weight: 800; color: #0D47A1; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-group input { 
+            width: 100%; padding: 14px 15px; border: 2px solid #E1F5FE; border-radius: 12px; outline: none; 
+            font-size: 13px; font-weight: 600; background: #fbfdff; transition: all 0.3s ease; color: #333;
+        }
+        .input-group input:focus { border-color: #0D47A1; background: #fff; box-shadow: 0 5px 15px rgba(13, 71, 161, 0.1); transform: translateY(-2px); }
+        
+        .forgot-link { display: block; text-align: right; font-size: 11px; color: #FF9800; text-decoration: none; font-weight: 800; margin-top: -5px; margin-bottom: 20px; transition: 0.2s; }
+        .forgot-link:hover { color: #0D47A1; }
+
+        .btn-auth { 
+            width: 100%; padding: 15px; background: linear-gradient(135deg, #0D47A1, #1976D2); 
+            color: #fff; border: none; border-radius: 12px; font-size: 13px; font-weight: 800; 
+            cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(13, 71, 161, 0.3); text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-auth:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(13, 71, 161, 0.4); }
+        .btn-auth:active { transform: scale(0.95); }
+
+        .toggle-text { margin-top: 25px; font-size: 12px; color: #666; font-weight: 600; }
+        .toggle-text a { color: #0D47A1; font-weight: 800; text-decoration: none; background: #E1F5FE; padding: 4px 10px; border-radius: 12px; margin-left: 5px; transition: 0.2s; }
+        .toggle-text a:hover { background: #0D47A1; color: #fff; }
+        
+        /* --- CSS NOTIFIKASI TOAST (MEMBAL/BOUNCY) --- */
+        #customToast {
+            visibility: hidden; min-width: 280px; margin-left: -140px;
+            background: rgba(13, 71, 161, 0.95); backdrop-filter: blur(10px);
+            color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 30px; padding: 16px 20px; position: fixed;
+            z-index: 9999; left: 50%; bottom: -50px; 
+            font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: visibility 0.4s, opacity 0.4s, bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            opacity: 0;
+        }
+        #customToast.show { visibility: visible; opacity: 1; bottom: 40px; }
+        #customToast.success { background: rgba(0, 170, 91, 0.95); border-color: #A5D6A7; }
+        #customToast.error { background: rgba(255, 59, 48, 0.95); border-color: #FFCDD2; }
     </style>
 </head>
 <body>
 
+    <div class="ramadhan-decor">
+        <i class="fas fa-moon moon-icon"></i>
+        <div class="lantern left"></div>
+        <div class="lantern right"></div>
+    </div>
+
     <div class="auth-card">
-        <a href="../dashboardutama.html" class="back-btn"><i class="fas fa-arrow-left"></i> Kembali ke Toko</a>
-        <h1 class="auth-title">Selamat Datang!</h1>
-        <p class="auth-subtitle">Masuk untuk melanjutkan belanja</p>
+        <a href="../dashboardutama.html" class="back-btn"><i class="fas fa-arrow-left"></i> Toko</a>
+        
+        <i class="fas fa-mosque auth-icon"></i>
+        <h1 class="auth-title">Ahlan Wa Sahlan</h1>
+        <p class="auth-subtitle">Masuk untuk belanja keperluan sahur & buka</p>
 
         <form id="formLogin">
             <div class="input-group">
-                <label>Email</label>
+                <label>Email Anda</label>
                 <input type="email" id="loginEmail" placeholder="contoh@gmail.com" required>
             </div>
             <div class="input-group">
-                <label>Password</label>
+                <label>Kata Sandi</label>
                 <input type="password" id="loginPassword" placeholder="Masukkan password" required>
             </div>
             <a href="lupapassword.html" class="forgot-link">Lupa Password?</a>
-            <button type="submit" class="btn-auth" id="btnLogin">MASUK SEKARANG</button>
+            <button type="submit" class="btn-auth" id="btnLogin">MASUK SEKARANG <i class="fas fa-sign-in-alt ml-1"></i></button>
         </form>
-        <div class="toggle-text">Belum punya akun? <a href="daftarpembeli.html">Daftar di sini</a></div>
+        <div class="toggle-text">Belum punya akun? <a href="daftarpembeli.html">Daftar Yuk!</a></div>
     </div>
 
     <div id="customToast"></div>
 
     <script>
-        // Fitur Anti Nyangkut (Otomatis hapus token lama jika membuka halaman login)
         window.onload = () => { localStorage.removeItem('token'); };
 
         function showToast(msg, type = 'error') {
@@ -90,7 +156,7 @@
             } catch(err) {
                 showToast("Server sibuk! Coba lagi nanti.", "error");
             } finally {
-                btn.innerHTML = "MASUK SEKARANG";
+                btn.innerHTML = "MASUK SEKARANG <i class='fas fa-sign-in-alt ml-1'></i>";
             }
         });
     </script>
