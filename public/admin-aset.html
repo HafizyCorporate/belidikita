@@ -45,7 +45,10 @@
         <div class="glass p-6 rounded-3xl mb-8 shadow-2xl bouncy-hover">
             <h2 class="text-xl font-extrabold mb-4 text-yellow-300"><i class="fas fa-file-excel mr-2"></i> Import Excel Aset</h2>
             <div class="bg-blue-900/40 border-l-4 border-yellow-400 p-4 rounded-lg mb-5">
-                <p class="text-xs text-gray-300"><b>Format Header (Baris 1) WAJIB:</b> Kode_Aset | Nama_Aset | Kategori | Jumlah | Kondisi | Catatan</p>
+                <p class="text-xs text-gray-300 mb-2"><b>Format Header (Baris 1) WAJIB SAMA PERSIS:</b></p>
+                <code class="bg-black/50 p-2 rounded text-yellow-300 text-[10px] block leading-relaxed">
+                    Kode_Aset | Nama_Aset | Kategori | Jumlah | Satuan | Kondisi | Catatan
+                </code>
             </div>
             <form id="formUploadAset" class="flex flex-col md:flex-row gap-4 items-center">
                 <input type="file" id="fileExcelAset" accept=".xlsx, .xls" required class="flex-1 w-full text-sm text-gray-300 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-extrabold file:bg-yellow-400 file:text-slate-900 hover:file:bg-yellow-300 cursor-pointer bg-slate-800 rounded-xl border border-slate-700">
@@ -64,8 +67,7 @@
                             <th class="p-4 rounded-tl-xl">Kode</th>
                             <th class="p-4">Nama Aset</th>
                             <th class="p-4">Kategori</th>
-                            <th class="p-4 text-center">Jumlah</th>
-                            <th class="p-4 text-center">Kondisi</th>
+                            <th class="p-4 text-center">Jumlah & Satuan</th> <th class="p-4 text-center">Kondisi</th>
                             <th class="p-4 rounded-tr-xl">Catatan</th>
                         </tr>
                     </thead>
@@ -102,12 +104,17 @@
                     tbody.innerHTML = '';
                     result.data.forEach(item => {
                         let warnaKondisi = item.condition.toLowerCase() === 'baik' ? 'text-green-400 bg-green-900/30' : 'text-red-400 bg-red-900/30';
+                        
+                        // ✅ Menampilkan Jumlah beserta Satuannya (Misal: 5 Unit)
+                        let textJumlah = item.quantity;
+                        if(item.unit) textJumlah += ` <span class="text-xs text-gray-400">${item.unit}</span>`;
+
                         tbody.innerHTML += `
                             <tr class="hover:bg-white/5 transition">
                                 <td class="p-4 font-bold text-yellow-300">${item.asset_code}</td>
                                 <td class="p-4 font-semibold text-white">${item.asset_name}</td>
                                 <td class="p-4"><span class="bg-blue-900/50 text-blue-300 px-3 py-1 rounded-full text-xs border border-blue-700/50">${item.category}</span></td>
-                                <td class="p-4 text-center font-bold text-lg">${item.quantity}</td>
+                                <td class="p-4 text-center font-bold text-lg">${textJumlah}</td>
                                 <td class="p-4 text-center"><span class="px-3 py-1 rounded-full text-xs font-bold ${warnaKondisi}">${item.condition}</span></td>
                                 <td class="p-4 text-xs text-gray-400 max-w-[200px] truncate" title="${item.notes}">${item.notes || '-'}</td>
                             </tr>
