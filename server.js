@@ -521,6 +521,34 @@ app.get('/api/admin/excel/draft', verifyAdmin, async (req, res) => {
 });
 
 
+// 5. Super Admin ACC Barang (Pindah dari Draft ke Products)
+app.post('/api/admin/excel/draft/approve/:id', verifyAdmin, async (req, res) => {
+    try {
+        const draftId = req.params.id;
+        
+        // 1. Cari barang di tabel draft
+        const cekDraft = await pool.query('SELECT * FROM draft_products WHERE id = $1', [draftId]);
+        if (cekDraft.rows.length === 0) return res.status(404).json({ success: false, message: "Data draft tidak ditemukan!" });
+        
+        const barang = cekDraft.rows[0];
+
+        // 2. Suntikkan ke tabel products utama (tanpa foto dulu, biarkan kosong / null)
+        await pool.query(
+            'INSERT INTO products (title, capital_price, price, stock, category, weight, description) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+            [barang.title, barang.capital_price, barang.price, barang.stock, barang.category, barang.weight, barang.description]
+        );
+
+        // 3. Ubah status di tabel draft menjadi 'Approved'
+        await pool.query("UPDATE draft_products SET status = 'Approved' WHERE id = $1", [draftId]);
+
+        res.json({ success: true, message: "Barang berhasil dilempar ke Etalase Toko!" });
+    } catch (err) {
+        console.error("🔥 Error Approve Draft:", err);
+        res.status(500).json({ success: false, message: "Gagal memproses ACC barang." });
+    }
+});
+
+
 // ==========================================
 // 🚨 PENANGKAP ERROR GLOBAL
 // ==========================================
