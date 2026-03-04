@@ -62,7 +62,7 @@
         #customToast.success { background: rgba(0, 170, 91, 0.95); border-color: #A5D6A7; }
         #customToast.error { background: rgba(255, 59, 48, 0.95); border-color: #FFCDD2; }
 
-        /* --- MODAL (POP-UP RETUR) BOUNCY --- */
+        /* --- MODAL BOUNCY --- */
         .modal-content-bouncy { animation: popModal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes popModal { 0% { transform: scale(0.7) translateY(50px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
     </style>
@@ -196,6 +196,31 @@
                     <input type="file" id="returProof" accept="video/*, image/*" style="width:100%; padding:10px; border:2px dashed #B3E5FC; border-radius:12px; font-size:12px; background:#fff; font-weight:600;" required>
                 </div>
                 <button type="submit" id="btnSubmitRetur" style="width:100%; padding:14px; background:linear-gradient(135deg, #ff3b30, #d32f2f); color:#fff; border:none; border-radius:12px; font-weight:800; font-size:14px; cursor:pointer; font-family:'Montserrat', sans-serif; box-shadow:0 5px 15px rgba(255,59,48,0.4); transition:0.3s;"><i class="fas fa-paper-plane mr-1"></i> KIRIM PENGAJUAN RETUR</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalUlasan" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,40,80,0.7); backdrop-filter:blur(5px); align-items:center; justify-content:center; padding: 20px;">
+        <div class="modal-content-bouncy" style="background:#fff; padding:25px 20px; border-radius:20px; width:100%; max-width:400px; position:relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 3px solid #FFD700;">
+            <button onclick="document.getElementById('modalUlasan').style.display='none'" style="position:absolute; right:15px; top:15px; background:#FFFDE7; color:#FF9800; border:none; width:35px; height:35px; border-radius:50%; font-size:18px; font-weight:bold; cursor:pointer;"><i class="fas fa-times"></i></button>
+            
+            <h2 style="color:#FF9800; font-size:20px; margin-bottom:5px; font-weight:800; text-align:center;"><i class="fas fa-star"></i> Nilai Produk Ini</h2>
+            <p style="font-size:11px; color:#666; text-align:center; margin-bottom:15px;">Bantu pembeli lain dengan ulasanmu!</p>
+
+            <form id="formUlasan">
+                <input type="hidden" id="ulasanProductId">
+                
+                <div style="text-align:center; margin-bottom:15px; font-size:30px; color:#ddd;" id="starContainer">
+                    <i class="fas fa-star" onclick="pilihBintang(1)" style="cursor:pointer; color:#FFD700;"></i>
+                    <i class="fas fa-star" onclick="pilihBintang(2)" style="cursor:pointer; color:#FFD700;"></i>
+                    <i class="fas fa-star" onclick="pilihBintang(3)" style="cursor:pointer; color:#FFD700;"></i>
+                    <i class="fas fa-star" onclick="pilihBintang(4)" style="cursor:pointer; color:#FFD700;"></i>
+                    <i class="fas fa-star" onclick="pilihBintang(5)" style="cursor:pointer; color:#FFD700;"></i>
+                </div>
+                <input type="hidden" id="ulasanRating" value="5"> <div style="margin-bottom:20px;">
+                    <textarea id="ulasanKomentar" rows="3" style="width:100%; padding:12px; border:2px solid #E1F5FE; border-radius:12px; outline:none; font-family:'Montserrat', sans-serif; font-size:13px; font-weight:600; background:#fbfdff;" placeholder="Ceritakan kepuasanmu tentang kualitas barang, kecepatan pengiriman, dll..." required></textarea>
+                </div>
+                <button type="submit" id="btnSubmitUlasan" style="width:100%; padding:14px; background:linear-gradient(135deg, #FF9800, #F57C00); color:#fff; border:none; border-radius:12px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 5px 15px rgba(255,152,0,0.4); transition:0.3s;"><i class="fas fa-paper-plane mr-1"></i> KIRIM ULASAN</button>
             </form>
         </div>
     </div>
@@ -402,7 +427,7 @@
                         let items = [];
                         try { items = JSON.parse(order.items); } catch(e) {}
                         
-                        const barangPertama = items.length > 0 ? items[0] : { foto: 'https://via.placeholder.com/150', nama: 'Barang', qty: 1 };
+                        const barangPertama = items.length > 0 ? items[0] : { id: 0, foto: 'https://via.placeholder.com/150', nama: 'Barang', qty: 1 };
                         const sisaBarang = items.length > 1 ? ` + ${items.length - 1} barang lainnya` : '';
                         
                         let statusColor = "bg-yellow-100 text-yellow-700 border border-yellow-200";
@@ -413,11 +438,18 @@
 
                         const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
 
+                        // ✅ LOGIKA TOMBOL RETUR & ULASAN
                         let btnReturHtml = '';
                         if ((order.status === 'Dikirim' || order.status === 'Selesai') && !order.status.includes('Retur')) {
-                            btnReturHtml = `<button onclick="bukaModalRetur(${order.id})" class="mt-4 w-full py-2.5 bg-white text-red-500 text-xs font-extrabold rounded-xl border-2 border-red-100 hover:bg-red-50 transition transform hover:scale-[1.02]"><i class="fas fa-undo mr-1"></i> Ajukan Retur Barang</button>`;
+                            btnReturHtml += `<button onclick="bukaModalRetur(${order.id})" class="mt-4 w-full py-2.5 bg-white text-red-500 text-xs font-extrabold rounded-xl border-2 border-red-100 hover:bg-red-50 transition transform hover:scale-[1.02] mb-2"><i class="fas fa-undo mr-1"></i> Ajukan Retur Barang</button>`;
                         } else if (order.status.includes('Retur')) {
-                            btnReturHtml = `<div class="mt-4 w-full py-2.5 bg-gray-50 text-gray-500 text-xs font-bold rounded-xl text-center border border-gray-200"><i class="fas fa-info-circle mr-1"></i> Status: ${order.status}</div>`;
+                            btnReturHtml += `<div class="mt-4 w-full py-2.5 bg-gray-50 text-gray-500 text-xs font-bold rounded-xl text-center border border-gray-200 mb-2"><i class="fas fa-info-circle mr-1"></i> Status: ${order.status}</div>`;
+                        }
+
+                        // Munculkan tombol Ulasan HANYA JIKA pesanan Selesai
+                        if (order.status === 'Selesai') {
+                            const idProdukSelesai = barangPertama.id || 0; 
+                            btnReturHtml += `<button onclick="bukaModalUlasan(${idProdukSelesai})" class="w-full py-2.5 bg-yellow-50 text-yellow-600 text-xs font-extrabold rounded-xl border-2 border-yellow-200 hover:bg-yellow-100 transition transform hover:scale-[1.02]"><i class="fas fa-star mr-1"></i> Beri Ulasan Produk</button>`;
                         }
 
                         containerRiwayat.innerHTML += `
@@ -528,6 +560,68 @@
                 showToast("Server Error saat upload video!", "error");
             } finally {
                 btn.innerHTML = "<i class='fas fa-paper-plane mr-1'></i> KIRIM PENGAJUAN RETUR";
+                btn.disabled = false;
+            }
+        });
+
+        // ==========================================
+        // ✅ FUNGSI BERI ULASAN DARI PEMBELI
+        // ==========================================
+        function bukaModalUlasan(id_produk) {
+            if(!id_produk || id_produk === 0) {
+                showToast("Data ID produk tidak ditemukan untuk pesanan lama ini.", "error");
+                return;
+            }
+            document.getElementById('ulasanProductId').value = id_produk;
+            document.getElementById('modalUlasan').style.display = 'flex';
+            pilihBintang(5); // Reset ke 5 bintang
+        }
+
+        function pilihBintang(jumlah) {
+            document.getElementById('ulasanRating').value = jumlah;
+            const stars = document.getElementById('starContainer').children;
+            for(let i=0; i<5; i++) {
+                if(i < jumlah) {
+                    stars[i].style.color = '#FFD700'; // Kuning Emas
+                    stars[i].className = 'fas fa-star';
+                } else {
+                    stars[i].style.color = '#ddd'; // Abu-abu
+                    stars[i].className = 'far fa-star'; // Bintang kosong
+                }
+            }
+        }
+
+        document.getElementById('formUlasan').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitUlasan');
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin mr-1'></i> Mengirim...";
+            btn.disabled = true;
+
+            const payload = {
+                product_id: document.getElementById('ulasanProductId').value,
+                rating: parseInt(document.getElementById('ulasanRating').value),
+                comment: document.getElementById('ulasanKomentar').value
+            };
+
+            try {
+                const res = await fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(payload) 
+                });
+                
+                const data = await res.json();
+                if(data.success) {
+                    showToast("Terima kasih! Ulasan berhasil dikirim 🌟", "success");
+                    document.getElementById('modalUlasan').style.display = 'none';
+                    document.getElementById('formUlasan').reset();
+                } else {
+                    showToast("Gagal: " + data.message, "error");
+                }
+            } catch(err) {
+                showToast("Server Error saat mengirim ulasan!", "error");
+            } finally {
+                btn.innerHTML = "<i class='fas fa-paper-plane mr-1'></i> KIRIM ULASAN";
                 btn.disabled = false;
             }
         });
