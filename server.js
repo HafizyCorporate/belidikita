@@ -184,7 +184,27 @@ app.post('/api/address', verifyToken, async (req, res) => {
     }
 });
 
-app.post('/api/products', verifyAdmin, upload.array('media', 5), uploadProduct);
+
+// ✅ UPLOAD CLOUDINARY: Rute ini menerima DNA Baru (Satuan & Varian)
+app.post('/api/products', verifyAdmin, upload.array('media', 5), async (req, res) => {
+    const { title, capital_price, price, stock, category, description, weight, unit, variant_title, variant_options } = req.body;
+    
+    try {
+        const mediaUrls = req.files ? req.files.map(f => f.path) : [];
+        const mediaJson = JSON.stringify(mediaUrls);
+        
+        await pool.query(
+            `INSERT INTO products (title, capital_price, price, stock, category, description, weight, media_url, media_type, unit, variant_title, variant_options) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'image', $9, $10, $11)`,
+            [title, capital_price || 0, price, stock || 0, category || 'biasa', description, weight || 1000, mediaJson, unit || 'Pcs', variant_title || '', variant_options || '']
+        );
+        res.json({ success: true, message: "Produk berhasil diupload!" });
+    } catch (err) {
+        console.error("🔥 Error Upload Produk:", err);
+        res.status(500).json({ success: false, message: "Gagal upload produk." });
+    }
+});
+
 app.post('/api/promos', verifyAdmin, upload.single('media'), uploadPromo); 
 app.post('/api/forum', verifyToken, createPost);
 
@@ -211,12 +231,16 @@ app.delete('/api/promos/:id', verifyAdmin, async (req, res) => {
     }
 });
 
+// ✅ EDIT PRODUK: Rute ini menerima DNA Baru (Satuan & Varian)
 app.put('/api/products/:id', verifyAdmin, async (req, res) => {
-    const { title, price, capital_price, stock, category, weight } = req.body;
+    const { title, price, capital_price, stock, category, weight, unit, variant_title, variant_options } = req.body;
     try {
         await pool.query(
-            'UPDATE products SET title=$1, price=$2, capital_price=$3, stock=$4, category=$5, weight=$6 WHERE id=$7',
-            [title, price, capital_price, stock, category, weight, req.params.id]
+            `UPDATE products SET 
+                title=$1, price=$2, capital_price=$3, stock=$4, category=$5, weight=$6, 
+                unit=$7, variant_title=$8, variant_options=$9 
+             WHERE id=$10`,
+            [title, price, capital_price, stock, category, weight, unit || 'Pcs', variant_title || '', variant_options || '', req.params.id]
         );
         res.json({ success: true, message: "Produk berhasil diubah!" });
     } catch(err) { 
@@ -410,17 +434,14 @@ app.post('/api/admin/excel/aset', verifyAdmin, uploadExcel.single('file_excel'),
     try {
         if (!req.file) return res.status(400).json({ success: false, message: "File Excel tidak ditemukan!" });
 
-        // Baca file excel dari memori
         const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
-        const sheetName = workbook.SheetNames[0]; // Ambil sheet pertama
+        const sheetName = workbook.SheetNames[0]; 
         const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
         if (data.length === 0) return res.status(400).json({ success: false, message: "File Excel kosong!" });
 
         let berhasil = 0;
-        // Looping dan masukkan ke tabel internal_assets
         for (let row of data) {
-            // Asumsi header Excel: Kode_Aset, Nama_Aset, Kategori, Jumlah, Kondisi, Catatan
             const kode = row['Kode_Aset'] || '-';
             const nama = row['Nama_Aset'];
             const kategori = row['Kategori'] || 'Umum';
@@ -444,26 +465,10 @@ app.post('/api/admin/excel/aset', verifyAdmin, uploadExcel.single('file_excel'),
     }
 });
 
-// 2. Upload Excel Draft Persediaan (Barang Karantina)
+// ✅ 2. Upload Excel Draft Persediaan DENGAN DNA BARU
 app.post('/api/admin/excel/draft', verifyAdmin, uploadExcel.single('file_excel'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ success: false, message: "File Excel tidak ditemukan!" });
-
-        // Bikin tabel karantina dulu kalau belum ada
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS draft_products (
-                id SERIAL PRIMARY KEY,
-                title VARCHAR(200) NOT NULL,
-                description TEXT,
-                price DECIMAL(12,2) NOT NULL,
-                capital_price DECIMAL(12,2) DEFAULT 0,
-                stock INT DEFAULT 0,
-                category VARCHAR(50) DEFAULT 'biasa',
-                weight INT DEFAULT 1000,
-                status VARCHAR(20) DEFAULT 'Pending',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
 
         const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
@@ -473,7 +478,7 @@ app.post('/api/admin/excel/draft', verifyAdmin, uploadExcel.single('file_excel')
 
         let berhasil = 0;
         for (let row of data) {
-            // Asumsi header Excel: Nama_Barang, Harga_Modal, Harga_Jual, Stok, Kategori, Berat, Deskripsi
+            // Header Excel BARU: Nama_Barang, Harga_Modal, Harga_Jual, Stok, Kategori, Berat, Deskripsi, Satuan_Jual, Judul_Varian, Pilihan_Varian
             const nama = row['Nama_Barang'];
             const modal = parseFloat(row['Harga_Modal']) || 0;
             const jual = parseFloat(row['Harga_Jual']) || 0;
@@ -481,11 +486,18 @@ app.post('/api/admin/excel/draft', verifyAdmin, uploadExcel.single('file_excel')
             const kategori = row['Kategori'] || 'biasa';
             const berat = parseInt(row['Berat']) || 1000;
             const deskripsi = row['Deskripsi'] || 'Barang baru dari Excel.';
+            
+            // Tangkap DNA Varian & Satuan dari Excel
+            const satuan = row['Satuan_Jual'] || 'Pcs';
+            const judulVarian = row['Judul_Varian'] || '';
+            const pilihanVarian = row['Pilihan_Varian'] || '';
 
             if (nama && jual > 0) {
                 await pool.query(
-                    'INSERT INTO draft_products (title, capital_price, price, stock, category, weight, description) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-                    [nama, modal, jual, stok, kategori, berat, deskripsi]
+                    `INSERT INTO draft_products 
+                    (title, capital_price, price, stock, category, weight, description, unit, variant_title, variant_options) 
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+                    [nama, modal, jual, stok, kategori, berat, deskripsi, satuan, judulVarian, pilihanVarian]
                 );
                 berhasil++;
             }
@@ -499,7 +511,7 @@ app.post('/api/admin/excel/draft', verifyAdmin, uploadExcel.single('file_excel')
 });
 
 
-// 3. Lihat Daftar Aset Internal (Hanya untuk Admin)
+// 3. Lihat Daftar Aset Internal
 app.get('/api/admin/excel/aset', verifyAdmin, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM internal_assets ORDER BY created_at DESC');
@@ -509,10 +521,9 @@ app.get('/api/admin/excel/aset', verifyAdmin, async (req, res) => {
     }
 });
 
-// 4. Lihat Daftar Draft Persediaan (Ruang Karantina)
+// 4. Lihat Daftar Draft Persediaan
 app.get('/api/admin/excel/draft', verifyAdmin, async (req, res) => {
     try {
-        // Hanya tampilkan yang statusnya masih 'Pending'
         const result = await pool.query("SELECT * FROM draft_products WHERE status = 'Pending' ORDER BY created_at DESC");
         res.json({ success: true, data: result.rows });
     } catch (err) { 
@@ -520,25 +531,23 @@ app.get('/api/admin/excel/draft', verifyAdmin, async (req, res) => {
     }
 });
 
-
-// 5. Super Admin ACC Barang (Pindah dari Draft ke Products)
+// ✅ 5. Super Admin ACC Barang DENGAN DNA BARU
 app.post('/api/admin/excel/draft/approve/:id', verifyAdmin, async (req, res) => {
     try {
         const draftId = req.params.id;
         
-        // 1. Cari barang di tabel draft
         const cekDraft = await pool.query('SELECT * FROM draft_products WHERE id = $1', [draftId]);
         if (cekDraft.rows.length === 0) return res.status(404).json({ success: false, message: "Data draft tidak ditemukan!" });
         
         const barang = cekDraft.rows[0];
 
-        // 2. Suntikkan ke tabel products utama (tanpa foto dulu, biarkan kosong / null)
+        // Suntikkan ke tabel products utama (Membawa unit dan variannya)
         await pool.query(
-            'INSERT INTO products (title, capital_price, price, stock, category, weight, description) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-            [barang.title, barang.capital_price, barang.price, barang.stock, barang.category, barang.weight, barang.description]
+            `INSERT INTO products (title, capital_price, price, stock, category, weight, description, unit, variant_title, variant_options) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+            [barang.title, barang.capital_price, barang.price, barang.stock, barang.category, barang.weight, barang.description, barang.unit, barang.variant_title, barang.variant_options]
         );
 
-        // 3. Ubah status di tabel draft menjadi 'Approved'
         await pool.query("UPDATE draft_products SET status = 'Approved' WHERE id = $1", [draftId]);
 
         res.json({ success: true, message: "Barang berhasil dilempar ke Etalase Toko!" });
