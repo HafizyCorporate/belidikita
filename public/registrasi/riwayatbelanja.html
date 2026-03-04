@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Riwayat Belanja - Belidikita</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,800" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['Montserrat', 'sans-serif'] }, colors: { brand: '#0D47A1', accent: '#00AA5B', light: '#E1F5FE' } } }
+        }
+    </script>
+    <style>
+        body { background: #f4f7fa; padding-bottom: 80px; }
+        .glass-card { background: #fff; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 15px; padding: 16px; border: 1px solid #eee;}
+        
+        /* Animasi Modern */
+        @keyframes fadeUp { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeUp 0.4s ease forwards; }
+
+        /* Toast Modern */
+        #customToast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 25px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; font-size: 13px; font-weight: 600; transition: opacity 0.3s, bottom 0.3s; opacity: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.2);}
+        #customToast.show { visibility: visible; opacity: 1; bottom: 50px; }
+        #customToast.success { background-color: #00AA5B; }
+        #customToast.error { background-color: #ff3b30; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="fixed top-0 left-0 w-full z-50 bg-white shadow-sm">
+        <div class="max-w-md mx-auto px-5 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <button onclick="window.history.back()" class="w-8 h-8 rounded-full bg-light text-brand flex justify-center items-center hover:scale-105 transition">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h1 class="text-lg font-extrabold text-brand">Riwayat Belanja</h1>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-md mx-auto pt-20 px-4" id="containerRiwayat">
+        <div class="text-center py-20">
+            <i class="fas fa-spinner fa-spin text-brand text-4xl mb-3"></i>
+            <p class="text-xs font-bold text-gray-500">Mencari data pesananmu...</p>
+        </div>
+    </main>
+
+    <div id="modalRetur" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); align-items:center; justify-content:center; padding: 20px;">
+        <div style="background:#fff; padding:20px; border-radius:15px; width:100%; max-width:400px; position:relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <span onclick="document.getElementById('modalRetur').style.display='none'" style="position:absolute; right:20px; top:15px; font-size:24px; cursor:pointer; color:#888;">&times;</span>
+            <h2 style="color:#ff3b30; font-size:18px; margin-bottom:15px; font-weight:800;"><i class="fas fa-box-open"></i> Ajukan Retur Barang</h2>
+            
+            <div style="background:#FFFDE7; border-left:4px solid #FBC02D; padding:10px; font-size:11px; margin-bottom:15px; border-radius:6px;">
+                <b style="color:#E65100;">SYARAT WAJIB:</b><br>Harap lampirkan foto/video UNBOXING paket dari sebelum kardus/lakban dibuka tanpa jeda!
+            </div>
+
+            <form id="formRetur">
+                <input type="hidden" id="returOrderId">
+                <div style="margin-bottom:15px;">
+                    <label style="font-size:12px; font-weight:bold; color:#555;">Alasan Retur / Kerusakan</label>
+                    <textarea id="returReason" rows="3" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; outline:none; font-family:'Montserrat', sans-serif; font-size:12px;" placeholder="Jelaskan detail kerusakannya..." required></textarea>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <label style="font-size:12px; font-weight:bold; color:#555;">Upload Video/Foto Unboxing</label>
+                    <input type="file" id="returProof" accept="video/*, image/*" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:8px; font-size:12px;" required>
+                </div>
+                <button type="submit" id="btnSubmitRetur" style="width:100%; padding:12px; background:#ff3b30; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; font-family:'Montserrat', sans-serif;"><i class="fas fa-paper-plane mr-1"></i> Kirim Pengajuan</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="customToast"></div>
+
+    <script>
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById("customToast");
+            toast.innerText = msg;
+            toast.className = type + " show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            showToast("Silakan login terlebih dahulu", "error");
+            setTimeout(() => window.location.href = 'loginpembeli.html', 1500); 
+        }
+
+        function salinResi(resi) {
+            navigator.clipboard.writeText(resi);
+            showToast("Resi " + resi + " berhasil disalin!", "success");
+        }
+
+        // ==========================================
+        // ✅ TARIK DATA PESANAN DARI DATABASE
+        // ==========================================
+        async function loadRiwayatPesanan() {
+            const containerRiwayat = document.getElementById('containerRiwayat');
+            try {
+                const res = await fetch('/api/orders/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+
+                if(result.success && result.data.length > 0) {
+                    containerRiwayat.innerHTML = ''; 
+
+                    result.data.forEach((order, index) => {
+                        let items = [];
+                        try { items = JSON.parse(order.items); } catch(e) {}
+                        
+                        const barangPertama = items.length > 0 ? items[0] : { foto: 'https://via.placeholder.com/150', nama: 'Barang', qty: 1 };
+                        const sisaBarang = items.length > 1 ? ` + ${items.length - 1} barang lainnya` : '';
+                        
+                        // Set Warna Label Status
+                        let statusColor = "bg-yellow-100 text-yellow-700";
+                        if(order.status === 'Diproses') statusColor = "bg-blue-100 text-blue-700";
+                        if(order.status === 'Dikirim') statusColor = "bg-purple-100 text-purple-700";
+                        if(order.status === 'Selesai') statusColor = "bg-green-100 text-green-700";
+                        if(order.status.includes('Retur')) statusColor = "bg-red-100 text-red-700 font-extrabold";
+
+                        const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
+
+                        // ✅ LOGIKA MUNCULNYA TOMBOL RETUR
+                        let btnReturHtml = '';
+                        if ((order.status === 'Dikirim' || order.status === 'Selesai') && !order.status.includes('Retur')) {
+                            btnReturHtml = `<button onclick="bukaModalRetur(${order.id})" class="mt-4 w-full py-2.5 bg-white text-red-500 text-xs font-extrabold rounded-xl border-2 border-red-100 hover:bg-red-50 transition shadow-sm"><i class="fas fa-undo mr-1"></i> Ajukan Retur Barang</button>`;
+                        } else if (order.status.includes('Retur')) {
+                            btnReturHtml = `<div class="mt-4 w-full py-2.5 bg-gray-100 text-gray-500 text-xs font-bold rounded-xl text-center"><i class="fas fa-info-circle mr-1"></i> Status: ${order.status}</div>`;
+                        }
+
+                        // Efek muncul berurutan
+                        const delay = index * 0.1;
+
+                        containerRiwayat.innerHTML += `
+                            <div class="glass-card animate-fade-up" style="animation-delay: ${delay}s;">
+                                <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-3">
+                                    <span class="text-xs font-bold text-gray-500"><i class="fas fa-store text-brand mr-1"></i> Belidikita Official</span>
+                                    <span class="text-[10px] font-extrabold ${statusColor} px-2 py-1 rounded uppercase tracking-wide">${order.status}</span>
+                                </div>
+                                
+                                <div class="flex gap-3 items-center mb-3">
+                                    <div class="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 border border-gray-100 p-1">
+                                        <img src="${barangPertama.foto}" class="w-full h-full object-cover rounded-md" alt="Barang">
+                                    </div>
+                                    <div class="flex-grow">
+                                        <h4 class="text-sm font-bold text-gray-800 line-clamp-1">${barangPertama.nama}</h4>
+                                        <p class="text-[11px] text-gray-500 mt-1">${barangPertama.qty} Barang ${sisaBarang}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-gray-50 rounded-lg p-3 border border-gray-100 mb-3">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <p class="text-[11px] text-gray-500 font-semibold">Kurir: <span class="text-brand">${order.shipping_courier}</span></p>
+                                        <button onclick="hapusPesananKu(${order.id})" class="text-red-400 hover:text-red-600 text-[11px] font-bold"><i class="fas fa-trash-alt"></i> Hapus Riwayat</button>
+                                    </div>
+                                    <div class="text-xs font-extrabold text-gray-800 flex justify-between items-center mt-2">
+                                        <span>Resi: ${order.resi}</span>
+                                        ${order.resi !== '-' ? `<button onclick="salinResi('${order.resi}')" class="text-brand text-[10px] bg-blue-100 px-2 py-1 rounded hover:bg-blue-200"><i class="fas fa-copy"></i> Salin</button>` : ''}
+                                    </div>
+                                </div>
+                                
+                                <div class="flex justify-between items-center border-t border-gray-100 pt-3">
+                                    <span class="text-xs font-semibold text-gray-500">Total Belanja</span>
+                                    <span class="text-base font-extrabold text-orange-500">${formatRp}</span>
+                                </div>
+                                
+                                ${btnReturHtml}
+                            </div>
+                        `;
+                    });
+                } else {
+                    containerRiwayat.innerHTML = `
+                        <div class="text-center py-20 opacity-60">
+                            <i class="fas fa-shopping-bag text-5xl mb-4 text-gray-300"></i>
+                            <p class="text-sm font-bold text-gray-600">Belum ada riwayat belanja.</p>
+                            <a href="../dashboardutama.html" class="mt-4 inline-block bg-brand text-white text-xs font-bold px-5 py-2 rounded-full">Mulai Belanja</a>
+                        </div>
+                    `;
+                }
+            } catch (err) { 
+                containerRiwayat.innerHTML = '<p class="text-center text-red-500 font-bold mt-10">Gagal memuat pesanan dari server.</p>';
+            }
+        }
+        loadRiwayatPesanan();
+
+        // ==========================================
+        // ✅ FUNGSI HAPUS (Soft Delete)
+        // ==========================================
+        async function hapusPesananKu(id) {
+            if(!confirm("Yakin ingin membersihkan pesanan ini dari riwayatmu? (Admin tetap bisa melihatnya di sistem)")) return;
+            try {
+                const res = await fetch(`/api/orders/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                if(data.success) { showToast("Riwayat dibersihkan!", "success"); loadRiwayatPesanan(); }
+                else { showToast(data.message, "error"); }
+            } catch(e) { showToast("Gagal menghapus pesanan", "error"); }
+        }
+
+        // ==========================================
+        // ✅ FUNGSI PENGAJUAN RETUR DENGAN FILE
+        // ==========================================
+        function bukaModalRetur(id_pesanan) {
+            document.getElementById('returOrderId').value = id_pesanan;
+            document.getElementById('modalRetur').style.display = 'flex';
+        }
+
+        document.getElementById('formRetur').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitRetur');
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengupload Video...";
+            btn.disabled = true;
+
+            const id_pesanan = document.getElementById('returOrderId').value;
+            
+            // Gunakan FormData karena ada file yang diupload
+            const formData = new FormData();
+            formData.append('reason', document.getElementById('returReason').value);
+            formData.append('proof', document.getElementById('returProof').files[0]);
+
+            try {
+                const res = await fetch(`/api/orders/${id_pesanan}/return`, {
+                    method: 'PUT',
+                    headers: { 'Authorization': `Bearer ${token}` }, // Token saja, FormData otomatis mengatur Content-Type
+                    body: formData
+                });
+                
+                const data = await res.json();
+                if(data.success) {
+                    showToast("Pengajuan retur terkirim ke Admin!", "success");
+                    document.getElementById('modalRetur').style.display = 'none';
+                    document.getElementById('formRetur').reset();
+                    loadRiwayatPesanan(); // Refresh layar
+                } else { 
+                    showToast("Gagal: " + data.message, "error"); 
+                }
+            } catch(err) { 
+                showToast("Server Error saat upload file!", "error"); 
+            } finally { 
+                btn.innerHTML = "<i class='fas fa-paper-plane mr-1'></i> Kirim Pengajuan"; 
+                btn.disabled = false; 
+            }
+        });
+    </script>
+</body>
+</html>
