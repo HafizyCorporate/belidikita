@@ -40,8 +40,11 @@
         <div class="glass p-6 rounded-3xl mb-8 shadow-2xl bouncy-hover border-emerald-500/30">
             <h2 class="text-xl font-extrabold mb-4 text-emerald-300"><i class="fas fa-file-excel mr-2"></i> Import Excel Barang Dagangan</h2>
             <div class="bg-slate-900/60 border-l-4 border-emerald-400 p-4 rounded-lg mb-5">
-                <p class="text-xs text-gray-300 mb-2"><b>Format Header (Baris 1) WAJIB SAMA PERSIS:</b></p>
-                <code class="bg-black/50 p-2 rounded text-emerald-300 text-[10px] block">Nama_Barang | Harga_Modal | Harga_Jual | Stok | Kategori | Berat | Deskripsi</code>
+                <p class="text-xs text-gray-300 mb-2"><b>Format Header (Baris 1) WAJIB SAMA PERSIS DENGAN TAMBAHAN VARIAN:</b></p>
+                <code class="bg-black/50 p-2 rounded text-emerald-300 text-[10px] block leading-relaxed">
+                    Nama_Barang | Harga_Modal | Harga_Jual | Stok | Kategori | Berat | Deskripsi | Satuan_Jual | Judul_Varian | Pilihan_Varian
+                </code>
+                <p class="text-[10px] text-gray-400 mt-2"><i class="fas fa-lightbulb text-yellow-400"></i> Tips: Kosongkan Judul_Varian dan Pilihan_Varian di file Excel jika barang tidak punya pilihan ukuran/jenis.</p>
             </div>
             <form id="formUploadDraft" class="flex flex-col md:flex-row gap-4 items-center">
                 <input type="file" id="fileExcelDraft" accept=".xlsx, .xls" required class="flex-1 w-full text-sm text-gray-300 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-extrabold file:bg-emerald-500 file:text-slate-900 hover:file:bg-emerald-400 cursor-pointer bg-slate-800 rounded-xl border border-slate-700">
@@ -58,7 +61,7 @@
                     <thead>
                         <tr class="bg-slate-800 text-emerald-400 text-sm">
                             <th class="p-4 rounded-tl-xl">Kategori</th>
-                            <th class="p-4">Nama Barang</th>
+                            <th class="p-4">Nama Barang & Varian</th>
                             <th class="p-4">Stok & Berat</th>
                             <th class="p-4">Harga Jual</th>
                             <th class="p-4 text-center rounded-tr-xl">Status</th>
@@ -98,12 +101,18 @@
                     result.data.forEach(item => {
                         const hargaRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.price);
                         
+                        // Logika Tampilan Varian di Tabel
+                        let badgeVarian = '';
+                        if (item.variant_options) {
+                            badgeVarian = `<br><span class="inline-block mt-1 text-[9px] bg-emerald-900/40 text-emerald-300 px-2 py-0.5 rounded border border-emerald-700"><i class="fas fa-tags"></i> Varian: ${item.variant_options}</span>`;
+                        }
+
                         tbody.innerHTML += `
                             <tr class="hover:bg-white/5 transition">
                                 <td class="p-4"><span class="bg-slate-700 text-emerald-300 px-3 py-1 rounded-full text-[10px] font-bold border border-emerald-700 uppercase">${item.category}</span></td>
-                                <td class="p-4 font-extrabold text-white max-w-[200px] truncate" title="${item.title}">${item.title}</td>
+                                <td class="p-4 font-extrabold text-white max-w-[200px] truncate" title="${item.title}">${item.title} ${badgeVarian}</td>
                                 <td class="p-4 font-bold text-gray-400"><i class="fas fa-box text-emerald-500 mr-1"></i> ${item.stock} <span class="mx-2 text-slate-600">|</span> <i class="fas fa-weight-hanging text-emerald-500 mr-1"></i> ${item.weight}g</td>
-                                <td class="p-4 font-bold text-yellow-400">${hargaRp}</td>
+                                <td class="p-4 font-bold text-yellow-400">${hargaRp} <span class="text-xs text-gray-400">/ ${item.unit || 'Pcs'}</span></td>
                                 <td class="p-4 text-center"><span class="px-3 py-1 rounded-full text-xs font-bold text-orange-400 bg-orange-900/30 border border-orange-500/50"><i class="fas fa-clock mr-1"></i> ${item.status}</span></td>
                             </tr>
                         `;
