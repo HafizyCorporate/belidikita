@@ -47,21 +47,34 @@
         .sub-cat-item:active { transform: scale(0.97); background: #E1F5FE; border-color: #81D4FA; color: #0D47A1; }
         .sub-cat-item i { color: #FF9800; font-size: 14px;}
 
-        /* ✅ CSS PERBAIKAN: KARTU PRODUK SAMA TINGGI */
-        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 0 15px 15px 15px; }
-        .product-card { background: #fff; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; border: 1px solid #f0f4f8;}
-        .product-media { width: 100%; height: 160px; object-fit: cover; border-bottom: 1px solid #f0f4f8; } /* Paksa tinggi gambar sama */
+        /* KARTU PRODUK SAMA TINGGI & RAPI */
+        .horizontal-scroll { display: flex; gap: 15px; overflow-x: auto; padding: 0 15px 15px 15px; scroll-snap-type: x mandatory; align-items: stretch; }
+        .horizontal-scroll::-webkit-scrollbar { display: none; }
+        
+        .h-card { min-width: 140px; background: #fff; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); scroll-snap-align: start; display: flex; flex-direction: column; position: relative; border: 1px solid #f0f4f8;}
+        .h-card-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-bottom: 1px solid #f0f4f8; } 
+        .h-card-info { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; }
+        .h-card-title { font-size: 11px; font-weight: 700; color: #0D47A1; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;}
+        .h-card-price { color: #ff9800; font-weight: 800; font-size: 13px; }
+        .h-card-stats { display: flex; justify-content: space-between; font-size: 9px; color: #888; font-weight: 600; margin-top: auto; padding-top: 8px; align-items: center;}
+
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 0 15px 15px 15px; align-items: stretch; }
+        .product-card { background: #fff; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; border: 1px solid #f0f4f8; position: relative;}
+        .product-media { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-bottom: 1px solid #f0f4f8; } 
         .product-info { padding: 12px; display: flex; flex-direction: column; flex-grow: 1; }
         .product-title { font-size: 12px; font-weight: 700; color: #0D47A1; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;}
-        .product-price { color: #ff9800; font-weight: 800; font-size: 14px; margin-bottom: 10px; }
-        .product-stats { display: flex; justify-content: space-between; font-size: 10px; color: #888; font-weight: 600; margin-top: auto; align-items: center;} /* margin-top:auto mendorong ke paling bawah */
+        .product-price { color: #ff9800; font-weight: 800; font-size: 14px; }
+        .product-stats { display: flex; justify-content: space-between; font-size: 10px; color: #888; font-weight: 600; margin-top: auto; padding-top: 10px; align-items: center;}
 
-        /* ✅ CSS HALAMAN BARU UNTUK KATEGORI (FULLSCREEN) */
-        #katalogLayarPenuh { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7fa; z-index: 5000; overflow-y: auto; display: none; flex-direction: column; animation: slideInRight 0.3s ease; }
+        /* HALAMAN BARU UNTUK KATEGORI & PESANAN (FULLSCREEN) */
+        .layar-penuh { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7fa; z-index: 5000; overflow-y: auto; display: none; flex-direction: column; animation: slideInRight 0.3s ease; }
         @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
         .katalog-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .katalog-header i { font-size: 20px; color: #0D47A1; cursor: pointer; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: #E1F5FE; border-radius: 50%;}
         .katalog-header h2 { font-size: 16px; font-weight: 800; color: #0D47A1; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Animasi Jantung Berdetak untuk Rayuan Login */
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         
     </style>
 </head>
@@ -140,7 +153,7 @@
         <div style="height: 90px;"></div>
     </main>
 
-    <div id="katalogLayarPenuh">
+    <div id="katalogLayarPenuh" class="layar-penuh">
         <div class="katalog-header">
             <i class="fas fa-arrow-left" onclick="tutupHalamanKategori()"></i>
             <h2 id="judulHalamanKategori">Hasil Pencarian</h2>
@@ -149,9 +162,17 @@
             </div>
     </div>
 
+    <div id="pesananLayarPenuh" class="layar-penuh">
+        <div class="katalog-header">
+            <i class="fas fa-arrow-left" onclick="tutupHalamanPesanan()"></i>
+            <h2>Pesanan Saya</h2>
+        </div>
+        <div id="kontenPesananLayar" style="padding: 15px;">
+            </div>
+    </div>
+
     <nav id="bottomNav" class="hidden">
         <a href="#" class="nav-item active" id="menuHome"><i class="fas fa-mosque"></i><span>Beranda</span></a>
-        <a href="#" class="nav-item" id="menuProduct"><i class="fas fa-box-open"></i><span>Katalog</span></a>
         <a href="#" class="nav-item" id="menuFeed"><i class="fas fa-play-circle"></i><span>Video</span></a>
         <a href="#" class="nav-item" id="menuTransaction"><i class="fas fa-receipt"></i><span>Pesanan</span></a>
         <a href="#" class="nav-item" id="menuAccount"><i class="fas fa-user"></i><span>Akun</span></a>
@@ -209,13 +230,11 @@
             document.body.style.overflow = 'auto'; 
         }
 
-        // ✅ TUTUP HALAMAN KATEGORI (KEMBALI KE BERANDA)
         function tutupHalamanKategori() {
             document.getElementById('katalogLayarPenuh').style.display = 'none';
             document.body.style.overflow = 'auto'; 
         }
 
-        // ✅ LOGIKA BARU: BUKA DI "HALAMAN BARU" (FULLSCREEN) DENGAN UKURAN KOTAK RAPI
         async function saringProdukLangsung(mainCat, subCat) {
             tutupSubKategori();
             
@@ -224,9 +243,8 @@
             const containerGrid = document.getElementById('gridHasilKategori');
             const teksPencarian = subCat === 'Semua' ? mainCat : subCat;
 
-            // Buka halaman baru
             layarPenuh.style.display = 'flex';
-            document.body.style.overflow = 'hidden'; // Kunci scroll di belakang
+            document.body.style.overflow = 'hidden'; 
             judulHalaman.innerText = teksPencarian;
             containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:#0D47A1; grid-column:span 2; padding: 50px 20px; font-weight:bold;"><i class="fas fa-spinner fa-spin mr-2"></i> Mencari barang...</p>';
 
@@ -261,6 +279,8 @@
                             const mediaTag = isVideo ? `<video src="${fotoBarang}" class="product-media"></video>` : `<img src="${fotoBarang}" class="product-media" alt="${product.title}">`;
                             
                             const terjual = product.sold_count || 0; 
+                            const avgRating = parseFloat(product.avg_rating) || 0;
+                            const ratingHtml = avgRating > 0 ? `<i class="fas fa-star" style="color:#FFD700;"></i> ${avgRating}` : `<i class="fas fa-star" style="color:#ccc;"></i> 0.0`;
 
                             const prodObj = {
                                 id: product.id, foto: fotoUtama, nama: product.title, 
@@ -280,7 +300,6 @@
                                 labelGrosir = `<div style="position:absolute; top:5px; left:5px; background:#4CAF50; color:#fff; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;"><i class="fas fa-tags"></i> GROSIR</div>`;
                             }
 
-                            // KOTAK KATEGORI (TINGGI SAMA)
                             containerGrid.innerHTML += `
                                 <div class="product-card" onclick="bukaDetailGlobal('${strObj}')" style="position:relative;">
                                     ${labelGrosir}
@@ -289,7 +308,7 @@
                                         <div class="product-title">${product.title}</div>
                                         <div class="product-price">${priceRp}</div>
                                         <div class="product-stats">
-                                            <span><i class="fas fa-star" style="color:#FFD700;"></i> 4.9</span>
+                                            <span>${ratingHtml}</span>
                                             <span>${terjual} Terjual</span>
                                         </div>
                                     </div>
