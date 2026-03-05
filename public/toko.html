@@ -260,13 +260,12 @@
         }
 
         // ==================================================
-        // ✅ 1. SISTEM FOLLOWER REAL-TIME (LOCAL STORAGE)
+        // 1. SISTEM FOLLOWER REAL-TIME (LOCAL STORAGE)
         // ==================================================
         let followerCount = parseInt(localStorage.getItem('belidikita_store_followers')) || 12000;
         let isFollowing = localStorage.getItem('belidikita_is_following') === 'true';
 
         function updateFollowerUI() {
-            // Format angka (misal 12500 -> 12.5RB)
             let displayFol = followerCount >= 1000 ? (followerCount / 1000).toFixed(1).replace('.0','') + 'RB' : followerCount;
             document.getElementById('displayFollowers').innerText = displayFol;
 
@@ -280,7 +279,6 @@
             }
         }
         
-        // Panggil saat web dimuat
         updateFollowerUI();
 
         function followToko() {
@@ -293,14 +291,13 @@
                 isFollowing = true;
                 showToast("Berhasil mengikuti toko!", "success");
             }
-            // Simpan aksi nyata
             localStorage.setItem('belidikita_store_followers', followerCount);
             localStorage.setItem('belidikita_is_following', isFollowing);
             updateFollowerUI();
         }
 
         // ==================================================
-        // ✅ 2. SETTING TOKO (NAMA, KOTA, ALAMAT LENGKAP, FILE LOGO)
+        // 2. SETTING TOKO (NAMA, KOTA, ALAMAT LENGKAP, FILE LOGO)
         // ==================================================
         const btnSetting = document.getElementById('btnSettingToko');
         const modalSetting = document.getElementById('modalSettingToko');
@@ -324,28 +321,54 @@
 
         closeSetting.addEventListener('click', () => modalSetting.style.display = 'none');
 
-        // Simpan Perubahan Setting (Termasuk Convert Foto ke Base64)
+        // ✅ LOGIKA BARU: KOMPRESI GAMBAR AGAR TIDAK ERROR "QUOTA EXCEEDED"
         formSetting.addEventListener('submit', (e) => {
             e.preventDefault();
-            
+            const btn = document.querySelector('.btn-save-store');
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
+
             const fileInput = document.getElementById('inputStoreLogoFile');
             const savedData = JSON.parse(localStorage.getItem('belidikita_store_profile')) || {};
             let logoBase64 = savedData.logo; // Pakai yang lama jika tidak upload baru
 
             // Jika admin memilih file gambar baru
             if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
                 const reader = new FileReader();
+
                 reader.onload = function(e) {
-                    logoBase64 = e.target.result; // Hasil convert file ke Base64
-                    simpanDataKeLokal(logoBase64);
+                    // MENGECILKAN FOTO OTOMATIS MENGGUNAKAN CANVAS
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 400; // Perkecil jadi 400px (Cukup untuk logo)
+                        const scaleSize = MAX_WIDTH / img.width;
+                        
+                        // Kalau gambar aslinya sudah kecil, biarkan ukurannya
+                        if(img.width < MAX_WIDTH) {
+                            canvas.width = img.width;
+                            canvas.height = img.height;
+                        } else {
+                            canvas.width = MAX_WIDTH;
+                            canvas.height = img.height * scaleSize;
+                        }
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        // Ubah jadi format JPG dengan kualitas 70% agar super ringan!
+                        logoBase64 = canvas.toDataURL('image/jpeg', 0.7); 
+                        simpanDataKeLokal(logoBase64, btn);
+                    }
+                    img.src = e.target.result;
                 };
-                reader.readAsDataURL(fileInput.files[0]);
+                reader.readAsDataURL(file);
             } else {
-                simpanDataKeLokal(logoBase64);
+                simpanDataKeLokal(logoBase64, btn);
             }
         });
 
-        function simpanDataKeLokal(logoStr) {
+        function simpanDataKeLokal(logoStr, btnElem) {
             const newData = {
                 nama: document.getElementById('inputStoreName').value,
                 kota: document.getElementById('inputStoreCity').value,
@@ -353,10 +376,16 @@
                 logo: logoStr
             };
             
-            localStorage.setItem('belidikita_store_profile', JSON.stringify(newData));
-            renderStoreProfile();
-            modalSetting.style.display = 'none';
-            showToast("Profil & Alamat Kurir berhasil diperbarui!", "success");
+            try {
+                localStorage.setItem('belidikita_store_profile', JSON.stringify(newData));
+                renderStoreProfile();
+                modalSetting.style.display = 'none';
+                showToast("Profil & Alamat Kurir berhasil diperbarui!", "success");
+            } catch (error) {
+                showToast("Gagal! Foto masih terlalu besar, coba foto yang lain.", "error");
+            } finally {
+                btnElem.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan";
+            }
         }
 
         // Tampilkan Data Toko ke Layar Depan
@@ -364,7 +393,7 @@
             const savedData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
             if (savedData) {
                 document.getElementById('displayStoreName').innerText = savedData.nama;
-                document.getElementById('displayStoreCity').innerText = savedData.kota; // TAMPILAN DEPAN HANYA KOTA
+                document.getElementById('displayStoreCity').innerText = savedData.kota;
                 if (savedData.logo) {
                     document.getElementById('displayStoreAvatar').innerHTML = `<img src="${savedData.logo}" alt="Logo">`;
                 } else {
@@ -375,7 +404,7 @@
         renderStoreProfile();
 
         // ==================================================
-        // ✅ 3. VOUCHER KLIK
+        // 3. VOUCHER KLIK
         // ==================================================
         function klaimVoucher(kode) {
             navigator.clipboard.writeText(kode);
@@ -383,7 +412,7 @@
         }
 
         // ==================================================
-        // ✅ 4. DATA PRODUK REAL & KALKULASI RATING TOKO REAL
+        // 4. DATA PRODUK REAL & KALKULASI RATING TOKO REAL
         // ==================================================
         async function loadStoreProducts() {
             try {
@@ -396,12 +425,10 @@
                     
                     document.getElementById('totalStoreProducts').innerText = result.data.length;
 
-                    // Variabel untuk menghitung rata-rata bintang toko keseluruhan
                     let totalRatingKeseluruhan = 0;
                     let produkYangPunyaRating = 0;
 
                     result.data.forEach(p => {
-                        // Proses Foto
                         let arrFoto = [];
                         try { 
                             arrFoto = JSON.parse(p.media_url); 
@@ -419,12 +446,10 @@
                         };
                         const strObj = encodeURIComponent(JSON.stringify(prodObj));
 
-                        // 🔴 AMBIL BINTANG DAN TERJUAL REAL DARI DATABASE
                         const terjualReal = p.sold_count || 0; 
                         const ratingReal = parseFloat(p.avg_rating) || 0;
                         const tampilanRating = ratingReal > 0 ? ratingReal.toFixed(1) : "0.0";
 
-                        // Kumpulkan data rating untuk dihitung jadi rating toko
                         if (ratingReal > 0) {
                             totalRatingKeseluruhan += ratingReal;
                             produkYangPunyaRating++;
@@ -445,17 +470,13 @@
                         `;
                     });
 
-                    // 🔴 KALKULASI RATING TOKO REAL
                     let ratingTokoReal = "0.0";
                     if (produkYangPunyaRating > 0) {
                         ratingTokoReal = (totalRatingKeseluruhan / produkYangPunyaRating).toFixed(1);
                     } else {
-                        // Jika belum ada yg review sama sekali, bisa kasih nilai default tinggi agar toko tidak terlihat buruk
                         ratingTokoReal = "4.9"; 
                     }
                     document.getElementById('displayStoreRating').innerText = ratingTokoReal;
-
-                    // Chat Response Rate (Bisa dikalkulasi nanti dari DB Chats, sementara kita set nilai dinamis tinggi)
                     document.getElementById('displayChatReply').innerText = "98%";
 
                 } else {
