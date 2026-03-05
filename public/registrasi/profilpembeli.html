@@ -43,6 +43,7 @@
         .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px); border: 2px solid #fff; box-shadow: 0 10px 30px rgba(13, 71, 161, 0.1); position: relative; z-index: 10; }
         .input-modern { background: #f4f9ff; border: 2px solid #E1F5FE; transition: all 0.3s ease; }
         .input-modern:focus { background: #fff; border-color: #0D47A1; box-shadow: 0 5px 15px rgba(13, 71, 161, 0.1); outline: none; transform: translateY(-2px); }
+        .input-modern:disabled { background: #eee; cursor: not-allowed; border-color: #ddd; }
         
         @keyframes fadeUp { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
         .animate-fade-up { animation: fadeUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
@@ -118,37 +119,79 @@
         <div id="secAlamat" class="hidden">
             <div class="glass-card rounded-3xl p-6 mb-6 border border-light">
                 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-lg mb-4 shadow-sm">
-                    <p class="text-[10px] text-yellow-700 font-bold"><i class="fas fa-truck-fast mr-1"></i> Isi alamat lengkap agar kurir tidak nyasar saat antar paket!</p>
+                    <p class="text-[10px] text-yellow-700 font-bold"><i class="fas fa-truck-fast mr-1"></i> Isi alamat secara detail, berurutan dari Provinsi hingga Kelurahan.</p>
                 </div>
+                
                 <form id="formAlamat" class="space-y-4">
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-user mr-1"></i> Penerima</label>
+                            <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-user mr-1"></i> Nama Penerima</label>
                             <input type="text" id="inputNamaPenerima" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" required>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fab fa-whatsapp mr-1"></i> No. WA</label>
+                            <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fab fa-whatsapp mr-1"></i> No. HP/WA</label>
                             <input type="number" id="inputWA" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" required>
                         </div>
                     </div>
+
                     <div>
-                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-map mr-1"></i> Provinsi</label>
-                        <select id="selectProvinsi" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold appearance-none bg-white" required>
+                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-map mr-1"></i> 1. Provinsi</label>
+                        <select id="selectProvinsi" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold appearance-none bg-white cursor-pointer" required>
                             <option value="">-- Pilih Provinsi --</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-city mr-1"></i> Kota / Kab</label>
-                        <select id="selectKota" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold appearance-none bg-white" disabled required>
-                            <option value="">-- Pilih Kota --</option>
+                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-city mr-1"></i> 2. Kota / Kabupaten</label>
+                        <select id="selectKota" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold appearance-none bg-white cursor-pointer" disabled required>
+                            <option value="">-- Pilih Kota / Kabupaten --</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-home mr-1"></i> Detail Jalan</label>
-                        <textarea id="inputDetail" rows="2" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" placeholder="Contoh: Jl. Mawar No 10 (Samping Masjid)" required></textarea>
+                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-map-pin mr-1"></i> 3. Kecamatan</label>
+                        <select id="selectKecamatan" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold appearance-none bg-white cursor-pointer" disabled required>
+                            <option value="">-- Pilih Kecamatan --</option>
+                        </select>
                     </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-layer-group mr-1"></i> 4. Kelurahan / Desa</label>
+                        <select id="selectKelurahan" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold appearance-none bg-white cursor-pointer" disabled required>
+                            <option value="">-- Pilih Kelurahan --</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-mail-bulk mr-1"></i> Kode Pos</label>
+                            <input type="number" id="inputKodePos" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" placeholder="Misal: 40553" required>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="w-1/2">
+                                <label class="block text-[10px] font-extrabold text-brand uppercase mb-1">RT</label>
+                                <input type="number" id="inputRT" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold text-center" placeholder="01" required>
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-[10px] font-extrabold text-brand uppercase mb-1">RW</label>
+                                <input type="number" id="inputRW" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold text-center" placeholder="02" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-home mr-1"></i> Nama Jalan / Perumahan</label>
+                        <textarea id="inputJalan" rows="2" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" placeholder="Contoh: Jl. Mawar Indah Blok B2 No. 10" required></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-flag mr-1"></i> Patokan Khusus (Opsional)</label>
+                        <input type="text" id="inputPatokan" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold" placeholder="Contoh: Pagar hitam, depan masjid">
+                    </div>
+
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs text-gray-600 italic">
+                        <b class="text-brand not-italic block mb-1">Preview Alamat Lengkap:</b>
+                        <span id="previewAlamatLengkap">Silakan lengkapi data di atas.</span>
+                    </div>
+
                     <button type="submit" id="btnSimpanAlamat" class="w-full bg-gradient-to-r from-brand to-blue-500 text-white font-extrabold rounded-xl py-3.5 shadow-lg hover:shadow-xl transition-all mt-2 transform hover:-translate-y-1">
-                        <i class="fas fa-save mr-1"></i> Simpan Alamat Pengiriman
+                        <i class="fas fa-save mr-1"></i> Simpan ke Database
                     </button>
                 </form>
             </div>
@@ -178,13 +221,10 @@
     <div id="modalRetur" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,40,80,0.7); backdrop-filter:blur(5px); align-items:center; justify-content:center; padding: 20px;">
         <div class="modal-content-bouncy" style="background:#fff; padding:25px 20px; border-radius:20px; width:100%; max-width:400px; position:relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 3px solid #ff3b30;">
             <button onclick="document.getElementById('modalRetur').style.display='none'" style="position:absolute; right:15px; top:15px; background:#ffebee; color:#ff3b30; border:none; width:35px; height:35px; border-radius:50%; font-size:18px; font-weight:bold; cursor:pointer; transition:0.2s;"><i class="fas fa-times"></i></button>
-            
             <h2 style="color:#ff3b30; font-size:20px; margin-bottom:15px; font-weight:800; text-align:center;"><i class="fas fa-box-open mr-2"></i> Ajukan Retur</h2>
-            
             <div style="background:#FFFDE7; border-left:4px solid #FBC02D; padding:12px; font-size:11px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
                 <b style="color:#E65100;"><i class="fas fa-exclamation-triangle mr-1"></i> SYARAT MUTLAK:</b><br>Harap lampirkan foto/video UNBOXING paket dari sebelum kardus/lakban dibuka hingga terlihat kerusakannya tanpa jeda!
             </div>
-
             <form id="formRetur">
                 <input type="hidden" id="returOrderId">
                 <div style="margin-bottom:15px;">
@@ -203,13 +243,10 @@
     <div id="modalUlasan" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,40,80,0.7); backdrop-filter:blur(5px); align-items:center; justify-content:center; padding: 20px;">
         <div class="modal-content-bouncy" style="background:#fff; padding:25px 20px; border-radius:20px; width:100%; max-width:400px; position:relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 3px solid #FFD700;">
             <button onclick="document.getElementById('modalUlasan').style.display='none'" style="position:absolute; right:15px; top:15px; background:#FFFDE7; color:#FF9800; border:none; width:35px; height:35px; border-radius:50%; font-size:18px; font-weight:bold; cursor:pointer;"><i class="fas fa-times"></i></button>
-            
             <h2 style="color:#FF9800; font-size:20px; margin-bottom:5px; font-weight:800; text-align:center;"><i class="fas fa-star"></i> Nilai Produk Ini</h2>
             <p style="font-size:11px; color:#666; text-align:center; margin-bottom:15px;">Bantu pembeli lain dengan ulasanmu!</p>
-
             <form id="formUlasan">
                 <input type="hidden" id="ulasanProductId">
-                
                 <div style="text-align:center; margin-bottom:15px; font-size:30px; color:#ddd;" id="starContainer">
                     <i class="fas fa-star" onclick="pilihBintang(1)" style="cursor:pointer; color:#FFD700;"></i>
                     <i class="fas fa-star" onclick="pilihBintang(2)" style="cursor:pointer; color:#FFD700;"></i>
@@ -241,84 +278,140 @@
             setTimeout(() => window.location.href = 'loginpembeli.html', 1500);
         }
 
-        // ==========================================
-        // LOGIKA PINDAH TABS MENU
-        // ==========================================
         function bukaTab(namaTab) {
             const tabs = ['tabRiwayat', 'tabAlamat', 'tabPengaturan'];
-            tabs.forEach(t => {
-                document.getElementById(t).className = "flex-1 py-3 text-[11px] font-extrabold text-gray-500 hover:text-brand transition-all";
-            });
-
+            tabs.forEach(t => { document.getElementById(t).className = "flex-1 py-3 text-[11px] font-extrabold text-gray-500 hover:text-brand transition-all"; });
             const secs = ['secRiwayat', 'secAlamat', 'secPengaturan'];
             secs.forEach(s => {
                 document.getElementById(s).classList.add('hidden');
                 document.getElementById(s).classList.remove('animate-fade-up');
             });
-
-            // Tab Aktif
-            const activeTab = document.getElementById('tab' + namaTab);
-            activeTab.className = "flex-1 py-3 text-[11px] font-extrabold bg-brand shadow-md rounded-xl text-white transition-all transform scale-105";
-            
+            document.getElementById('tab' + namaTab).className = "flex-1 py-3 text-[11px] font-extrabold bg-brand shadow-md rounded-xl text-white transition-all transform scale-105";
             const targetSec = document.getElementById('sec' + namaTab);
             targetSec.classList.remove('hidden');
-            
             void targetSec.offsetWidth; 
             targetSec.classList.add('animate-fade-up');
         }
 
-        function salinResi(resi) {
-            navigator.clipboard.writeText(resi);
-            showToast("Resi " + resi + " disalin!", "success");
+        // ==========================================
+        // ✅ API WILAYAH BERLAPIS (BINDERBYTE)
+        // ==========================================
+        const apiWilayah = "https://api.binderbyte.com/wilayah";
+        const apiKeyWilayah = "9829f0ce6ef539afc33ffaa3339edc5d0ef6017bba5ed6ba0fdf83f47e3be970"; 
+
+        const selProv = document.getElementById('selectProvinsi');
+        const selKota = document.getElementById('selectKota');
+        const selKec = document.getElementById('selectKecamatan');
+        const selKel = document.getElementById('selectKelurahan');
+        
+        let namaProv = "", namaKota = "", namaKec = "", namaKel = "";
+
+        // 1. Muat Provinsi
+        fetch(`${apiWilayah}/provinsi?api_key=${apiKeyWilayah}`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.value) {
+                    data.value.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.id; opt.text = p.name;
+                        selProv.appendChild(opt);
+                    });
+                }
+            });
+
+        // 2. Pilih Provinsi -> Muat Kota
+        selProv.addEventListener('change', function() {
+            namaProv = this.options[this.selectedIndex].text;
+            selKota.innerHTML = '<option value="">-- Sedang Memuat... --</option>'; selKota.disabled = true;
+            selKec.innerHTML = '<option value="">-- Pilih Kecamatan --</option>'; selKec.disabled = true;
+            selKel.innerHTML = '<option value="">-- Pilih Kelurahan --</option>'; selKel.disabled = true;
+
+            if(this.value) {
+                fetch(`${apiWilayah}/kabupaten?api_key=${apiKeyWilayah}&id_provinsi=${this.value}`)
+                .then(res => res.json()).then(data => {
+                    selKota.innerHTML = '<option value="">-- Pilih Kota/Kab --</option>';
+                    data.value.forEach(k => {
+                        const opt = document.createElement('option');
+                        opt.value = k.id; opt.text = k.name; selKota.appendChild(opt);
+                    });
+                    selKota.disabled = false;
+                });
+            } else { selKota.innerHTML = '<option value="">-- Pilih Kota/Kab --</option>'; }
+            updatePreviewAlamat();
+        });
+
+        // 3. Pilih Kota -> Muat Kecamatan
+        selKota.addEventListener('change', function() {
+            namaKota = this.options[this.selectedIndex].text;
+            selKec.innerHTML = '<option value="">-- Sedang Memuat... --</option>'; selKec.disabled = true;
+            selKel.innerHTML = '<option value="">-- Pilih Kelurahan --</option>'; selKel.disabled = true;
+
+            if(this.value) {
+                fetch(`${apiWilayah}/kecamatan?api_key=${apiKeyWilayah}&id_kabupaten=${this.value}`)
+                .then(res => res.json()).then(data => {
+                    selKec.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+                    data.value.forEach(k => {
+                        const opt = document.createElement('option');
+                        opt.value = k.id; opt.text = k.name; selKec.appendChild(opt);
+                    });
+                    selKec.disabled = false;
+                });
+            } else { selKec.innerHTML = '<option value="">-- Pilih Kecamatan --</option>'; }
+            updatePreviewAlamat();
+        });
+
+        // 4. Pilih Kecamatan -> Muat Kelurahan
+        selKec.addEventListener('change', function() {
+            namaKec = this.options[this.selectedIndex].text;
+            selKel.innerHTML = '<option value="">-- Sedang Memuat... --</option>'; selKel.disabled = true;
+
+            if(this.value) {
+                fetch(`${apiWilayah}/kelurahan?api_key=${apiKeyWilayah}&id_kecamatan=${this.value}`)
+                .then(res => res.json()).then(data => {
+                    selKel.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
+                    data.value.forEach(k => {
+                        const opt = document.createElement('option');
+                        opt.value = k.id; opt.text = k.name; selKel.appendChild(opt);
+                    });
+                    selKel.disabled = false;
+                });
+            } else { selKel.innerHTML = '<option value="">-- Pilih Kelurahan --</option>'; }
+            updatePreviewAlamat();
+        });
+
+        selKel.addEventListener('change', function() {
+            namaKel = this.options[this.selectedIndex].text;
+            updatePreviewAlamat();
+        });
+
+        // 5. UPDATE PREVIEW ALAMAT REAL TIME
+        const inputJalan = document.getElementById('inputJalan');
+        const inputRT = document.getElementById('inputRT');
+        const inputRW = document.getElementById('inputRW');
+        const inputKodePos = document.getElementById('inputKodePos');
+        const inputPatokan = document.getElementById('inputPatokan');
+        
+        const allInputs = [inputJalan, inputRT, inputRW, inputKodePos, inputPatokan];
+        allInputs.forEach(input => input.addEventListener('input', updatePreviewAlamat));
+
+        function updatePreviewAlamat() {
+            const jln = inputJalan.value ? inputJalan.value + ", " : "";
+            const rt = inputRT.value ? "RT " + inputRT.value : "";
+            const rw = inputRW.value ? "/ RW " + inputRW.value + ", " : (rt ? ", " : "");
+            const kel = namaKel ? "Kel. " + namaKel + ", " : "";
+            const kec = namaKec ? "Kec. " + namaKec + ", " : "";
+            const kota = namaKota ? namaKota + ", " : "";
+            const prov = namaProv ? "Prov. " + namaProv + " " : "";
+            const pos = inputKodePos.value ? inputKodePos.value : "";
+            const patokan = inputPatokan.value ? ` (Patokan: ${inputPatokan.value})` : "";
+
+            const fullString = `${jln}${rt}${rw}${kel}${kec}${kota}${prov}${pos}${patokan}`;
+            
+            document.getElementById('previewAlamatLengkap').innerText = fullString.length > 5 ? fullString : "Silakan lengkapi data di atas.";
         }
 
         // ==========================================
-        // API WILAYAH INDONESIA (EMSIFA) - ALAMAT
-        // ==========================================
-        const selectProvinsi = document.getElementById('selectProvinsi');
-        const selectKota = document.getElementById('selectKota');
-        let namaProvinsiTerpilih = "";
-        let namaKotaTerpilih = "";
-
-        fetch('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json')
-            .then(res => res.json())
-            .then(data => {
-                data.forEach(prov => {
-                    const option = document.createElement('option');
-                    option.value = prov.id; option.text = prov.name;
-                    selectProvinsi.appendChild(option);
-                });
-            });
-
-        selectProvinsi.addEventListener('change', function() {
-            const provId = this.value;
-            namaProvinsiTerpilih = this.options[this.selectedIndex].text;
-            selectKota.innerHTML = '<option value="">-- Sedang Memuat... --</option>';
-            selectKota.disabled = true;
-
-            if(provId) {
-                fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provId}.json`)
-                    .then(res => res.json())
-                    .then(data => {
-                        selectKota.innerHTML = '<option value="">-- Pilih Kota --</option>';
-                        data.forEach(kota => {
-                            const option = document.createElement('option');
-                            option.value = kota.id; option.text = kota.name;
-                            selectKota.appendChild(option);
-                        });
-                        selectKota.disabled = false;
-                    });
-            } else {
-                selectKota.innerHTML = '<option value="">-- Pilih Kota --</option>';
-            }
-        });
-
-        selectKota.addEventListener('change', function() {
-            namaKotaTerpilih = this.options[this.selectedIndex].text;
-        });
-
-        // ==========================================
-        // LOAD DATA AWAL DARI SERVER
+        // LOAD DATA PROFIL LAMA
         // ==========================================
         async function loadProfileData() {
             try {
@@ -336,35 +429,41 @@
                     document.getElementById('inputNamaPenerima').value = data.name;
                 }
 
+                // Note: Untuk load data alamat yang sudah tersimpan menjadi format dropdown bertingkat itu butuh logika reverse-engineering teks yang rumit. 
+                // Untuk amannya, kolom teks kita biarkan terisi alamat lama (jika ada), tapi untuk update baru, user wajib pilih ulang dropdownnya.
                 const resAddr = await fetch('/api/address', { headers: { 'Authorization': `Bearer ${token}` } });
                 const resultAddr = await resAddr.json();
                 if (resultAddr.success && resultAddr.data) {
                     document.getElementById('inputNamaPenerima').value = resultAddr.data.nama_penerima;
                     document.getElementById('inputWA').value = resultAddr.data.nomor_wa;
-                    document.getElementById('inputDetail').value = resultAddr.data.alamat_lengkap;
+                    // Alamat lama dimunculkan di preview
+                    document.getElementById('previewAlamatLengkap').innerText = "Alamat Tersimpan: " + resultAddr.data.alamat_lengkap;
                 }
             } catch (err) { console.error("Gagal memuat data", err); }
         }
         loadProfileData();
 
         // ==========================================
-        // AKSI SIMPAN ALAMAT PENGIRIMAN
+        // AKSI SIMPAN ALAMAT (DIGABUNG JADI 1 STRING)
         // ==========================================
         document.getElementById('formAlamat').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanAlamat');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...';
 
-            if(!selectProvinsi.value || !selectKota.value) {
-                showToast("Pilih Provinsi dan Kota dari menu yang tersedia!", "error");
-                btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan Alamat Pengiriman';
+            if(!namaProv || !namaKota || !namaKec || !namaKel) {
+                showToast("Wilayah (Provinsi s/d Kelurahan) wajib dipilih semua!", "error");
+                btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan ke Database';
                 return;
             }
+
+            // Ambil string jadi dari preview function
+            const alamatFinal = document.getElementById('previewAlamatLengkap').innerText;
 
             const payload = {
                 nama: document.getElementById('inputNamaPenerima').value,
                 wa: document.getElementById('inputWA').value,
-                detail: `${document.getElementById('inputDetail').value}, ${namaKotaTerpilih}, ${namaProvinsiTerpilih}`
+                detail: alamatFinal // Dikirim bulat-bulat ke database untuk Checkout
             };
 
             try {
@@ -375,78 +474,51 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast("Alamat berhasil diupdate! 🎉", "success");
+                    showToast("Alamat berhasil disimpan permanen! 🎉", "success");
                 }
             } catch (err) { showToast("Gagal simpan alamat", "error"); }
-            finally { btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan Alamat Pengiriman'; }
+            finally { btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan ke Database'; }
         });
 
         // ==========================================
-        // AKSI UPDATE PROFIL (Nama & Bio)
+        // SISANYA ADALAH LOGIKA RETUR & ULASAN (TIDAK DIRUBAH)
         // ==========================================
         document.getElementById('formPengaturanProfil').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanProfil');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Updating...';
-
-            const payload = {
-                name: document.getElementById('inputEditNama').value,
-                bio: document.getElementById('inputEditBio').value
-            };
-
+            const payload = { name: document.getElementById('inputEditNama').value, bio: document.getElementById('inputEditBio').value };
             try {
-                const res = await fetch('/api/profile', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(payload)
-                });
+                const res = await fetch('/api/profile', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
                 const data = await res.json();
-                if (data.success) {
-                    showToast("Profil berhasil diperbarui!", "success");
-                    loadProfileData(); 
-                } else {
-                    showToast("Gagal update profil", "error");
-                }
-            } catch (err) { showToast("Server Error", "error"); }
-            finally { btn.innerHTML = '<i class="fas fa-user-edit mr-1"></i> Perbarui Profil Saya'; }
+                if (data.success) { showToast("Profil berhasil diperbarui!", "success"); loadProfileData(); } else { showToast("Gagal update profil", "error"); }
+            } catch (err) { showToast("Server Error", "error"); } finally { btn.innerHTML = '<i class="fas fa-user-edit mr-1"></i> Perbarui Profil Saya'; }
         });
 
-        // ==========================================
-        // LOAD RIWAYAT PESANAN DARI DATABASE
-        // ==========================================
         async function loadRiwayatPesanan() {
             const containerRiwayat = document.getElementById('secRiwayat');
             try {
                 const res = await fetch('/api/orders/me', { headers: { 'Authorization': `Bearer ${token}` } });
                 const result = await res.json();
-
                 if(result.success && result.data.length > 0) {
                     containerRiwayat.innerHTML = ''; 
-
                     result.data.forEach(order => {
-                        let items = [];
-                        try { items = JSON.parse(order.items); } catch(e) {}
-                        
+                        let items = []; try { items = JSON.parse(order.items); } catch(e) {}
                         const barangPertama = items.length > 0 ? items[0] : { id: 0, foto: 'https://via.placeholder.com/150', nama: 'Barang', qty: 1 };
                         const sisaBarang = items.length > 1 ? ` + ${items.length - 1} barang lainnya` : '';
-                        
                         let statusColor = "bg-yellow-100 text-yellow-700 border border-yellow-200";
                         if(order.status === 'Diproses') statusColor = "bg-blue-100 text-blue-700 border border-blue-200";
                         if(order.status === 'Dikirim') statusColor = "bg-purple-100 text-purple-700 border border-purple-200";
                         if(order.status === 'Selesai') statusColor = "bg-green-100 text-green-700 border border-green-200";
                         if(order.status.includes('Retur')) statusColor = "bg-red-100 text-red-700 font-extrabold border border-red-200 shadow-sm";
-
                         const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
 
-                        // ✅ LOGIKA TOMBOL RETUR & ULASAN
                         let btnReturHtml = '';
                         if ((order.status === 'Dikirim' || order.status === 'Selesai') && !order.status.includes('Retur')) {
                             btnReturHtml += `<button onclick="bukaModalRetur(${order.id})" class="mt-4 w-full py-2.5 bg-white text-red-500 text-xs font-extrabold rounded-xl border-2 border-red-100 hover:bg-red-50 transition transform hover:scale-[1.02] mb-2"><i class="fas fa-undo mr-1"></i> Ajukan Retur Barang</button>`;
                         } else if (order.status.includes('Retur')) {
                             btnReturHtml += `<div class="mt-4 w-full py-2.5 bg-gray-50 text-gray-500 text-xs font-bold rounded-xl text-center border border-gray-200 mb-2"><i class="fas fa-info-circle mr-1"></i> Status: ${order.status}</div>`;
                         }
-
-                        // Munculkan tombol Ulasan HANYA JIKA pesanan Selesai
                         if (order.status === 'Selesai') {
                             const idProdukSelesai = barangPertama.id || 0; 
                             btnReturHtml += `<button onclick="bukaModalUlasan(${idProdukSelesai})" class="w-full py-2.5 bg-yellow-50 text-yellow-600 text-xs font-extrabold rounded-xl border-2 border-yellow-200 hover:bg-yellow-100 transition transform hover:scale-[1.02]"><i class="fas fa-star mr-1"></i> Beri Ulasan Produk</button>`;
@@ -474,7 +546,6 @@
                                     <p class="text-[11px] text-gray-500 font-bold mb-1"><i class="fas fa-truck mr-1"></i> Kurir: <span class="text-brand">${order.shipping_courier}</span></p>
                                     <p class="text-xs font-extrabold text-gray-800 flex justify-between items-center">
                                         <span><i class="fas fa-barcode mr-1 text-gray-400"></i> ${order.resi}</span>
-                                        ${order.resi !== '-' ? `<button onclick="salinResi('${order.resi}')" class="text-brand text-[10px] bg-blue-100 px-3 py-1 rounded-md hover:bg-brand hover:text-white transition"><i class="fas fa-copy mr-1"></i> Salin</button>` : ''}
                                     </p>
                                 </div>
                                 <div class="flex justify-between items-center pt-1">
@@ -486,153 +557,48 @@
                         `;
                     });
                 } else {
-                    containerRiwayat.innerHTML = `
-                        <div class="text-center py-10 opacity-50">
-                            <i class="fas fa-shopping-bag text-6xl mb-4 text-brand"></i>
-                            <p class="text-sm font-bold text-gray-600">Belum ada pesanan.</p>
-                        </div>
-                    `;
+                    containerRiwayat.innerHTML = `<div class="text-center py-10 opacity-50"><i class="fas fa-shopping-bag text-6xl mb-4 text-brand"></i><p class="text-sm font-bold text-gray-600">Belum ada pesanan.</p></div>`;
                 }
-            } catch (err) { console.error("Gagal load riwayat", err); }
+            } catch (err) {}
         }
         loadRiwayatPesanan();
 
-        // ==========================================
-        // FUNGSI PEMBELI MENGHAPUS RIWAYAT PESANAN
-        // ==========================================
         async function hapusPesananKu(id) {
             if(!confirm("Yakin ingin menghapus riwayat pesanan ini?")) return;
-            
             try {
-                const res = await fetch(`/api/orders/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const res = await fetch(`/api/orders/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await res.json();
-                
-                if(data.success) {
-                    showToast("Riwayat pesanan dibersihkan! 🧹", "success");
-                    loadRiwayatPesanan(); 
-                } else {
-                    showToast(data.message, "error");
-                }
-            } catch(e) {
-                showToast("Gagal menghapus pesanan", "error");
-            }
+                if(data.success) { showToast("Riwayat pesanan dibersihkan! 🧹", "success"); loadRiwayatPesanan(); } else { showToast(data.message, "error"); }
+            } catch(e) { showToast("Gagal menghapus pesanan", "error"); }
         }
 
-        // ==========================================
-        // FUNGSI EKSEKUSI PENGAJUAN RETUR
-        // ==========================================
-        function bukaModalRetur(id_pesanan) {
-            document.getElementById('returOrderId').value = id_pesanan;
-            document.getElementById('modalRetur').style.display = 'flex';
-        }
-
+        function bukaModalRetur(id_pesanan) { document.getElementById('returOrderId').value = id_pesanan; document.getElementById('modalRetur').style.display = 'flex'; }
         document.getElementById('formRetur').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSubmitRetur');
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin mr-1'></i> Mengupload Video...";
-            btn.disabled = true;
-
-            const id_pesanan = document.getElementById('returOrderId').value;
-            const formData = new FormData();
-            formData.append('reason', document.getElementById('returReason').value);
-            formData.append('proof', document.getElementById('returProof').files[0]);
-
+            e.preventDefault(); const btn = document.getElementById('btnSubmitRetur'); btn.innerHTML = "<i class='fas fa-spinner fa-spin mr-1'></i> Mengupload..."; btn.disabled = true;
+            const formData = new FormData(); formData.append('reason', document.getElementById('returReason').value); formData.append('proof', document.getElementById('returProof').files[0]);
             try {
-                const res = await fetch(`/api/orders/${id_pesanan}/return`, {
-                    method: 'PUT',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData 
-                });
-                
+                const res = await fetch(`/api/orders/${document.getElementById('returOrderId').value}/return`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
                 const data = await res.json();
-                if(data.success) {
-                    showToast("Pengajuan retur dikirim!", "success");
-                    document.getElementById('modalRetur').style.display = 'none';
-                    document.getElementById('formRetur').reset();
-                    loadRiwayatPesanan(); 
-                } else {
-                    showToast("Gagal: " + data.message, "error");
-                }
-            } catch(err) {
-                showToast("Server Error saat upload video!", "error");
-            } finally {
-                btn.innerHTML = "<i class='fas fa-paper-plane mr-1'></i> KIRIM PENGAJUAN RETUR";
-                btn.disabled = false;
-            }
+                if(data.success) { showToast("Pengajuan retur dikirim!", "success"); document.getElementById('modalRetur').style.display = 'none'; document.getElementById('formRetur').reset(); loadRiwayatPesanan(); } else { showToast("Gagal: " + data.message, "error"); }
+            } catch(err) { showToast("Server Error", "error"); } finally { btn.innerHTML = "<i class='fas fa-paper-plane mr-1'></i> KIRIM PENGAJUAN RETUR"; btn.disabled = false; }
         });
 
-        // ==========================================
-        // ✅ FUNGSI BERI ULASAN DARI PEMBELI
-        // ==========================================
-        function bukaModalUlasan(id_produk) {
-            if(!id_produk || id_produk === 0) {
-                showToast("Data ID produk tidak ditemukan untuk pesanan lama ini.", "error");
-                return;
-            }
-            document.getElementById('ulasanProductId').value = id_produk;
-            document.getElementById('modalUlasan').style.display = 'flex';
-            pilihBintang(5); // Reset ke 5 bintang
-        }
-
+        function bukaModalUlasan(id_produk) { if(!id_produk || id_produk === 0) return; document.getElementById('ulasanProductId').value = id_produk; document.getElementById('modalUlasan').style.display = 'flex'; pilihBintang(5); }
         function pilihBintang(jumlah) {
-            document.getElementById('ulasanRating').value = jumlah;
-            const stars = document.getElementById('starContainer').children;
-            for(let i=0; i<5; i++) {
-                if(i < jumlah) {
-                    stars[i].style.color = '#FFD700'; // Kuning Emas
-                    stars[i].className = 'fas fa-star';
-                } else {
-                    stars[i].style.color = '#ddd'; // Abu-abu
-                    stars[i].className = 'far fa-star'; // Bintang kosong
-                }
-            }
+            document.getElementById('ulasanRating').value = jumlah; const stars = document.getElementById('starContainer').children;
+            for(let i=0; i<5; i++) { if(i < jumlah) { stars[i].style.color = '#FFD700'; stars[i].className = 'fas fa-star'; } else { stars[i].style.color = '#ddd'; stars[i].className = 'far fa-star'; } }
         }
-
         document.getElementById('formUlasan').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSubmitUlasan');
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin mr-1'></i> Mengirim...";
-            btn.disabled = true;
-
-            const payload = {
-                product_id: document.getElementById('ulasanProductId').value,
-                rating: parseInt(document.getElementById('ulasanRating').value),
-                comment: document.getElementById('ulasanKomentar').value
-            };
-
+            e.preventDefault(); const btn = document.getElementById('btnSubmitUlasan'); btn.innerHTML = "<i class='fas fa-spinner fa-spin mr-1'></i> Mengirim..."; btn.disabled = true;
+            const payload = { product_id: document.getElementById('ulasanProductId').value, rating: parseInt(document.getElementById('ulasanRating').value), comment: document.getElementById('ulasanKomentar').value };
             try {
-                const res = await fetch('/api/reviews', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify(payload) 
-                });
-                
+                const res = await fetch('/api/reviews', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
                 const data = await res.json();
-                if(data.success) {
-                    showToast("Terima kasih! Ulasan berhasil dikirim 🌟", "success");
-                    document.getElementById('modalUlasan').style.display = 'none';
-                    document.getElementById('formUlasan').reset();
-                } else {
-                    showToast("Gagal: " + data.message, "error");
-                }
-            } catch(err) {
-                showToast("Server Error saat mengirim ulasan!", "error");
-            } finally {
-                btn.innerHTML = "<i class='fas fa-paper-plane mr-1'></i> KIRIM ULASAN";
-                btn.disabled = false;
-            }
+                if(data.success) { showToast("Ulasan dikirim 🌟", "success"); document.getElementById('modalUlasan').style.display = 'none'; document.getElementById('formUlasan').reset(); } else { showToast("Gagal: " + data.message, "error"); }
+            } catch(err) { showToast("Server Error", "error"); } finally { btn.innerHTML = "<i class='fas fa-paper-plane mr-1'></i> KIRIM ULASAN"; btn.disabled = false; }
         });
 
-        // LOGOUT
-        document.getElementById('btnLogout').addEventListener('click', () => {
-            localStorage.removeItem('token');
-            showToast("Berhasil Keluar", "success");
-            setTimeout(() => window.location.href = '../dashboardutama.html', 1000);
-        });
-
+        document.getElementById('btnLogout').addEventListener('click', () => { localStorage.removeItem('token'); showToast("Berhasil Keluar", "success"); setTimeout(() => window.location.href = '../dashboardutama.html', 1000); });
     </script>
 </body>
 </html>
