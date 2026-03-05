@@ -17,9 +17,16 @@
         .section { background: #fff; margin-top: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .section-title { font-size: 13px; font-weight: 800; color: #0D47A1; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #eee; padding-bottom: 10px; justify-content: space-between; }
 
-        /* Alamat */
+        /* ✅ KOTAK ALAMAT BISA DIKLIK */
+        .address-box { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 5px 0; }
+        .address-content { flex: 1; }
         .address-box p { font-size: 12px; color: #555; line-height: 1.5; margin-bottom: 5px; }
         .address-box strong { color: #333; }
+        .address-label { font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 4px; margin-bottom: 5px; display: inline-block; text-transform: uppercase;}
+        .label-rumah { background: #E1F5FE; color: #0D47A1; }
+        .label-kantor { background: #FFF3E0; color: #F57F17; }
+        .label-lainnya { background: #F3E5F5; color: #7B1FA2; }
+        .arrow-right { color: #aaa; font-size: 16px; margin-left: 15px; }
 
         /* Produk */
         .product-item { display: flex; gap: 15px; align-items: center; margin-bottom: 10px; position: relative;}
@@ -78,6 +85,20 @@
         .confirm-box p { font-size: 12px; color: #666; margin-bottom: 25px; line-height: 1.5; }
         .btn-yakin { width: 100%; padding: 12px; background: #0D47A1; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3); }
 
+        /* ✅ MODAL PILIH ALAMAT (SHOPEE STYLE) */
+        .modal-bottom-sheet { display: none; position: fixed; z-index: 4000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,40,80,0.6); backdrop-filter: blur(3px); align-items: flex-end; justify-content: center; }
+        .bottom-sheet-content { background: #fff; width: 100%; max-width: 600px; border-radius: 20px 20px 0 0; padding: 20px; animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; max-height: 80vh; display: flex; flex-direction: column; }
+        @keyframes slideUp { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
+        .bs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px; flex-shrink: 0;}
+        .bs-title { font-size: 15px; font-weight: 800; color: #333; }
+        .bs-close { font-size: 20px; color: #aaa; cursor: pointer; }
+        .address-list-container { overflow-y: auto; padding-bottom: 20px; display: flex; flex-direction: column; gap: 10px;}
+        
+        .address-card-select { border: 1px solid #ddd; border-radius: 10px; padding: 15px; cursor: pointer; position: relative; transition: 0.2s;}
+        .address-card-select.selected { border: 2px solid #00AA5B; background: #f2fcf6; }
+        .address-card-select.selected::after { content: '\f00c'; font-family: 'Font Awesome 5 Free'; font-weight: 900; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #00AA5B; font-size: 20px; }
+        .btn-add-address { width: 100%; padding: 12px; border: 2px dashed #0D47A1; color: #0D47A1; background: transparent; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; margin-top: 10px;}
+
         #customToast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 25px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 80px; font-size: 13px; font-weight: 600; transition: opacity 0.3s, bottom 0.3s; opacity: 0; }
         #customToast.show { visibility: visible; opacity: 1; bottom: 100px; }
         #customToast.error { background-color: #ff3b30; }
@@ -95,8 +116,11 @@
         <div class="section-title">
             <span><i class="fas fa-map-marker-alt"></i> Alamat Pengiriman</span>
         </div>
-        <div class="address-box" id="addressBox">
-            <p>Memuat alamat...</p>
+        <div class="address-box" onclick="bukaModalPilihAlamat()">
+            <div class="address-content" id="addressBox">
+                <p>Memuat alamat...</p>
+            </div>
+            <i class="fas fa-chevron-right arrow-right"></i>
         </div>
     </div>
 
@@ -121,48 +145,23 @@
 
     <div class="section">
         <div class="section-title">
-            <span><i class="fas fa-truck"></i> Opsi Pengiriman (8 Kurir)</span>
+            <span><i class="fas fa-truck"></i> Opsi Pengiriman</span>
         </div>
         <div class="option-group">
             <label class="option-label">
-                <input type="radio" name="shipping" value="jne">
-                <div class="option-content">JNE Reguler</div>
-                <div class="option-price">Pilih kurir</div>
+                <input type="radio" name="shipping" value="JNE">
+                <div class="option-content">JNE Reguler (Real-Time API)</div>
+                <div class="option-price" id="labelJNE">Pilih kurir ini</div>
             </label>
             <label class="option-label">
-                <input type="radio" name="shipping" value="jnt">
-                <div class="option-content">J&T Express</div>
-                <div class="option-price">Pilih kurir</div>
+                <input type="radio" name="shipping" value="JNT">
+                <div class="option-content">J&T Express (Real-Time API)</div>
+                <div class="option-price" id="labelJNT">Pilih kurir ini</div>
             </label>
             <label class="option-label">
-                <input type="radio" name="shipping" value="sicepat">
-                <div class="option-content">SiCepat REG</div>
-                <div class="option-price">Pilih kurir</div>
-            </label>
-            <label class="option-label">
-                <input type="radio" name="shipping" value="ide">
-                <div class="option-content">ID Express</div>
-                <div class="option-price">Pilih kurir</div>
-            </label>
-            <label class="option-label">
-                <input type="radio" name="shipping" value="sap">
-                <div class="option-content">SAP Express</div>
-                <div class="option-price">Pilih kurir</div>
-            </label>
-            <label class="option-label">
-                <input type="radio" name="shipping" value="ninja">
-                <div class="option-content">Ninja Xpress</div>
-                <div class="option-price">Pilih kurir</div>
-            </label>
-            <label class="option-label">
-                <input type="radio" name="shipping" value="pos">
-                <div class="option-content">POS Indonesia</div>
-                <div class="option-price">Pilih kurir</div>
-            </label>
-            <label class="option-label">
-                <input type="radio" name="shipping" value="tiki">
-                <div class="option-content">TIKI Reguler</div>
-                <div class="option-price">Pilih kurir</div>
+                <input type="radio" name="shipping" value="Sicepat">
+                <div class="option-content">SiCepat REG (Real-Time API)</div>
+                <div class="option-price" id="labelSicepat">Pilih kurir ini</div>
             </label>
         </div>
     </div>
@@ -230,6 +229,18 @@
         </div>
     </div>
 
+    <div id="modalPilihAlamat" class="modal-bottom-sheet">
+        <div class="bottom-sheet-content">
+            <div class="bs-header">
+                <div class="bs-title">Pilih Alamat Pengiriman</div>
+                <div class="bs-close" onclick="tutupModalPilihAlamat()">&times;</div>
+            </div>
+            <div class="address-list-container" id="listAlamatTersimpan">
+                </div>
+            <button class="btn-add-address" onclick="window.location.href='registrasi/profilpembeli.html'"><i class="fas fa-plus"></i> Tambah Alamat Baru</button>
+        </div>
+    </div>
+
     <div id="customToast"></div>
 
     <script>
@@ -248,14 +259,18 @@
         let totalBeratGram = 0; 
         let items = [];
         
-        let userInfo = { nama: "Pembeli", wa: "-", alamat: "" };
+        let userInfo = { nama: "Pembeli", wa: "-", alamat: "", label: "Rumah" };
         let kotaTokoGlobal = "Bandung"; 
+
+        // Array untuk menyimpan daftar buku alamat
+        let bukuAlamat = [];
 
         const token = localStorage.getItem('token');
         if (!token) { window.location.href = 'login.html'; }
 
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
 
+        // ✅ FUNGSI TARIK DATA ALAMAT YANG DIPERKUAT (DIBIKIN MULTI-ADDRESS LIST)
         async function fetchAddress() {
             try {
                 const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
@@ -264,17 +279,16 @@
                 const res = await fetch('/api/address', { headers: { 'Authorization': `Bearer ${token}` } });
                 const result = await res.json();
                 
+                // Ambil label dari memori HP
+                const labelTersimpan = localStorage.getItem('belidikita_label_alamat') || 'Rumah';
+                
                 if (result.success && result.data && result.data.alamat_lengkap) {
-                    userInfo = { nama: result.data.nama_penerima, wa: result.data.nomor_wa, alamat: result.data.alamat_lengkap };
+                    userInfo = { nama: result.data.nama_penerima, wa: result.data.nomor_wa, alamat: result.data.alamat_lengkap, label: labelTersimpan };
                     
-                    document.getElementById('addressBox').innerHTML = `
-                        <p><strong>${userInfo.nama}</strong> (${userInfo.wa})</p>
-                        <p>${userInfo.alamat}</p>
-                        <div style="margin-top:10px; padding:8px 10px; background:#f4f9ff; border:1px dashed #81D4FA; border-radius:8px; font-size:10px; color:#0D47A1; font-weight:700; display:flex; align-items:center; gap:8px;">
-                            <i class="fas fa-route" style="font-size:14px; color:#FF9800;"></i> 
-                            <span>Dikirim dari: <b>${kotaTokoGlobal}</b></span>
-                        </div>
-                    `;
+                    // Masukkan ke array buku alamat (Untuk fitur upgrade multi-address ke depannya)
+                    bukuAlamat = [userInfo];
+
+                    renderAlamatTerpilih();
                 } else {
                     document.getElementById('addressBox').innerHTML = `<p style="color:red; font-weight:bold;">Alamat belum diatur. Silakan atur di Profil Akun.</p>`;
                     document.getElementById('modalConfirmAddress').style.display = 'flex'; 
@@ -282,6 +296,62 @@
             } catch (err) { console.error(err); }
         }
 
+        // Tampilkan alamat ke layar Checkout Utama
+        function renderAlamatTerpilih() {
+            let classBadge = 'label-rumah';
+            if(userInfo.label === 'Kantor') classBadge = 'label-kantor';
+            if(userInfo.label === 'Lainnya') classBadge = 'label-lainnya';
+
+            document.getElementById('addressBox').innerHTML = `
+                <div class="address-label ${classBadge}">${userInfo.label}</div>
+                <p><strong>${userInfo.nama}</strong> (${userInfo.wa})</p>
+                <p>${userInfo.alamat}</p>
+                <div style="margin-top:10px; padding:8px 10px; background:#f4f9ff; border:1px dashed #81D4FA; border-radius:8px; font-size:10px; color:#0D47A1; font-weight:700; display:flex; align-items:center; gap:8px; width:max-content;">
+                    <i class="fas fa-route" style="font-size:14px; color:#FF9800;"></i> 
+                    <span>Dikirim dari: <b>${kotaTokoGlobal}</b></span>
+                </div>
+            `;
+            
+            resetOngkir(); // Jika alamat berubah, ongkir harus kereset
+        }
+
+        // BUKA MODAL PILIH ALAMAT
+        function bukaModalPilihAlamat() {
+            document.getElementById('modalPilihAlamat').style.display = 'flex';
+            const container = document.getElementById('listAlamatTersimpan');
+            container.innerHTML = '';
+
+            bukuAlamat.forEach((almt, idx) => {
+                let classBadge = 'label-rumah';
+                if(almt.label === 'Kantor') classBadge = 'label-kantor';
+                if(almt.label === 'Lainnya') classBadge = 'label-lainnya';
+
+                // Tampilkan sebagai yg terpilih jika sama
+                let isSelected = (almt.alamat === userInfo.alamat) ? 'selected' : '';
+
+                container.innerHTML += `
+                    <div class="address-card-select ${isSelected}" onclick="pilihAlamatIni(${idx})">
+                        <div class="address-label ${classBadge}">${almt.label}</div>
+                        <p style="font-size: 12px; margin-bottom: 5px;"><strong>${almt.nama}</strong> (${almt.wa})</p>
+                        <p style="font-size: 11px; color: #666;">${almt.alamat}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function tutupModalPilihAlamat() {
+            document.getElementById('modalPilihAlamat').style.display = 'none';
+        }
+
+        // AKSI SAAT PEMBELI MEMILIH ALAMAT DI MODAL
+        window.pilihAlamatIni = function(index) {
+            userInfo = bukuAlamat[index];
+            renderAlamatTerpilih();
+            tutupModalPilihAlamat();
+            showToast("Alamat pengiriman berhasil diubah!", "success");
+        }
+
+        // LOGIKA QTY DI CHECKOUT + KALKULASI GROSIR
         function loadCheckoutItems() {
             const dataStr = sessionStorage.getItem('belidikita_checkout');
             if(!dataStr) { window.location.href = 'dashboardutama.html'; return; }
@@ -350,7 +420,6 @@
             resetOngkir(); 
         }
 
-        // ✅ LOGIKA BARU: Reset semua teks ke "Pilih kurir" dengan bersih
         function resetOngkir() {
             ongkir = 0;
             document.querySelectorAll('input[name="shipping"]').forEach(radio => {
@@ -508,7 +577,7 @@
 
                 if(dbResult.success) {
                     let pesanWA = `*INVOICE PESANAN BARU* 🛒\n*ID Pesanan:* #ORD-${dbResult.order_id}\n\n`;
-                    pesanWA += `*Data Penerima:*\nNama: ${userInfo.nama}\nNo WA: ${userInfo.wa}\nAlamat: ${userInfo.alamat}\n\n`;
+                    pesanWA += `*Data Penerima:*\nLabel: ${userInfo.label}\nNama: ${userInfo.nama}\nNo WA: ${userInfo.wa}\nAlamat: ${userInfo.alamat}\n\n`;
                     pesanWA += `*Daftar Barang:*\n`;
                     
                     items.forEach(item => {
