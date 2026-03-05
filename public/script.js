@@ -15,9 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const mainContent = document.getElementById('mainContent');
     const bottomNav = document.getElementById('bottomNav');
 
-    // ==========================================
-    // ✅ LOGIKA BARU: ANIMASI HANYA 1X SAJA 
-    // ==========================================
     const skipSplash = sessionStorage.getItem('skipSplash');
     const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
 
@@ -177,15 +174,27 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ✅ FUNGSI PENGATUR PRODUK BERANDA (MENGHILANGKAN AREA KOSONG & KOTAK RAPI)
     async function loadRandomProducts() {
         const productList = document.getElementById('randomProductList');
         const larisList = document.getElementById('topSellingList');
         const cartList = document.getElementById('topCartList');
+        
+        // Panggil Section untuk di-hide jika kosong
+        const sectionLaris = document.getElementById('sectionLaris');
+        const sectionKeranjang = document.getElementById('sectionKeranjang');
+        const sectionProdukUtama = document.getElementById('bagianProdukUtama');
+
         if(!productList) return;
 
         try {
             const res = await fetch('/api/products');
             const result = await res.json();
+            
+            let countLaris = 0;
+            let countKeranjang = 0;
+            let countBiasa = 0;
+
             if (result.success && result.data.length > 0) {
                 productList.innerHTML = ''; 
                 if(larisList) larisList.innerHTML = '';
@@ -205,23 +214,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video+Produk' : (fotoUtama || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
                     const mediaTag = isVideo ? `<video src="${fotoBarang}" class="product-media" style="object-fit:cover;"></video>` : `<img src="${fotoBarang}" class="product-media" alt="${product.title}">`;
 
-                    const terjual = (product.id * 17 % 500) + 10;
+                    // ✅ MENGGUNAKAN DATA TERJUAL ASLI DARI DATABASE
+                    const terjual = product.sold_count || 0;
 
-                    // ✅ MENGAMBIL SEMUA DNA GROSIR & VARIAN
-                    const pId = product.id;
-                    const pUrl = product.media_url;
-                    const pTitle = product.title;
-                    const pDesc = deskripsiBarang;
-                    const pPrice = product.price;
-                    const pWeight = product.weight;
-                    const pSeller = product.seller_name;
-                    const pUnit = product.unit;
-                    const pVarTitle = product.variant_title;
-                    const pVarOpt = product.variant_options;
-                    const pWsPrice = product.wholesale_price;
-                    const pWsMin = product.wholesale_min_qty;
+                    const pId = product.id; const pUrl = product.media_url; const pTitle = product.title;
+                    const pDesc = deskripsiBarang; const pPrice = product.price; const pWeight = product.weight;
+                    const pSeller = product.seller_name; const pUnit = product.unit; const pVarTitle = product.variant_title;
+                    const pVarOpt = product.variant_options; const pWsPrice = product.wholesale_price; const pWsMin = product.wholesale_min_qty;
 
-                    // Lencana Grosir di Beranda
                     let badgeGrosirHorizontal = '';
                     let badgeGrosirKotak = '';
                     if(pWsPrice > 0 && pWsMin > 0) {
@@ -245,20 +245,20 @@ document.addEventListener("DOMContentLoaded", () => {
                         `;
                         hCard.addEventListener('click', () => bukaDetailProduk(pId, pUrl, pTitle, priceRp, pDesc, pPrice, pWeight, pSeller, pUnit, pVarTitle, pVarOpt, pWsPrice, pWsMin));
                         
-                        if (product.category === 'laris' && larisList) larisList.appendChild(hCard);
-                        if (product.category === 'keranjang' && cartList) cartList.appendChild(hCard);
+                        if (product.category === 'laris' && larisList) { larisList.appendChild(hCard); countLaris++; }
+                        if (product.category === 'keranjang' && cartList) { cartList.appendChild(hCard); countKeranjang++; }
                     }
 
+                    // ✅ KOTAK SAMA TINGGI BERKAT CSS BARU (.product-card)
                     const card = document.createElement('div');
                     card.className = 'product-card';
-                    card.style.position = 'relative';
                     card.innerHTML = `
                         ${badgeGrosirKotak}
                         ${fotoUtama ? mediaTag : '<div class="product-media" style="display:flex; align-items:center; justify-content:center; color:#aaa;">No Media</div>'}
                         <div class="product-info">
                             <div class="product-title">${product.title}</div>
                             <div class="product-price">${priceRp}</div>
-                            <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; font-weight: 600; margin-top: auto;">
+                            <div class="product-stats">
                                 <span><i class="fas fa-star" style="color:#FFD700;"></i> 4.9</span>
                                 <span>${terjual} Terjual</span>
                             </div>
@@ -267,22 +267,26 @@ document.addEventListener("DOMContentLoaded", () => {
                     card.addEventListener('click', () => bukaDetailProduk(pId, pUrl, pTitle, priceRp, pDesc, pPrice, pWeight, pSeller, pUnit, pVarTitle, pVarOpt, pWsPrice, pWsMin));
                     
                     productList.appendChild(card);
+                    countBiasa++;
                 });
 
-                if(larisList && larisList.innerHTML === '') larisList.innerHTML = '<p style="padding:15px; font-size:12px; color:#888;">Belum ada barang di etalase ini.</p>';
-                if(cartList && cartList.innerHTML === '') cartList.innerHTML = '<p style="padding:15px; font-size:12px; color:#888;">Belum ada barang di etalase ini.</p>';
+                // ✅ LOGIKA MENGHILANGKAN SECTION YANG KOSONG
+                if(countLaris > 0) { sectionLaris.style.display = 'block'; } else { sectionLaris.style.display = 'none'; }
+                if(countKeranjang > 0) { sectionKeranjang.style.display = 'block'; } else { sectionKeranjang.style.display = 'none'; }
+                if(countBiasa > 0) { sectionProdukUtama.style.display = 'block'; } else { sectionProdukUtama.style.display = 'none'; }
+
             } else {
-                productList.innerHTML = '<p style="text-align:center; width:100%; color:#888;">Admin belum menambahkan barang.</p>';
-                if(larisList) larisList.innerHTML = '<p style="padding:15px; font-size:12px; color:#888;">Belum ada barang.</p>';
-                if(cartList) cartList.innerHTML = '<p style="padding:15px; font-size:12px; color:#888;">Belum ada barang.</p>';
+                sectionLaris.style.display = 'none';
+                sectionKeranjang.style.display = 'none';
+                sectionProdukUtama.style.display = 'block';
+                productList.innerHTML = '<p style="text-align:center; width:100%; color:#888; grid-column:span 2;">Toko masih dalam tahap persiapan barang.</p>';
             }
-        } catch (error) { productList.innerHTML = '<p style="color: red; text-align:center;">Gagal memuat barang toko.</p>'; }
+        } catch (error) { 
+            sectionProdukUtama.style.display = 'block';
+            productList.innerHTML = '<p style="color: red; text-align:center; grid-column:span 2;">Gagal memuat barang toko.</p>'; 
+        }
     }
 
-    const productModal = document.getElementById('productDetailModal');
-    const closeDetailBtn = document.getElementById('closeDetailBtn');
-    
-    // ✅ FUNGSI KLIK MENGANGKUT SEMUA DATA GROSIR & VARIAN
     function bukaDetailProduk(id, foto, nama, hargaStr, deskripsi, hargaRaw, beratRaw, sellerName, unit, vTitle, vOpt, wsPrice, wsMin) {
         const dataProduk = { 
             id: id,
@@ -303,42 +307,5 @@ document.addEventListener("DOMContentLoaded", () => {
         
         localStorage.setItem('produk_detail', JSON.stringify(dataProduk));
         window.location.href = 'detailproduk.html';
-    }
-
-    if(closeDetailBtn) { closeDetailBtn.addEventListener('click', () => { productModal.style.display = "none"; }); }
-
-    // FUNGSI LAIN (Tidak Dihapus)
-    const btnAddToCart = document.getElementById('btnAddToCart');
-    if(btnAddToCart) {
-        btnAddToCart.addEventListener('click', () => {
-            if(!currentProduct) return;
-            let cart = JSON.parse(localStorage.getItem('belidikita_cart')) || [];
-            const existingItem = cart.find(item => item.nama === currentProduct.nama);
-            if(existingItem) { existingItem.qty += 1; } else { cart.push(currentProduct); }
-            localStorage.setItem('belidikita_cart', JSON.stringify(cart));
-            updateCartBadge();
-            showToast("Barang dimasukkan ke keranjang 🛒", "success");
-            productModal.style.display = "none"; 
-        });
-    }
-
-    const btnCheckout = document.getElementById('btnCheckout');
-    if(btnCheckout) {
-        btnCheckout.addEventListener('click', () => {
-            const token = localStorage.getItem('token');
-            if (!token || token.startsWith('token-admin-')) {
-                showToast("Silakan Login atau Daftar akun dulu ya!", "error");
-                setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
-                return; 
-            }
-            const namaBarang = document.getElementById('detailTitle').innerText;
-            const hargaBarang = document.getElementById('detailPrice').innerText;
-            const pesan = `Halo Admin Belidikita, saya tertarik untuk membeli:\n\n*Nama Barang:* ${namaBarang}\n*Harga:* ${hargaBarang}\n\nApakah stoknya masih tersedia?`;
-            const nomorAdmin = "6282240400388"; 
-            const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
-            showToast("Mengarahkan ke WhatsApp...", "info");
-            setTimeout(() => window.open(linkWA, '_blank'), 1000); 
-            productModal.style.display = "none"; 
-        });
     }
 });
