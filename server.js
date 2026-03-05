@@ -33,7 +33,6 @@ const upload = multer({ storage: storage });
 const uploadExcel = multer({ storage: multer.memoryStorage() });
 
 const { pool, initDB } = require('./config/db'); 
-// (getAllProducts kita override di bawah, jadi abaikan yang di import ini)
 const { register, verifyOTP, googleLogin, forgotPassword, resetPassword } = require('./controllers/auth/auth');
 const { getProfile, updateProfile } = require('./controllers/profile/profile');
 const { uploadProduct, getAllProducts, uploadPromo, getPromos } = require('./controllers/product/product');
@@ -92,7 +91,6 @@ app.post('/api/login', async (req, res) => {
 
 app.post('/api/ai/search', askAI);
 
-// ✅ PERBAIKAN: MENGAMBIL RATA-RATA BINTANG REAL DARI DATABASE
 app.get('/api/products', async (req, res) => {
     try {
         const query = `
@@ -150,60 +148,6 @@ app.get('/api/admin/chats', verifyAdmin, async (req, res) => {
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
-// ==========================================
-// 🚚 API RAJAONGKIR (HITUNG ONGKIR REAL-TIME)
-// ==========================================
-app.post('/api/ongkir/hitung', verifyToken, async (req, res) => {
-    const { kota_asal, kota_tujuan, berat, kurir } = req.body;
-    
-    // 🚨 Wajib masukkan API Key RajaOngkir di Railway/env nanti
-    const apiKey = process.env.RAJAONGKIR_KEY; 
-
-    // Jika belum ada API Key, pakai harga fallback (cadangan) aman
-    if (!apiKey) {
-        return res.json({ success: true, ongkir: 15000 * Math.ceil(berat/1000) });
-    }
-
-    try {
-        // 1. Ambil list kota dari RajaOngkir
-        const cityRes = await fetch('https://api.rajaongkir.com/starter/city', { headers: { 'key': apiKey } });
-        const cityData = await cityRes.json();
-        const cities = cityData.rajaongkir.results;
-
-        // 2. Fungsi Cerdas: Cocokkan teks alamat dengan ID Kota RajaOngkir
-        const findCityId = (teksAlamat) => {
-            if (!teksAlamat) return null;
-            const alamatLower = teksAlamat.toLowerCase();
-            const found = cities.find(c => alamatLower.includes(c.city_name.toLowerCase()));
-            return found ? found.city_id : null;
-        };
-
-        const originId = findCityId(kota_asal) || "22"; // 22 = Default ID Bandung
-        const destId = findCityId(kota_tujuan) || "114"; // 114 = Default ID Denpasar
-
-        // 3. Paksa kurir ke JNE/POS/TIKI (Karena RajaOngkir Starter hanya dukung 3 ini)
-        let realKurir = kurir.toLowerCase();
-        if(realKurir === 'jnt' || realKurir === 'sicepat') realKurir = 'jne';
-
-        // 4. Tembak API Cost RajaOngkir
-        const costRes = await fetch('https://api.rajaongkir.com/starter/cost', {
-            method: 'POST',
-            headers: { 'content-type': 'application/x-www-form-urlencoded', 'key': apiKey },
-            body: new URLSearchParams({ origin: originId, destination: destId, weight: berat, courier: realKurir })
-        });
-        const costData = await costRes.json();
-
-        // 5. Kirim balasan harga asli ke layar Checkout
-        if (costData.rajaongkir.status.code === 200 && costData.rajaongkir.results[0].costs.length > 0) {
-            const realOngkir = costData.rajaongkir.results[0].costs[0].cost[0].value;
-            res.json({ success: true, ongkir: realOngkir });
-        } else {
-            res.json({ success: true, ongkir: 15000 * Math.ceil(berat/1000) }); // Fallback
-        }
-    } catch (e) {
-        res.json({ success: true, ongkir: 15000 * Math.ceil(berat/1000) }); // Fallback Error
-    }
-});
 // ==========================================
 
 app.get('/api/profile', verifyToken, getProfile);
