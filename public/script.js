@@ -148,6 +148,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    const btnChatAdminWA = document.getElementById('btnChatAdminWA');
+    if(btnChatAdminWA) {
+        btnChatAdminWA.addEventListener('click', () => {
+            const nomorAdmin = "6282240400388"; 
+            const pesan = "Halo Admin Belidikita, saya ingin bertanya...";
+            const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
+            window.open(linkWA, '_blank');
+        });
+    }
+
     const adminLoginIcon = document.getElementById('adminLoginIcon');
     const modalConfirmAdmin = document.getElementById('modalConfirmAdmin');
     const btnBatalAdmin = document.getElementById('btnBatalAdmin');
@@ -224,17 +234,18 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch(e) {}
     }
 
+    // ✅ FUNGSI KIRIM CHAT (Hanya Kirim Pesan Asli, Otak AI diatur murni dari Server)
     async function kirimChatToko() {
         const teks = chatTokoInput.value.trim();
         if(!teks) return;
         const token = localStorage.getItem('token');
 
-        // 1. Munculkan Chat Pembeli
+        // 1. Munculkan Chat Pembeli di layar
         chatTokoBody.innerHTML += `<div class="chat-msg-user">${teks}</div>`;
         chatTokoInput.value = '';
         chatTokoBody.scrollTop = chatTokoBody.scrollHeight;
 
-        // 2. Simpan Chat Pembeli ke Database
+        // 2. Simpan Chat Pembeli ke Database Admin
         fetch('/api/chat/save', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ message: teks, sender: 'pembeli' })
@@ -242,34 +253,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // 3. Tampilkan Loading Toko Mengetik
         const loadingId = 'loading-' + Date.now();
-        chatTokoBody.innerHTML += `<div class="chat-msg-store" id="${loadingId}"><i class="fas fa-ellipsis-h fa-fade"></i> Belidikita mengetik...</div>`;
+        chatTokoBody.innerHTML += `<div class="chat-msg-store" id="${loadingId}"><i class="fas fa-ellipsis-h fa-fade"></i> Admin mengetik...</div>`;
         chatTokoBody.scrollTop = chatTokoBody.scrollHeight;
 
-        // 4. Tanya ke AI (Bertindak sebagai Admin)
+        // 4. Kirim teks ASLI pembeli ke Server (Server yang akan memproses persona AI)
         try {
-            const promptSakti = `Kamu adalah Customer Service toko online bernama 'Belidikita'. Jawab pertanyaan pembeli ini dengan ramah, singkat, dan persuasif. Jika dia tanya stok, bilang selalu ready. Jika tanya harga/produk, suruh langsung checkout. Pertanyaan pembeli: ${teks}`;
-            
             const res = await fetch('/api/ai/search', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: promptSakti })
+                body: JSON.stringify({ prompt: teks }) 
             });
             const data = await res.json();
-            document.getElementById(loadingId).remove();
+            if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
 
             if(data.success) {
+                // 5. Tampilkan Balasan AI di layar
                 let jawaban = data.answer.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
                 chatTokoBody.innerHTML += `<div class="chat-msg-store">${jawaban}</div>`;
                 
-                // 5. Simpan Balasan AI ke Database
+                // 6. Simpan Balasan AI ke Database Admin
                 fetch('/api/chat/save', {
                     method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify({ message: jawaban, sender: 'bot' })
                 });
             } else {
-                 chatTokoBody.innerHTML += `<div class="chat-msg-store">Mohon tunggu sebentar ya kak, Admin kami akan segera membalas pesan kakak.</div>`;
+                 chatTokoBody.innerHTML += `<div class="chat-msg-store">Mohon tunggu sebentar ya kak, Admin kami sedang memproses pesan kakak.</div>`;
             }
         } catch(e) {
-            document.getElementById(loadingId).remove();
+            if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
             chatTokoBody.innerHTML += `<div class="chat-msg-store">Pesan kakak sudah kami terima. Admin akan membalas secepatnya.</div>`;
         }
         chatTokoBody.scrollTop = chatTokoBody.scrollHeight;
@@ -278,6 +288,66 @@ document.addEventListener("DOMContentLoaded", () => {
     if(btnKirimChat) btnKirimChat.addEventListener('click', kirimChatToko);
     if(chatTokoInput) chatTokoInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') kirimChatToko(); });
 
+
+    // ==========================================
+    // BOT AI CHAT (Sisa kode lama Floating AI)
+    // ==========================================
+    const aiChatModal = document.getElementById('aiChatModal');
+    const closeAIBtn = document.getElementById('closeAIBtn');
+    const aiSendBtn = document.getElementById('aiSendBtn');
+    const aiInput = document.getElementById('aiInput');
+    const aiBody = document.getElementById('aiBody');
+
+    if(floatingAIBtn) {
+        floatingAIBtn.addEventListener('click', () => {
+            aiChatModal.style.display = 'flex';
+        });
+    }
+
+    if(closeAIBtn) {
+        closeAIBtn.addEventListener('click', () => {
+            aiChatModal.style.display = 'none';
+        });
+    }
+
+    // ✅ Di fungsi lama ini juga murni dikirim ke server langsung
+    async function kirimPesanAI() {
+        const teks = aiInput.value.trim();
+        if(!teks) return;
+
+        aiBody.innerHTML += `<div class="ai-msg user">${teks}</div>`;
+        aiInput.value = '';
+        aiBody.scrollTop = aiBody.scrollHeight;
+
+        const loadingId = 'loading-' + Date.now();
+        aiBody.innerHTML += `<div class="ai-msg bot" id="${loadingId}"><i class="fas fa-ellipsis-h fa-fade"></i> Berpikir...</div>`;
+        aiBody.scrollTop = aiBody.scrollHeight;
+
+        try {
+            const res = await fetch('/api/ai/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: teks })
+            });
+            const data = await res.json();
+            
+            if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+            
+            if(data.success) {
+                let jawaban = data.answer.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+                aiBody.innerHTML += `<div class="ai-msg bot">${jawaban}</div>`;
+            } else {
+                aiBody.innerHTML += `<div class="ai-msg bot" style="color:#ff3b30;">Maaf, otak AI saya sedang gangguan. Coba lagi nanti ya.</div>`;
+            }
+        } catch(e) {
+            if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+            aiBody.innerHTML += `<div class="ai-msg bot" style="color:#ff3b30;">Koneksi internetmu sepertinya terputus.</div>`;
+        }
+        aiBody.scrollTop = aiBody.scrollHeight;
+    }
+
+    if(aiSendBtn) { aiSendBtn.addEventListener('click', kirimPesanAI); }
+    if(aiInput) { aiInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') kirimPesanAI(); }); }
 
     // ==========================================
     // FUNGSI PENGATUR PRODUK BERANDA UTAMA
