@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const topHeader = document.getElementById('topHeader');
     const mainContent = document.getElementById('mainContent');
     const bottomNav = document.getElementById('bottomNav');
+    const floatingAIBtn = document.getElementById('floatingAIBtn'); // ✅ Ambil tombol AI
 
     const skipSplash = sessionStorage.getItem('skipSplash');
     const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
@@ -25,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
             topHeader.classList.remove('hidden');
             mainContent.classList.remove('hidden');
             bottomNav.classList.remove('hidden');
+            if(floatingAIBtn) floatingAIBtn.classList.remove('hidden'); // Munculkan AI
             sessionStorage.removeItem('skipSplash'); 
             initDashboard();
         } else {
@@ -38,6 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     topHeader.classList.remove('hidden');
                     mainContent.classList.remove('hidden');
                     bottomNav.classList.remove('hidden');
+                    if(floatingAIBtn) floatingAIBtn.classList.remove('hidden'); // Munculkan AI
                     sessionStorage.setItem('hasSeenSplash', 'true'); 
                     initDashboard(); 
                 }, 1000); 
@@ -105,6 +108,9 @@ document.addEventListener("DOMContentLoaded", () => {
         cekStatusPembeli(); 
     }
 
+    // ==========================================
+    // ✅ KABEL TOMBOL MENU & HEADER
+    // ==========================================
     const menuHome = document.getElementById('menuHome');
     const menuFeed = document.getElementById('menuFeed');
     const menuTransaction = document.getElementById('menuTransaction');
@@ -142,6 +148,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ✅ LOGIKA TOMBOL CHAT WA ADMIN DI HEADER
+    const btnChatAdminWA = document.getElementById('btnChatAdminWA');
+    if(btnChatAdminWA) {
+        btnChatAdminWA.addEventListener('click', () => {
+            const nomorAdmin = "6282240400388"; 
+            const pesan = "Halo Admin Belidikita, saya ingin bertanya...";
+            const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
+            window.open(linkWA, '_blank');
+        });
+    }
+
     const adminLoginIcon = document.getElementById('adminLoginIcon');
     const modalConfirmAdmin = document.getElementById('modalConfirmAdmin');
     const btnBatalAdmin = document.getElementById('btnBatalAdmin');
@@ -169,6 +186,79 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ==========================================
+    // ✅ LOGIKA BARU: BOT AI CHAT 
+    // ==========================================
+    const aiChatModal = document.getElementById('aiChatModal');
+    const closeAIBtn = document.getElementById('closeAIBtn');
+    const aiSendBtn = document.getElementById('aiSendBtn');
+    const aiInput = document.getElementById('aiInput');
+    const aiBody = document.getElementById('aiBody');
+
+    if(floatingAIBtn) {
+        floatingAIBtn.addEventListener('click', () => {
+            aiChatModal.style.display = 'flex';
+        });
+    }
+
+    if(closeAIBtn) {
+        closeAIBtn.addEventListener('click', () => {
+            aiChatModal.style.display = 'none';
+        });
+    }
+
+    async function kirimPesanAI() {
+        const teks = aiInput.value.trim();
+        if(!teks) return;
+
+        // 1. Tampilkan Chat User
+        aiBody.innerHTML += `<div class="ai-msg user">${teks}</div>`;
+        aiInput.value = '';
+        aiBody.scrollTop = aiBody.scrollHeight;
+
+        // 2. Tampilkan Status Mengetik Bot
+        const loadingId = 'loading-' + Date.now();
+        aiBody.innerHTML += `<div class="ai-msg bot" id="${loadingId}"><i class="fas fa-ellipsis-h fa-fade"></i> Berpikir...</div>`;
+        aiBody.scrollTop = aiBody.scrollHeight;
+
+        try {
+            // 3. Tembak ke API Server Anda
+            const res = await fetch('/api/ai/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: teks })
+            });
+            const data = await res.json();
+            
+            // 4. Hapus tulisan mengetik, ganti dengan jawaban Asli
+            document.getElementById(loadingId).remove();
+            
+            if(data.success) {
+                // Parse HTML ke text agar rapi (jika AI membalas pakai Markdown)
+                let jawaban = data.answer.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+                aiBody.innerHTML += `<div class="ai-msg bot">${jawaban}</div>`;
+            } else {
+                aiBody.innerHTML += `<div class="ai-msg bot" style="color:#ff3b30;">Maaf, otak AI saya sedang gangguan. Coba lagi nanti ya.</div>`;
+            }
+        } catch(e) {
+            document.getElementById(loadingId).remove();
+            aiBody.innerHTML += `<div class="ai-msg bot" style="color:#ff3b30;">Koneksi internetmu sepertinya terputus.</div>`;
+        }
+        aiBody.scrollTop = aiBody.scrollHeight;
+    }
+
+    if(aiSendBtn) {
+        aiSendBtn.addEventListener('click', kirimPesanAI);
+    }
+    if(aiInput) {
+        aiInput.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') kirimPesanAI();
+        });
+    }
+
+    // ==========================================
+    // FUNGSI PENGATUR PRODUK BERANDA
+    // ==========================================
     async function loadRandomProducts() {
         const productList = document.getElementById('randomProductList');
         const larisList = document.getElementById('topSellingList');
@@ -282,9 +372,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==========================================
-    // ✅ FUNGSI KATEGORI CERDAS (DENGAN SEARCH & FILTER)
+    // FUNGSI KATEGORI CERDAS (DENGAN SEARCH & FILTER)
     // ==========================================
-    window.katalogDataSementara = []; // Array Penyimpan Sementara
+    window.katalogDataSementara = []; 
 
     window.saringProdukLangsung = async function(mainCat, subCat) {
         tutupSubKategori();
@@ -294,7 +384,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const containerGrid = document.getElementById('gridHasilKategori');
         const teksPencarian = subCat === 'Semua' ? mainCat : subCat;
 
-        // Reset Filter UI
         const inputCari = document.getElementById('inputCariKatalog');
         const filterDrop = document.getElementById('filterKatalog');
         if(inputCari) inputCari.value = '';
@@ -313,14 +402,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 let keyword = teksPencarian.toLowerCase().split(/[,\/ ]/)[0]; 
                 if(keyword === "buku" && subCat.includes("sekolah")) keyword = "sekolah";
 
-                // Simpan barang yang sesuai Kategori ke memori sementara
                 window.katalogDataSementara = result.data.filter(p => {
                     const title = (p.title || '').toLowerCase();
                     const desc = (p.description || '').toLowerCase();
                     return title.includes(keyword) || desc.includes(keyword);
                 });
 
-                // Eksekusi rendering final
                 window.renderHasilKatalog();
             } else {
                 containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:#888; grid-column:span 2; padding: 50px 20px;">Toko belum mengunggah barang.</p>';
@@ -330,15 +417,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Fungsi Render yg terhubung dengan Tombol Filter & Kotak Pencarian
     window.renderHasilKatalog = function() {
         const containerGrid = document.getElementById('gridHasilKategori');
         const inputCari = document.getElementById('inputCariKatalog');
         const filterDrop = document.getElementById('filterKatalog');
         
-        let finalData = [...window.katalogDataSementara]; // Duplikasi agar aslinya tidak rusak
+        let finalData = [...window.katalogDataSementara]; 
 
-        // 1. FILTER PENCARIAN (Berdasarkan Teks Ketikan)
         if(inputCari && inputCari.value.trim() !== '') {
             const searchTxt = inputCari.value.toLowerCase().trim();
             finalData = finalData.filter(p => {
@@ -348,19 +433,16 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // 2. SORTING (Termurah, Terlaris, Terbaru)
         if(filterDrop) {
             if(filterDrop.value === 'termurah') {
                 finalData.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
             } else if (filterDrop.value === 'terlaris') {
                 finalData.sort((a, b) => (parseInt(b.sold_count) || 0) - (parseInt(a.sold_count) || 0));
             } else {
-                // Terbaru (Berdasarkan ID / Waktu upload)
                 finalData.sort((a, b) => parseInt(b.id) - parseInt(a.id));
             }
         }
 
-        // 3. RENDER HTML
         if (finalData.length > 0) {
             containerGrid.innerHTML = '';
             finalData.forEach(product => {
@@ -427,12 +509,12 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = 'detailproduk.html';
     }
 
-
     window.tutupHalamanPesanan = function() {
         document.getElementById('pesananLayarPenuh').style.display = 'none';
         document.body.style.overflow = 'auto';
     }
 
+    // ✅ LOGIKA LAYAR PESANAN DENGAN RAYUAN MANIS
     async function bukaHalamanPesanan() {
         const layarPesanan = document.getElementById('pesananLayarPenuh');
         const kontenPesanan = document.getElementById('kontenPesananLayar');
@@ -447,7 +529,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div style="text-align:center; padding: 50px 20px; margin-top:20px;">
                     <i class="fas fa-heart" style="font-size: 60px; color: #ff4757; margin-bottom: 20px; animation: pulse 1.5s infinite;"></i>
                     <h3 style="color:#0D47A1; font-weight:800; margin-bottom:10px;">Halo Orang Baik! ✨</h3>
-                    <p style="color:#666; font-size:13px; line-height:1.6; margin-bottom:25px;">Keranjangmu masih sepi nih, sesepi hati yang belum disinggahi. Yuk, login sekarang dan temukan barang-barang murah spesial Ramadhan buat nemenin hari-harimu!</p>
+                    <p style="color:#666; font-size:13px; line-height:1.6; margin-bottom:25px;">Halaman ini masih sepi nih, sesepi hati yang belum disinggahi. Yuk, login sekarang dan temukan barang-barang murah spesial Ramadhan buat nemenin hari-harimu!</p>
                     <button onclick="window.location.href='registrasi/loginpembeli.html'" style="background:linear-gradient(135deg, #0D47A1, #1976D2); color:white; border:none; padding:14px 30px; border-radius:25px; font-weight:800; box-shadow:0 4px 15px rgba(13,71,161,0.3); cursor:pointer; width:100%;">Login & Mulai Belanja <i class="fas fa-arrow-right ml-2"></i></button>
                 </div>
             `;
