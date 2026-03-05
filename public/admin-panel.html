@@ -104,6 +104,9 @@
         <a href="#" class="active"><i class="fas fa-chart-pie"></i> Dasbor</a>
         <a href="#accSection" style="color: #FFD700;"><i class="fas fa-check-circle"></i> Tugas Persetujuan</a>
         <a href="#pesananSection"><i class="fas fa-shopping-cart"></i> Pesanan Masuk</a>
+        
+        <a href="#chatSection" style="color: #00AA5B;"><i class="fas fa-comments"></i> Pantau Live Chat</a>
+
         <a href="#kuponSection"><i class="fas fa-ticket-alt"></i> Kelola Kupon</a>
         <a href="#promoSection"><i class="fas fa-images"></i> Upload Banner</a>
         <a href="#uploadSection"><i class="fas fa-upload"></i> Upload Barang</a>
@@ -178,6 +181,27 @@
                     </thead>
                     <tbody id="tableBodyOrders">
                         <tr><td colspan="5" style="text-align:center;">Memuat data pesanan...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="box" id="chatSection" style="border-top: 4px solid #00AA5B;">
+            <h3 style="color:#00AA5B;"><i class="fas fa-robot"></i> Pantau Percakapan (Bot AI & Pembeli)</h3>
+            <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Bot AI sudah otomatis membalas semua pesan di bawah ini. Anda cukup memantau saja sambil ngopi santai ☕.</p>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama Pembeli</th>
+                            <th>Pesan Terakhir</th>
+                            <th>Pengirim Terakhir</th>
+                            <th>Waktu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBodyChats">
+                        <tr><td colspan="4" style="text-align:center; padding: 20px;">Memuat data chat dari server...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -636,7 +660,6 @@
             } catch (err) { console.error(err); }
         }
 
-        // ✅ UBAH: MENGIRIM DNA GROSIR KE FUNGSI EDIT
         async function fetchProducts() { 
             try {
                 const res = await fetch('/api/products');
@@ -655,7 +678,6 @@
                         if(prod.category === 'laris') { badgeClass = 'badge-laris'; badgeText = '🔥 Laris'; }
                         else if(prod.category === 'keranjang') { badgeClass = 'badge-keranjang'; badgeText = '🛒 Diminati'; }
 
-                        // Info tambahan grosir di tabel jika ada
                         let infoGrosir = '';
                         if(prod.wholesale_price > 0 && prod.wholesale_min_qty > 0) {
                             infoGrosir = `<br><span style="font-size:9px; color:#00AA5B; background:#E8F5E9; padding:2px 4px; border-radius:4px;">Grosir: Min ${prod.wholesale_min_qty}</span>`;
@@ -705,11 +727,43 @@
             } catch (err) {}
         }
 
+        // ✅ LOGIKA UNTUK MENARIK DATA CHAT KE ADMIN PANEL
+        async function fetchAdminChats() {
+            try {
+                const res = await fetch('/api/admin/chats', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                const tbody = document.getElementById('tableBodyChats');
+                
+                if (result.success && result.data.length > 0) {
+                    tbody.innerHTML = '';
+                    result.data.forEach(chat => {
+                        const waktu = new Date(chat.created_at).toLocaleString('id-ID', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
+                        
+                        let badgeSender = chat.sender_role === 'pembeli' 
+                            ? '<span style="background:#E1F5FE; color:#0D47A1; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:bold;"><i class="fas fa-user"></i> Pembeli</span>' 
+                            : '<span style="background:#E8F5E9; color:#00AA5B; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:bold;"><i class="fas fa-robot"></i> Bot AI</span>';
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><b>${chat.user_name}</b></td>
+                                <td style="max-width: 250px; white-space: normal; line-height: 1.4; color: #555;"><i>"${chat.message}"</i></td>
+                                <td>${badgeSender}</td>
+                                <td style="font-size:11px; color:#888;">${waktu} WIB</td>
+                            </tr>
+                        `;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color:#aaa;"><i class="fas fa-comment-slash" style="font-size:24px; margin-bottom:10px; display:block;"></i>Belum ada percakapan dari pembeli.</td></tr>';
+                }
+            } catch(e) { console.error("Gagal memuat chat", e); }
+        }
+
         fetchDraftTugas(); 
         fetchProducts(); 
         fetchPromos(); 
         fetchOrders(); 
         fetchCoupons();
+        fetchAdminChats(); // ✅ PANGGIL FUNGSI CHAT DI SINI
 
         let targetHapusTipe = ""; let targetHapusId = "";
         function konfirmasiHapus(tipe, id) { targetHapusTipe = tipe; targetHapusId = id; document.getElementById('modalConfirm').style.display = 'flex'; }
@@ -759,7 +813,6 @@
             } catch(err) { showToast("Server Error!", "error"); } finally { btn.innerHTML = "<i class='fas fa-paper-plane'></i> Simpan & Perbarui Pembeli"; }
         });
 
-        // ✅ UPLOAD MANUAL DENGAN BAWA DNA GROSIR
         document.getElementById('formUploadBarang').addEventListener('submit', async (e) => {
             e.preventDefault(); const btn = document.getElementById('btnSimpanBarang'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengupload...";
             
@@ -778,7 +831,6 @@
             formData.append('variant_title', document.getElementById('prodVariantTitle').value);
             formData.append('variant_options', document.getElementById('prodVariantOptions').value);
             
-            // Tambahan DNA Grosir
             formData.append('wholesale_price', document.getElementById('prodWholesalePrice').value || 0);
             formData.append('wholesale_min_qty', document.getElementById('prodWholesaleMin').value || 0);
 
@@ -802,7 +854,6 @@
             } catch(err) {} finally { btn.innerHTML = "<i class='fas fa-cloud-upload-alt'></i> Pasang Banner Promo"; }
         });
 
-        // ✅ EDIT PRODUK MENERIMA DNA GROSIR
         function bukaEditProduk(id, title, capital, price, stock, category, weight, unit, varTitle, varOptions, wsPrice, wsMin) {
             document.getElementById('editProdId').value = id; 
             document.getElementById('editProdName').value = title;
@@ -815,7 +866,6 @@
             document.getElementById('editProdVariantTitle').value = varTitle || '';
             document.getElementById('editProdVariantOptions').value = varOptions || '';
             
-            // Info Grosir
             document.getElementById('editProdWholesalePrice').value = wsPrice || 0;
             document.getElementById('editProdWholesaleMin').value = wsMin || 0;
 
