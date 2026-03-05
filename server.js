@@ -33,6 +33,7 @@ const upload = multer({ storage: storage });
 const uploadExcel = multer({ storage: multer.memoryStorage() });
 
 const { pool, initDB } = require('./config/db'); 
+// (getAllProducts kita override di bawah, jadi abaikan yang di import ini)
 const { register, verifyOTP, googleLogin, forgotPassword, resetPassword } = require('./controllers/auth/auth');
 const { getProfile, updateProfile } = require('./controllers/profile/profile');
 const { uploadProduct, getAllProducts, uploadPromo, getPromos } = require('./controllers/product/product');
@@ -90,7 +91,26 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/ai/search', askAI);
-app.get('/api/products', getAllProducts); 
+
+// ✅ PERBAIKAN: MENGAMBIL RATA-RATA BINTANG REAL DARI DATABASE
+app.get('/api/products', async (req, res) => {
+    try {
+        const query = `
+            SELECT p.*, 
+                   COALESCE(ROUND(AVG(r.rating), 1), 0) as avg_rating
+            FROM products p
+            LEFT JOIN product_reviews r ON p.id = r.product_id
+            GROUP BY p.id
+            ORDER BY p.created_at DESC
+        `;
+        const result = await pool.query(query);
+        res.json({ success: true, data: result.rows });
+    } catch (err) {
+        console.error("🔥 Error Get Products:", err);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
 app.get('/api/promos', getPromos); 
 app.get('/api/forum', getPosts);          
 
@@ -123,7 +143,6 @@ app.post('/api/address', verifyToken, async (req, res) => {
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
-// ✅ UPLOAD CLOUDINARY: MENERIMA DNA GROSIR (RUDAL 2)
 app.post('/api/products', verifyAdmin, upload.array('media', 5), async (req, res) => {
     const { title, capital_price, price, stock, category, description, weight, unit, variant_title, variant_options, wholesale_price, wholesale_min_qty } = req.body;
     try {
@@ -152,7 +171,6 @@ app.delete('/api/promos/:id', verifyAdmin, async (req, res) => {
     } catch(err) { res.status(500).json({ success: false }); }
 });
 
-// ✅ EDIT PRODUK: MENERIMA DNA GROSIR (RUDAL 2)
 app.put('/api/products/:id', verifyAdmin, async (req, res) => {
     const { title, price, capital_price, stock, category, weight, unit, variant_title, variant_options, wholesale_price, wholesale_min_qty } = req.body;
     try {
@@ -167,7 +185,6 @@ app.put('/api/products/:id', verifyAdmin, async (req, res) => {
     } catch(err) { res.status(500).json({ success: false }); }
 });
 
-// API KUPON & ORDER (TETAP SAMA)
 app.post('/api/coupons/check', async (req, res) => {
     const { code } = req.body;
     try {
@@ -235,9 +252,6 @@ app.post('/api/reviews', verifyToken, async (req, res) => {
     try { await pool.query('INSERT INTO product_reviews (product_id, user_id, rating, comment) VALUES ($1, $2, $3, $4)', [req.body.product_id, req.user.id, req.body.rating, req.body.comment]); res.json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
 });
 
-// ==========================================
-// 🟢 API BARU: RUANG KARANTINA & UPLOAD EXCEL
-// ==========================================
 app.post('/api/admin/excel/aset', verifyAdmin, uploadExcel.single('file_excel'), async (req, res) => {
     try {
         const workbook = xlsx.read(req.file.buffer, { type: 'buffer' }); const data = xlsx.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
@@ -253,7 +267,6 @@ app.post('/api/admin/excel/aset', verifyAdmin, uploadExcel.single('file_excel'),
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
-// ✅ UPLOAD EXCEL DRAFT: BACA KOLOM GROSIR
 app.post('/api/admin/excel/draft', verifyAdmin, uploadExcel.single('file_excel'), async (req, res) => {
     try {
         const workbook = xlsx.read(req.file.buffer, { type: 'buffer' }); const data = xlsx.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
@@ -284,7 +297,6 @@ app.get('/api/admin/excel/draft', verifyAdmin, async (req, res) => {
     try { const result = await pool.query("SELECT * FROM draft_products WHERE status = 'Pending' ORDER BY created_at DESC"); res.json({ success: true, data: result.rows }); } catch (err) { res.status(500).json({ success: false }); }
 });
 
-// ✅ ACC BARANG: BAWA DNA GROSIR KE TOKO UTAMA
 app.post('/api/admin/excel/draft/approve/:id', verifyAdmin, async (req, res) => {
     try {
         const cekDraft = await pool.query('SELECT * FROM draft_products WHERE id = $1', [req.params.id]);
