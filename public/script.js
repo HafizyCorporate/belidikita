@@ -174,13 +174,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ✅ FUNGSI PENGATUR PRODUK BERANDA (MENGHILANGKAN AREA KOSONG & KOTAK RAPI)
+    // ✅ FUNGSI PENGATUR PRODUK BERANDA (HILANGKAN AREA KOSONG & BINTANG REAL)
     async function loadRandomProducts() {
         const productList = document.getElementById('randomProductList');
         const larisList = document.getElementById('topSellingList');
         const cartList = document.getElementById('topCartList');
         
-        // Panggil Section untuk di-hide jika kosong
         const sectionLaris = document.getElementById('sectionLaris');
         const sectionKeranjang = document.getElementById('sectionKeranjang');
         const sectionProdukUtama = document.getElementById('bagianProdukUtama');
@@ -214,8 +213,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video+Produk' : (fotoUtama || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
                     const mediaTag = isVideo ? `<video src="${fotoBarang}" class="product-media" style="object-fit:cover;"></video>` : `<img src="${fotoBarang}" class="product-media" alt="${product.title}">`;
 
-                    // ✅ MENGGUNAKAN DATA TERJUAL ASLI DARI DATABASE
+                    // ✅ LOGIKA BINTANG REAL (Dari Server)
                     const terjual = product.sold_count || 0;
+                    const avgRating = parseFloat(product.avg_rating) || 0;
+                    
+                    // Jika ada review, bintang kuning. Jika belum, bintang abu-abu "0.0"
+                    const ratingHtml = avgRating > 0 
+                        ? `<i class="fas fa-star" style="color:#FFD700;"></i> ${avgRating}` 
+                        : `<i class="fas fa-star" style="color:#ccc;"></i> 0.0`;
 
                     const pId = product.id; const pUrl = product.media_url; const pTitle = product.title;
                     const pDesc = deskripsiBarang; const pPrice = product.price; const pWeight = product.weight;
@@ -237,9 +242,11 @@ document.addEventListener("DOMContentLoaded", () => {
                             ${badgeGrosirHorizontal}
                             <img src="${fotoBarang}" class="h-card-img" alt="Barang">
                             <div class="h-card-info">
-                                <div class="h-card-row">
-                                    <span class="h-card-title">${product.title}</span>
-                                    <span class="h-card-price" style="font-size:11px;">${priceRp}</span>
+                                <div class="h-card-title">${product.title}</div>
+                                <div class="h-card-price">${priceRp}</div>
+                                <div class="h-card-stats">
+                                    <span>${ratingHtml}</span>
+                                    <span>${terjual} Terjual</span>
                                 </div>
                             </div>
                         `;
@@ -249,7 +256,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (product.category === 'keranjang' && cartList) { cartList.appendChild(hCard); countKeranjang++; }
                     }
 
-                    // ✅ KOTAK SAMA TINGGI BERKAT CSS BARU (.product-card)
                     const card = document.createElement('div');
                     card.className = 'product-card';
                     card.innerHTML = `
@@ -259,7 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             <div class="product-title">${product.title}</div>
                             <div class="product-price">${priceRp}</div>
                             <div class="product-stats">
-                                <span><i class="fas fa-star" style="color:#FFD700;"></i> 4.9</span>
+                                <span>${ratingHtml}</span>
                                 <span>${terjual} Terjual</span>
                             </div>
                         </div>`;
@@ -270,7 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     countBiasa++;
                 });
 
-                // ✅ LOGIKA MENGHILANGKAN SECTION YANG KOSONG
+                // ✅ LOGIKA MENGHILANGKAN SECTION YANG KOSONG DENGAN KEJAM
                 if(countLaris > 0) { sectionLaris.style.display = 'block'; } else { sectionLaris.style.display = 'none'; }
                 if(countKeranjang > 0) { sectionKeranjang.style.display = 'block'; } else { sectionKeranjang.style.display = 'none'; }
                 if(countBiasa > 0) { sectionProdukUtama.style.display = 'block'; } else { sectionProdukUtama.style.display = 'none'; }
@@ -279,11 +285,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 sectionLaris.style.display = 'none';
                 sectionKeranjang.style.display = 'none';
                 sectionProdukUtama.style.display = 'block';
-                productList.innerHTML = '<p style="text-align:center; width:100%; color:#888; grid-column:span 2;">Toko masih dalam tahap persiapan barang.</p>';
+                productList.innerHTML = '<p style="text-align:center; width:100%; color:#888; grid-column:span 2; padding:30px;">Toko masih dalam tahap persiapan barang.</p>';
             }
         } catch (error) { 
             sectionProdukUtama.style.display = 'block';
-            productList.innerHTML = '<p style="color: red; text-align:center; grid-column:span 2;">Gagal memuat barang toko.</p>'; 
+            productList.innerHTML = '<p style="color: red; text-align:center; grid-column:span 2; padding:30px;">Gagal memuat barang toko.</p>'; 
         }
     }
 
