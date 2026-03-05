@@ -11,17 +11,7 @@
         .cat-section { background: #fff; padding: 15px 10px 5px 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .cat-header { font-size: 14px; font-weight: 800; color: #0D47A1; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; padding-left: 5px; }
         
-        /* Grid Sliding 2 Baris ke Samping */
-        .cat-grid { 
-            display: grid; 
-            grid-template-rows: repeat(2, 1fr); 
-            grid-auto-flow: column; 
-            gap: 15px 10px; 
-            overflow-x: auto; 
-            padding-bottom: 10px; 
-            scrollbar-width: none; 
-            -webkit-overflow-scrolling: touch; 
-        }
+        .cat-grid { display: grid; grid-template-rows: repeat(2, 1fr); grid-auto-flow: column; gap: 15px 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .cat-grid::-webkit-scrollbar { display: none; }
         
         .cat-item { display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; text-decoration: none; transition: transform 0.2s; width: 70px; }
@@ -43,7 +33,6 @@
         .bg-mainan { background: linear-gradient(135deg, #FFEB3B, #FFF176); color: #e65100 !important; }
         .bg-ibadah { background: linear-gradient(135deg, #0D47A1, #1976D2); }
 
-        /* ✅ CSS MODAL BOTTOM SHEET (SUB-KATEGORI) */
         .modal-bottom-sheet { display: none; position: fixed; z-index: 4000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,40,80,0.6); backdrop-filter: blur(3px); align-items: flex-end; justify-content: center; }
         .bottom-sheet-content { background: #fff; width: 100%; max-width: 600px; border-radius: 25px 25px 0 0; padding: 25px 20px; animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; box-shadow: 0 -10px 30px rgba(0,0,0,0.2); max-height: 80vh; display: flex; flex-direction: column; }
         @keyframes slideUp { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
@@ -57,6 +46,23 @@
         .sub-cat-item { padding: 14px 18px; background: #fafcff; border: 2px solid #E1F5FE; border-radius: 12px; font-size: 13px; font-weight: 700; color: #555; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
         .sub-cat-item:active { transform: scale(0.97); background: #E1F5FE; border-color: #81D4FA; color: #0D47A1; }
         .sub-cat-item i { color: #FF9800; font-size: 14px;}
+
+        /* ✅ CSS PERBAIKAN: KARTU PRODUK SAMA TINGGI */
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 0 15px 15px 15px; }
+        .product-card { background: #fff; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 100%; border: 1px solid #f0f4f8;}
+        .product-media { width: 100%; height: 160px; object-fit: cover; border-bottom: 1px solid #f0f4f8; } /* Paksa tinggi gambar sama */
+        .product-info { padding: 12px; display: flex; flex-direction: column; flex-grow: 1; }
+        .product-title { font-size: 12px; font-weight: 700; color: #0D47A1; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;}
+        .product-price { color: #ff9800; font-weight: 800; font-size: 14px; margin-bottom: 10px; }
+        .product-stats { display: flex; justify-content: space-between; font-size: 10px; color: #888; font-weight: 600; margin-top: auto; align-items: center;} /* margin-top:auto mendorong ke paling bawah */
+
+        /* ✅ CSS HALAMAN BARU UNTUK KATEGORI (FULLSCREEN) */
+        #katalogLayarPenuh { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7fa; z-index: 5000; overflow-y: auto; display: none; flex-direction: column; animation: slideInRight 0.3s ease; }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .katalog-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .katalog-header i { font-size: 20px; color: #0D47A1; cursor: pointer; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: #E1F5FE; border-radius: 50%;}
+        .katalog-header h2 { font-size: 16px; font-weight: 800; color: #0D47A1; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
     </style>
 </head>
 <body class="no-scroll"> 
@@ -68,9 +74,7 @@
     </div>
 
     <div id="splashScreen" class="splash-screen">
-        <div class="moon-ramadhan">
-            <i class="fas fa-star-and-crescent"></i>
-        </div>
+        <div class="moon-ramadhan"><i class="fas fa-star-and-crescent"></i></div>
         <div class="splash-text-container">
             <img src="assets/nama_logo_kamu.png" alt="Logo" class="splash-logo" onerror="this.style.display='none'">
             <p class="brand-slogan">Marhaban Ya Ramadhan<br><span style="font-size: 14px; font-weight: 600;">Belanja pintar, Jualan lancar</span></p>
@@ -80,193 +84,89 @@
                 <div class="mountain"></div><div class="hill"></div>
                 <div class="tree"></div><div class="tree"></div><div class="tree"></div>
                 <div class="rock"></div>
-                <div class="truck-wrapper">
-                    <div class="truck"></div><div class="wheels"></div>
-                </div>
+                <div class="truck-wrapper"><div class="truck"></div><div class="wheels"></div></div>
             </div>
         </div>
     </div> 
 
     <header id="topHeader" class="hidden">
-        <div class="header-logo-box">
-            <img src="assets/nama_logo_kamu.png" alt="Logo Belidikita" class="main-logo-header">
-        </div>
-        <div class="header-search">
-            <i class="fas fa-search"></i>
-            <input type="text" placeholder="Cari untuk sahur & buka...">
-        </div>
-        <div class="header-admin" id="adminLoginIcon">
-            <i class="fas fa-user-shield"></i>
-        </div>
-        <div class="header-cart" style="cursor: pointer;" onclick="window.location.href='keranjang.html'">
-            <i class="fas fa-shopping-cart"></i>
-            <span class="cart-badge">0</span>
-        </div>
+        <div class="header-logo-box"><img src="assets/nama_logo_kamu.png" alt="Logo" class="main-logo-header"></div>
+        <div class="header-search"><i class="fas fa-search"></i><input type="text" placeholder="Cari untuk sahur & buka..."></div>
+        <div class="header-admin" id="adminLoginIcon"><i class="fas fa-user-shield"></i></div>
+        <div class="header-cart" style="cursor: pointer;" onclick="window.location.href='keranjang.html'"><i class="fas fa-shopping-cart"></i><span class="cart-badge">0</span></div>
     </header>
 
     <main id="mainContent" class="hidden">
-        
         <div class="slider-container">
             <div class="slider-wrapper" id="promoSlider">
-                <div class="slide" style="background: linear-gradient(135deg, #0D47A1, #81D4FA);">
-                    <h3>🌙 Berkah Ramadhan!</h3><p>Diskon spesial hingga 50%</p>
-                </div>
-                <div class="slide" style="background: linear-gradient(135deg, #00AA5B, #B2DFDB);">
-                    <h3>Baju Muslim & Takjil</h3><p>Cek koleksi terbaru kami</p>
-                </div>
-                <div class="slide" style="background: linear-gradient(135deg, #FF9800, #FFCC80);">
-                    <h3>Gratis Ongkir</h3><p>Ke seluruh pelosok negeri</p>
-                </div>
+                <div class="slide" style="background: linear-gradient(135deg, #0D47A1, #81D4FA);"><h3>🌙 Berkah Ramadhan!</h3><p>Diskon spesial hingga 50%</p></div>
             </div>
         </div>
 
         <section class="cat-section">
-            <div class="cat-header">
-                <i class="fas fa-th-large"></i> Kategori Pilihan
-            </div>
+            <div class="cat-header"><i class="fas fa-th-large"></i> Kategori Pilihan</div>
             <div class="cat-grid">
-                <div class="cat-item" onclick="bukaSubKategori('Sembako')">
-                    <div class="cat-icon-box bg-sembako"><i class="fas fa-shopping-basket"></i></div>
-                    <span class="cat-name">Sembako</span>
-                </div>
-                <div class="cat-item" onclick="bukaSubKategori('Fashion')">
-                    <div class="cat-icon-box bg-fashion"><i class="fas fa-tshirt"></i></div>
-                    <span class="cat-name">Fashion</span>
-                </div>
-                <div class="cat-item" onclick="bukaSubKategori('Elektronik')">
-                    <div class="cat-icon-box bg-elektronik"><i class="fas fa-mobile-alt"></i></div>
-                    <span class="cat-name">Elektronik</span>
-                </div>
-                <div class="cat-item" onclick="bukaSubKategori('Rumah Tangga')">
-                    <div class="cat-icon-box bg-rumah"><i class="fas fa-blender"></i></div>
-                    <span class="cat-name">Rumah</span>
-                </div>
-                <div class="cat-item" onclick="bukaSubKategori('Beauty')">
-                    <div class="cat-icon-box bg-beauty"><i class="fas fa-magic"></i></div>
-                    <span class="cat-name">Beauty</span>
-                </div>
-                <div class="cat-item" onclick="bukaSubKategori('Ibu & Bayi')">
-                    <div class="cat-icon-box bg-bayi"><i class="fas fa-baby-carriage"></i></div>
-                    <span class="cat-name">Bayi</span>
-                </div>
-                <div class="cat-item" onclick="bukaSubKategori('Komputer')">
-                    <div class="cat-icon-box bg-komputer"><i class="fas fa-laptop"></i></div>
-                    <span class="cat-name">Komputer</span>
-                </div>
-                <div class="cat-item" onclick="bukaSubKategori('Otomotif')">
-                    <div class="cat-icon-box bg-otomotif"><i class="fas fa-motorcycle"></i></div>
-                    <span class="cat-name">Otomotif</span>
-                </div>
-                <div class="cat-item" onclick="bukaSubKategori('Olahraga')">
-                    <div class="cat-icon-box bg-olahraga"><i class="fas fa-dumbbell"></i></div>
-                    <span class="cat-name">Olahraga</span>
-                </div>
-                <div class="cat-item" onclick="bukaSubKategori('Makanan')">
-                    <div class="cat-icon-box bg-makanan"><i class="fas fa-hamburger"></i></div>
-                    <span class="cat-name">Makanan</span>
-                </div>
-                <div class="cat-item" onclick="bukaSubKategori('Buku')">
-                    <div class="cat-icon-box bg-buku"><i class="fas fa-book"></i></div>
-                    <span class="cat-name">Buku & ATK</span>
-                </div>
-                <div class="cat-item" onclick="bukaSubKategori('Mainan')">
-                    <div class="cat-icon-box bg-mainan"><i class="fas fa-gamepad" style="color:#e65100;"></i></div>
-                    <span class="cat-name">Mainan</span>
-                </div>
-                <div class="cat-item" onclick="bukaSubKategori('Ibadah')">
-                    <div class="cat-icon-box bg-ibadah"><i class="fas fa-mosque"></i></div>
-                    <span class="cat-name">Ibadah</span>
-                </div>
+                <div class="cat-item" onclick="bukaSubKategori('Sembako')"><div class="cat-icon-box bg-sembako"><i class="fas fa-shopping-basket"></i></div><span class="cat-name">Sembako</span></div>
+                <div class="cat-item" onclick="bukaSubKategori('Fashion')"><div class="cat-icon-box bg-fashion"><i class="fas fa-tshirt"></i></div><span class="cat-name">Fashion</span></div>
+                <div class="cat-item" onclick="bukaSubKategori('Elektronik')"><div class="cat-icon-box bg-elektronik"><i class="fas fa-mobile-alt"></i></div><span class="cat-name">Elektronik</span></div>
+                <div class="cat-item" onclick="bukaSubKategori('Rumah Tangga')"><div class="cat-icon-box bg-rumah"><i class="fas fa-blender"></i></div><span class="cat-name">Rumah</span></div>
+                <div class="cat-item" onclick="bukaSubKategori('Beauty')"><div class="cat-icon-box bg-beauty"><i class="fas fa-magic"></i></div><span class="cat-name">Beauty</span></div>
+                <div class="cat-item" onclick="bukaSubKategori('Ibu & Bayi')"><div class="cat-icon-box bg-bayi"><i class="fas fa-baby-carriage"></i></div><span class="cat-name">Bayi</span></div>
+                <div class="cat-item" onclick="bukaSubKategori('Komputer')"><div class="cat-icon-box bg-komputer"><i class="fas fa-laptop"></i></div><span class="cat-name">Komputer</span></div>
+                <div class="cat-item" onclick="bukaSubKategori('Otomotif')"><div class="cat-icon-box bg-otomotif"><i class="fas fa-motorcycle"></i></div><span class="cat-name">Otomotif</span></div>
+                <div class="cat-item" onclick="bukaSubKategori('Olahraga')"><div class="cat-icon-box bg-olahraga"><i class="fas fa-dumbbell"></i></div><span class="cat-name">Olahraga</span></div>
+                <div class="cat-item" onclick="bukaSubKategori('Makanan')"><div class="cat-icon-box bg-makanan"><i class="fas fa-hamburger"></i></div><span class="cat-name">Makanan</span></div>
+                <div class="cat-item" onclick="bukaSubKategori('Buku')"><div class="cat-icon-box bg-buku"><i class="fas fa-book"></i></div><span class="cat-name">Buku & ATK</span></div>
+                <div class="cat-item" onclick="bukaSubKategori('Mainan')"><div class="cat-icon-box bg-mainan"><i class="fas fa-gamepad" style="color:#e65100;"></i></div><span class="cat-name">Mainan</span></div>
+                <div class="cat-item" onclick="bukaSubKategori('Ibadah')"><div class="cat-icon-box bg-ibadah"><i class="fas fa-mosque"></i></div><span class="cat-name">Ibadah</span></div>
             </div>
         </section>
 
-        <section class="scroll-section">
-            <div class="section-header">
-                <h2>🔥 Flash Sale Ramadhan</h2>
-                <a href="#">Lihat Semua</a>
-            </div>
+        <section class="scroll-section" id="sectionLaris" style="display:none;">
+            <div class="section-header"><h2>🔥 Flash Sale Ramadhan</h2><a href="#">Lihat Semua</a></div>
             <div class="horizontal-scroll" id="topSellingList"></div>
         </section>
 
-        <section class="scroll-section">
-            <div class="section-header">
-                <h2>🛒 Paling Dicari Buat Lebaran</h2>
-            </div>
+        <section class="scroll-section" id="sectionKeranjang" style="display:none;">
+            <div class="section-header"><h2>🛒 Paling Dicari Buat Lebaran</h2></div>
             <div class="horizontal-scroll" id="topCartList"></div>
         </section>
 
-        <section class="grid-section" id="bagianProdukUtama">
-            <div class="section-header">
-                <h2 id="judulDaftarProduk">📦 Jelajahi Semua Barang</h2>
-            </div>
-            <div class="product-grid" id="randomProductList">
-                <p style="text-align:center; width:100%; color:#888; grid-column: span 2;">Memuat barang toko...</p>
-            </div>
+        <section class="grid-section" id="bagianProdukUtama" style="display:none;">
+            <div class="section-header"><h2 id="judulDaftarProduk">📦 Jelajahi Semua Barang</h2></div>
+            <div class="product-grid" id="randomProductList"></div>
         </section>
         
         <div style="height: 90px;"></div>
     </main>
 
-    <nav id="bottomNav" class="hidden">
-        <a href="#" class="nav-item active" id="menuHome">
-            <i class="fas fa-mosque"></i><span>Beranda</span>
-        </a>
-        <a href="#" class="nav-item" id="menuProduct">
-            <i class="fas fa-box-open"></i><span>Katalog</span>
-        </a>
-        <a href="#" class="nav-item" id="menuFeed">
-            <i class="fas fa-play-circle"></i><span>Video</span>
-        </a>
-        <a href="#" class="nav-item" id="menuTransaction">
-            <i class="fas fa-receipt"></i><span>Pesanan</span>
-        </a>
-        <a href="#" class="nav-item" id="menuAccount">
-            <i class="fas fa-user"></i><span>Akun</span>
-        </a>
-    </nav>
-
-    <div id="productDetailModal" class="modal" style="display: none;">
-        <div class="modal-content product-detail-box">
-            <button id="closeDetailBtn" class="close-detail-btn">&times;</button>
-            <div class="detail-img-box">
-                <img id="detailImage" src="" alt="Foto Barang">
-                <div class="ramadhan-badge">Spesial Ramadhan</div>
-            </div>
-            <h2 id="detailTitle">Nama Barang</h2>
-            <h3 id="detailPrice">Rp0</h3>
-            
-            <div class="detail-desc-box">
-                <h4>Deskripsi Produk:</h4>
-                <p id="detailDesc">Deskripsi barang akan muncul di sini secara detail...</p>
-            </div>
-
-            <div class="detail-buttons">
-                <button id="btnAddToCart" class="btn-cart"><i class="fas fa-shopping-cart"></i> Masukkan Keranjang</button>
-                <button id="btnCheckout" class="btn-checkout"><i class="fas fa-money-bill-wave"></i> Beli Sekarang</button>
-            </div>
+    <div id="katalogLayarPenuh">
+        <div class="katalog-header">
+            <i class="fas fa-arrow-left" onclick="tutupHalamanKategori()"></i>
+            <h2 id="judulHalamanKategori">Hasil Pencarian</h2>
         </div>
+        <div class="product-grid" id="gridHasilKategori" style="padding-top: 15px;">
+            </div>
     </div>
 
+    <nav id="bottomNav" class="hidden">
+        <a href="#" class="nav-item active" id="menuHome"><i class="fas fa-mosque"></i><span>Beranda</span></a>
+        <a href="#" class="nav-item" id="menuProduct"><i class="fas fa-box-open"></i><span>Katalog</span></a>
+        <a href="#" class="nav-item" id="menuFeed"><i class="fas fa-play-circle"></i><span>Video</span></a>
+        <a href="#" class="nav-item" id="menuTransaction"><i class="fas fa-receipt"></i><span>Pesanan</span></a>
+        <a href="#" class="nav-item" id="menuAccount"><i class="fas fa-user"></i><span>Akun</span></a>
+    </nav>
+
     <div id="modalConfirmAdmin" class="modal-confirm">
-        <div class="confirm-box">
-            <i class="fas fa-user-shield"></i>
-            <h3>Status: Admin Aktif</h3>
-            <p>Anda sedang login sebagai Admin. Apakah Anda ingin keluar dari panel Admin sekarang?</p>
-            <div class="confirm-btn-group">
-                <button class="btn-batal" id="btnBatalAdmin">Batal</button>
-                <button class="btn-yakin" id="btnYakinAdmin">Ya, Keluar</button>
-            </div>
+        <div class="confirm-box"><i class="fas fa-user-shield"></i><h3>Status: Admin Aktif</h3><p>Anda sedang login sebagai Admin. Apakah Anda ingin keluar dari panel Admin sekarang?</p>
+            <div class="confirm-btn-group"><button class="btn-batal" id="btnBatalAdmin">Batal</button><button class="btn-yakin" id="btnYakinAdmin">Ya, Keluar</button></div>
         </div>
     </div>
 
     <div id="modalSubKategori" class="modal-bottom-sheet">
         <div class="bottom-sheet-content">
-            <div class="bs-header">
-                <div class="bs-title" id="judulSubKategori"><i class="fas fa-tags"></i> Kategori</div>
-                <div class="bs-close" onclick="tutupSubKategori()"><i class="fas fa-times"></i></div>
-            </div>
-            <div class="sub-cat-grid" id="listSubKategori">
-                </div>
+            <div class="bs-header"><div class="bs-title" id="judulSubKategori"><i class="fas fa-tags"></i> Kategori</div><div class="bs-close" onclick="tutupSubKategori()"><i class="fas fa-times"></i></div></div>
+            <div class="sub-cat-grid" id="listSubKategori"></div>
         </div>
     </div>
 
@@ -295,24 +195,10 @@
             document.getElementById('judulSubKategori').innerHTML = `<i class="fas fa-tags" style="color:#FF9800;"></i> Etalase ${mainCat}`;
             const container = document.getElementById('listSubKategori');
             container.innerHTML = '';
-            
             const subs = kamusKategori[mainCat] || [];
             
-            container.innerHTML += `
-                <div class="sub-cat-item" style="background:#E1F5FE; border-color:#81D4FA; color:#0D47A1;" onclick="saringProdukLangsung('${mainCat}', 'Semua')">
-                    <span>Semua Produk ${mainCat}</span>
-                    <i class="fas fa-chevron-right" style="color:#0D47A1;"></i>
-                </div>
-            `;
-
-            subs.forEach(sub => {
-                container.innerHTML += `
-                    <div class="sub-cat-item" onclick="saringProdukLangsung('${mainCat}', '${sub}')">
-                        <span>${sub}</span>
-                        <i class="fas fa-chevron-right"></i>
-                    </div>
-                `;
-            });
+            container.innerHTML += `<div class="sub-cat-item" style="background:#E1F5FE; border-color:#81D4FA; color:#0D47A1;" onclick="saringProdukLangsung('${mainCat}', 'Semua')"><span>Semua Produk ${mainCat}</span><i class="fas fa-chevron-right" style="color:#0D47A1;"></i></div>`;
+            subs.forEach(sub => { container.innerHTML += `<div class="sub-cat-item" onclick="saringProdukLangsung('${mainCat}', '${sub}')"><span>${sub}</span><i class="fas fa-chevron-right"></i></div>`; });
 
             document.getElementById('modalSubKategori').style.display = 'flex';
             document.body.style.overflow = 'hidden'; 
@@ -323,25 +209,32 @@
             document.body.style.overflow = 'auto'; 
         }
 
-        // ✅ LOGIKA PENYARINGAN YANG MEMBAWA DNA GROSIR & VARIAN
+        // ✅ TUTUP HALAMAN KATEGORI (KEMBALI KE BERANDA)
+        function tutupHalamanKategori() {
+            document.getElementById('katalogLayarPenuh').style.display = 'none';
+            document.body.style.overflow = 'auto'; 
+        }
+
+        // ✅ LOGIKA BARU: BUKA DI "HALAMAN BARU" (FULLSCREEN) DENGAN UKURAN KOTAK RAPI
         async function saringProdukLangsung(mainCat, subCat) {
             tutupSubKategori();
             
-            const container = document.getElementById('randomProductList');
-            const judulSection = document.getElementById('judulDaftarProduk');
+            const layarPenuh = document.getElementById('katalogLayarPenuh');
+            const judulHalaman = document.getElementById('judulHalamanKategori');
+            const containerGrid = document.getElementById('gridHasilKategori');
             const teksPencarian = subCat === 'Semua' ? mainCat : subCat;
 
-            judulSection.innerHTML = `📦 Hasil Pencarian: <span style="color:#FF9800;">${teksPencarian}</span>`;
-            container.innerHTML = '<p style="text-align:center; width:100%; color:#0D47A1; grid-column:span 2; padding: 20px; font-weight:bold;"><i class="fas fa-spinner fa-spin mr-2"></i> Mengambil barang dari rak...</p>';
-            
-            document.getElementById('bagianProdukUtama').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Buka halaman baru
+            layarPenuh.style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Kunci scroll di belakang
+            judulHalaman.innerText = teksPencarian;
+            containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:#0D47A1; grid-column:span 2; padding: 50px 20px; font-weight:bold;"><i class="fas fa-spinner fa-spin mr-2"></i> Mencari barang...</p>';
 
             try {
                 const res = await fetch('/api/products');
                 const result = await res.json();
 
                 if (result.success && result.data.length > 0) {
-                    
                     let keyword = teksPencarian.toLowerCase().split(/[,\/ ]/)[0]; 
                     if(keyword === "buku" && subCat.includes("sekolah")) keyword = "sekolah";
 
@@ -352,7 +245,7 @@
                     });
 
                     if (filteredData.length > 0) {
-                        container.innerHTML = '';
+                        containerGrid.innerHTML = '';
                         filteredData.forEach(product => {
                             const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
                             const deskripsiBarang = product.description || "Deskripsi belum tersedia.";
@@ -365,11 +258,10 @@
 
                             const isVideo = product.media_type === 'video';
                             const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video' : (fotoUtama || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
-                            const mediaTag = isVideo ? `<video src="${fotoBarang}" class="product-media" style="object-fit:cover;"></video>` : `<img src="${fotoBarang}" class="product-media" alt="${product.title}">`;
+                            const mediaTag = isVideo ? `<video src="${fotoBarang}" class="product-media"></video>` : `<img src="${fotoBarang}" class="product-media" alt="${product.title}">`;
                             
-                            const terjual = (product.id * 17 % 500) + 10; 
+                            const terjual = product.sold_count || 0; 
 
-                            // ✅ PERBAIKAN: BAWA DNA GROSIR, VARIAN, & SATUAN SAAT DI-KLIK DARI HASIL PENCARIAN
                             const prodObj = {
                                 id: product.id, foto: fotoUtama, nama: product.title, 
                                 hargaStr: priceRp, deskripsi: deskripsiBarang, 
@@ -383,20 +275,20 @@
                             };
                             const strObj = encodeURIComponent(JSON.stringify(prodObj));
 
-                            // Tambahkan Lencana Grosir di card jika ada
                             let labelGrosir = '';
                             if(product.wholesale_price > 0 && product.wholesale_min_qty > 0) {
                                 labelGrosir = `<div style="position:absolute; top:5px; left:5px; background:#4CAF50; color:#fff; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;"><i class="fas fa-tags"></i> GROSIR</div>`;
                             }
 
-                            container.innerHTML += `
+                            // KOTAK KATEGORI (TINGGI SAMA)
+                            containerGrid.innerHTML += `
                                 <div class="product-card" onclick="bukaDetailGlobal('${strObj}')" style="position:relative;">
                                     ${labelGrosir}
                                     ${mediaTag}
                                     <div class="product-info">
                                         <div class="product-title">${product.title}</div>
                                         <div class="product-price">${priceRp}</div>
-                                        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #888; font-weight: 600; margin-top: auto;">
+                                        <div class="product-stats">
                                             <span><i class="fas fa-star" style="color:#FFD700;"></i> 4.9</span>
                                             <span>${terjual} Terjual</span>
                                         </div>
@@ -405,15 +297,15 @@
                             `;
                         });
                     } else {
-                        container.innerHTML = `
-                            <div style="text-align:center; width:100%; grid-column:span 2; padding: 30px 10px;">
-                                <i class="fas fa-box-open" style="font-size: 40px; color: #ccc; margin-bottom: 10px;"></i>
-                                <p style="color:#888; font-weight:600; font-size: 12px;">Maaf, produk <b>${teksPencarian}</b> belum ditambahkan oleh Admin.</p>
+                        containerGrid.innerHTML = `
+                            <div style="text-align:center; width:100%; grid-column:span 2; padding: 50px 20px;">
+                                <i class="fas fa-box-open" style="font-size: 60px; color: #ccc; margin-bottom: 15px;"></i>
+                                <p style="color:#888; font-weight:600; font-size: 14px;">Barang <b>${teksPencarian}</b> belum ada di toko.</p>
                             </div>`;
                     }
                 }
             } catch (e) {
-                container.innerHTML = '<p style="text-align:center; width:100%; color:red; grid-column:span 2;">Gagal memuat barang dari server.</p>';
+                containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:red; grid-column:span 2;">Gagal memuat barang dari server.</p>';
             }
         }
 
