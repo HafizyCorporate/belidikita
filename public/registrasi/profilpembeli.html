@@ -69,6 +69,14 @@
         .tab-pesanan { position: relative; padding-bottom: 8px; color: #888; font-weight: 700; white-space: nowrap; font-size: 11px; transition: 0.3s; cursor: pointer;}
         .tab-pesanan.active { color: #0D47A1; font-weight: 800; }
         .tab-pesanan.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 80%; height: 3px; background: #0D47A1; border-radius: 3px; }
+
+        /* ✅ KARTU ALAMAT SHOPEE STYLE */
+        .address-card { background: #fff; border: 1px solid #E1F5FE; border-radius: 15px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; margin-bottom: 15px; }
+        .address-card.default { border: 2px solid #00AA5B; background: #f2fcf6;}
+        .address-label-badge { position: absolute; top: 15px; right: 15px; font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 5px; text-transform: uppercase; }
+        .badge-rumah { background: #E1F5FE; color: #0D47A1; }
+        .badge-kantor { background: #FFF3E0; color: #F57F17; }
+        .badge-lainnya { background: #F3E5F5; color: #7B1FA2; }
     </style>
 </head>
 <body class="text-gray-800 relative">
@@ -131,12 +139,44 @@
         </div>
 
         <div id="secAlamat" class="hidden">
-            <div class="glass-card rounded-3xl p-6 mb-6 border border-light">
+            
+            <div id="areaAlamatTersimpan" style="display: none;">
+                <h3 class="text-xs font-extrabold text-gray-700 mb-3"><i class="fas fa-address-book text-brand mr-1"></i> Buku Alamat Saya</h3>
+                
+                <div class="address-card default" id="kartuAlamatUtama">
+                    <div class="address-label-badge badge-rumah" id="badgeLabelAlamat"><i class="fas fa-home mr-1"></i> Rumah</div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <h4 class="text-sm font-extrabold text-gray-800" id="cardNamaPenerima">Nama</h4>
+                        <span class="text-gray-300">|</span>
+                        <span class="text-xs font-bold text-gray-500" id="cardWaPenerima">08xx</span>
+                    </div>
+                    <p class="text-xs text-gray-600 leading-relaxed mb-3" id="cardAlamatLengkap">Alamat lengkap disini...</p>
+                    <div class="flex gap-2">
+                        <span class="text-[9px] border border-accent text-accent px-2 py-1 rounded font-bold">Utama</span>
+                        <span class="text-[9px] border border-gray-300 text-gray-500 px-2 py-1 rounded font-bold">Alamat Pengiriman</span>
+                    </div>
+                </div>
+
+                <button onclick="bukaFormEditAlamat()" class="w-full bg-white border-2 border-dashed border-brand text-brand font-extrabold rounded-xl py-3 shadow-sm hover:bg-light transition-all mb-6">
+                    <i class="fas fa-edit mr-1"></i> Ubah Alamat / Tambah Baru
+                </button>
+            </div>
+
+            <div class="glass-card rounded-3xl p-6 mb-6 border border-light" id="areaFormAlamat">
                 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-lg mb-4 shadow-sm" id="alertAlamat">
-                    <p class="text-[10px] text-yellow-700 font-bold"><i class="fas fa-truck-fast mr-1"></i> Isi alamat secara detail, berurutan dari Provinsi hingga Kelurahan.</p>
+                    <p class="text-[10px] text-yellow-700 font-bold"><i class="fas fa-truck-fast mr-1"></i> Isi alamat secara detail agar kurir mudah menemukan lokasimu!</p>
                 </div>
                 
                 <form id="formAlamat" class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-tag mr-1"></i> Label Alamat</label>
+                        <select id="selectLabelAlamat" class="input-modern w-full rounded-xl px-4 py-3 text-sm font-semibold appearance-none bg-white cursor-pointer" required>
+                            <option value="Rumah">🏠 Rumah</option>
+                            <option value="Kantor">🏢 Kantor</option>
+                            <option value="Lainnya">📍 Tempat Lainnya</option>
+                        </select>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-[10px] font-extrabold text-brand uppercase mb-1"><i class="fas fa-user mr-1"></i> Nama Penerima</label>
@@ -204,9 +244,12 @@
                         <span id="previewAlamatLengkap" class="font-semibold italic">Silakan lengkapi form di atas...</span>
                     </div>
 
-                    <button type="submit" id="btnSimpanAlamat" class="w-full bg-gradient-to-r from-brand to-blue-500 text-white font-extrabold rounded-xl py-3.5 shadow-lg hover:shadow-xl transition-all mt-2 transform hover:-translate-y-1">
-                        <i class="fas fa-save mr-1"></i> Simpan & Gunakan Alamat
-                    </button>
+                    <div class="flex gap-2 mt-4">
+                        <button type="button" id="btnBatalEdit" onclick="tutupFormEditAlamat()" class="w-1/3 bg-gray-100 text-gray-500 font-extrabold rounded-xl py-3.5 hover:bg-gray-200 transition-all hidden">Batal</button>
+                        <button type="submit" id="btnSimpanAlamat" class="flex-1 bg-gradient-to-r from-brand to-blue-500 text-white font-extrabold rounded-xl py-3.5 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
+                            <i class="fas fa-save mr-1"></i> Simpan & Gunakan
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -314,22 +357,17 @@
 
         if(sessionStorage.getItem('belidikita_checkout')) {
             bukaTab('Alamat');
-            document.getElementById('alertAlamat').innerHTML = `<p class="text-[11px] text-yellow-700 font-extrabold"><i class="fas fa-exclamation-circle mr-1"></i> Selesaikan isi alamatmu untuk melanjutkan Checkout!</p>`;
         }
 
         // ==========================================
-        // ✅ 1. SINKRONISASI DATA PESANAN YANG DIPERKUAT
+        // 1. SINKRONISASI DATA PESANAN YANG DIPERKUAT
         // ==========================================
         let allMyOrders = [];
 
         async function loadRiwayatPesanan() {
             try {
-                // Logika Tembus Batas: Jika Anda menggunakan akun Admin untuk tes, ini akan menarik semua order.
-                // Jika Anda menggunakan akun Pembeli biasa, ini akan menarik order milik pembeli tersebut.
                 let apiEndpoint = '/api/orders/me';
-                if(token && token.startsWith('token-admin-')) {
-                    apiEndpoint = '/api/orders'; 
-                }
+                if(token && token.startsWith('token-admin-')) { apiEndpoint = '/api/orders'; }
 
                 const res = await fetch(apiEndpoint, { headers: { 'Authorization': `Bearer ${token}` } });
                 const result = await res.json();
@@ -338,9 +376,7 @@
                     allMyOrders = result.data;
                     filterPesanan('Semua', document.querySelector('.tab-pesanan.active')); 
                 }
-            } catch (err) { 
-                console.error("Kesalahan jaringan:", err); 
-            }
+            } catch (err) { }
         }
 
         window.filterPesanan = function(statusFilter, elemenTab) {
@@ -348,21 +384,16 @@
                 document.querySelectorAll('.tab-pesanan').forEach(tab => tab.classList.remove('active'));
                 elemenTab.classList.add('active');
             }
-
             const containerRiwayat = document.getElementById('containerRiwayatCards');
             containerRiwayat.innerHTML = ''; 
 
             let dataFiltered = allMyOrders;
-            
-            // MESIN PENERJEMAH STATUS LEBIH SENSITIF
             if(statusFilter !== 'Semua') {
                 dataFiltered = allMyOrders.filter(o => {
-                    let dbStatus = (o.status || 'Menunggu Pembayaran').trim(); // Pastikan tidak ada spasi terselubung
-                    
+                    let dbStatus = (o.status || 'Menunggu Pembayaran').trim(); 
                     if (statusFilter === 'Menunggu Pembayaran') return dbStatus === 'Pending' || dbStatus === 'Menunggu Pembayaran' || dbStatus === '';
                     if (statusFilter === 'Diproses') return dbStatus === 'Diproses' || dbStatus === 'Dikemas';
                     if (statusFilter === 'Retur') return dbStatus.includes('Retur');
-                    
                     return dbStatus === statusFilter;
                 });
             }
@@ -373,7 +404,6 @@
                     const barangPertama = items.length > 0 ? items[0] : { id: 0, foto: 'https://via.placeholder.com/150', nama: 'Barang', qty: 1, harga_final: 0 };
                     const sisaBarang = items.length > 1 ? ` + ${items.length - 1} produk lainnya` : '';
                     
-                    // Terjemahkan kata ke Tampilan
                     let rawStatus = (order.status || 'Menunggu Pembayaran').trim();
                     let displayStatus = rawStatus;
                     if(rawStatus === 'Pending' || rawStatus === '') displayStatus = 'Menunggu Pembayaran';
@@ -510,7 +540,7 @@
         }
 
         // ==========================================
-        // 3. LOAD DATA PROFIL & ALAMAT LAMA
+        // ✅ 3. LOAD DATA PROFIL & KARTU ALAMAT SHOPEE
         // ==========================================
         async function loadProfileData() {
             try {
@@ -522,18 +552,60 @@
                     document.getElementById('displayEmail').innerHTML = `<i class="fas fa-envelope mr-1"></i> ${data.email}`;
                     document.getElementById('inputNamaPenerima').value = data.name;
                 }
+
+                // Cek Alamat
                 const resAddr = await fetch('/api/address', { headers: { 'Authorization': `Bearer ${token}` } });
                 const resultAddr = await resAddr.json();
                 
+                const labelTersimpan = localStorage.getItem('belidikita_label_alamat') || 'Rumah';
+
                 if (resultAddr.success && resultAddr.data && resultAddr.data.alamat_lengkap) {
+                    // JIKA SUDAH ADA ALAMAT, MUNCULKAN KARTU DAN SEMBUNYIKAN FORM
+                    document.getElementById('areaAlamatTersimpan').style.display = 'block';
+                    document.getElementById('areaFormAlamat').style.display = 'none';
+
+                    // Isi Kartu
+                    document.getElementById('cardNamaPenerima').innerText = resultAddr.data.nama_penerima;
+                    document.getElementById('cardWaPenerima').innerText = resultAddr.data.nomor_wa;
+                    document.getElementById('cardAlamatLengkap').innerText = resultAddr.data.alamat_lengkap;
+                    
+                    // Set Label (Warna dan Ikon)
+                    const badge = document.getElementById('badgeLabelAlamat');
+                    if(labelTersimpan === 'Rumah') {
+                        badge.className = 'address-label-badge badge-rumah';
+                        badge.innerHTML = '<i class="fas fa-home mr-1"></i> Rumah';
+                    } else if(labelTersimpan === 'Kantor') {
+                        badge.className = 'address-label-badge badge-kantor';
+                        badge.innerHTML = '<i class="fas fa-building mr-1"></i> Kantor';
+                    } else {
+                        badge.className = 'address-label-badge badge-lainnya';
+                        badge.innerHTML = '<i class="fas fa-map-marker-alt mr-1"></i> Lainnya';
+                    }
+
+                    // Isi juga ke form biar kalau di klik edit gak kosong
                     document.getElementById('inputNamaPenerima').value = resultAddr.data.nama_penerima;
                     document.getElementById('inputWA').value = resultAddr.data.nomor_wa;
-                    document.getElementById('previewAlamatLengkap').innerText = resultAddr.data.alamat_lengkap;
-                    document.getElementById('previewAlamatLengkap').classList.remove("italic");
+                    document.getElementById('selectLabelAlamat').value = labelTersimpan;
+                    
+                } else {
+                    // JIKA KOSONG, LANGSUNG TAMPILKAN FORM
+                    document.getElementById('areaAlamatTersimpan').style.display = 'none';
+                    document.getElementById('areaFormAlamat').style.display = 'block';
                 }
             } catch (err) {}
         }
         loadProfileData();
+
+        // FUNGSI BUKA TUTUP FORM EDIT
+        function bukaFormEditAlamat() {
+            document.getElementById('areaAlamatTersimpan').style.display = 'none';
+            document.getElementById('areaFormAlamat').style.display = 'block';
+            document.getElementById('btnBatalEdit').classList.remove('hidden');
+        }
+        function tutupFormEditAlamat() {
+            document.getElementById('areaAlamatTersimpan').style.display = 'block';
+            document.getElementById('areaFormAlamat').style.display = 'none';
+        }
 
         // SIMPAN ALAMAT KE DB
         document.getElementById('formAlamat').addEventListener('submit', async (e) => {
@@ -542,22 +614,30 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...'; btn.disabled = true;
 
             if(!namaProv || !namaKota || !namaKec || !namaKel) { 
-                showToast("Dropdown Wilayah (Provinsi s/d Kelurahan) wajib dipilih ulang dari menu!", "error"); 
-                btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan & Gunakan Alamat'; btn.disabled = false; return; 
+                showToast("Dropdown Wilayah (Provinsi s/d Kelurahan) wajib dipilih dari menu!", "error"); 
+                btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan & Gunakan'; btn.disabled = false; return; 
             }
             
             const alamatFinal = document.getElementById('previewAlamatLengkap').innerText;
+            const labelDipilih = document.getElementById('selectLabelAlamat').value;
+
             const payload = { nama: document.getElementById('inputNamaPenerima').value, wa: document.getElementById('inputWA').value, detail: alamatFinal };
             
             try {
                 const res = await fetch('/api/address', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
                 const data = await res.json();
                 if (data.success) { 
-                    showToast("Alamat berhasil disinkronisasi! 🎉", "success"); 
-                    if(sessionStorage.getItem('belidikita_checkout')) { setTimeout(() => { window.location.href = '../checkout.html'; }, 1500); } 
-                    else { btn.innerHTML = '<i class="fas fa-check mr-1"></i> Tersimpan!'; setTimeout(() => { btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan & Gunakan Alamat'; btn.disabled = false; }, 2000); }
+                    localStorage.setItem('belidikita_label_alamat', labelDipilih); // Simpan label di HP
+                    showToast("Alamat berhasil diperbarui! 🎉", "success"); 
+                    
+                    if(sessionStorage.getItem('belidikita_checkout')) { 
+                        setTimeout(() => { window.location.href = '../checkout.html'; }, 1500); 
+                    } else { 
+                        loadProfileData(); // Reload UI menjadi kartu
+                        btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan & Gunakan'; btn.disabled = false; 
+                    }
                 }
-            } catch (err) { showToast("Gagal simpan alamat", "error"); btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan & Gunakan Alamat'; btn.disabled = false; } 
+            } catch (err) { showToast("Gagal simpan alamat", "error"); btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan & Gunakan'; btn.disabled = false; } 
         });
 
         // PENGATURAN PROFIL
