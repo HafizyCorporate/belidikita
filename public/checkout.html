@@ -121,23 +121,48 @@
 
     <div class="section">
         <div class="section-title">
-            <span><i class="fas fa-truck"></i> Opsi Pengiriman</span>
+            <span><i class="fas fa-truck"></i> Opsi Pengiriman (8 Kurir)</span>
         </div>
         <div class="option-group">
             <label class="option-label">
-                <input type="radio" name="shipping" value="JNE">
-                <div class="option-content">JNE Reguler (Real-Time API)</div>
-                <div class="option-price" id="labelJNE">Pilih kurir ini</div>
+                <input type="radio" name="shipping" value="jne">
+                <div class="option-content">JNE Reguler</div>
+                <div class="option-price">Pilih kurir</div>
             </label>
             <label class="option-label">
-                <input type="radio" name="shipping" value="JNT">
-                <div class="option-content">J&T Express (Real-Time API)</div>
-                <div class="option-price" id="labelJNT">Pilih kurir ini</div>
+                <input type="radio" name="shipping" value="jnt">
+                <div class="option-content">J&T Express</div>
+                <div class="option-price">Pilih kurir</div>
             </label>
             <label class="option-label">
-                <input type="radio" name="shipping" value="Sicepat">
-                <div class="option-content">SiCepat REG (Real-Time API)</div>
-                <div class="option-price" id="labelSicepat">Pilih kurir ini</div>
+                <input type="radio" name="shipping" value="sicepat">
+                <div class="option-content">SiCepat REG</div>
+                <div class="option-price">Pilih kurir</div>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="shipping" value="ide">
+                <div class="option-content">ID Express</div>
+                <div class="option-price">Pilih kurir</div>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="shipping" value="sap">
+                <div class="option-content">SAP Express</div>
+                <div class="option-price">Pilih kurir</div>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="shipping" value="ninja">
+                <div class="option-content">Ninja Xpress</div>
+                <div class="option-price">Pilih kurir</div>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="shipping" value="pos">
+                <div class="option-content">POS Indonesia</div>
+                <div class="option-price">Pilih kurir</div>
+            </label>
+            <label class="option-label">
+                <input type="radio" name="shipping" value="tiki">
+                <div class="option-content">TIKI Reguler</div>
+                <div class="option-price">Pilih kurir</div>
             </label>
         </div>
     </div>
@@ -223,7 +248,6 @@
         let totalBeratGram = 0; 
         let items = [];
         
-        // Data Lokasi
         let userInfo = { nama: "Pembeli", wa: "-", alamat: "" };
         let kotaTokoGlobal = "Bandung"; 
 
@@ -242,9 +266,14 @@
                 
                 if (result.success && result.data && result.data.alamat_lengkap) {
                     userInfo = { nama: result.data.nama_penerima, wa: result.data.nomor_wa, alamat: result.data.alamat_lengkap };
+                    
                     document.getElementById('addressBox').innerHTML = `
                         <p><strong>${userInfo.nama}</strong> (${userInfo.wa})</p>
                         <p>${userInfo.alamat}</p>
+                        <div style="margin-top:10px; padding:8px 10px; background:#f4f9ff; border:1px dashed #81D4FA; border-radius:8px; font-size:10px; color:#0D47A1; font-weight:700; display:flex; align-items:center; gap:8px;">
+                            <i class="fas fa-route" style="font-size:14px; color:#FF9800;"></i> 
+                            <span>Dikirim dari: <b>${kotaTokoGlobal}</b></span>
+                        </div>
                     `;
                 } else {
                     document.getElementById('addressBox').innerHTML = `<p style="color:red; font-weight:bold;">Alamat belum diatur. Silakan atur di Profil Akun.</p>`;
@@ -253,7 +282,6 @@
             } catch (err) { console.error(err); }
         }
 
-        // LOGIKA QTY DI CHECKOUT + KALKULASI GROSIR
         function loadCheckoutItems() {
             const dataStr = sessionStorage.getItem('belidikita_checkout');
             if(!dataStr) { window.location.href = 'dashboardutama.html'; return; }
@@ -319,19 +347,19 @@
             }
             sessionStorage.setItem('belidikita_checkout', JSON.stringify(items));
             loadCheckoutItems(); 
-            resetOngkir(); // Jika berat berubah, ongkir harus dicek ulang
+            resetOngkir(); 
         }
 
+        // ✅ LOGIKA BARU: Reset semua teks ke "Pilih kurir" dengan bersih
         function resetOngkir() {
             ongkir = 0;
-            document.querySelectorAll('input[name="shipping"]').forEach(radio => radio.checked = false);
-            document.getElementById('labelJNE').innerText = "Pilih kurir ini";
-            document.getElementById('labelJNT').innerText = "Pilih kurir ini";
-            document.getElementById('labelSicepat').innerText = "Pilih kurir ini";
+            document.querySelectorAll('input[name="shipping"]').forEach(radio => {
+                radio.checked = false;
+                radio.nextElementSibling.nextElementSibling.innerText = "Pilih kurir";
+            });
             hitungTotal();
         }
 
-        // ✅ LOGIKA BARU: TEMBAK API ONGKIR SERVER SAAT PILIH KURIR
         document.querySelectorAll('input[name="shipping"]').forEach(radio => {
             radio.addEventListener('change', async function() {
                 if(userInfo.alamat === "") {
@@ -342,18 +370,16 @@
                 const kurirDipilih = this.value;
                 const elemenHarga = this.nextElementSibling.nextElementSibling;
                 
-                // Animasi Loading
                 elemenHarga.innerHTML = "<i class='fas fa-circle-notch fa-spin'></i> Menghitung...";
                 document.getElementById('txtOngkir').innerHTML = "<i class='fas fa-spinner fa-spin'></i>";
 
                 try {
-                    // Tembak API Server yang sudah dipasangi Komerce API
                     const res = await fetch('/api/ongkir/hitung', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({
-                            kota_asal: kotaTokoGlobal,
-                            kota_tujuan: userInfo.alamat,
+                            kota_asal: kotaTokoGlobal,       
+                            kota_tujuan: userInfo.alamat,    
                             berat: totalBeratGram > 0 ? totalBeratGram : 1000,
                             kurir: kurirDipilih
                         })
@@ -364,15 +390,12 @@
                     if(result.success) {
                         ongkir = result.ongkir;
                     } else {
-                        // Fallback jika API Komerce gangguan
                         ongkir = 15000 * Math.ceil(totalBeratGram / 1000); 
                     }
                 } catch(e) {
-                    // Fallback jika error jaringan
                     ongkir = 15000 * Math.ceil(totalBeratGram / 1000); 
                 }
                 
-                // Tampilkan Harga Hasil Tarikan API
                 elemenHarga.innerText = formatRp(ongkir);
                 if(currentCouponType === 'ongkir') { diskonKupon = ongkir; }
                 hitungTotal();
@@ -493,7 +516,7 @@
                         pesanWA += `- ${item.nama}${infoPromo} (x${item.qty}) = ${formatRp(item.hargaTerpakai * item.qty)}\n`;
                     });
                     
-                    pesanWA += `\n*Pengiriman:* ${pengiriman} (${formatRp(ongkir)})\n`;
+                    pesanWA += `\n*Pengiriman:* ${pengiriman.toUpperCase()} (${formatRp(ongkir)})\n`;
                     if (diskonKupon > 0) { pesanWA += `*Diskon Kupon:* -${formatRp(diskonKupon)}\n`; }
                     pesanWA += `*Pembayaran:* ${pembayaran}\n\n`;
                     pesanWA += `*TOTAL TAGIHAN: ${formatRp(totalAkhir)}*\n\n`;
