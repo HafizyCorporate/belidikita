@@ -69,9 +69,17 @@
         /* HALAMAN BARU UNTUK KATEGORI & PESANAN (FULLSCREEN) */
         .layar-penuh { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f7fa; z-index: 5000; overflow-y: auto; display: none; flex-direction: column; animation: slideInRight 0.3s ease; }
         @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        .katalog-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .katalog-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); position: sticky; top: 0; z-index: 100; }
         .katalog-header i { font-size: 20px; color: #0D47A1; cursor: pointer; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: #E1F5FE; border-radius: 50%;}
         .katalog-header h2 { font-size: 16px; font-weight: 800; color: #0D47A1; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* ✅ CSS BARU UNTUK SEARCH & FILTER DI KATEGORI */
+        .katalog-tools { background: #fff; padding: 10px 15px; display: flex; gap: 10px; position: sticky; top: 60px; z-index: 99; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .katalog-search { flex: 1; position: relative; }
+        .katalog-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888; font-size: 13px;}
+        .katalog-search input { width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #E1F5FE; border-radius: 10px; font-size: 12px; outline: none; font-family: 'Montserrat', sans-serif; background: #fafcff; font-weight:600; color:#333; transition:0.2s;}
+        .katalog-search input:focus { border-color: #81D4FA; background: #fff; }
+        .katalog-tools select { padding: 10px; border: 1px solid #81D4FA; border-radius: 10px; font-size: 11px; font-weight: 800; color: #0D47A1; outline: none; font-family: 'Montserrat', sans-serif; background: #E1F5FE; cursor:pointer;}
 
         /* Animasi Jantung Berdetak untuk Rayuan Login */
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
@@ -158,6 +166,19 @@
             <i class="fas fa-arrow-left" onclick="tutupHalamanKategori()"></i>
             <h2 id="judulHalamanKategori">Hasil Pencarian</h2>
         </div>
+        
+        <div class="katalog-tools">
+            <div class="katalog-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="inputCariKatalog" placeholder="Cari di kategori ini..." oninput="renderHasilKatalog()">
+            </div>
+            <select id="filterKatalog" onchange="renderHasilKatalog()">
+                <option value="terbaru">Terbaru</option>
+                <option value="termurah">Termurah</option>
+                <option value="terlaris">Terlaris</option>
+            </select>
+        </div>
+
         <div class="product-grid" id="gridHasilKategori" style="padding-top: 15px;">
             </div>
     </div>
@@ -194,145 +215,5 @@
     <div id="customToast"></div>
 
     <script src="script.js"></script>
-
-    <script>
-        const kamusKategori = {
-            'Sembako': ['Beras, minyak, gula', 'Mie instan', 'Telur', 'Air galon', 'Gas LPG'],
-            'Fashion': ['Baju pria / wanita / anak', 'Celana', 'Jaket', 'Hijab', 'Sepatu', 'Tas'],
-            'Elektronik': ['HP & aksesoris', 'Charger', 'Headset', 'Powerbank', 'Smartwatch'],
-            'Rumah Tangga': ['Alat dapur', 'Dispenser', 'Rice cooker', 'Blender', 'Peralatan kebersihan'],
-            'Beauty': ['Skincare', 'Makeup', 'Parfum', 'Bodycare', 'Haircare'],
-            'Ibu & Bayi': ['Popok', 'Susu', 'Baju bayi', 'Perlengkapan makan bayi'],
-            'Komputer': ['Keyboard', 'Mouse', 'Laptop', 'Flashdisk', 'Harddisk'],
-            'Otomotif': ['Oli', 'Aksesoris motor', 'Helm', 'Ban', 'Lampu kendaraan'],
-            'Olahraga': ['Sepatu olahraga', 'Alat gym', 'Jersey', 'Tenda', 'Botol minum'],
-            'Makanan': ['Snack', 'Frozen food', 'Kopi', 'Minuman kekinian'],
-            'Buku': ['Buku sekolah', 'Novel', 'ATK', 'Perlengkapan kantor'],
-            'Mainan': ['Mainan anak', 'Action figure', 'Puzzle', 'Alat musik'],
-            'Ibadah': ['Sajadah', 'Mukena', 'Sarung', 'Al-Qur’an']
-        };
-
-        function bukaSubKategori(mainCat) {
-            document.getElementById('judulSubKategori').innerHTML = `<i class="fas fa-tags" style="color:#FF9800;"></i> Etalase ${mainCat}`;
-            const container = document.getElementById('listSubKategori');
-            container.innerHTML = '';
-            const subs = kamusKategori[mainCat] || [];
-            
-            container.innerHTML += `<div class="sub-cat-item" style="background:#E1F5FE; border-color:#81D4FA; color:#0D47A1;" onclick="saringProdukLangsung('${mainCat}', 'Semua')"><span>Semua Produk ${mainCat}</span><i class="fas fa-chevron-right" style="color:#0D47A1;"></i></div>`;
-            subs.forEach(sub => { container.innerHTML += `<div class="sub-cat-item" onclick="saringProdukLangsung('${mainCat}', '${sub}')"><span>${sub}</span><i class="fas fa-chevron-right"></i></div>`; });
-
-            document.getElementById('modalSubKategori').style.display = 'flex';
-            document.body.style.overflow = 'hidden'; 
-        }
-
-        function tutupSubKategori() {
-            document.getElementById('modalSubKategori').style.display = 'none';
-            document.body.style.overflow = 'auto'; 
-        }
-
-        function tutupHalamanKategori() {
-            document.getElementById('katalogLayarPenuh').style.display = 'none';
-            document.body.style.overflow = 'auto'; 
-        }
-
-        async function saringProdukLangsung(mainCat, subCat) {
-            tutupSubKategori();
-            
-            const layarPenuh = document.getElementById('katalogLayarPenuh');
-            const judulHalaman = document.getElementById('judulHalamanKategori');
-            const containerGrid = document.getElementById('gridHasilKategori');
-            const teksPencarian = subCat === 'Semua' ? mainCat : subCat;
-
-            layarPenuh.style.display = 'flex';
-            document.body.style.overflow = 'hidden'; 
-            judulHalaman.innerText = teksPencarian;
-            containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:#0D47A1; grid-column:span 2; padding: 50px 20px; font-weight:bold;"><i class="fas fa-spinner fa-spin mr-2"></i> Mencari barang...</p>';
-
-            try {
-                const res = await fetch('/api/products');
-                const result = await res.json();
-
-                if (result.success && result.data.length > 0) {
-                    let keyword = teksPencarian.toLowerCase().split(/[,\/ ]/)[0]; 
-                    if(keyword === "buku" && subCat.includes("sekolah")) keyword = "sekolah";
-
-                    const filteredData = result.data.filter(p => {
-                        const title = (p.title || '').toLowerCase();
-                        const desc = (p.description || '').toLowerCase();
-                        return title.includes(keyword) || desc.includes(keyword);
-                    });
-
-                    if (filteredData.length > 0) {
-                        containerGrid.innerHTML = '';
-                        filteredData.forEach(product => {
-                            const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
-                            const deskripsiBarang = product.description || "Deskripsi belum tersedia.";
-                            
-                            let fotoUtama = product.media_url;
-                            try {
-                                const parsedMedia = JSON.parse(product.media_url);
-                                if (Array.isArray(parsedMedia) && parsedMedia.length > 0) fotoUtama = parsedMedia[0];
-                            } catch(e) {} 
-
-                            const isVideo = product.media_type === 'video';
-                            const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video' : (fotoUtama || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
-                            const mediaTag = isVideo ? `<video src="${fotoBarang}" class="product-media"></video>` : `<img src="${fotoBarang}" class="product-media" alt="${product.title}">`;
-                            
-                            const terjual = product.sold_count || 0; 
-                            const avgRating = parseFloat(product.avg_rating) || 0;
-                            const ratingHtml = avgRating > 0 ? `<i class="fas fa-star" style="color:#FFD700;"></i> ${avgRating}` : `<i class="fas fa-star" style="color:#ccc;"></i> 0.0`;
-
-                            const prodObj = {
-                                id: product.id, foto: fotoUtama, nama: product.title, 
-                                hargaStr: priceRp, deskripsi: deskripsiBarang, 
-                                harga: product.price, weight: product.weight || 1000, 
-                                seller_name: product.seller_name || "Belidikita Official", qty: 1,
-                                unit: product.unit || 'Pcs',
-                                variant_title: product.variant_title || '',
-                                variant_options: product.variant_options || '',
-                                wholesale_price: product.wholesale_price || 0,
-                                wholesale_min_qty: product.wholesale_min_qty || 0
-                            };
-                            const strObj = encodeURIComponent(JSON.stringify(prodObj));
-
-                            let labelGrosir = '';
-                            if(product.wholesale_price > 0 && product.wholesale_min_qty > 0) {
-                                labelGrosir = `<div style="position:absolute; top:5px; left:5px; background:#4CAF50; color:#fff; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;"><i class="fas fa-tags"></i> GROSIR</div>`;
-                            }
-
-                            containerGrid.innerHTML += `
-                                <div class="product-card" onclick="bukaDetailGlobal('${strObj}')" style="position:relative;">
-                                    ${labelGrosir}
-                                    ${mediaTag}
-                                    <div class="product-info">
-                                        <div class="product-title">${product.title}</div>
-                                        <div class="product-price">${priceRp}</div>
-                                        <div class="product-stats">
-                                            <span>${ratingHtml}</span>
-                                            <span>${terjual} Terjual</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                    } else {
-                        containerGrid.innerHTML = `
-                            <div style="text-align:center; width:100%; grid-column:span 2; padding: 50px 20px;">
-                                <i class="fas fa-box-open" style="font-size: 60px; color: #ccc; margin-bottom: 15px;"></i>
-                                <p style="color:#888; font-weight:600; font-size: 14px;">Barang <b>${teksPencarian}</b> belum ada di toko.</p>
-                            </div>`;
-                    }
-                }
-            } catch (e) {
-                containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:red; grid-column:span 2;">Gagal memuat barang dari server.</p>';
-            }
-        }
-
-        function bukaDetailGlobal(encodedObj) {
-            const decodedObj = decodeURIComponent(encodedObj);
-            localStorage.setItem('produk_detail', decodedObj);
-            window.location.href = 'detailproduk.html';
-        }
-    </script>
 </body>
 </html>
