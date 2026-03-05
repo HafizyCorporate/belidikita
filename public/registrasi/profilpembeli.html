@@ -118,7 +118,6 @@
         </div>
 
         <div id="secRiwayat" class="animate-fade-up" style="animation-delay: 0.2s;">
-            
             <div class="flex overflow-x-auto space-x-5 border-b border-light pb-1 mb-4 hide-scroll" id="navStatusPesanan">
                 <div class="tab-pesanan active" onclick="filterPesanan('Semua', this)">Semua</div>
                 <div class="tab-pesanan" onclick="filterPesanan('Menunggu Pembayaran', this)">Belum Bayar</div>
@@ -127,11 +126,9 @@
                 <div class="tab-pesanan" onclick="filterPesanan('Selesai', this)">Selesai</div>
                 <div class="tab-pesanan" onclick="filterPesanan('Retur', this)">Retur</div>
             </div>
-
             <div id="containerRiwayatCards">
                 <div class="text-center py-10 opacity-50"><i class="fas fa-spinner fa-spin text-4xl text-brand mb-3"></i><p class="text-xs font-bold text-gray-500">Memuat data pesanan...</p></div>
             </div>
-
         </div>
 
         <div id="secAlamat" class="hidden">
@@ -312,10 +309,9 @@
         }
 
         // ==========================================
-        // ✅ API WILAYAH BERLAPIS (BINDERBYTE) - TETAP UTUH
+        // ✅ API WILAYAH BERLAPIS (EMSIFA - GRATIS & STABIL)
         // ==========================================
-        const apiWilayah = "https://api.binderbyte.com/wilayah";
-        const apiKeyWilayah = "9829f0ce6ef539afc33ffaa3339edc5d0ef6017bba5ed6ba0fdf83f47e3be970"; 
+        const apiWilayah = "https://www.emsifa.com/api-wilayah-indonesia/api";
 
         const selProv = document.getElementById('selectProvinsi');
         const selKota = document.getElementById('selectKota');
@@ -324,45 +320,49 @@
         
         let namaProv = "", namaKota = "", namaKec = "", namaKel = "";
 
-        fetch(`${apiWilayah}/provinsi?api_key=${apiKeyWilayah}`)
+        // 1. Muat Provinsi
+        fetch(`${apiWilayah}/provinces.json`)
             .then(res => res.json())
             .then(data => {
-                if(data.value) {
-                    data.value.forEach(p => {
-                        const opt = document.createElement('option');
-                        opt.value = p.id; opt.text = p.name; selProv.appendChild(opt);
-                    });
-                }
+                data.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.id; opt.text = p.name;
+                    selProv.appendChild(opt);
+                });
             });
 
+        // 2. Pilih Provinsi -> Muat Kota
         selProv.addEventListener('change', function() {
             namaProv = this.options[this.selectedIndex].text;
             selKota.innerHTML = '<option value="">-- Sedang Memuat... --</option>'; selKota.disabled = true;
             selKec.innerHTML = '<option value="">-- Pilih Kecamatan --</option>'; selKec.disabled = true;
             selKel.innerHTML = '<option value="">-- Pilih Kelurahan --</option>'; selKel.disabled = true;
+            namaKota = ""; namaKec = ""; namaKel = "";
 
             if(this.value) {
-                fetch(`${apiWilayah}/kabupaten?api_key=${apiKeyWilayah}&id_provinsi=${this.value}`)
+                fetch(`${apiWilayah}/regencies/${this.value}.json`)
                 .then(res => res.json()).then(data => {
-                    selKota.innerHTML = '<option value="">-- Pilih Kota/Kab --</option>';
-                    data.value.forEach(k => {
+                    selKota.innerHTML = '<option value="">-- Pilih Kota / Kabupaten --</option>';
+                    data.forEach(k => {
                         const opt = document.createElement('option'); opt.value = k.id; opt.text = k.name; selKota.appendChild(opt);
                     }); selKota.disabled = false;
                 });
-            } else { selKota.innerHTML = '<option value="">-- Pilih Kota/Kab --</option>'; }
+            } else { selKota.innerHTML = '<option value="">-- Pilih Kota / Kabupaten --</option>'; }
             updatePreviewAlamat();
         });
 
+        // 3. Pilih Kota -> Muat Kecamatan
         selKota.addEventListener('change', function() {
             namaKota = this.options[this.selectedIndex].text;
             selKec.innerHTML = '<option value="">-- Sedang Memuat... --</option>'; selKec.disabled = true;
             selKel.innerHTML = '<option value="">-- Pilih Kelurahan --</option>'; selKel.disabled = true;
+            namaKec = ""; namaKel = "";
 
             if(this.value) {
-                fetch(`${apiWilayah}/kecamatan?api_key=${apiKeyWilayah}&id_kabupaten=${this.value}`)
+                fetch(`${apiWilayah}/districts/${this.value}.json`)
                 .then(res => res.json()).then(data => {
                     selKec.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
-                    data.value.forEach(k => {
+                    data.forEach(k => {
                         const opt = document.createElement('option'); opt.value = k.id; opt.text = k.name; selKec.appendChild(opt);
                     }); selKec.disabled = false;
                 });
@@ -370,15 +370,17 @@
             updatePreviewAlamat();
         });
 
+        // 4. Pilih Kecamatan -> Muat Kelurahan
         selKec.addEventListener('change', function() {
             namaKec = this.options[this.selectedIndex].text;
             selKel.innerHTML = '<option value="">-- Sedang Memuat... --</option>'; selKel.disabled = true;
+            namaKel = "";
 
             if(this.value) {
-                fetch(`${apiWilayah}/kelurahan?api_key=${apiKeyWilayah}&id_kecamatan=${this.value}`)
+                fetch(`${apiWilayah}/villages/${this.value}.json`)
                 .then(res => res.json()).then(data => {
                     selKel.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
-                    data.value.forEach(k => {
+                    data.forEach(k => {
                         const opt = document.createElement('option'); opt.value = k.id; opt.text = k.name; selKel.appendChild(opt);
                     }); selKel.disabled = false;
                 });
@@ -386,8 +388,13 @@
             updatePreviewAlamat();
         });
 
-        selKel.addEventListener('change', function() { namaKel = this.options[this.selectedIndex].text; updatePreviewAlamat(); });
+        // 5. Pilih Kelurahan
+        selKel.addEventListener('change', function() { 
+            namaKel = this.options[this.selectedIndex].text; 
+            updatePreviewAlamat(); 
+        });
 
+        // UPDATE PREVIEW ALAMAT REAL TIME
         const inputJalan = document.getElementById('inputJalan'), inputRT = document.getElementById('inputRT'), inputRW = document.getElementById('inputRW'), inputKodePos = document.getElementById('inputKodePos'), inputPatokan = document.getElementById('inputPatokan');
         const allInputs = [inputJalan, inputRT, inputRW, inputKodePos, inputPatokan];
         allInputs.forEach(input => input.addEventListener('input', updatePreviewAlamat));
@@ -402,10 +409,14 @@
             const prov = namaProv ? "Prov. " + namaProv + " " : "";
             const pos = inputKodePos.value ? inputKodePos.value : "";
             const patokan = inputPatokan.value ? ` (Patokan: ${inputPatokan.value})` : "";
+            
             const fullString = `${jln}${rt}${rw}${kel}${kec}${kota}${prov}${pos}${patokan}`;
             document.getElementById('previewAlamatLengkap').innerText = fullString.length > 5 ? fullString : "Silakan lengkapi data di atas.";
         }
 
+        // ==========================================
+        // LOAD DATA PROFIL LAMA
+        // ==========================================
         async function loadProfileData() {
             try {
                 const resProf = await fetch('/api/profile', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -425,17 +436,22 @@
                 if (resultAddr.success && resultAddr.data) {
                     document.getElementById('inputNamaPenerima').value = resultAddr.data.nama_penerima;
                     document.getElementById('inputWA').value = resultAddr.data.nomor_wa;
-                    document.getElementById('previewAlamatLengkap').innerText = "Alamat Tersimpan: " + resultAddr.data.alamat_lengkap;
+                    // ✅ TEMPLATE LAMA (CEMPAKA) DIHAPUS, BIAR PREVIEW BERSIH!
                 }
             } catch (err) {}
         }
         loadProfileData();
 
+        // ==========================================
+        // AKSI SIMPAN ALAMAT KE DB
+        // ==========================================
         document.getElementById('formAlamat').addEventListener('submit', async (e) => {
             e.preventDefault(); const btn = document.getElementById('btnSimpanAlamat'); btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...';
             if(!namaProv || !namaKota || !namaKec || !namaKel) { showToast("Wilayah (Provinsi s/d Kelurahan) wajib dipilih semua!", "error"); btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan ke Database'; return; }
+            
             const alamatFinal = document.getElementById('previewAlamatLengkap').innerText;
             const payload = { nama: document.getElementById('inputNamaPenerima').value, wa: document.getElementById('inputWA').value, detail: alamatFinal };
+            
             try {
                 const res = await fetch('/api/address', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
                 const data = await res.json();
@@ -444,7 +460,7 @@
         });
 
         // ==========================================
-        // ✅ LOGIKA BARU: RIWAYAT PESANAN ALA SHOPEE
+        // RIWAYAT PESANAN ALA SHOPEE
         // ==========================================
         let allMyOrders = [];
 
@@ -459,9 +475,7 @@
             } catch (err) { console.error("Gagal load riwayat", err); }
         }
 
-        // FUNGSI FILTER SAAT TAB DIKLIK
         window.filterPesanan = function(statusFilter, elemenTab) {
-            // Ubah garis biru ke tab yang diklik
             if(elemenTab) {
                 document.querySelectorAll('.tab-pesanan').forEach(tab => tab.classList.remove('active'));
                 elemenTab.classList.add('active');
@@ -472,16 +486,11 @@
 
             let dataFiltered = allMyOrders;
             
-            // Logika Penyaringan
             if(statusFilter !== 'Semua') {
-                if(statusFilter === 'Retur') {
-                    dataFiltered = allMyOrders.filter(o => o.status.includes('Retur'));
-                } else {
-                    dataFiltered = allMyOrders.filter(o => o.status === statusFilter);
-                }
+                if(statusFilter === 'Retur') { dataFiltered = allMyOrders.filter(o => o.status.includes('Retur')); } 
+                else { dataFiltered = allMyOrders.filter(o => o.status === statusFilter); }
             }
 
-            // RENDER DATA
             if(dataFiltered.length > 0) {
                 dataFiltered.forEach(order => {
                     let items = []; try { items = JSON.parse(order.items); } catch(e) {}
@@ -505,14 +514,12 @@
                         btnReturHtml += `<button onclick="bukaModalUlasan(${idProdukSelesai})" class="w-full py-2 bg-brand text-white text-xs font-extrabold rounded-lg hover:bg-blue-800 transition shadow-md"><i class="fas fa-star text-yellow-400 mr-1"></i> Nilai Pesanan</button>`;
                     }
 
-                    // TAMPILAN KARTU DETAIL BARU
                     containerRiwayat.innerHTML += `
                         <div class="glass-card rounded-2xl p-4 mb-4 border border-light animate-fade-up">
                             <div class="flex justify-between items-center border-b border-light pb-3 mb-3">
                                 <span class="text-xs font-extrabold text-gray-700"><i class="fas fa-store text-brand mr-1"></i> Belidikita Official</span>
                                 <span class="text-[10px] font-bold ${statusColor} px-2 py-1 rounded flex items-center gap-1 uppercase"><i class="fas ${iconStatus}"></i> ${order.status}</span>
                             </div>
-                            
                             <div class="flex gap-3 items-start mb-3">
                                 <img src="${barangPertama.foto}" class="w-16 h-16 object-cover rounded-lg border border-gray-200 shadow-sm" alt="Barang">
                                 <div class="flex-grow">
@@ -523,7 +530,6 @@
                                     </div>
                                 </div>
                             </div>
-                            
                             <div class="bg-gray-50 rounded-lg p-3 mb-3 border border-gray-200">
                                 <p class="text-[10px] text-gray-600 font-semibold line-clamp-2 mb-1"><i class="fas fa-map-marker-alt text-red-500 mr-1"></i> <b>Dikirim ke:</b> ${order.shipping_address}</p>
                                 <div class="flex justify-between items-center mt-2 border-t border-gray-200 pt-2">
@@ -531,7 +537,6 @@
                                     ${order.resi !== '-' ? `<span class="text-[10px] font-extrabold text-brand bg-blue-50 px-2 py-1 rounded select-all">${order.resi}</span>` : '<span class="text-[10px] text-gray-400 italic">Resi belum diinput</span>'}
                                 </div>
                             </div>
-
                             <div class="flex justify-between items-center pt-1 border-t border-light mt-2 pt-3">
                                 <span class="text-xs font-bold text-gray-500">Total Pesanan:</span>
                                 <span class="text-sm font-extrabold text-orange-500">${formatRp}</span>
@@ -541,7 +546,6 @@
                     `;
                 });
             } else {
-                // PESAN KOSONG DINAMIS
                 let pesanKosong = "Belum ada pesanan.";
                 let iconKosong = "fa-shopping-bag";
                 if(statusFilter === 'Menunggu Pembayaran') { pesanKosong = "Yeay! Tidak ada tagihan yang belum dibayar."; iconKosong = "fa-wallet"; }
@@ -558,15 +562,10 @@
                 `;
             }
         }
-
-        // Panggil pertama kali
-        loadRiwayatPesanan();
-
+        
         // ==========================================
-        // SISA FUNGSI LAINNYA (Update Profil, Logout, dll) TETAP SAMA
+        // LAINNYA
         // ==========================================
-        function salinResi(resi) { navigator.clipboard.writeText(resi); showToast("Resi " + resi + " disalin!", "success"); }
-
         document.getElementById('formPengaturanProfil').addEventListener('submit', async (e) => {
             e.preventDefault(); const btn = document.getElementById('btnSimpanProfil'); btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Updating...';
             const payload = { name: document.getElementById('inputEditNama').value, bio: document.getElementById('inputEditBio').value };
