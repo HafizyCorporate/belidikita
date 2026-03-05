@@ -87,6 +87,16 @@ const initDB = async () => {
             wholesale_min_qty INT DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
+
+        -- ✅ TABEL BARU UNTUK KOTAK MASUK & LIVE CHAT (BEDIKI/ADMIN/PEMBELI)
+        CREATE TABLE IF NOT EXISTS chats (
+            id SERIAL PRIMARY KEY,
+            user_id INT REFERENCES users(id) ON DELETE CASCADE,
+            sender_role VARCHAR(20) DEFAULT 'pembeli', 
+            message TEXT,
+            is_read BOOLEAN DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
     `;
 
     // Modifikasi tabel jika ada kolom baru (Tanpa menghapus data lama)
