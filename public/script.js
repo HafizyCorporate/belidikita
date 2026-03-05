@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const topHeader = document.getElementById('topHeader');
     const mainContent = document.getElementById('mainContent');
     const bottomNav = document.getElementById('bottomNav');
-    const floatingAIBtn = document.getElementById('floatingAIBtn'); // ✅ Ambil tombol AI
+    const floatingAIBtn = document.getElementById('floatingAIBtn'); 
 
     const skipSplash = sessionStorage.getItem('skipSplash');
     const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
             topHeader.classList.remove('hidden');
             mainContent.classList.remove('hidden');
             bottomNav.classList.remove('hidden');
-            if(floatingAIBtn) floatingAIBtn.classList.remove('hidden'); // Munculkan AI
+            if(floatingAIBtn) floatingAIBtn.classList.remove('hidden'); 
             sessionStorage.removeItem('skipSplash'); 
             initDashboard();
         } else {
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     topHeader.classList.remove('hidden');
                     mainContent.classList.remove('hidden');
                     bottomNav.classList.remove('hidden');
-                    if(floatingAIBtn) floatingAIBtn.classList.remove('hidden'); // Munculkan AI
+                    if(floatingAIBtn) floatingAIBtn.classList.remove('hidden'); 
                     sessionStorage.setItem('hasSeenSplash', 'true'); 
                     initDashboard(); 
                 }, 1000); 
@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==========================================
-    // ✅ KABEL TOMBOL MENU & HEADER
+    // KABEL TOMBOL MENU & HEADER
     // ==========================================
     const menuHome = document.getElementById('menuHome');
     const menuFeed = document.getElementById('menuFeed');
@@ -148,7 +148,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ✅ LOGIKA TOMBOL CHAT WA ADMIN DI HEADER
     const btnChatAdminWA = document.getElementById('btnChatAdminWA');
     if(btnChatAdminWA) {
         btnChatAdminWA.addEventListener('click', () => {
@@ -187,7 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==========================================
-    // ✅ LOGIKA BARU: BOT AI CHAT 
+    // BOT AI CHAT 
     // ==========================================
     const aiChatModal = document.getElementById('aiChatModal');
     const closeAIBtn = document.getElementById('closeAIBtn');
@@ -211,18 +210,15 @@ document.addEventListener("DOMContentLoaded", () => {
         const teks = aiInput.value.trim();
         if(!teks) return;
 
-        // 1. Tampilkan Chat User
         aiBody.innerHTML += `<div class="ai-msg user">${teks}</div>`;
         aiInput.value = '';
         aiBody.scrollTop = aiBody.scrollHeight;
 
-        // 2. Tampilkan Status Mengetik Bot
         const loadingId = 'loading-' + Date.now();
         aiBody.innerHTML += `<div class="ai-msg bot" id="${loadingId}"><i class="fas fa-ellipsis-h fa-fade"></i> Berpikir...</div>`;
         aiBody.scrollTop = aiBody.scrollHeight;
 
         try {
-            // 3. Tembak ke API Server Anda
             const res = await fetch('/api/ai/search', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -230,11 +226,9 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             const data = await res.json();
             
-            // 4. Hapus tulisan mengetik, ganti dengan jawaban Asli
             document.getElementById(loadingId).remove();
             
             if(data.success) {
-                // Parse HTML ke text agar rapi (jika AI membalas pakai Markdown)
                 let jawaban = data.answer.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
                 aiBody.innerHTML += `<div class="ai-msg bot">${jawaban}</div>`;
             } else {
@@ -247,17 +241,11 @@ document.addEventListener("DOMContentLoaded", () => {
         aiBody.scrollTop = aiBody.scrollHeight;
     }
 
-    if(aiSendBtn) {
-        aiSendBtn.addEventListener('click', kirimPesanAI);
-    }
-    if(aiInput) {
-        aiInput.addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') kirimPesanAI();
-        });
-    }
+    if(aiSendBtn) { aiSendBtn.addEventListener('click', kirimPesanAI); }
+    if(aiInput) { aiInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') kirimPesanAI(); }); }
 
     // ==========================================
-    // FUNGSI PENGATUR PRODUK BERANDA
+    // FUNGSI PENGATUR PRODUK BERANDA UTAMA
     // ==========================================
     async function loadRandomProducts() {
         const productList = document.getElementById('randomProductList');
@@ -329,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 </div>
                             </div>
                         `;
-                        hCard.addEventListener('click', () => bukaDetailProduk(pId, pUrl, pTitle, priceRp, pDesc, pPrice, pWeight, pSeller, pUnit, pVarTitle, pVarOpt, pWsPrice, pWsMin));
+                        hCard.addEventListener('click', () => window.bukaDetailGlobal(pId, pUrl, pTitle, priceRp, pDesc, pPrice, pWeight, pSeller, pUnit, pVarTitle, pVarOpt, pWsPrice, pWsMin));
                         
                         if (product.category === 'laris' && larisList) { larisList.appendChild(hCard); countLaris++; }
                         if (product.category === 'keranjang' && cartList) { cartList.appendChild(hCard); countKeranjang++; }
@@ -349,7 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             </div>
                         </div>`;
                     
-                    card.addEventListener('click', () => bukaDetailProduk(pId, pUrl, pTitle, priceRp, pDesc, pPrice, pWeight, pSeller, pUnit, pVarTitle, pVarOpt, pWsPrice, pWsMin));
+                    card.addEventListener('click', () => window.bukaDetailGlobal(pId, pUrl, pTitle, priceRp, pDesc, pPrice, pWeight, pSeller, pUnit, pVarTitle, pVarOpt, pWsPrice, pWsMin));
                     
                     productList.appendChild(card);
                     countBiasa++;
@@ -371,13 +359,77 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+
     // ==========================================
-    // FUNGSI KATEGORI CERDAS (DENGAN SEARCH & FILTER)
+    // ✅ KUMPULAN FUNGSI GLOBAL (DI-ATTACH KE WINDOW) 
     // ==========================================
+    
+    // 1. Fungsi Lompat ke Detail
+    window.bukaDetailGlobal = function(id, foto, nama, hargaStr, deskripsi, hargaRaw, beratRaw, sellerName, unit, vTitle, vOpt, wsPrice, wsMin) {
+        // Jika dipanggil dengan string ter-encode (dari HTML Kategori Filter)
+        if(typeof id === 'string' && id.includes('%7B')) {
+            const decodedObj = decodeURIComponent(id);
+            localStorage.setItem('produk_detail', decodedObj);
+            window.location.href = 'detailproduk.html';
+            return;
+        }
+
+        // Jika dipanggil dari Render JS Utama
+        const dataProduk = { 
+            id: id, foto: foto, nama: nama, hargaStr: hargaStr, deskripsi: deskripsi, 
+            harga: hargaRaw, weight: beratRaw || 1000, seller_name: sellerName || "Belidikita Official", qty: 1,
+            unit: unit || 'Pcs', variant_title: vTitle || '', variant_options: vOpt || '',
+            wholesale_price: wsPrice || 0, wholesale_min_qty: wsMin || 0
+        };
+        localStorage.setItem('produk_detail', JSON.stringify(dataProduk));
+        window.location.href = 'detailproduk.html';
+    }
+
+    // 2. Fungsi Buka & Tutup Bottom Sheet Sub-Kategori (Kamus Kategori Pindah ke Sini)
+    const kamusKategori = {
+        'Sembako': ['Beras, minyak, gula', 'Mie instan', 'Telur', 'Air galon', 'Gas LPG'],
+        'Fashion': ['Baju pria / wanita / anak', 'Celana', 'Jaket', 'Hijab', 'Sepatu', 'Tas'],
+        'Elektronik': ['HP & aksesoris', 'Charger', 'Headset', 'Powerbank', 'Smartwatch'],
+        'Rumah Tangga': ['Alat dapur', 'Dispenser', 'Rice cooker', 'Blender', 'Peralatan kebersihan'],
+        'Beauty': ['Skincare', 'Makeup', 'Parfum', 'Bodycare', 'Haircare'],
+        'Ibu & Bayi': ['Popok', 'Susu', 'Baju bayi', 'Perlengkapan makan bayi'],
+        'Komputer': ['Keyboard', 'Mouse', 'Laptop', 'Flashdisk', 'Harddisk'],
+        'Otomotif': ['Oli', 'Aksesoris motor', 'Helm', 'Ban', 'Lampu kendaraan'],
+        'Olahraga': ['Sepatu olahraga', 'Alat gym', 'Jersey', 'Tenda', 'Botol minum'],
+        'Makanan': ['Snack', 'Frozen food', 'Kopi', 'Minuman kekinian'],
+        'Buku': ['Buku sekolah', 'Novel', 'ATK', 'Perlengkapan kantor'],
+        'Mainan': ['Mainan anak', 'Action figure', 'Puzzle', 'Alat musik'],
+        'Ibadah': ['Sajadah', 'Mukena', 'Sarung', 'Al-Qur’an']
+    };
+
+    window.bukaSubKategori = function(mainCat) {
+        document.getElementById('judulSubKategori').innerHTML = `<i class="fas fa-tags" style="color:#FF9800;"></i> Etalase ${mainCat}`;
+        const container = document.getElementById('listSubKategori');
+        container.innerHTML = '';
+        const subs = kamusKategori[mainCat] || [];
+        
+        container.innerHTML += `<div class="sub-cat-item" style="background:#E1F5FE; border-color:#81D4FA; color:#0D47A1;" onclick="window.saringProdukLangsung('${mainCat}', 'Semua')"><span>Semua Produk ${mainCat}</span><i class="fas fa-chevron-right" style="color:#0D47A1;"></i></div>`;
+        subs.forEach(sub => { container.innerHTML += `<div class="sub-cat-item" onclick="window.saringProdukLangsung('${mainCat}', '${sub}')"><span>${sub}</span><i class="fas fa-chevron-right"></i></div>`; });
+
+        document.getElementById('modalSubKategori').style.display = 'flex';
+        document.body.style.overflow = 'hidden'; 
+    }
+
+    window.tutupSubKategori = function() {
+        document.getElementById('modalSubKategori').style.display = 'none';
+        document.body.style.overflow = 'auto'; 
+    }
+
+    // 3. Fungsi Buka & Tutup Halaman Layar Penuh Kategori
+    window.tutupHalamanKategori = function() {
+        document.getElementById('katalogLayarPenuh').style.display = 'none';
+        document.body.style.overflow = 'auto'; 
+    }
+
     window.katalogDataSementara = []; 
 
     window.saringProdukLangsung = async function(mainCat, subCat) {
-        tutupSubKategori();
+        window.tutupSubKategori();
         
         const layarPenuh = document.getElementById('katalogLayarPenuh');
         const judulHalaman = document.getElementById('judulHalamanKategori');
@@ -503,19 +555,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    window.bukaDetailGlobal = function(encodedObj) {
-        const decodedObj = decodeURIComponent(encodedObj);
-        localStorage.setItem('produk_detail', decodedObj);
-        window.location.href = 'detailproduk.html';
-    }
-
+    // 4. Fungsi Buka & Tutup Layar Pesanan
     window.tutupHalamanPesanan = function() {
         document.getElementById('pesananLayarPenuh').style.display = 'none';
         document.body.style.overflow = 'auto';
     }
 
-    // ✅ LOGIKA LAYAR PESANAN DENGAN RAYUAN MANIS
-    async function bukaHalamanPesanan() {
+    window.bukaHalamanPesanan = async function() {
         const layarPesanan = document.getElementById('pesananLayarPenuh');
         const kontenPesanan = document.getElementById('kontenPesananLayar');
         
@@ -586,7 +632,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         <i class="fas fa-shopping-bag" style="font-size: 60px; color: #ddd; margin-bottom: 15px;"></i>
                         <h3 style="color:#333; font-weight:800; margin-bottom:10px;">Belum ada pesanan nih</h3>
                         <p style="color:#888; font-size:12px; line-height:1.5;">Pilih barang favoritmu dan checkout sekarang. Banyak promo menarik menanti lho!</p>
-                        <button onclick="tutupHalamanPesanan()" style="margin-top:20px; background:#0D47A1; color:white; border:none; padding:12px 25px; border-radius:20px; font-weight:bold; cursor:pointer;">Mulai Belanja Sekarang</button>
+                        <button onclick="window.tutupHalamanPesanan()" style="margin-top:20px; background:#0D47A1; color:white; border:none; padding:12px 25px; border-radius:20px; font-weight:bold; cursor:pointer;">Mulai Belanja Sekarang</button>
                     </div>
                 `;
             }
