@@ -234,7 +234,6 @@
 
         async function fetchAddress() {
             try {
-                // Ambil Data Kota Toko dari Setting (yang dibuat Admin tadi)
                 const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
                 if(storeData && storeData.kota) kotaTokoGlobal = storeData.kota;
 
@@ -332,7 +331,7 @@
             hitungTotal();
         }
 
-        // ✅ LOGIKA KLIK RADIO BUTTON -> TEMBAK RAJAONGKIR
+        // ✅ LOGIKA BARU: TEMBAK API ONGKIR SERVER SAAT PILIH KURIR
         document.querySelectorAll('input[name="shipping"]').forEach(radio => {
             radio.addEventListener('change', async function() {
                 if(userInfo.alamat === "") {
@@ -340,14 +339,15 @@
                     this.checked = false; return;
                 }
 
-                // Tampilkan Loading
-                document.getElementById('txtOngkir').innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menghitung ongkir...";
                 const kurirDipilih = this.value;
                 const elemenHarga = this.nextElementSibling.nextElementSibling;
-                elemenHarga.innerHTML = "<i class='fas fa-circle-notch fa-spin'></i>";
+                
+                // Animasi Loading
+                elemenHarga.innerHTML = "<i class='fas fa-circle-notch fa-spin'></i> Menghitung...";
+                document.getElementById('txtOngkir').innerHTML = "<i class='fas fa-spinner fa-spin'></i>";
 
                 try {
-                    // Tembak API RajaOngkir via Backend
+                    // Tembak API Server yang sudah dipasangi Komerce API
                     const res = await fetch('/api/ongkir/hitung', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -364,14 +364,16 @@
                     if(result.success) {
                         ongkir = result.ongkir;
                     } else {
-                        ongkir = 15000 * Math.ceil(totalBeratGram / 1000); // Fallback
+                        // Fallback jika API Komerce gangguan
+                        ongkir = 15000 * Math.ceil(totalBeratGram / 1000); 
                     }
                 } catch(e) {
-                    ongkir = 15000 * Math.ceil(totalBeratGram / 1000); // Fallback
+                    // Fallback jika error jaringan
+                    ongkir = 15000 * Math.ceil(totalBeratGram / 1000); 
                 }
                 
+                // Tampilkan Harga Hasil Tarikan API
                 elemenHarga.innerText = formatRp(ongkir);
-                
                 if(currentCouponType === 'ongkir') { diskonKupon = ongkir; }
                 hitungTotal();
             });
