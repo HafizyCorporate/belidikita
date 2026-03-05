@@ -123,6 +123,7 @@
         
         .btn-save-store { width: 100%; background: #00AA5B; color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 170, 91, 0.3); transition: 0.2s; margin-top: 10px;}
         .btn-save-store:active { transform: scale(0.95); }
+        .btn-save-store:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
 
         /* TOAST */
         #customToast { visibility: hidden; min-width: 280px; margin-left: -140px; background: rgba(13, 71, 161, 0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 9999; left: 50%; bottom: -50px; font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; }
@@ -244,7 +245,7 @@
                     <textarea id="inputStoreFullAddress" rows="3" placeholder="Contoh: Jl. Sudirman No. 10, RT 01/RW 02..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 12px; font-family: 'Montserrat', sans-serif;" required></textarea>
                 </div>
 
-                <button type="submit" class="btn-save-store"><i class="fas fa-save"></i> Simpan Perubahan</button>
+                <button type="submit" class="btn-save-store" id="btnSimpanSettingToko"><i class="fas fa-save"></i> Simpan Perubahan</button>
             </form>
         </div>
     </div>
@@ -297,7 +298,7 @@
         }
 
         // ==================================================
-        // 2. SETTING TOKO (NAMA, KOTA, ALAMAT LENGKAP, FILE LOGO)
+        // 2. SETTING TOKO DENGAN PENGAMAN ANTI MACET
         // ==================================================
         const btnSetting = document.getElementById('btnSettingToko');
         const modalSetting = document.getElementById('modalSettingToko');
@@ -310,7 +311,7 @@
             btnSetting.style.display = 'block'; 
         }
 
-        // Buka Modal & Isi Data Sebelumnya
+        // Buka Modal
         btnSetting.addEventListener('click', () => {
             modalSetting.style.display = 'flex';
             const savedData = JSON.parse(localStorage.getItem('belidikita_store_profile')) || { nama: "Belidikita Official", kota: "Kota Bandung", alamatLengkap: "", logo: "" };
@@ -321,53 +322,76 @@
 
         closeSetting.addEventListener('click', () => modalSetting.style.display = 'none');
 
-        // ✅ LOGIKA BARU: KOMPRESI GAMBAR AGAR TIDAK ERROR "QUOTA EXCEEDED"
+        // ✅ LOGIKA BARU: KOMPRESI AMAN ANTI MACET
         formSetting.addEventListener('submit', (e) => {
             e.preventDefault();
-            const btn = document.querySelector('.btn-save-store');
+            const btn = document.getElementById('btnSimpanSettingToko');
             btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
+            btn.disabled = true;
 
             const fileInput = document.getElementById('inputStoreLogoFile');
             const savedData = JSON.parse(localStorage.getItem('belidikita_store_profile')) || {};
-            let logoBase64 = savedData.logo; // Pakai yang lama jika tidak upload baru
+            let logoBase64 = savedData.logo; // Tetap pakai yang lama kalau gak upload baru
 
-            // Jika admin memilih file gambar baru
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
                 const reader = new FileReader();
 
-                reader.onload = function(e) {
-                    // MENGECILKAN FOTO OTOMATIS MENGGUNAKAN CANVAS
+                // Deteksi kalau file berhasil dibaca
+                reader.onload = function(event) {
                     const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 400; // Perkecil jadi 400px (Cukup untuk logo)
-                        const scaleSize = MAX_WIDTH / img.width;
-                        
-                        // Kalau gambar aslinya sudah kecil, biarkan ukurannya
-                        if(img.width < MAX_WIDTH) {
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                        } else {
-                            canvas.width = MAX_WIDTH;
-                            canvas.height = img.height * scaleSize;
-                        }
+                    
+                    // Kalau gambar bermasalah
+                    img.onerror = function() {
+                        showToast("Format gambar tidak didukung.", "error");
+                        btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan";
+                        btn.disabled = false;
+                    };
 
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        
-                        // Ubah jadi format JPG dengan kualitas 70% agar super ringan!
-                        logoBase64 = canvas.toDataURL('image/jpeg', 0.7); 
-                        simpanDataKeLokal(logoBase64, btn);
-                    }
-                    img.src = e.target.result;
+                    // Kalau gambar sukses diload, kita kompres
+                    img.onload = function() {
+                        try {
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 250; // Dikecilkan maksimal agar sangat aman di HP
+                            const scaleSize = MAX_WIDTH / img.width;
+
+                            if (img.width < MAX_WIDTH) {
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                            } else {
+                                canvas.width = MAX_WIDTH;
+                                canvas.height = img.height * scaleSize;
+                            }
+
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                            logoBase64 = canvas.toDataURL('image/jpeg', 0.5); // Kualitas 50%
+                            simpanDataKeLokal(logoBase64, btn);
+                        } catch (err) {
+                            showToast("Browser tidak mendukung kompresi. Coba foto lain.", "error");
+                            btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan";
+                            btn.disabled = false;
+                        }
+                    };
+                    
+                    img.src = event.target.result;
                 };
+
+                // Deteksi kalau file gagal dibaca HP
+                reader.onerror = function() {
+                    showToast("Gagal membaca file foto.", "error");
+                    btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan";
+                    btn.disabled = false;
+                };
+
                 reader.readAsDataURL(file);
             } else {
                 simpanDataKeLokal(logoBase64, btn);
             }
         });
 
+        // Eksekusi Akhir Simpan
         function simpanDataKeLokal(logoStr, btnElem) {
             const newData = {
                 nama: document.getElementById('inputStoreName').value,
@@ -382,13 +406,13 @@
                 modalSetting.style.display = 'none';
                 showToast("Profil & Alamat Kurir berhasil diperbarui!", "success");
             } catch (error) {
-                showToast("Gagal! Foto masih terlalu besar, coba foto yang lain.", "error");
+                showToast("Memori HP penuh! Coba tanpa foto.", "error");
             } finally {
                 btnElem.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan";
+                btnElem.disabled = false;
             }
         }
 
-        // Tampilkan Data Toko ke Layar Depan
         function renderStoreProfile() {
             const savedData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
             if (savedData) {
@@ -498,3 +522,4 @@
     </script>
 </body>
 </html>
+
