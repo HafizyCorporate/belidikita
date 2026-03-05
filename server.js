@@ -120,6 +120,38 @@ const verifyAdmin = (req, res, next) => {
     verifyToken(req, res, next);
 };
 
+// ==========================================
+// 🟢 API KOTAK MASUK & LIVE CHAT TOKO (BARU DITAMBAHKAN)
+// ==========================================
+app.post('/api/chat/save', verifyToken, async (req, res) => {
+    const { message, sender } = req.body; 
+    try {
+        await pool.query("INSERT INTO chats (user_id, sender_role, message) VALUES ($1, $2, $3)", [req.user.id, sender, message]);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+app.get('/api/chat/me', verifyToken, async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM chats WHERE user_id = $1 ORDER BY created_at ASC", [req.user.id]);
+        res.json({ success: true, data: result.rows });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+app.get('/api/admin/chats', verifyAdmin, async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT c.*, u.name as user_name 
+            FROM chats c JOIN users u ON c.user_id = u.id 
+            WHERE c.id IN (SELECT MAX(id) FROM chats GROUP BY user_id) 
+            ORDER BY c.created_at DESC
+        `);
+        res.json({ success: true, data: result.rows });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+// ==========================================
+
 app.get('/api/profile', verifyToken, getProfile);
 app.put('/api/profile', verifyToken, updateProfile);
 
