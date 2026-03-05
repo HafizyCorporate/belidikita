@@ -54,7 +54,8 @@
         .store-bg-accent { position: absolute; top: 0; left: 0; width: 100%; height: 70px; background: linear-gradient(135deg, #0D47A1, #81D4FA); opacity: 0.1; }
         
         .store-info-top { display: flex; gap: 15px; align-items: center; position: relative; z-index: 2; }
-        .store-avatar { width: 65px; height: 65px; background: linear-gradient(135deg, #FF9800, #FFD700); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 30px; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); border: 3px solid #fff;}
+        .store-avatar { width: 65px; height: 65px; background: linear-gradient(135deg, #FF9800, #FFD700); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 30px; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); border: 3px solid #fff; overflow: hidden;}
+        .store-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .store-name-box { flex: 1; }
         .store-name-box h2 { font-size: 16px; font-weight: 800; color: #0D47A1; margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
         .badge-mall { background: #ff3b30; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 800; letter-spacing: 0.5px; }
@@ -80,7 +81,6 @@
             border-radius: 12px; display: flex; color: #fff; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
             position: relative; overflow: hidden;
         }
-        /* Efek sobekan tiket */
         .voucher-card::before, .voucher-card::after { content: ''; position: absolute; width: 15px; height: 15px; background: #f4f7fa; border-radius: 50%; top: 50%; transform: translateY(-50%); z-index: 2; }
         .voucher-card::before { left: -8px; }
         .voucher-card::after { right: 65px; }
@@ -109,6 +109,21 @@
 
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
+        /* ✅ CSS MODAL SETTING TOKO KHUSUS ADMIN */
+        .modal-setting { display: none; position: fixed; z-index: 5000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,40,80,0.6); backdrop-filter: blur(5px); align-items: center; justify-content: center; }
+        .setting-box { background: #fff; padding: 25px 20px; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); animation: popIn 0.3s ease; position: relative; }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .setting-close { position: absolute; top: 15px; right: 20px; font-size: 24px; color: #aaa; cursor: pointer; font-weight: bold; }
+        .setting-box h3 { font-size: 16px; color: #0D47A1; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 2px dashed #E1F5FE; padding-bottom: 10px;}
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; color: #555; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; outline: none; font-size: 12px; font-family: 'Montserrat', sans-serif; background: #fafcff; }
+        .form-group input:focus, .form-group select:focus { border-color: #0D47A1; background: #fff; }
+        
+        .btn-save-store { width: 100%; background: #00AA5B; color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 170, 91, 0.3); transition: 0.2s; margin-top: 10px;}
+        .btn-save-store:active { transform: scale(0.95); }
+
         /* TOAST */
         #customToast { visibility: hidden; min-width: 280px; margin-left: -140px; background: rgba(13, 71, 161, 0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 9999; left: 50%; bottom: -50px; font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; }
         #customToast.show { visibility: visible; opacity: 1; bottom: 40px; }
@@ -128,7 +143,7 @@
             <i class="fas fa-search"></i>
             <input type="text" placeholder="Cari di toko ini...">
         </div>
-        <i class="fas fa-ellipsis-v"></i>
+        <i class="fas fa-ellipsis-v" id="btnSettingToko" style="padding: 5px 10px; display: none;"></i>
     </div>
 
     <div class="content-wrapper">
@@ -136,11 +151,11 @@
         <div class="store-profile-card">
             <div class="store-bg-accent"></div>
             <div class="store-info-top">
-                <div class="store-avatar"><i class="fas fa-store"></i></div>
+                <div class="store-avatar" id="displayStoreAvatar"><i class="fas fa-store"></i></div>
                 <div class="store-name-box">
-                    <h2>Belidikita Official <span class="badge-mall">MALL</span></h2>
+                    <h2><span id="displayStoreName">Belidikita Official</span> <span class="badge-mall">MALL</span></h2>
                     <div class="store-status"><i class="fas fa-circle" style="font-size:8px;"></i> Aktif 2 menit lalu</div>
-                    <div style="font-size:10px; color:#888; font-weight:600; margin-top:2px;"><i class="fas fa-map-marker-alt"></i> Kota Bandung</div>
+                    <div style="font-size:10px; color:#888; font-weight:600; margin-top:2px;"><i class="fas fa-map-marker-alt"></i> <span id="displayStoreCity">Kota Bandung</span></div>
                 </div>
             </div>
 
@@ -202,6 +217,33 @@
 
     </div>
 
+    <div id="modalSettingToko" class="modal-setting">
+        <div class="setting-box">
+            <span class="setting-close" id="closeSettingToko">&times;</span>
+            <h3><i class="fas fa-cog"></i> Pengaturan Toko</h3>
+            
+            <form id="formStoreSetting">
+                <div class="form-group">
+                    <label>Nama Toko</label>
+                    <input type="text" id="inputStoreName" placeholder="Contoh: Belidikita Official" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Link Foto Profil / Logo (URL Cloudinary/Lainnya)</label>
+                    <input type="url" id="inputStoreLogo" placeholder="https://contoh.com/logo.jpg">
+                </div>
+
+                <div class="form-group" style="background: #FFFDE7; border-left: 3px solid #FBC02D; padding: 10px; border-radius: 8px;">
+                    <label style="color:#F57F17;"><i class="fas fa-map-marker-alt"></i> Kota Asal Pengiriman (Penting untuk Ongkir!)</label>
+                    <input type="text" id="inputStoreCity" placeholder="Contoh: Bandung, Jakarta, Papua..." required>
+                    <p style="font-size: 9px; color:#888; margin-top:5px;">Sistem akan menghitung tarif ongkos kirim berdasarkan kota ini.</p>
+                </div>
+
+                <button type="submit" class="btn-save-store"><i class="fas fa-save"></i> Simpan Perubahan</button>
+            </form>
+        </div>
+    </div>
+
     <div id="customToast"></div>
 
     <script>
@@ -212,13 +254,72 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // 1. Fungsi Klaim Voucher Pintar (Otomatis Copy)
+        // --- ✅ LOGIKA BARU: PENGATURAN TOKO OLEH ADMIN ---
+        const btnSetting = document.getElementById('btnSettingToko');
+        const modalSetting = document.getElementById('modalSettingToko');
+        const closeSetting = document.getElementById('closeSettingToko');
+        const formSetting = document.getElementById('formStoreSetting');
+
+        // ✅ DETEKSI ADMIN: Hanya munculkan tombol titik 3 jika Admin yang login
+        const currentToken = localStorage.getItem('token');
+        if (currentToken && currentToken.startsWith('token-admin-')) {
+            btnSetting.style.display = 'block'; // Munculkan dari persembunyian
+        }
+
+        // Buka Modal
+        btnSetting.addEventListener('click', () => {
+            modalSetting.style.display = 'flex';
+            // Isi form dengan data yang ada di local storage saat ini
+            const savedData = JSON.parse(localStorage.getItem('belidikita_store_profile')) || { nama: "Belidikita Official", kota: "Kota Bandung", logo: "" };
+            document.getElementById('inputStoreName').value = savedData.nama;
+            document.getElementById('inputStoreCity').value = savedData.kota;
+            document.getElementById('inputStoreLogo').value = savedData.logo;
+        });
+
+        // Tutup Modal
+        closeSetting.addEventListener('click', () => modalSetting.style.display = 'none');
+
+        // Simpan Perubahan
+        formSetting.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newData = {
+                nama: document.getElementById('inputStoreName').value,
+                kota: document.getElementById('inputStoreCity').value,
+                logo: document.getElementById('inputStoreLogo').value
+            };
+            
+            // Simpan ke Local Storage
+            localStorage.setItem('belidikita_store_profile', JSON.stringify(newData));
+            
+            // Update Tampilan Langsung di Layar
+            renderStoreProfile();
+            
+            modalSetting.style.display = 'none';
+            showToast("Profil Toko berhasil diperbarui!", "success");
+        });
+
+        // Fungsi Tampilkan Profil Toko (Dipanggil saat web dimuat)
+        function renderStoreProfile() {
+            const savedData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
+            if (savedData) {
+                document.getElementById('displayStoreName').innerText = savedData.nama;
+                document.getElementById('displayStoreCity').innerText = savedData.kota;
+                if (savedData.logo) {
+                    document.getElementById('displayStoreAvatar').innerHTML = `<img src="${savedData.logo}" alt="Logo">`;
+                } else {
+                    document.getElementById('displayStoreAvatar').innerHTML = `<i class="fas fa-store"></i>`;
+                }
+            }
+        }
+        // Eksekusi render pertama kali
+        renderStoreProfile();
+        // --------------------------------------------------
+
         function klaimVoucher(kode) {
             navigator.clipboard.writeText(kode);
             showToast(`Voucher ${kode} diklaim & disalin! Gunakan saat Checkout.`, "success");
         }
 
-        // 2. Fungsi Animasi Ikuti Toko
         function followToko() {
             const btn = document.getElementById('btnFollowToko');
             if(btn.innerText.includes("Mengikuti")) {
@@ -228,11 +329,10 @@
             } else {
                 btn.innerHTML = "<i class='fas fa-check'></i> Mengikuti";
                 btn.style.background = "#00AA5B";
-                showToast("Berhasil mengikuti Belidikita Official!", "success");
+                showToast("Berhasil mengikuti toko!", "success");
             }
         }
 
-        // 3. Tarik Semua Produk ke Etalase Toko
         async function loadStoreProducts() {
             try {
                 const res = await fetch('/api/products');
@@ -241,12 +341,9 @@
 
                 if (result.success && result.data.length > 0) {
                     container.innerHTML = '';
-                    
-                    // ✅ Update Angka Total Produk di Header Toko secara Otomatis!
                     document.getElementById('totalStoreProducts').innerText = result.data.length;
 
                     result.data.forEach(p => {
-                        // Kecerdsan Foto Cloudinary
                         let arrFoto = [];
                         try { 
                             arrFoto = JSON.parse(p.media_url); 
@@ -256,20 +353,14 @@
                         const imgUrl = arrFoto[0] || 'https://via.placeholder.com/150';
                         const hargaRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.price);
 
-                        // Siapkan Object untuk dibawa ke halaman Detail
                         const prodObj = {
-                            id: p.id,
-                            nama: p.title,
-                            harga: p.price,
-                            hargaStr: hargaRp,
-                            deskripsi: p.description,
-                            foto: p.media_url, // Kirim foto mentah
-                            seller_name: p.seller_name || 'Belidikita Official',
+                            id: p.id, nama: p.title, harga: p.price, hargaStr: hargaRp,
+                            deskripsi: p.description, foto: p.media_url, 
+                            seller_name: document.getElementById('displayStoreName').innerText, 
                             weight: p.weight || 1000
                         };
                         const strObj = encodeURIComponent(JSON.stringify(prodObj));
 
-                        // Generate Angka Terjual Dummy agar terlihat ramai (Matematika dari ID)
                         const terjual = (p.id * 17 % 500) + 10;
 
                         container.innerHTML += `
@@ -295,14 +386,12 @@
             }
         }
 
-        // Fungsi klik produk
         function bukaDetail(encodedObj) {
             const decodedObj = decodeURIComponent(encodedObj);
             localStorage.setItem('produk_detail', decodedObj);
             window.location.href = 'detailproduk.html';
         }
 
-        // Eksekusi pemuatan data
         loadStoreProducts();
     </script>
 </body>
