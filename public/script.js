@@ -105,8 +105,10 @@ document.addEventListener("DOMContentLoaded", () => {
         cekStatusPembeli(); 
     }
 
+    // ==========================================
+    // 🚀 LOGIKA MENU BAWAH (BOTTOM NAV)
+    // ==========================================
     const menuHome = document.getElementById('menuHome');
-    const menuProduct = document.getElementById('menuProduct');
     const menuFeed = document.getElementById('menuFeed');
     const menuTransaction = document.getElementById('menuTransaction');
     const menuAccount = document.getElementById('menuAccount'); 
@@ -120,19 +122,16 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault(); setActiveNav(menuHome); window.scrollTo({ top: 0, behavior: 'smooth' }); 
     });
     
-    if(menuProduct) menuProduct.addEventListener('click', (e) => { 
-        e.preventDefault(); setActiveNav(menuProduct); 
-        window.location.href = 'toko.html'; 
-    });
-    
     if(menuFeed) menuFeed.addEventListener('click', (e) => { 
         e.preventDefault(); setActiveNav(menuFeed); 
         showToast("Fitur Video Feed segera hadir!", "info"); 
     });
     
+    // ✅ UBAH: TOMBOL PESANAN MEMBUKA LAYAR PENUH CEK STATUS
     if(menuTransaction) menuTransaction.addEventListener('click', (e) => { 
-        e.preventDefault(); setActiveNav(menuTransaction); 
-        window.location.href = 'registrasi/profilpembeli.html'; 
+        e.preventDefault(); 
+        setActiveNav(menuTransaction); 
+        bukaHalamanPesanan(); // Fungsi baru di bawah
     });
 
     if(menuAccount) {
@@ -174,7 +173,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // ✅ FUNGSI PENGATUR PRODUK BERANDA (HILANGKAN AREA KOSONG & BINTANG REAL)
     async function loadRandomProducts() {
         const productList = document.getElementById('randomProductList');
         const larisList = document.getElementById('topSellingList');
@@ -213,14 +211,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video+Produk' : (fotoUtama || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
                     const mediaTag = isVideo ? `<video src="${fotoBarang}" class="product-media" style="object-fit:cover;"></video>` : `<img src="${fotoBarang}" class="product-media" alt="${product.title}">`;
 
-                    // ✅ LOGIKA BINTANG REAL (Dari Server)
                     const terjual = product.sold_count || 0;
                     const avgRating = parseFloat(product.avg_rating) || 0;
-                    
-                    // Jika ada review, bintang kuning. Jika belum, bintang abu-abu "0.0"
-                    const ratingHtml = avgRating > 0 
-                        ? `<i class="fas fa-star" style="color:#FFD700;"></i> ${avgRating}` 
-                        : `<i class="fas fa-star" style="color:#ccc;"></i> 0.0`;
+                    const ratingHtml = avgRating > 0 ? `<i class="fas fa-star" style="color:#FFD700;"></i> ${avgRating}` : `<i class="fas fa-star" style="color:#ccc;"></i> 0.0`;
 
                     const pId = product.id; const pUrl = product.media_url; const pTitle = product.title;
                     const pDesc = deskripsiBarang; const pPrice = product.price; const pWeight = product.weight;
@@ -237,7 +230,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (product.category === 'laris' || product.category === 'keranjang') {
                         const hCard = document.createElement('div');
                         hCard.className = 'h-card';
-                        hCard.style.position = 'relative';
                         hCard.innerHTML = `
                             ${badgeGrosirHorizontal}
                             <img src="${fotoBarang}" class="h-card-img" alt="Barang">
@@ -276,7 +268,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     countBiasa++;
                 });
 
-                // ✅ LOGIKA MENGHILANGKAN SECTION YANG KOSONG DENGAN KEJAM
                 if(countLaris > 0) { sectionLaris.style.display = 'block'; } else { sectionLaris.style.display = 'none'; }
                 if(countKeranjang > 0) { sectionKeranjang.style.display = 'block'; } else { sectionKeranjang.style.display = 'none'; }
                 if(countBiasa > 0) { sectionProdukUtama.style.display = 'block'; } else { sectionProdukUtama.style.display = 'none'; }
@@ -295,23 +286,106 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function bukaDetailProduk(id, foto, nama, hargaStr, deskripsi, hargaRaw, beratRaw, sellerName, unit, vTitle, vOpt, wsPrice, wsMin) {
         const dataProduk = { 
-            id: id,
-            foto: foto, 
-            nama: nama, 
-            hargaStr: hargaStr, 
-            deskripsi: deskripsi, 
-            harga: hargaRaw, 
-            weight: beratRaw || 1000, 
-            seller_name: sellerName || "Belidikita Official",
-            qty: 1,
-            unit: unit || 'Pcs',
-            variant_title: vTitle || '',
-            variant_options: vOpt || '',
-            wholesale_price: wsPrice || 0,
-            wholesale_min_qty: wsMin || 0
+            id: id, foto: foto, nama: nama, hargaStr: hargaStr, deskripsi: deskripsi, 
+            harga: hargaRaw, weight: beratRaw || 1000, seller_name: sellerName || "Belidikita Official", qty: 1,
+            unit: unit || 'Pcs', variant_title: vTitle || '', variant_options: vOpt || '',
+            wholesale_price: wsPrice || 0, wholesale_min_qty: wsMin || 0
         };
-        
         localStorage.setItem('produk_detail', JSON.stringify(dataProduk));
         window.location.href = 'detailproduk.html';
+    }
+
+    // ==========================================
+    // ✅ LOGIKA BARU: LAYAR PESANAN & RAYUAN MANIS
+    // ==========================================
+    window.tutupHalamanPesanan = function() {
+        document.getElementById('pesananLayarPenuh').style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    async function bukaHalamanPesanan() {
+        const layarPesanan = document.getElementById('pesananLayarPenuh');
+        const kontenPesanan = document.getElementById('kontenPesananLayar');
+        
+        layarPesanan.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        const token = localStorage.getItem('token');
+
+        // JIKA BELUM LOGIN (Rayuan Manis)
+        if (!token || token.startsWith('token-admin-')) {
+            kontenPesanan.innerHTML = `
+                <div style="text-align:center; padding: 50px 20px; margin-top:20px;">
+                    <i class="fas fa-heart" style="font-size: 60px; color: #ff4757; margin-bottom: 20px; animation: pulse 1.5s infinite;"></i>
+                    <h3 style="color:#0D47A1; font-weight:800; margin-bottom:10px;">Halo Orang Baik! ✨</h3>
+                    <p style="color:#666; font-size:13px; line-height:1.6; margin-bottom:25px;">Keranjangmu masih sepi nih, sesepi hati yang belum disinggahi. Yuk, login sekarang dan temukan barang-barang murah spesial Ramadhan buat nemenin hari-harimu!</p>
+                    <button onclick="window.location.href='registrasi/loginpembeli.html'" style="background:linear-gradient(135deg, #0D47A1, #1976D2); color:white; border:none; padding:14px 30px; border-radius:25px; font-weight:800; box-shadow:0 4px 15px rgba(13,71,161,0.3); cursor:pointer; width:100%;">Login & Mulai Belanja <i class="fas fa-arrow-right ml-2"></i></button>
+                </div>
+            `;
+            return;
+        }
+
+        // JIKA SUDAH LOGIN (Cek Data Pesanan ke Server)
+        kontenPesanan.innerHTML = '<p style="text-align:center; padding:50px; font-weight:bold; color:#0D47A1;"><i class="fas fa-spinner fa-spin mr-2"></i> Mengecek data pesananmu dari Admin...</p>';
+
+        try {
+            const res = await fetch('/api/orders/me', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await res.json();
+
+            if (result.success && result.data.length > 0) {
+                kontenPesanan.innerHTML = '';
+                
+                result.data.forEach(order => {
+                    // Warna Status Pesanan
+                    let statusColor = "#ff9800"; let iconStatus = "fa-clock";
+                    if(order.status === 'Diproses') { statusColor = "#0D47A1"; iconStatus = "fa-box-open"; }
+                    if(order.status === 'Dikirim') { statusColor = "#9c27b0"; iconStatus = "fa-truck-fast"; }
+                    if(order.status === 'Selesai') { statusColor = "#00AA5B"; iconStatus = "fa-check-circle"; }
+                    if(order.status.includes('Retur')) { statusColor = "#ff3b30"; iconStatus = "fa-exclamation-circle"; }
+
+                    const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
+
+                    // Tampilan Resi Pengiriman
+                    let resiHtml = order.resi && order.resi !== '-'
+                        ? `<div style="margin-top:10px; padding:10px; background:#f4f9ff; border:1px dashed #81D4FA; border-radius:8px; font-size:11px; font-weight:700;"><span style="color:#888;">No. Resi:</span> <span style="color:#0D47A1; user-select:all;">${order.resi}</span></div>`
+                        : `<div style="margin-top:10px; font-size:10px; color:#888; font-style:italic;">*Nomor Resi akan muncul setelah dikirim Admin</div>`;
+
+                    kontenPesanan.innerHTML += `
+                        <div style="background:#fff; border-radius:15px; padding:15px; margin-bottom:15px; box-shadow:0 4px 10px rgba(0,0,0,0.05); border:1px solid #f0f4f8;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px dashed #eee; padding-bottom:10px;">
+                                <span style="font-size:11px; color:#888; font-weight:700;">#ORD-${order.id}</span>
+                                <span style="font-size:10px; font-weight:800; color:${statusColor}; background:${statusColor}15; padding:4px 8px; border-radius:6px;"><i class="fas ${iconStatus}"></i> ${order.status}</span>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <p style="font-size:10px; color:#666; margin-bottom:2px;">Total Tagihan</p>
+                                    <h4 style="font-size:15px; color:#ff5722; font-weight:800;">${formatRp}</h4>
+                                </div>
+                                <div style="text-align:right;">
+                                    <p style="font-size:10px; color:#666; margin-bottom:2px;">Pengiriman via</p>
+                                    <span style="font-size:12px; font-weight:800; color:#333;"><i class="fas fa-shipping-fast" style="color:#0D47A1;"></i> ${order.shipping_courier}</span>
+                                </div>
+                            </div>
+                            ${resiHtml}
+                        </div>
+                    `;
+                });
+            } else {
+                // JIKA USER LOGIN TAPI BELUM ADA PESANAN SAMA SEKALI
+                kontenPesanan.innerHTML = `
+                    <div style="text-align:center; padding: 50px 20px;">
+                        <i class="fas fa-shopping-bag" style="font-size: 60px; color: #ddd; margin-bottom: 15px;"></i>
+                        <h3 style="color:#333; font-weight:800; margin-bottom:10px;">Belum ada pesanan nih</h3>
+                        <p style="color:#888; font-size:12px; line-height:1.5;">Pilih barang favoritmu dan checkout sekarang. Banyak promo menarik menanti lho!</p>
+                        <button onclick="tutupHalamanPesanan()" style="margin-top:20px; background:#0D47A1; color:white; border:none; padding:12px 25px; border-radius:20px; font-weight:bold; cursor:pointer;">Mulai Belanja Sekarang</button>
+                    </div>
+                `;
+            }
+
+        } catch (error) {
+            kontenPesanan.innerHTML = '<p style="color:red; text-align:center; padding:20px;">Gagal mengambil data pesanan. Periksa koneksi internet Anda.</p>';
+        }
     }
 });
