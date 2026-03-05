@@ -105,9 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
         cekStatusPembeli(); 
     }
 
-    // ==========================================
-    // 🚀 LOGIKA MENU BAWAH (BOTTOM NAV)
-    // ==========================================
     const menuHome = document.getElementById('menuHome');
     const menuFeed = document.getElementById('menuFeed');
     const menuTransaction = document.getElementById('menuTransaction');
@@ -127,11 +124,10 @@ document.addEventListener("DOMContentLoaded", () => {
         showToast("Fitur Video Feed segera hadir!", "info"); 
     });
     
-    // ✅ UBAH: TOMBOL PESANAN MEMBUKA LAYAR PENUH CEK STATUS
     if(menuTransaction) menuTransaction.addEventListener('click', (e) => { 
         e.preventDefault(); 
         setActiveNav(menuTransaction); 
-        bukaHalamanPesanan(); // Fungsi baru di bawah
+        bukaHalamanPesanan(); 
     });
 
     if(menuAccount) {
@@ -230,6 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if (product.category === 'laris' || product.category === 'keranjang') {
                         const hCard = document.createElement('div');
                         hCard.className = 'h-card';
+                        hCard.style.position = 'relative';
                         hCard.innerHTML = `
                             ${badgeGrosirHorizontal}
                             <img src="${fotoBarang}" class="h-card-img" alt="Barang">
@@ -284,20 +281,153 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    function bukaDetailProduk(id, foto, nama, hargaStr, deskripsi, hargaRaw, beratRaw, sellerName, unit, vTitle, vOpt, wsPrice, wsMin) {
-        const dataProduk = { 
-            id: id, foto: foto, nama: nama, hargaStr: hargaStr, deskripsi: deskripsi, 
-            harga: hargaRaw, weight: beratRaw || 1000, seller_name: sellerName || "Belidikita Official", qty: 1,
-            unit: unit || 'Pcs', variant_title: vTitle || '', variant_options: vOpt || '',
-            wholesale_price: wsPrice || 0, wholesale_min_qty: wsMin || 0
-        };
-        localStorage.setItem('produk_detail', JSON.stringify(dataProduk));
+    // ==========================================
+    // ✅ FUNGSI KATEGORI CERDAS (DENGAN SEARCH & FILTER)
+    // ==========================================
+    window.katalogDataSementara = []; // Array Penyimpan Sementara
+
+    window.saringProdukLangsung = async function(mainCat, subCat) {
+        tutupSubKategori();
+        
+        const layarPenuh = document.getElementById('katalogLayarPenuh');
+        const judulHalaman = document.getElementById('judulHalamanKategori');
+        const containerGrid = document.getElementById('gridHasilKategori');
+        const teksPencarian = subCat === 'Semua' ? mainCat : subCat;
+
+        // Reset Filter UI
+        const inputCari = document.getElementById('inputCariKatalog');
+        const filterDrop = document.getElementById('filterKatalog');
+        if(inputCari) inputCari.value = '';
+        if(filterDrop) filterDrop.value = 'terbaru';
+
+        layarPenuh.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; 
+        judulHalaman.innerText = teksPencarian;
+        containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:#0D47A1; grid-column:span 2; padding: 50px 20px; font-weight:bold;"><i class="fas fa-spinner fa-spin mr-2"></i> Mengambil data dari server...</p>';
+
+        try {
+            const res = await fetch('/api/products');
+            const result = await res.json();
+
+            if (result.success && result.data.length > 0) {
+                let keyword = teksPencarian.toLowerCase().split(/[,\/ ]/)[0]; 
+                if(keyword === "buku" && subCat.includes("sekolah")) keyword = "sekolah";
+
+                // Simpan barang yang sesuai Kategori ke memori sementara
+                window.katalogDataSementara = result.data.filter(p => {
+                    const title = (p.title || '').toLowerCase();
+                    const desc = (p.description || '').toLowerCase();
+                    return title.includes(keyword) || desc.includes(keyword);
+                });
+
+                // Eksekusi rendering final
+                window.renderHasilKatalog();
+            } else {
+                containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:#888; grid-column:span 2; padding: 50px 20px;">Toko belum mengunggah barang.</p>';
+            }
+        } catch (e) {
+            containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:red; grid-column:span 2; padding: 50px 20px;">Gagal memuat barang dari server.</p>';
+        }
+    }
+
+    // Fungsi Render yg terhubung dengan Tombol Filter & Kotak Pencarian
+    window.renderHasilKatalog = function() {
+        const containerGrid = document.getElementById('gridHasilKategori');
+        const inputCari = document.getElementById('inputCariKatalog');
+        const filterDrop = document.getElementById('filterKatalog');
+        
+        let finalData = [...window.katalogDataSementara]; // Duplikasi agar aslinya tidak rusak
+
+        // 1. FILTER PENCARIAN (Berdasarkan Teks Ketikan)
+        if(inputCari && inputCari.value.trim() !== '') {
+            const searchTxt = inputCari.value.toLowerCase().trim();
+            finalData = finalData.filter(p => {
+                const title = (p.title || '').toLowerCase();
+                const desc = (p.description || '').toLowerCase();
+                return title.includes(searchTxt) || desc.includes(searchTxt);
+            });
+        }
+
+        // 2. SORTING (Termurah, Terlaris, Terbaru)
+        if(filterDrop) {
+            if(filterDrop.value === 'termurah') {
+                finalData.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+            } else if (filterDrop.value === 'terlaris') {
+                finalData.sort((a, b) => (parseInt(b.sold_count) || 0) - (parseInt(a.sold_count) || 0));
+            } else {
+                // Terbaru (Berdasarkan ID / Waktu upload)
+                finalData.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+            }
+        }
+
+        // 3. RENDER HTML
+        if (finalData.length > 0) {
+            containerGrid.innerHTML = '';
+            finalData.forEach(product => {
+                const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
+                const deskripsiBarang = product.description || "Deskripsi belum tersedia.";
+                
+                let fotoUtama = product.media_url;
+                try {
+                    const parsedMedia = JSON.parse(product.media_url);
+                    if (Array.isArray(parsedMedia) && parsedMedia.length > 0) fotoUtama = parsedMedia[0];
+                } catch(e) {} 
+
+                const isVideo = product.media_type === 'video';
+                const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video' : (fotoUtama || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
+                const mediaTag = isVideo ? `<video src="${fotoBarang}" class="product-media"></video>` : `<img src="${fotoBarang}" class="product-media" alt="${product.title}">`;
+                
+                const terjual = product.sold_count || 0; 
+                const avgRating = parseFloat(product.avg_rating) || 0;
+                const ratingHtml = avgRating > 0 ? `<i class="fas fa-star" style="color:#FFD700;"></i> ${avgRating}` : `<i class="fas fa-star" style="color:#ccc;"></i> 0.0`;
+
+                const prodObj = {
+                    id: product.id, foto: fotoUtama, nama: product.title, 
+                    hargaStr: priceRp, deskripsi: deskripsiBarang, 
+                    harga: product.price, weight: product.weight || 1000, 
+                    seller_name: product.seller_name || "Belidikita Official", qty: 1,
+                    unit: product.unit || 'Pcs', variant_title: product.variant_title || '',
+                    variant_options: product.variant_options || '', wholesale_price: product.wholesale_price || 0,
+                    wholesale_min_qty: product.wholesale_min_qty || 0
+                };
+                const strObj = encodeURIComponent(JSON.stringify(prodObj));
+
+                let labelGrosir = '';
+                if(product.wholesale_price > 0 && product.wholesale_min_qty > 0) {
+                    labelGrosir = `<div style="position:absolute; top:5px; left:5px; background:#4CAF50; color:#fff; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;"><i class="fas fa-tags"></i> GROSIR</div>`;
+                }
+
+                containerGrid.innerHTML += `
+                    <div class="product-card" onclick="window.bukaDetailGlobal('${strObj}')" style="position:relative;">
+                        ${labelGrosir}
+                        ${mediaTag}
+                        <div class="product-info">
+                            <div class="product-title">${product.title}</div>
+                            <div class="product-price">${priceRp}</div>
+                            <div class="product-stats">
+                                <span>${ratingHtml}</span>
+                                <span>${terjual} Terjual</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        } else {
+            containerGrid.innerHTML = `
+                <div style="text-align:center; width:100%; grid-column:span 2; padding: 50px 20px;">
+                    <i class="fas fa-box-open" style="font-size: 60px; color: #ddd; margin-bottom: 15px;"></i>
+                    <p style="color:#888; font-weight:600; font-size: 13px;">Ups, barang yang kamu ketik tidak ditemukan di kategori ini.</p>
+                </div>`;
+        }
+    }
+
+    window.bukaDetailGlobal = function(encodedObj) {
+        const decodedObj = decodeURIComponent(encodedObj);
+        localStorage.setItem('produk_detail', decodedObj);
         window.location.href = 'detailproduk.html';
     }
 
-    // ==========================================
-    // ✅ LOGIKA BARU: LAYAR PESANAN & RAYUAN MANIS
-    // ==========================================
+
     window.tutupHalamanPesanan = function() {
         document.getElementById('pesananLayarPenuh').style.display = 'none';
         document.body.style.overflow = 'auto';
@@ -312,7 +442,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const token = localStorage.getItem('token');
 
-        // JIKA BELUM LOGIN (Rayuan Manis)
         if (!token || token.startsWith('token-admin-')) {
             kontenPesanan.innerHTML = `
                 <div style="text-align:center; padding: 50px 20px; margin-top:20px;">
@@ -325,7 +454,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // JIKA SUDAH LOGIN (Cek Data Pesanan ke Server)
         kontenPesanan.innerHTML = '<p style="text-align:center; padding:50px; font-weight:bold; color:#0D47A1;"><i class="fas fa-spinner fa-spin mr-2"></i> Mengecek data pesananmu dari Admin...</p>';
 
         try {
@@ -338,7 +466,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 kontenPesanan.innerHTML = '';
                 
                 result.data.forEach(order => {
-                    // Warna Status Pesanan
                     let statusColor = "#ff9800"; let iconStatus = "fa-clock";
                     if(order.status === 'Diproses') { statusColor = "#0D47A1"; iconStatus = "fa-box-open"; }
                     if(order.status === 'Dikirim') { statusColor = "#9c27b0"; iconStatus = "fa-truck-fast"; }
@@ -347,7 +474,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
 
-                    // Tampilan Resi Pengiriman
                     let resiHtml = order.resi && order.resi !== '-'
                         ? `<div style="margin-top:10px; padding:10px; background:#f4f9ff; border:1px dashed #81D4FA; border-radius:8px; font-size:11px; font-weight:700;"><span style="color:#888;">No. Resi:</span> <span style="color:#0D47A1; user-select:all;">${order.resi}</span></div>`
                         : `<div style="margin-top:10px; font-size:10px; color:#888; font-style:italic;">*Nomor Resi akan muncul setelah dikirim Admin</div>`;
@@ -373,7 +499,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     `;
                 });
             } else {
-                // JIKA USER LOGIN TAPI BELUM ADA PESANAN SAMA SEKALI
                 kontenPesanan.innerHTML = `
                     <div style="text-align:center; padding: 50px 20px;">
                         <i class="fas fa-shopping-bag" style="font-size: 60px; color: #ddd; margin-bottom: 15px;"></i>
