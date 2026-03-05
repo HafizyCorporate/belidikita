@@ -234,19 +234,33 @@ app.delete('/api/coupons/:id', verifyAdmin, async (req, res) => {
     try { await pool.query('DELETE FROM coupons WHERE id = $1', [req.params.id]); res.json({ success: true }); } catch(err) { res.status(500).json({ success: false }); }
 });
 
+// ✅ PERBAIKAN LOGIKA: SINKRONISASI API ORDERS AGAR TEMBUS KE PROFIL PEMBELI
 app.post('/api/orders', verifyToken, async (req, res) => {
     const { customer_name, customer_wa, shipping_address, items, total_price, shipping_courier, shipping_cost, payment_method } = req.body;
     try {
-        const result = await pool.query(`INSERT INTO orders (user_id, customer_name, customer_wa, shipping_address, items, total_price, shipping_courier, shipping_cost, payment_method) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id`, [req.user.id, customer_name, customer_wa, shipping_address, items, total_price, shipping_courier, shipping_cost, payment_method]);
+        const result = await pool.query(
+            `INSERT INTO orders (user_id, customer_name, customer_wa, shipping_address, items, total_price, shipping_courier, shipping_cost, payment_method, status, is_hidden_buyer, is_hidden_admin) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'Menunggu Pembayaran', FALSE, FALSE) RETURNING id`, 
+            [req.user.id, customer_name, customer_wa, shipping_address, items, total_price, shipping_courier, shipping_cost, payment_method]
+        );
         res.json({ success: true, order_id: result.rows[0].id });
     } catch(err) { res.status(500).json({ success: false }); }
 });
+
 app.get('/api/orders/me', verifyToken, async (req, res) => {
-    try { const result = await pool.query('SELECT * FROM orders WHERE user_id = $1 AND is_hidden_buyer = FALSE ORDER BY created_at DESC', [req.user.id]); res.json({ success: true, data: result.rows }); } catch(err) { res.status(500).json({ success: false }); }
+    try { 
+        const result = await pool.query('SELECT * FROM orders WHERE user_id = $1 AND (is_hidden_buyer = FALSE OR is_hidden_buyer IS NULL) ORDER BY created_at DESC', [req.user.id]); 
+        res.json({ success: true, data: result.rows }); 
+    } catch(err) { res.status(500).json({ success: false }); }
 });
+
 app.get('/api/orders', verifyAdmin, async (req, res) => {
-    try { const result = await pool.query('SELECT * FROM orders WHERE is_hidden_admin = FALSE ORDER BY created_at DESC'); res.json({ success: true, data: result.rows }); } catch(err) { res.status(500).json({ success: false }); }
+    try { 
+        const result = await pool.query('SELECT * FROM orders WHERE (is_hidden_admin = FALSE OR is_hidden_admin IS NULL) ORDER BY created_at DESC'); 
+        res.json({ success: true, data: result.rows }); 
+    } catch(err) { res.status(500).json({ success: false }); }
 });
+
 app.put('/api/orders/:id', verifyAdmin, async (req, res) => {
     const { status, resi } = req.body;
     try { await pool.query('UPDATE orders SET status=$1, resi=$2 WHERE id=$3', [status, resi, req.params.id]); res.json({ success: true }); } catch(err) { res.status(500).json({ success: false }); }
