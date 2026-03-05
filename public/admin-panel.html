@@ -544,10 +544,11 @@
             setTimeout(() => window.location.href = 'login.html', 1500);
         }
 
+                // ✅ DIPERBAIKI: Admin tidak akan di-logout saat melihat toko depan
         function lihatTokoDepan() {
-            localStorage.removeItem('token'); 
+            // localStorage.removeItem('token'); // BARIS INI KITA BUANG AGAR STATUS ADMIN TETAP NEMPEL
             sessionStorage.setItem('skipSplash', 'true'); 
-            window.location.href = 'dashboardutama.html'; 
+            window.location.href = 'toko.html'; // Langsung tembak ke halaman toko agar Komandan bisa setting
         }
 
         const doLogout = (e) => {
