@@ -148,16 +148,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    const btnChatAdminWA = document.getElementById('btnChatAdminWA');
-    if(btnChatAdminWA) {
-        btnChatAdminWA.addEventListener('click', () => {
-            const nomorAdmin = "6282240400388"; 
-            const pesan = "Halo Admin Belidikita, saya ingin bertanya...";
-            const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesan)}`;
-            window.open(linkWA, '_blank');
-        });
-    }
-
     const adminLoginIcon = document.getElementById('adminLoginIcon');
     const modalConfirmAdmin = document.getElementById('modalConfirmAdmin');
     const btnBatalAdmin = document.getElementById('btnBatalAdmin');
@@ -186,63 +176,108 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==========================================
-    // BOT AI CHAT 
+    // ✅ LOGIKA KOTAK MASUK TOKO (SHOPEE STYLE + AI AUTO-REPLY)
     // ==========================================
-    const aiChatModal = document.getElementById('aiChatModal');
-    const closeAIBtn = document.getElementById('closeAIBtn');
-    const aiSendBtn = document.getElementById('aiSendBtn');
-    const aiInput = document.getElementById('aiInput');
-    const aiBody = document.getElementById('aiBody');
+    const btnChatToko = document.getElementById('btnChatToko');
+    const modalChatToko = document.getElementById('modalChatToko');
+    const closeChatToko = document.getElementById('closeChatToko');
+    const chatTokoBody = document.getElementById('chatTokoBody');
+    const chatTokoInput = document.getElementById('chatTokoInput');
+    const btnKirimChat = document.getElementById('btnKirimChat');
 
-    if(floatingAIBtn) {
-        floatingAIBtn.addEventListener('click', () => {
-            aiChatModal.style.display = 'flex';
+    if(btnChatToko) {
+        btnChatToko.addEventListener('click', () => {
+            const token = localStorage.getItem('token');
+            if (!token || token.startsWith('token-admin-')) {
+                showToast("Silakan login dulu untuk mengirim pesan ke toko!", "error");
+                setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
+                return;
+            }
+            if(modalChatToko) modalChatToko.style.display = 'flex';
+            muatRiwayatChatToko();
         });
     }
 
-    if(closeAIBtn) {
-        closeAIBtn.addEventListener('click', () => {
-            aiChatModal.style.display = 'none';
-        });
-    }
+    if(closeChatToko) closeChatToko.addEventListener('click', () => {
+        if(modalChatToko) modalChatToko.style.display = 'none';
+    });
 
-    async function kirimPesanAI() {
-        const teks = aiInput.value.trim();
-        if(!teks) return;
-
-        aiBody.innerHTML += `<div class="ai-msg user">${teks}</div>`;
-        aiInput.value = '';
-        aiBody.scrollTop = aiBody.scrollHeight;
-
-        const loadingId = 'loading-' + Date.now();
-        aiBody.innerHTML += `<div class="ai-msg bot" id="${loadingId}"><i class="fas fa-ellipsis-h fa-fade"></i> Berpikir...</div>`;
-        aiBody.scrollTop = aiBody.scrollHeight;
-
+    async function muatRiwayatChatToko() {
+        const token = localStorage.getItem('token');
         try {
+            const res = await fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } });
+            const result = await res.json();
+            
+            if(result.success && result.data.length > 0) {
+                chatTokoBody.innerHTML = '';
+                result.data.forEach(msg => {
+                    let isUser = msg.sender_role === 'pembeli';
+                    let cssClass = isUser ? 'chat-msg-user' : 'chat-msg-store';
+                    let labelToko = msg.sender_role === 'admin' ? '<br><small style="color:#00AA5B; font-weight:bold;">- Admin -</small>' : '';
+                    
+                    chatTokoBody.innerHTML += `<div class="${cssClass}">${msg.message} ${labelToko}</div>`;
+                });
+            } else {
+                chatTokoBody.innerHTML = `<div class="chat-msg-store">Halo kak! Selamat datang di Belidikita. Ada yang bisa kami bantu? 😊</div>`;
+            }
+            chatTokoBody.scrollTop = chatTokoBody.scrollHeight;
+        } catch(e) {}
+    }
+
+    async function kirimChatToko() {
+        const teks = chatTokoInput.value.trim();
+        if(!teks) return;
+        const token = localStorage.getItem('token');
+
+        // 1. Munculkan Chat Pembeli
+        chatTokoBody.innerHTML += `<div class="chat-msg-user">${teks}</div>`;
+        chatTokoInput.value = '';
+        chatTokoBody.scrollTop = chatTokoBody.scrollHeight;
+
+        // 2. Simpan Chat Pembeli ke Database
+        fetch('/api/chat/save', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ message: teks, sender: 'pembeli' })
+        });
+
+        // 3. Tampilkan Loading Toko Mengetik
+        const loadingId = 'loading-' + Date.now();
+        chatTokoBody.innerHTML += `<div class="chat-msg-store" id="${loadingId}"><i class="fas fa-ellipsis-h fa-fade"></i> Belidikita mengetik...</div>`;
+        chatTokoBody.scrollTop = chatTokoBody.scrollHeight;
+
+        // 4. Tanya ke AI (Bertindak sebagai Admin)
+        try {
+            const promptSakti = `Kamu adalah Customer Service toko online bernama 'Belidikita'. Jawab pertanyaan pembeli ini dengan ramah, singkat, dan persuasif. Jika dia tanya stok, bilang selalu ready. Jika tanya harga/produk, suruh langsung checkout. Pertanyaan pembeli: ${teks}`;
+            
             const res = await fetch('/api/ai/search', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: teks })
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: promptSakti })
             });
             const data = await res.json();
-            
             document.getElementById(loadingId).remove();
-            
+
             if(data.success) {
                 let jawaban = data.answer.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
-                aiBody.innerHTML += `<div class="ai-msg bot">${jawaban}</div>`;
+                chatTokoBody.innerHTML += `<div class="chat-msg-store">${jawaban}</div>`;
+                
+                // 5. Simpan Balasan AI ke Database
+                fetch('/api/chat/save', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ message: jawaban, sender: 'bot' })
+                });
             } else {
-                aiBody.innerHTML += `<div class="ai-msg bot" style="color:#ff3b30;">Maaf, otak AI saya sedang gangguan. Coba lagi nanti ya.</div>`;
+                 chatTokoBody.innerHTML += `<div class="chat-msg-store">Mohon tunggu sebentar ya kak, Admin kami akan segera membalas pesan kakak.</div>`;
             }
         } catch(e) {
             document.getElementById(loadingId).remove();
-            aiBody.innerHTML += `<div class="ai-msg bot" style="color:#ff3b30;">Koneksi internetmu sepertinya terputus.</div>`;
+            chatTokoBody.innerHTML += `<div class="chat-msg-store">Pesan kakak sudah kami terima. Admin akan membalas secepatnya.</div>`;
         }
-        aiBody.scrollTop = aiBody.scrollHeight;
+        chatTokoBody.scrollTop = chatTokoBody.scrollHeight;
     }
 
-    if(aiSendBtn) { aiSendBtn.addEventListener('click', kirimPesanAI); }
-    if(aiInput) { aiInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') kirimPesanAI(); }); }
+    if(btnKirimChat) btnKirimChat.addEventListener('click', kirimChatToko);
+    if(chatTokoInput) chatTokoInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') kirimChatToko(); });
+
 
     // ==========================================
     // FUNGSI PENGATUR PRODUK BERANDA UTAMA
@@ -364,9 +399,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // ✅ KUMPULAN FUNGSI GLOBAL (DI-ATTACH KE WINDOW) 
     // ==========================================
     
-    // 1. Fungsi Lompat ke Detail
     window.bukaDetailGlobal = function(id, foto, nama, hargaStr, deskripsi, hargaRaw, beratRaw, sellerName, unit, vTitle, vOpt, wsPrice, wsMin) {
-        // Jika dipanggil dengan string ter-encode (dari HTML Kategori Filter)
         if(typeof id === 'string' && id.includes('%7B')) {
             const decodedObj = decodeURIComponent(id);
             localStorage.setItem('produk_detail', decodedObj);
@@ -374,7 +407,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Jika dipanggil dari Render JS Utama
         const dataProduk = { 
             id: id, foto: foto, nama: nama, hargaStr: hargaStr, deskripsi: deskripsi, 
             harga: hargaRaw, weight: beratRaw || 1000, seller_name: sellerName || "Belidikita Official", qty: 1,
@@ -385,7 +417,6 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = 'detailproduk.html';
     }
 
-    // 2. Fungsi Buka & Tutup Bottom Sheet Sub-Kategori (Kamus Kategori Pindah ke Sini)
     const kamusKategori = {
         'Sembako': ['Beras, minyak, gula', 'Mie instan', 'Telur', 'Air galon', 'Gas LPG'],
         'Fashion': ['Baju pria / wanita / anak', 'Celana', 'Jaket', 'Hijab', 'Sepatu', 'Tas'],
@@ -420,7 +451,6 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.style.overflow = 'auto'; 
     }
 
-    // 3. Fungsi Buka & Tutup Halaman Layar Penuh Kategori
     window.tutupHalamanKategori = function() {
         document.getElementById('katalogLayarPenuh').style.display = 'none';
         document.body.style.overflow = 'auto'; 
@@ -555,7 +585,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // 4. Fungsi Buka & Tutup Layar Pesanan
     window.tutupHalamanPesanan = function() {
         document.getElementById('pesananLayarPenuh').style.display = 'none';
         document.body.style.overflow = 'auto';
