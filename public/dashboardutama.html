@@ -326,33 +326,28 @@
         }
 
         // ==========================================
-        // ✅ LOGIKA MESIN PENCARI PINTAR
+        // ✅ LOGIKA PENCARIAN & KARTU RATING
         // ==========================================
         document.getElementById('searchInputDashboard').addEventListener('keypress', async function(e) {
             if (e.key === 'Enter') {
                 const keyword = this.value.trim().toLowerCase();
                 if (!keyword) return;
 
-                // Tampilkan loading toast (bisa meminjam showToast Anda)
                 showToast("Mencari produk...", "info");
 
                 try {
-                    // Tembak API server untuk narik data barang terbaru
                     const res = await fetch('/api/products');
                     const result = await res.json();
                     
                     if (result.success) {
-                        // Filter pintar: mencari kecocokan kata di Judul atau Kategori
                         const filtered = result.data.filter(p => 
                             p.title.toLowerCase().includes(keyword) || 
                             p.category.toLowerCase().includes(keyword)
                         );
                         
                         if (filtered.length === 0) {
-                            // JIKA KOSONG: Munculkan Popup Kuning
                             document.getElementById('modalNotFound').style.display = 'flex';
                         } else {
-                            // JIKA ADA: Buka halaman Katalog Fullscreen
                             bukaHasilPencarianPintar(keyword, filtered);
                         }
                     }
@@ -363,12 +358,10 @@
         });
 
         function bukaHasilPencarianPintar(keyword, dataProduk) {
-            // Tampilkan layar penuh khusus pencarian
             document.getElementById('katalogLayarPenuh').style.display = 'flex';
             document.getElementById('judulHalamanKategori').innerText = `Hasil: "${keyword}"`;
             document.getElementById('inputCariKatalog').value = keyword; 
             
-            // Push history agar back HP tidak keluar aplikasi
             window.history.pushState({ page: 'katalog' }, "", "");
             
             const container = document.getElementById('gridHasilKategori');
@@ -411,12 +404,108 @@
             });
         }
 
-        // Fungsi khusus jika onclick di katalog memanggil window.location
         window.bukaDetailTunggal = function(encodedObj) {
             const decodedObj = decodeURIComponent(encodedObj);
             localStorage.setItem('produk_detail', decodedObj);
             window.location.href = 'detailproduk.html';
         };
+
+        // ==========================================
+        // ✅ FASE 3: AUTO-LOAD PRODUK BERANDA (RATING BINTANG)
+        // ==========================================
+        async function loadProdukBeranda() {
+            try {
+                const res = await fetch('/api/products');
+                const result = await res.json();
+                
+                if(result.success) {
+                    const data = result.data;
+                    const cLaris = document.getElementById('topSellingList');
+                    const cKeranjang = document.getElementById('topCartList');
+                    const cGeneral = document.getElementById('randomProductList');
+
+                    cLaris.innerHTML = '';
+                    cKeranjang.innerHTML = '';
+                    cGeneral.innerHTML = '';
+
+                    let countLaris = 0, countKeranjang = 0, countGeneral = 0;
+
+                    data.forEach(p => {
+                        let arrFoto = [];
+                        try { 
+                            arrFoto = JSON.parse(p.media_url); 
+                            if (!Array.isArray(arrFoto)) arrFoto = [p.media_url]; 
+                        } catch(e) { arrFoto = [p.media_url]; }
+                        
+                        const imgUrl = arrFoto[0] || 'https://via.placeholder.com/150';
+                        const hargaRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.price);
+                        
+                        const terjualReal = p.sold_count || 0; 
+                        const ratingReal = parseFloat(p.avg_rating) || 0;
+                        const tampilanRating = ratingReal > 0 ? ratingReal.toFixed(1) : "0.0"; // INI ADALAH LOGIKA RATING
+
+                        const prodObj = { 
+                            id: p.id, nama: p.title, harga: p.price, hargaStr: hargaRp, 
+                            deskripsi: p.description, foto: p.media_url, 
+                            weight: p.weight || 1000, wholesale_price: p.wholesale_price, wholesale_min_qty: p.wholesale_min_qty 
+                        };
+                        const strObj = encodeURIComponent(JSON.stringify(prodObj));
+
+                        // KARTU UNTUK FLASH SALE & PALING DICARI (HORIZONTAL)
+                        const htmlCardHorizontal = `
+                            <div class="h-card" onclick="bukaDetailTunggal('${strObj}')">
+                                <img src="${imgUrl}" class="h-card-img" alt="Produk" loading="lazy">
+                                <div class="h-card-info">
+                                    <h3 class="h-card-title">${p.title}</h3>
+                                    <div class="h-card-price">${hargaRp}</div>
+                                    <div class="h-card-stats">
+                                        <span><i class="fas fa-star" style="color:#FFD700;"></i> ${tampilanRating}</span>
+                                        <span>${terjualReal} Terjual</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        // KARTU UNTUK SEMUA BARANG (GRID)
+                        const htmlCardGrid = `
+                            <div class="product-card" onclick="bukaDetailTunggal('${strObj}')">
+                                <img src="${imgUrl}" class="product-media" alt="Produk" loading="lazy">
+                                <div class="product-info">
+                                    <h3 class="product-title">${p.title}</h3>
+                                    <div class="product-price">${hargaRp}</div>
+                                    <div class="product-stats">
+                                        <span><i class="fas fa-star" style="color:#FFD700;"></i> ${tampilanRating}</span>
+                                        <span>${terjualReal} Terjual</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        if (p.category === 'laris') {
+                            cLaris.innerHTML += htmlCardHorizontal;
+                            countLaris++;
+                        } else if (p.category === 'keranjang') {
+                            cKeranjang.innerHTML += htmlCardHorizontal;
+                            countKeranjang++;
+                        } else {
+                            cGeneral.innerHTML += htmlCardGrid;
+                            countGeneral++;
+                        }
+                    });
+
+                    if (countLaris > 0) document.getElementById('sectionLaris').style.display = 'block';
+                    if (countKeranjang > 0) document.getElementById('sectionKeranjang').style.display = 'block';
+                    if (countGeneral > 0) document.getElementById('bagianProdukUtama').style.display = 'block';
+                }
+            } catch(e) {
+                console.error("Gagal memuat produk di beranda", e);
+            }
+        }
+
+        // Panggil fungsi saat halaman selesai dimuat
+        document.addEventListener("DOMContentLoaded", () => {
+            loadProdukBeranda();
+        });
     </script>
 </body>
 </html>
