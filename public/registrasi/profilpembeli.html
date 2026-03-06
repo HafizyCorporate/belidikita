@@ -70,7 +70,7 @@
         .tab-pesanan.active { color: #0D47A1; font-weight: 800; }
         .tab-pesanan.active::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 80%; height: 3px; background: #0D47A1; border-radius: 3px; }
 
-        /* ✅ KARTU ALAMAT SHOPEE STYLE */
+        /* KARTU ALAMAT SHOPEE STYLE */
         .address-card { background: #fff; border: 1px solid #E1F5FE; border-radius: 15px; padding: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; margin-bottom: 15px; }
         .address-card.default { border: 2px solid #00AA5B; background: #f2fcf6;}
         .address-label-badge { position: absolute; top: 15px; right: 15px; font-size: 9px; font-weight: 800; padding: 3px 8px; border-radius: 5px; text-transform: uppercase; }
@@ -139,7 +139,6 @@
         </div>
 
         <div id="secAlamat" class="hidden">
-            
             <div id="areaAlamatTersimpan" style="display: none;">
                 <h3 class="text-xs font-extrabold text-gray-700 mb-3"><i class="fas fa-address-book text-brand mr-1"></i> Buku Alamat Saya</h3>
                 
@@ -379,6 +378,75 @@
             } catch (err) { }
         }
 
+        // ✅ FUNGSI CETAK RESI RETUR DENGAN KODINGAN BERSIH
+        window.cetakResiRetur = function(idOrder) {
+            const order = allMyOrders.find(o => o.id === idOrder);
+            if(!order) return;
+
+            let items = []; try { items = JSON.parse(order.items); } catch(e){}
+            let rincianBarang = items.map(item => `<li>${item.nama} (x${item.qty})</li>`).join('');
+
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Cetak Resi Retur - #ORD-${order.id}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; color: #000; }
+                        .label-container { border: 4px solid #ff3b30; padding: 20px; width: 100%; max-width: 500px; margin: auto; border-radius: 10px; background: #fff;}
+                        .header { text-align: center; border-bottom: 2px dashed #ff3b30; padding-bottom: 15px; margin-bottom: 20px; }
+                        .header h2 { margin: 0; font-size: 28px; text-transform: uppercase; font-weight: 900; color: #ff3b30;}
+                        .header p { margin: 5px 0 0 0; font-size: 14px; font-weight: bold; background: #ffebee; display: inline-block; padding: 5px 10px; border-radius: 5px;}
+                        .section { margin-bottom: 20px; }
+                        .section-title { font-size: 14px; color: #ff3b30; text-transform: uppercase; margin-bottom: 5px; font-weight: 800;}
+                        .box { border: 2px solid #ccc; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.5;}
+                        .footer { font-size: 11px; text-align: center; margin-top: 30px; color: #555; border-top: 1px solid #ccc; padding-top: 10px;}
+                        ul { margin: 0; padding-left: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="label-container">
+                        <div class="header">
+                            <h2>LABEL RETUR PAKET</h2>
+                            <p>PESANAN ASAL: #ORD-${order.id}</p>
+                        </div>
+                        <div class="section">
+                            <div class="section-title">📍 KEPADA (PENGEMBALIAN):</div>
+                            <div class="box" style="border-color: #0D47A1; background: #f4f9ff;">
+                                <strong style="font-size: 18px;">Belidikita Official</strong> <br>
+                                Admin Retur (082240400388)<br><br>
+                                <strong>Alamat Toko:</strong><br>
+                                Padalarang, Bandung Barat (Alamat sesuai konfirmasi WA)
+                            </div>
+                        </div>
+                        <div class="section">
+                            <div class="section-title">📦 DARI (PEMBELI):</div>
+                            <div class="box">
+                                <strong>${order.customer_name}</strong><br>
+                                No HP: ${order.customer_wa}<br>
+                                ${order.shipping_address}
+                            </div>
+                        </div>
+                        <div class="section">
+                            <div class="section-title">📝 ISI PAKET RETUR:</div>
+                            <div class="box">
+                                <ul>${rincianBarang}</ul>
+                                <p style="margin-top: 10px; font-size: 12px; color: #ff3b30;"><b>Alasan:</b> ${order.return_reason}</p>
+                            </div>
+                        </div>
+                        <div class="footer">
+                            Tempelkan label ini di luar paket sebelum diserahkan ke kurir ekspedisi.
+                        </div>
+                    </div>
+                    <script>
+                        window.onload = function() { window.print(); }
+                    </script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
         window.filterPesanan = function(statusFilter, elemenTab) {
             if(elemenTab) {
                 document.querySelectorAll('.tab-pesanan').forEach(tab => tab.classList.remove('active'));
@@ -417,6 +485,18 @@
 
                     const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
 
+                    let btnReturHtml = '';
+                    if (displayStatus === 'Retur Diproses') {
+                        btnReturHtml = `<button onclick="cetakResiRetur(${order.id})" class="mt-3 w-full py-2.5 bg-red-50 border border-red-200 text-red-600 text-xs font-extrabold rounded-lg hover:bg-red-100 transition shadow-sm"><i class="fas fa-print mr-1"></i> Cetak Label Retur Pengembalian</button>`;
+                    } else if ((displayStatus === 'Dikirim' || displayStatus === 'Selesai') && !displayStatus.includes('Retur')) {
+                        btnReturHtml = `<button onclick="bukaModalRetur(${order.id})" class="mt-3 w-full py-2 bg-white text-red-500 text-xs font-extrabold rounded-lg border border-red-200 hover:bg-red-50 transition mb-2"><i class="fas fa-undo mr-1"></i> Ajukan Retur</button>`;
+                    }
+                    
+                    if (displayStatus === 'Selesai') {
+                        const idProdukSelesai = barangPertama.id || 0; 
+                        btnReturHtml += `<button onclick="bukaModalUlasan(${idProdukSelesai})" class="w-full py-2 bg-brand text-white text-xs font-extrabold rounded-lg hover:bg-blue-800 transition shadow-md"><i class="fas fa-star text-yellow-400 mr-1"></i> Nilai Pesanan</button>`;
+                    }
+
                     containerRiwayat.innerHTML += `
                         <div class="glass-card rounded-2xl p-4 mb-4 border border-light animate-fade-up shadow-md">
                             <div class="flex justify-between items-center border-b border-light pb-3 mb-3">
@@ -444,6 +524,7 @@
                                 <span class="text-xs font-bold text-gray-500">Total Tagihan:</span>
                                 <span class="text-sm font-extrabold text-orange-500">${formatRp}</span>
                             </div>
+                            ${btnReturHtml}
                         </div>
                     `;
                 });
@@ -540,7 +621,7 @@
         }
 
         // ==========================================
-        // ✅ 3. LOAD DATA PROFIL & KARTU ALAMAT SHOPEE
+        // 3. LOAD DATA PROFIL & KARTU ALAMAT SHOPEE
         // ==========================================
         async function loadProfileData() {
             try {
@@ -553,23 +634,19 @@
                     document.getElementById('inputNamaPenerima').value = data.name;
                 }
 
-                // Cek Alamat
                 const resAddr = await fetch('/api/address', { headers: { 'Authorization': `Bearer ${token}` } });
                 const resultAddr = await resAddr.json();
                 
                 const labelTersimpan = localStorage.getItem('belidikita_label_alamat') || 'Rumah';
 
                 if (resultAddr.success && resultAddr.data && resultAddr.data.alamat_lengkap) {
-                    // JIKA SUDAH ADA ALAMAT, MUNCULKAN KARTU DAN SEMBUNYIKAN FORM
                     document.getElementById('areaAlamatTersimpan').style.display = 'block';
                     document.getElementById('areaFormAlamat').style.display = 'none';
 
-                    // Isi Kartu
                     document.getElementById('cardNamaPenerima').innerText = resultAddr.data.nama_penerima;
                     document.getElementById('cardWaPenerima').innerText = resultAddr.data.nomor_wa;
                     document.getElementById('cardAlamatLengkap').innerText = resultAddr.data.alamat_lengkap;
                     
-                    // Set Label (Warna dan Ikon)
                     const badge = document.getElementById('badgeLabelAlamat');
                     if(labelTersimpan === 'Rumah') {
                         badge.className = 'address-label-badge badge-rumah';
@@ -582,13 +659,11 @@
                         badge.innerHTML = '<i class="fas fa-map-marker-alt mr-1"></i> Lainnya';
                     }
 
-                    // Isi juga ke form biar kalau di klik edit gak kosong
                     document.getElementById('inputNamaPenerima').value = resultAddr.data.nama_penerima;
                     document.getElementById('inputWA').value = resultAddr.data.nomor_wa;
                     document.getElementById('selectLabelAlamat').value = labelTersimpan;
                     
                 } else {
-                    // JIKA KOSONG, LANGSUNG TAMPILKAN FORM
                     document.getElementById('areaAlamatTersimpan').style.display = 'none';
                     document.getElementById('areaFormAlamat').style.display = 'block';
                 }
@@ -596,7 +671,6 @@
         }
         loadProfileData();
 
-        // FUNGSI BUKA TUTUP FORM EDIT
         function bukaFormEditAlamat() {
             document.getElementById('areaAlamatTersimpan').style.display = 'none';
             document.getElementById('areaFormAlamat').style.display = 'block';
@@ -607,7 +681,6 @@
             document.getElementById('areaFormAlamat').style.display = 'none';
         }
 
-        // SIMPAN ALAMAT KE DB
         document.getElementById('formAlamat').addEventListener('submit', async (e) => {
             e.preventDefault(); 
             const btn = document.getElementById('btnSimpanAlamat'); 
@@ -627,20 +700,19 @@
                 const res = await fetch('/api/address', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
                 const data = await res.json();
                 if (data.success) { 
-                    localStorage.setItem('belidikita_label_alamat', labelDipilih); // Simpan label di HP
+                    localStorage.setItem('belidikita_label_alamat', labelDipilih); 
                     showToast("Alamat berhasil diperbarui! 🎉", "success"); 
                     
                     if(sessionStorage.getItem('belidikita_checkout')) { 
                         setTimeout(() => { window.location.href = '../checkout.html'; }, 1500); 
                     } else { 
-                        loadProfileData(); // Reload UI menjadi kartu
+                        loadProfileData(); 
                         btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan & Gunakan'; btn.disabled = false; 
                     }
                 }
             } catch (err) { showToast("Gagal simpan alamat", "error"); btn.innerHTML = '<i class="fas fa-save mr-1"></i> Simpan & Gunakan'; btn.disabled = false; } 
         });
 
-        // PENGATURAN PROFIL
         document.getElementById('formPengaturanProfil').addEventListener('submit', async (e) => {
             e.preventDefault(); const btn = document.getElementById('btnSimpanProfil'); btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Updating...';
             const payload = { name: document.getElementById('inputEditNama').value, bio: document.getElementById('inputEditBio').value };
