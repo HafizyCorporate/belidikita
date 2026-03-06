@@ -45,13 +45,14 @@ const PORT = process.env.PORT || 8080;
 
 initDB();
 
-// 🛠️ SUNTIKAN OTOMATIS: UPDATE STRUKTUR DATABASE UNTUK LOGIKA WAKTU & RETUR
+// 🛠️ SUNTIKAN OTOMATIS: UPDATE STRUKTUR DATABASE UNTUK LOGIKA WAKTU & RETUR TERBARU
 (async () => {
     try {
         await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipped_at TIMESTAMP`);
+        await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMP`); // Waktu saat paket "Terkirim"
         await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP`);
         await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_reject_reason TEXT`);
-        console.log("✅ Database berhasil di-upgrade untuk fitur Waktu & Retur Lanjutan!");
+        console.log("✅ Database berhasil di-upgrade untuk fitur Waktu & Retur 2x24 Jam!");
     } catch (e) {
         console.error("Gagal upgrade database:", e.message);
     }
@@ -171,7 +172,6 @@ app.get('/api/orders', verifyAdmin, async (req, res) => {
     } catch(err) { res.status(500).json({ success: false }); }
 });
 
-// ✅ GUDANG ARSIP ADMIN
 app.get('/api/orders/archive', verifyAdmin, async (req, res) => {
     try { 
         const result = await pool.query('SELECT * FROM orders WHERE is_hidden_admin = TRUE ORDER BY created_at DESC'); 
@@ -179,12 +179,14 @@ app.get('/api/orders/archive', verifyAdmin, async (req, res) => {
     } catch(err) { res.status(500).json({ success: false }); }
 });
 
-// ✅ ADMIN UPDATE STATUS (Pencatatan Waktu & Alasan Penolakan)
+// ✅ FASE 1: ADMIN UPDATE STATUS (Ditambah Waktu Terkirim)
 app.put('/api/orders/:id', verifyAdmin, async (req, res) => {
     const { status, resi, reject_reason } = req.body;
     try { 
         if (status === 'Dikirim') {
             await pool.query('UPDATE orders SET status=$1, resi=$2, shipped_at=NOW() WHERE id=$3', [status, resi, req.params.id]);
+        } else if (status === 'Terkirim') {
+            await pool.query('UPDATE orders SET status=$1, resi=$2, delivered_at=NOW() WHERE id=$3', [status, resi, req.params.id]);
         } else if (status === 'Selesai') {
             await pool.query('UPDATE orders SET status=$1, resi=$2, completed_at=NOW() WHERE id=$3', [status, resi, req.params.id]);
         } else if (status === 'Retur Ditolak') {
@@ -196,7 +198,7 @@ app.put('/api/orders/:id', verifyAdmin, async (req, res) => {
     } catch(err) { res.status(500).json({ success: false }); }
 });
 
-// ✅ PEMBELI TERIMA BARANG (Klik Selesai Manual)
+// ✅ PEMBELI TERIMA BARANG (Klik Selesai Manual - Harus dari status Terkirim/Dikirim)
 app.put('/api/orders/:id/receive', verifyToken, async (req, res) => {
     try {
         await pool.query("UPDATE orders SET status = 'Selesai', completed_at = NOW() WHERE id = $1 AND user_id = $2", [req.params.id, req.user.id]);
@@ -204,7 +206,7 @@ app.put('/api/orders/:id/receive', verifyToken, async (req, res) => {
     } catch(err) { res.status(500).json({ success: false }); }
 });
 
-// ✅ LOGIKA HAPUS DENGAN GEMBOK KEAMANAN (Pisah Admin & Pembeli)
+// LOGIKA HAPUS DENGAN GEMBOK KEAMANAN
 app.delete('/api/orders/:id', verifyToken, async (req, res) => {
     try {
         const isAdmin = req.user.role === 'admin';
@@ -221,24 +223,19 @@ app.delete('/api/orders/:id', verifyToken, async (req, res) => {
         let isAman = statusAman.some(s => currentStatus.includes(s));
 
         if(!isAman) {
-            return res.status(403).json({ 
-                success: false, 
-                message: `GEMBOK AKTIF! Pesanan masih berstatus "${currentStatus}". Tunggu pesanan selesai atau dibatalkan sebelum dihapus.` 
-            });
+            return res.status(403).json({ success: false, message: `GEMBOK AKTIF! Pesanan masih berstatus "${currentStatus}".` });
         }
 
         if (isAdmin) {
-            // Admin Hapus -> Pindah ke Gudang Arsip (is_hidden_admin = TRUE)
             await pool.query('UPDATE orders SET is_hidden_admin = TRUE WHERE id = $1', [req.params.id]);
         } else {
-            // Pembeli Hapus -> Hilang dari layar Pembeli (is_hidden_buyer = TRUE)
             await pool.query('UPDATE orders SET is_hidden_buyer = TRUE WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
         }
         res.json({ success: true, message: "Pesanan berhasil dihapus/diarsipkan." });
     } catch(err) { res.status(500).json({ success: false, message: "Server Error saat menghapus." }); }
 });
 
-// ✅ LOGIKA RETUR DENGAN ATURAN WAKTU 3 HARI
+// ✅ FASE 1: LOGIKA RETUR DENGAN ATURAN WAKTU 2 HARI DARI TERKIRIM
 app.put('/api/orders/:id/return', verifyToken, upload.single('proof'), async (req, res) => {
     const { reason } = req.body; 
     const proof_url = req.file ? req.file.path : null;
@@ -246,23 +243,23 @@ app.put('/api/orders/:id/return', verifyToken, upload.single('proof'), async (re
     if (!proof_url || !reason) return res.status(400).json({ success: false, message: "Bukti dan Alasan wajib diisi!" });
     
     try {
-        // Cek apakah pesanan Selesai dan waktunya belum lewat 3 hari
-        const checkQuery = await pool.query('SELECT status, completed_at FROM orders WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+        const checkQuery = await pool.query('SELECT status, delivered_at FROM orders WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
         if(checkQuery.rows.length === 0) return res.status(404).json({ success: false });
 
         const order = checkQuery.rows[0];
         
-        if (order.status !== 'Selesai') {
-            return res.status(400).json({ success: false, message: "Hanya pesanan berstatus Selesai yang bisa diretur!" });
+        // Retur HANYA BISA saat paket sudah Terkirim (dalam masa garansi)
+        if (order.status !== 'Terkirim') {
+            return res.status(400).json({ success: false, message: "Hanya pesanan berstatus TERKIRIM (Sampai) yang bisa diajukan retur!" });
         }
 
-        if (order.completed_at) {
+        if (order.delivered_at) {
             const hariIni = new Date();
-            const tglSelesai = new Date(order.completed_at);
-            const selisihHari = Math.ceil(Math.abs(hariIni - tglSelesai) / (1000 * 60 * 60 * 24));
+            const tglTerkirim = new Date(order.delivered_at);
+            const selisihHari = Math.ceil(Math.abs(hariIni - tglTerkirim) / (1000 * 60 * 60 * 24));
             
-            if (selisihHari > 3) {
-                return res.status(403).json({ success: false, message: "Batas waktu pengajuan retur (3 hari) sudah habis!" });
+            if (selisihHari > 2) { // 2 Hari (2x24 Jam)
+                return res.status(403).json({ success: false, message: "Batas waktu pengajuan retur (2x24 Jam) sudah lewat!" });
             }
         }
 
@@ -367,7 +364,7 @@ app.post('/api/admin/cetak-resi', verifyAdmin, async (req, res) => {
 // ==========================================
 function jalankanRobotECommerce() {
     
-    // ROBOT 1: Auto-Cancel 10 Menit (Aktif tiap 1 menit)
+    // ROBOT 1: Auto-Cancel 10 Menit
     setInterval(async () => {
         try {
             const queryCancel = `SELECT id FROM orders WHERE (status = 'Menunggu Pembayaran' OR status = 'Pending') AND created_at < NOW() - INTERVAL '10 minutes'`;
@@ -379,14 +376,13 @@ function jalankanRobotECommerce() {
         } catch (err) { console.error("Robot Cancel Error:", err.message); }
     }, 60000); 
 
-    // ROBOT 2: Auto-Selesai 3 Hari (Aktif tiap 1 jam)
-    // Jika pesanan status "Dikirim" sudah lewat 3 hari sejak waktu shipped_at, otomatis Selesai.
+    // ✅ FASE 1: ROBOT 2 (Auto-Selesai 2 Hari dari status Terkirim)
     setInterval(async () => {
         try {
             const querySelesai = `
                 UPDATE orders 
                 SET status = 'Selesai', completed_at = NOW() 
-                WHERE status = 'Dikirim' AND shipped_at < NOW() - INTERVAL '3 days'
+                WHERE status = 'Terkirim' AND delivered_at < NOW() - INTERVAL '2 days'
                 RETURNING id
             `;
             const otomatisSelesai = await pool.query(querySelesai);
