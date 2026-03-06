@@ -109,6 +109,7 @@
         <a href="#" class="active"><i class="fas fa-chart-pie"></i> Dasbor</a>
         <a href="#accSection" style="color: #FFD700;"><i class="fas fa-check-circle"></i> Tugas Persetujuan</a>
         <a href="#pesananSection"><i class="fas fa-shopping-cart"></i> Pesanan Masuk</a>
+        <a href="#arsipSection" style="color: #9c27b0;"><i class="fas fa-archive"></i> Gudang Arsip</a>
         
         <a href="#chatSection" style="color: #00AA5B;"><i class="fas fa-comments"></i> Pantau Live Chat</a>
 
@@ -143,7 +144,7 @@
             </div>
             <div class="card">
                 <div class="card-info">
-                    <h3>Pesanan Masuk</h3>
+                    <h3>Pesanan Aktif</h3>
                     <h2 id="totalPesanan">0 Pesanan</h2>
                 </div>
                 <i class="fas fa-shopping-cart card-icon" style="color: #ff9800;"></i>
@@ -172,7 +173,10 @@
         </div>
 
         <div class="box" id="pesananSection" style="border-top: 4px solid #ff9800;">
-            <h3><i class="fas fa-shopping-cart"></i> Daftar Pesanan Pembeli</h3>
+            <h3 style="display:flex; justify-content:space-between; align-items:center;">
+                <span><i class="fas fa-shopping-cart"></i> Daftar Pesanan (Aktif)</span>
+                <button onclick="window.location.href='#arsipSection'" style="background: #9c27b0; color:#fff; border:none; padding:5px 10px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer;"><i class="fas fa-archive"></i> Buka Arsip</button>
+            </h3>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -186,6 +190,26 @@
                     </thead>
                     <tbody id="tableBodyOrders">
                         <tr><td colspan="5" style="text-align:center;">Memuat data pesanan...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="box" id="arsipSection" style="border-top: 4px solid #9c27b0; background: #faf5fc;">
+            <h3 style="color:#9c27b0;"><i class="fas fa-archive"></i> Gudang Arsip (Riwayat Selesai/Batal)</h3>
+            <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Pesanan yang dihapus akan diamankan di sini sebagai bukti transaksi untuk keperluan audit.</p>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Waktu Arsip</th>
+                            <th>No. Order / Pembeli</th>
+                            <th>Status Akhir</th>
+                            <th>Total Tagihan</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBodyArchive">
+                        <tr><td colspan="4" style="text-align:center;">Memuat data arsip...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -433,17 +457,23 @@
 
                 <div class="form-group">
                     <label>Status Pesanan Pembeli</label>
-                    <select id="prosesOrderStatus" required>
+                    <select id="prosesOrderStatus" required onchange="cekTolakRetur(this.value)">
                         <option value="Menunggu Pembayaran">Menunggu Pembayaran (Belum Transfer)</option>
                         <option value="Diproses">Diproses (Sedang Dikemas)</option>
                         <option value="Dikirim">Dikirim (Kurir Sudah Jalan)</option>
                         <option value="Selesai">Pesanan Selesai</option>
+                        <option value="Dibatalkan">Pesanan Dibatalkan</option>
                         <option value="" disabled style="background:#eee; font-weight:bold;">--- STATUS RETUR ---</option>
                         <option value="Ajukan Retur">Ajukan Retur (Permintaan Pembeli)</option>
                         <option value="Retur Diproses">Retur Diproses (Tunggu Barang Kembali)</option>
                         <option value="Retur Selesai">Retur Selesai (Dana Dikembalikan)</option>
-                        <option value="Retur Ditolak">Retur Ditolak (Alasan Tidak Valid)</option>
+                        <option value="Retur Ditolak">❌ Retur Ditolak (Alasan Tidak Valid)</option>
                     </select>
+                </div>
+                
+                <div class="form-group" id="boxAlasanTolak" style="display:none; background: #ffebee; border-left: 4px solid #ff3b30; padding: 10px; border-radius: 8px;">
+                    <label style="color:#ff3b30;">Alasan Penolakan Retur</label>
+                    <textarea id="prosesRejectReason" rows="2" placeholder="Contoh: Video unboxing tidak lengkap / putus-putus..." style="background:#fff;"></textarea>
                 </div>
                 
                 <button type="submit" class="btn-submit" id="btnSimpanProses" style="background: #00AA5B; margin-top: 10px;"><i class="fas fa-save"></i> Simpan Status Ke Pembeli</button>
@@ -532,11 +562,11 @@
     <div id="modalConfirm" class="modal-confirm">
         <div class="confirm-box">
             <i class="fas fa-exclamation-triangle" style="font-size:40px; color:#ff3b30; margin-bottom:15px;"></i>
-            <h3>Yakin Hapus Data?</h3>
-            <p>Data yang sudah dihapus tidak akan bisa dikembalikan lagi dari database.</p>
+            <h3>Yakin Amankan Data?</h3>
+            <p>Data pesanan ini tidak akan terhapus permanen, tapi akan disembunyikan ke <b>Gudang Arsip</b>. Pastikan pesanan sudah selesai!</p>
             <div class="confirm-btn-group">
                 <button class="btn-batal" onclick="tutupConfirm()">Batal</button>
-                <button class="btn-yakin" id="btnEksekusiHapus">Ya, Hapus!</button>
+                <button class="btn-yakin" id="btnEksekusiHapus">Arsipkan!</button>
             </div>
         </div>
     </div>
@@ -548,7 +578,7 @@
             const toast = document.getElementById("customToast");
             toast.innerText = msg;
             toast.className = type + " show";
-            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3500);
         }
 
         const token = localStorage.getItem('token');
@@ -598,7 +628,6 @@
 
         let adminOrdersData = [];
 
-        // ✅ TERTATA RAPI: MEMANGGIL DATA HANYA SAAT DIBUTUHKAN
         async function muatSemuaDataAwal() {
             await fetchDraftTugas();
             await fetchProducts();
@@ -606,9 +635,9 @@
             await fetchCoupons();
             await fetchAdminChats();
             await fetchOrders(); 
+            await fetchArchive(); // Tarik arsip
         }
         
-        // Panggil setelah 1 detik agar tidak berebut koneksi
         setTimeout(() => { muatSemuaDataAwal(); }, 1000);
 
         async function fetchDraftTugas() {
@@ -655,23 +684,24 @@
                 const result = await res.json();
                 const tbody = document.getElementById('tableBodyOrders');
                 if (result.success && result.data.length > 0) {
-                    
                     adminOrdersData = result.data; 
-                    
                     tbody.innerHTML = '';
                     document.getElementById('totalPesanan').innerText = result.data.length + " Pesanan"; 
+                    
                     result.data.forEach(order => {
                         let items = []; try { items = JSON.parse(order.items); } catch(e){}
                         const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
+                        
                         let statusColor = "color: #ff9800;"; 
                         if(order.status === 'Diproses') statusColor = "color: #0D47A1;"; 
                         if(order.status === 'Dikirim') statusColor = "color: #9c27b0;"; 
                         if(order.status === 'Selesai') statusColor = "color: #00AA5B;"; 
                         if(order.status.includes('Retur')) statusColor = "color: #ff3b30; font-weight: 800;"; 
+                        
                         let returnBadge = '';
                         if (order.return_reason) {
-                            let mediaLink = order.return_media ? `<br><a href="${order.return_media}" target="_blank" style="font-size:10px; background:#1976D2; color:#fff; padding:4px 8px; border-radius:4px; display:inline-block; margin-top:5px; text-decoration:none;"><i class="fas fa-play-circle"></i> Bukti</a>` : '';
-                            returnBadge = `<br><span style="font-size:10px; background:#ffebee; color:#c62828; padding:3px 6px; border-radius:4px; display:inline-block; margin-top:5px;">Alasan: ${order.return_reason}</span>${mediaLink}`;
+                            let mediaLink = order.return_media ? `<br><a href="${order.return_media}" target="_blank" style="font-size:10px; background:#1976D2; color:#fff; padding:4px 8px; border-radius:4px; display:inline-block; margin-top:5px; text-decoration:none;"><i class="fas fa-play-circle"></i> Cek Video/Foto</a>` : '';
+                            returnBadge = `<br><span style="font-size:10px; background:#ffebee; color:#c62828; padding:3px 6px; border-radius:4px; display:inline-block; margin-top:5px;">Retur: ${order.return_reason}</span>${mediaLink}`;
                         }
                         
                         const alamatSafe = order.shipping_address ? order.shipping_address.replace(/'/g, "\\'") : '';
@@ -689,21 +719,42 @@
                             <td>
                                 <button class="btn-aksi btn-proses" onclick="bukaProsesPesanan(${order.id}, '${order.status}', '${order.resi || ''}', '${order.shipping_courier}', '${alamatSafe}')"><i class="fas fa-truck"></i> Proses</button>
                                 ${btnCetakHtml}
-                                <button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('orders', ${order.id})"><i class="fas fa-trash"></i></button>
+                                <button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('orders', ${order.id})"><i class="fas fa-archive"></i></button>
                             </td>
                         </tr>`;
                     });
-                } else { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada pesanan masuk hari ini.</td></tr>'; document.getElementById('totalPesanan').innerText = "0 Pesanan"; }
+                } else { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada pesanan aktif.</td></tr>'; document.getElementById('totalPesanan').innerText = "0 Pesanan"; }
+            } catch (err) {}
+        }
+
+        // ✅ FUNGSI TARIK GUDANG ARSIP (BARU)
+        async function fetchArchive() { 
+            try {
+                const res = await fetch('/api/orders/archive', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                const tbody = document.getElementById('tableBodyArchive');
+                if (result.success && result.data.length > 0) {
+                    tbody.innerHTML = '';
+                    result.data.forEach(order => {
+                        const tgl = new Date(order.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                        const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
+                        
+                        tbody.innerHTML += `<tr>
+                            <td><span style="font-size:10px; color:#888;"><i class="fas fa-calendar-alt"></i> ${tgl}</span></td>
+                            <td><b>#ORD-${order.id}</b><br><span style="font-size:10px; color:#666;">${order.customer_name}</span></td>
+                            <td><span style="background:#eee; color:#555; padding:3px 8px; border-radius:10px; font-weight:bold; font-size:10px;">${order.status}</span></td>
+                            <td><b style="color:#ff5722;">${formatRp}</b></td>
+                        </tr>`;
+                    });
+                } else { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Gudang arsip masih kosong.</td></tr>'; }
             } catch (err) {}
         }
 
         function cetakLabelPengiriman(id) {
             const order = adminOrdersData.find(o => o.id === id);
             if(!order) return;
-
             let items = []; try { items = JSON.parse(order.items); } catch(e){}
             let rincianBarang = items.map(item => `<li><b>${item.nama}</b> (Jumlah: ${item.qty})</li>`).join('');
-
             const tokoData = JSON.parse(localStorage.getItem('belidikita_store_profile')) || { nama: "Belidikita Official", kota: "Padalarang, Bandung Barat", alamatLengkap: "Alamat belum diatur" };
 
             const printWindow = window.open('', '_blank', 'width=800,height=600');
@@ -832,22 +883,29 @@
         }
 
         let targetHapusTipe = ""; let targetHapusId = "";
-        function konfirmasiHapus(tipe, id) { targetHapusTipe = tipe; targetHapusId = id; document.getElementById('modalConfirm').style.display = 'flex'; }
+        function konfirmasiHapus(tipe, id) { 
+            targetHapusTipe = tipe; targetHapusId = id; 
+            document.getElementById('modalConfirm').style.display = 'flex'; 
+        }
         function tutupConfirm() { document.getElementById('modalConfirm').style.display = 'none'; }
         
+        // ✅ GEMBOK PENGHAPUSAN (Akan ditolak server jika pesanan masih aktif)
         document.getElementById('btnEksekusiHapus').addEventListener('click', async () => {
             tutupConfirm(); const btn = document.getElementById('btnEksekusiHapus'); btn.innerHTML = "Memproses...";
             try {
                 const res = await fetch(`/api/${targetHapusTipe}/${targetHapusId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await res.json();
                 if(data.success) {
-                    showToast("✅ Berhasil dihapus!", "success");
+                    showToast("✅ Berhasil diarsipkan!", "success");
                     if(targetHapusTipe === 'products') fetchProducts();
                     if(targetHapusTipe === 'promos') fetchPromos();
-                    if(targetHapusTipe === 'orders') fetchOrders(); 
+                    if(targetHapusTipe === 'orders') { fetchOrders(); fetchArchive(); } // Refresh tabel
                     if(targetHapusTipe === 'coupons') fetchCoupons(); 
-                } else { showToast("❌ Gagal: " + (data.message || "Ditolak"), "error"); }
-            } catch(err) { showToast("❌ Server Error", "error"); } finally { btn.innerHTML = "Ya, Hapus!"; }
+                } else { 
+                    // Tampilkan pesan error dari Gembok Server
+                    showToast("❌ Ditolak: " + (data.message || "Gagal dihapus"), "error"); 
+                }
+            } catch(err) { showToast("❌ Server Error", "error"); } finally { btn.innerHTML = "Arsipkan!"; }
         });
 
         document.getElementById('kuponType').addEventListener('change', function() {
@@ -866,11 +924,20 @@
             } catch(err) { showToast("Server Error", "error"); } finally { btn.innerHTML = "<i class='fas fa-plus'></i> Buat Kupon Baru"; }
         });
 
+        // ✅ LOGIKA MUNCULKAN ALASAN JIKA RETUR DITOLAK
+        window.cekTolakRetur = function(val) {
+            const boxAlasan = document.getElementById('boxAlasanTolak');
+            if (val === 'Retur Ditolak') { boxAlasan.style.display = 'block'; document.getElementById('prosesRejectReason').required = true; } 
+            else { boxAlasan.style.display = 'none'; document.getElementById('prosesRejectReason').required = false; }
+        }
+
         function bukaProsesPesanan(id, status, resi, kurir, alamat) { 
             document.getElementById('prosesOrderId').value = id; 
             document.getElementById('prosesOrderStatus').value = status; 
             document.getElementById('prosesKurirId').value = kurir;
             document.getElementById('prosesAlamatPembeli').value = alamat;
+            
+            cekTolakRetur(status); // Cek apakah perlu nampilin box tolak
 
             const inputResi = document.getElementById('prosesOrderResi');
             const btnResi = document.getElementById('btnPanggilKurir');
@@ -902,7 +969,7 @@
                 if(data.success) {
                     showToast("🎉 Kurir berhasil dipanggil! Resi tercetak.", "success");
                     document.getElementById('prosesOrderResi').value = data.resi;
-                    document.getElementById('prosesOrderStatus').value = 'Dikirim';
+                    document.getElementById('prosesOrderStatus').value = 'Diproses'; // Otomatis jadi dikemas
                     btn.style.display = 'none';
                 } else {
                     showToast("Gagal memanggil kurir: " + data.message, "error");
@@ -914,10 +981,18 @@
             }
         }
         
+        // ✅ SIMPAN STATUS DAN ALASAN TOLAK
         document.getElementById('formProsesPesanan').addEventListener('submit', async (e) => {
             e.preventDefault(); const btn = document.getElementById('btnSimpanProses'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
             const id = document.getElementById('prosesOrderId').value;
-            const payload = { status: document.getElementById('prosesOrderStatus').value, resi: document.getElementById('prosesOrderResi').value || '-' };
+            const stat = document.getElementById('prosesOrderStatus').value;
+            
+            const payload = { 
+                status: stat, 
+                resi: document.getElementById('prosesOrderResi').value || '-',
+                reject_reason: stat === 'Retur Ditolak' ? document.getElementById('prosesRejectReason').value : ''
+            };
+
             try {
                 const res = await fetch(`/api/orders/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
                 const data = await res.json();
