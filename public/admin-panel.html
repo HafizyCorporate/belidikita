@@ -87,7 +87,7 @@
         .btn-hapus { background: #ff3b30; }
         .btn-proses { background: #0D47A1; }
         .btn-acc { background: linear-gradient(135deg, #00AA5B, #00c853); box-shadow: 0 2px 5px rgba(0, 170, 91, 0.4); padding: 8px 15px;}
-        .btn-cetak { background: #607D8B; } /* Tombol Cetak Baru */
+        .btn-cetak { background: #607D8B; } 
         
         .img-preview { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
         
@@ -596,8 +596,20 @@
             }
         }
 
-        // Variabel global untuk menyimpan data pesanan agar bisa dipanggil oleh fitur Cetak Resi
         let adminOrdersData = [];
+
+        // ✅ TERTATA RAPI: MEMANGGIL DATA HANYA SAAT DIBUTUHKAN
+        async function muatSemuaDataAwal() {
+            await fetchDraftTugas();
+            await fetchProducts();
+            await fetchPromos();
+            await fetchCoupons();
+            await fetchAdminChats();
+            await fetchOrders(); 
+        }
+        
+        // Panggil setelah 1 detik agar tidak berebut koneksi
+        setTimeout(() => { muatSemuaDataAwal(); }, 1000);
 
         async function fetchDraftTugas() {
             try {
@@ -623,28 +635,17 @@
                 } else {
                     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color:#aaa;"><i class="fas fa-mug-hot" style="font-size:20px; margin-bottom:10px; display:block;"></i>Tidak ada tugas persetujuan saat ini. Silakan bersantai.</td></tr>';
                 }
-            } catch (err) { console.error("Gagal load draft", err); }
+            } catch (err) {}
         }
 
         async function accBarangDraft(id, tombol) {
             tombol.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Memproses...";
             tombol.disabled = true;
-
             try {
-                const res = await fetch(`/api/admin/excel/draft/approve/${id}`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const res = await fetch(`/api/admin/excel/draft/approve/${id}`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await res.json();
-                if(data.success) {
-                    showToast("Barang sukses dilempar ke Toko!", "success");
-                    fetchDraftTugas(); 
-                    fetchProducts();   
-                } else {
-                    showToast("Gagal: " + data.message, "error");
-                    tombol.innerHTML = "<i class='fas fa-check-circle'></i> ACC Ke Toko";
-                    tombol.disabled = false;
-                }
+                if(data.success) { showToast("Barang sukses dilempar ke Toko!", "success"); fetchDraftTugas(); fetchProducts(); } 
+                else { showToast("Gagal: " + data.message, "error"); tombol.innerHTML = "<i class='fas fa-check-circle'></i> ACC Ke Toko"; tombol.disabled = false; }
             } catch(e) { showToast("Server error", "error"); }
         }
 
@@ -655,7 +656,7 @@
                 const tbody = document.getElementById('tableBodyOrders');
                 if (result.success && result.data.length > 0) {
                     
-                    adminOrdersData = result.data; // Simpan data pesanan ke variabel global untuk keperluan cetak resi
+                    adminOrdersData = result.data; 
                     
                     tbody.innerHTML = '';
                     document.getElementById('totalPesanan').innerText = result.data.length + " Pesanan"; 
@@ -675,7 +676,6 @@
                         
                         const alamatSafe = order.shipping_address ? order.shipping_address.replace(/'/g, "\\'") : '';
                         
-                        // ✅ Tampilkan tombol Cetak jika resi sudah ada
                         let btnCetakHtml = '';
                         if (order.resi && order.resi !== '-' && order.resi !== 'null') {
                             btnCetakHtml = `<button class="btn-aksi btn-cetak" onclick="cetakLabelPengiriman(${order.id})" title="Cetak Resi & Label"><i class="fas fa-print"></i> Cetak</button>`;
@@ -694,26 +694,18 @@
                         </tr>`;
                     });
                 } else { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada pesanan masuk hari ini.</td></tr>'; document.getElementById('totalPesanan').innerText = "0 Pesanan"; }
-            } catch (err) { console.error(err); }
+            } catch (err) {}
         }
 
-        // ✅ FUNGSI BARU: CETAK LABEL PENGIRIMAN
         function cetakLabelPengiriman(id) {
             const order = adminOrdersData.find(o => o.id === id);
-            if(!order) {
-                showToast("Data pesanan tidak ditemukan", "error");
-                return;
-            }
+            if(!order) return;
 
-            let items = [];
-            try { items = JSON.parse(order.items); } catch(e){}
-
+            let items = []; try { items = JSON.parse(order.items); } catch(e){}
             let rincianBarang = items.map(item => `<li><b>${item.nama}</b> (Jumlah: ${item.qty})</li>`).join('');
 
-            // Ambil data toko dari Local Storage
             const tokoData = JSON.parse(localStorage.getItem('belidikita_store_profile')) || { nama: "Belidikita Official", kota: "Padalarang, Bandung Barat", alamatLengkap: "Alamat belum diatur" };
 
-            // Buka Jendela Baru Khusus Print
             const printWindow = window.open('', '_blank', 'width=800,height=600');
             printWindow.document.write(`
                 <html>
@@ -740,49 +732,13 @@
                             <h2>${order.shipping_courier ? order.shipping_courier.toUpperCase() : 'KURIR'}</h2>
                             <p>NO RESI: ${order.resi}</p>
                         </div>
-                        
-                        <div class="barcode">
-                            *${order.resi}*
-                        </div>
-
-                        <div class="section">
-                            <div class="section-title">📦 PENGIRIM:</div>
-                            <div class="box">
-                                <strong>${tokoData.nama}</strong><br>
-                                ${tokoData.kota}<br>
-                                ${tokoData.alamatLengkap}
-                            </div>
-                        </div>
-
-                        <div class="section">
-                            <div class="section-title">📍 PENERIMA:</div>
-                            <div class="box">
-                                <strong style="font-size: 18px;">${order.customer_name}</strong> <br>
-                                No HP: ${order.customer_wa}<br><br>
-                                <strong>Alamat Tujuan:</strong><br>
-                                ${order.shipping_address}
-                            </div>
-                        </div>
-
-                        <div class="section">
-                            <div class="section-title">📝 ISI PAKET:</div>
-                            <div class="box">
-                                <ul>${rincianBarang}</ul>
-                            </div>
-                        </div>
-
-                        <div class="footer">
-                            <strong>Marketplace Belidikita</strong><br>
-                            Resi tercetak otomatis pada: ${new Date().toLocaleString('id-ID')}
-                        </div>
+                        <div class="barcode">*${order.resi}*</div>
+                        <div class="section"><div class="section-title">📦 PENGIRIM:</div><div class="box"><strong>${tokoData.nama}</strong><br>${tokoData.kota}<br>${tokoData.alamatLengkap}</div></div>
+                        <div class="section"><div class="section-title">📍 PENERIMA:</div><div class="box"><strong style="font-size: 18px;">${order.customer_name}</strong> <br>No HP: ${order.customer_wa}<br><br><strong>Alamat Tujuan:</strong><br>${order.shipping_address}</div></div>
+                        <div class="section"><div class="section-title">📝 ISI PAKET:</div><div class="box"><ul>${rincianBarang}</ul></div></div>
+                        <div class="footer"><strong>Marketplace Belidikita</strong><br>Resi tercetak otomatis pada: ${new Date().toLocaleString('id-ID')}</div>
                     </div>
-                    <script>
-                        // Otomatis memanggil dialog print browser saat halaman selesai dimuat
-                        window.onload = function() { 
-                            window.print(); 
-                            // Bisa aktifkan window.close() jika ingin otomatis tertutup setelah print, tapi dibiarkan terbuka agar admin bisa cek.
-                        }
-                    </script>
+                    <script> window.onload = function() { window.print(); } <\/script>
                 </body>
                 </html>
             `);
@@ -824,7 +780,7 @@
                         </tr>`;
                     });
                 } else { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Toko Anda masih kosong. Silakan upload barang.</td></tr>'; document.getElementById('totalProduk').innerText = "0 Barang"; }
-            } catch (err) { console.error(err); }
+            } catch (err) {}
         }
 
         async function fetchPromos() { 
@@ -866,32 +822,14 @@
                     tbody.innerHTML = '';
                     result.data.forEach(chat => {
                         const waktu = new Date(chat.created_at).toLocaleString('id-ID', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
-                        
-                        let badgeSender = chat.sender_role === 'pembeli' 
-                            ? '<span style="background:#E1F5FE; color:#0D47A1; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:bold;"><i class="fas fa-user"></i> Pembeli</span>' 
-                            : '<span style="background:#E8F5E9; color:#00AA5B; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:bold;"><i class="fas fa-robot"></i> Bot AI</span>';
-
-                        tbody.innerHTML += `
-                            <tr>
-                                <td><b>${chat.user_name}</b></td>
-                                <td style="max-width: 250px; white-space: normal; line-height: 1.4; color: #555;"><i>"${chat.message}"</i></td>
-                                <td>${badgeSender}</td>
-                                <td style="font-size:11px; color:#888;">${waktu} WIB</td>
-                            </tr>
-                        `;
+                        let badgeSender = chat.sender_role === 'pembeli' ? '<span style="background:#E1F5FE; color:#0D47A1; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:bold;"><i class="fas fa-user"></i> Pembeli</span>' : '<span style="background:#E8F5E9; color:#00AA5B; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:bold;"><i class="fas fa-robot"></i> Bot AI</span>';
+                        tbody.innerHTML += `<tr><td><b>${chat.user_name}</b></td><td style="max-width: 250px; white-space: normal; line-height: 1.4; color: #555;"><i>"${chat.message}"</i></td><td>${badgeSender}</td><td style="font-size:11px; color:#888;">${waktu} WIB</td></tr>`;
                     });
                 } else {
                     tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color:#aaa;"><i class="fas fa-comment-slash" style="font-size:24px; margin-bottom:10px; display:block;"></i>Belum ada percakapan dari pembeli.</td></tr>';
                 }
-            } catch(e) { console.error("Gagal memuat chat", e); }
+            } catch(e) {}
         }
-
-        fetchDraftTugas(); 
-        fetchProducts(); 
-        fetchPromos(); 
-        fetchOrders(); 
-        fetchCoupons();
-        fetchAdminChats(); 
 
         let targetHapusTipe = ""; let targetHapusId = "";
         function konfirmasiHapus(tipe, id) { targetHapusTipe = tipe; targetHapusId = id; document.getElementById('modalConfirm').style.display = 'flex'; }
@@ -913,8 +851,8 @@
         });
 
         document.getElementById('kuponType').addEventListener('change', function() {
-            if(this.value === 'ongkir') { document.getElementById('groupKuponValue').style.display = 'none'; document.getElementById('kuponValue').value = 0;
-            } else { document.getElementById('groupKuponValue').style.display = 'block'; }
+            if(this.value === 'ongkir') { document.getElementById('groupKuponValue').style.display = 'none'; document.getElementById('kuponValue').value = 0; } 
+            else { document.getElementById('groupKuponValue').style.display = 'block'; }
         });
 
         document.getElementById('formUploadKupon').addEventListener('submit', async (e) => {
@@ -931,7 +869,6 @@
         function bukaProsesPesanan(id, status, resi, kurir, alamat) { 
             document.getElementById('prosesOrderId').value = id; 
             document.getElementById('prosesOrderStatus').value = status; 
-            
             document.getElementById('prosesKurirId').value = kurir;
             document.getElementById('prosesAlamatPembeli').value = alamat;
 
@@ -939,13 +876,10 @@
             const btnResi = document.getElementById('btnPanggilKurir');
 
             if (resi && resi !== '-' && resi !== 'null') {
-                inputResi.value = resi;
-                btnResi.style.display = 'none';
+                inputResi.value = resi; btnResi.style.display = 'none';
             } else {
-                inputResi.value = '';
-                btnResi.style.display = 'flex';
+                inputResi.value = ''; btnResi.style.display = 'flex';
             }
-
             document.getElementById('modalProsesPesanan').style.display = 'block'; 
         }
 
@@ -955,19 +889,12 @@
             const tujuan = document.getElementById('prosesAlamatPembeli').value;
             
             const btn = document.getElementById('btnPanggilKurir');
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menghubungi Ekspedisi...";
-            btn.disabled = true;
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menghubungi Ekspedisi..."; btn.disabled = true;
 
             try {
                 const res = await fetch('/api/admin/cetak-resi', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ 
-                        order_id: idOrder,
-                        kurir: kurirDipilih,
-                        alamat_tujuan: tujuan,
-                        kota_asal: "Padalarang, Bandung Barat" 
-                    })
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ order_id: idOrder, kurir: kurirDipilih, alamat_tujuan: tujuan, kota_asal: "Padalarang, Bandung Barat" })
                 });
 
                 const data = await res.json();
@@ -979,13 +906,11 @@
                     btn.style.display = 'none';
                 } else {
                     showToast("Gagal memanggil kurir: " + data.message, "error");
-                    btn.innerHTML = "<i class='fas fa-truck-pickup'></i> Coba Panggil Lagi";
-                    btn.disabled = false;
+                    btn.innerHTML = "<i class='fas fa-truck-pickup'></i> Coba Panggil Lagi"; btn.disabled = false;
                 }
             } catch(e) {
                 showToast("Terjadi kesalahan jaringan.", "error");
-                btn.innerHTML = "<i class='fas fa-truck-pickup'></i> Request Pickup & Cetak Resi";
-                btn.disabled = false;
+                btn.innerHTML = "<i class='fas fa-truck-pickup'></i> Request Pickup & Cetak Resi"; btn.disabled = false;
             }
         }
         
@@ -1004,7 +929,6 @@
             e.preventDefault(); const btn = document.getElementById('btnSimpanBarang'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengupload...";
             
             const finalDesc = `[Kategori: ${document.getElementById('mainCategory').value} - ${document.getElementById('subCategory').value}]\n\n${document.getElementById('prodDesc').value}`;
-            
             const formData = new FormData(); 
             formData.append('title', document.getElementById('prodName').value); 
             formData.append('capital_price', document.getElementById('prodCapital').value); 
@@ -1013,11 +937,9 @@
             formData.append('category', document.getElementById('prodCategory').value); 
             formData.append('description', finalDesc); 
             formData.append('weight', document.getElementById('prodWeight').value);
-            
             formData.append('unit', document.getElementById('prodUnit').value);
             formData.append('variant_title', document.getElementById('prodVariantTitle').value);
             formData.append('variant_options', document.getElementById('prodVariantOptions').value);
-            
             formData.append('wholesale_price', document.getElementById('prodWholesalePrice').value || 0);
             formData.append('wholesale_min_qty', document.getElementById('prodWholesaleMin').value || 0);
 
@@ -1052,7 +974,6 @@
             document.getElementById('editProdUnit').value = unit || 'Pcs';
             document.getElementById('editProdVariantTitle').value = varTitle || '';
             document.getElementById('editProdVariantOptions').value = varOptions || '';
-            
             document.getElementById('editProdWholesalePrice').value = wsPrice || 0;
             document.getElementById('editProdWholesaleMin').value = wsMin || 0;
 
@@ -1061,38 +982,21 @@
 
         document.getElementById('formEditProduk').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btnSimpanEdit'); 
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
+            const btn = document.getElementById('btnSimpanEdit'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
             const id = document.getElementById('editProdId').value;
-            
             const bodyData = {
-                title: document.getElementById('editProdName').value, 
-                capital_price: document.getElementById('editProdCapital').value,
-                price: document.getElementById('editProdPrice').value, 
-                stock: document.getElementById('editProdStock').value,
-                category: document.getElementById('editProdCategory').value, 
-                weight: document.getElementById('editProdWeight').value,
-                unit: document.getElementById('editProdUnit').value,
-                variant_title: document.getElementById('editProdVariantTitle').value,
-                variant_options: document.getElementById('editProdVariantOptions').value,
-                wholesale_price: document.getElementById('editProdWholesalePrice').value || 0,
+                title: document.getElementById('editProdName').value, capital_price: document.getElementById('editProdCapital').value,
+                price: document.getElementById('editProdPrice').value, stock: document.getElementById('editProdStock').value,
+                category: document.getElementById('editProdCategory').value, weight: document.getElementById('editProdWeight').value,
+                unit: document.getElementById('editProdUnit').value, variant_title: document.getElementById('editProdVariantTitle').value,
+                variant_options: document.getElementById('editProdVariantOptions').value, wholesale_price: document.getElementById('editProdWholesalePrice').value || 0,
                 wholesale_min_qty: document.getElementById('editProdWholesaleMin').value || 0
             };
-
             try {
-                const res = await fetch(`/api/products/${id}`, { 
-                    method: 'PUT', 
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
-                    body: JSON.stringify(bodyData) 
-                });
+                const res = await fetch(`/api/products/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(bodyData) });
                 const data = await res.json();
-                if(data.success) { 
-                    showToast("✅ Barang berhasil diupdate!", "success"); 
-                    document.getElementById('modalEditProduk').style.display = 'none'; 
-                    fetchProducts(); 
-                } else { showToast("Gagal: " + data.message, "error"); }
-            } catch(err) { showToast("Server Error saat mengedit!", "error"); } 
-            finally { btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan"; }
+                if(data.success) { showToast("✅ Barang berhasil diupdate!", "success"); document.getElementById('modalEditProduk').style.display = 'none'; fetchProducts(); } else { showToast("Gagal: " + data.message, "error"); }
+            } catch(err) { showToast("Server Error saat mengedit!", "error"); } finally { btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan"; }
         });
     </script>
 </body>
