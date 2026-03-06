@@ -378,8 +378,8 @@ app.post('/api/admin/cetak-resi', verifyAdmin, async (req, res) => {
         // Generate Nomor Resi Otomatis
         const nomorResiOtomatis = prefixKurir + Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
 
-        // Simpan resi ke database dan ubah status jadi 'Dikirim'
-        await pool.query('UPDATE orders SET resi = $1, status = $2 WHERE id = $3', [nomorResiOtomatis, 'Dikirim', order_id]);
+        // ✅ PERUBAHAN: Simpan resi ke database dan ubah status jadi 'Diproses' (Dikemas) bukan 'Dikirim'
+        await pool.query('UPDATE orders SET resi = $1, status = $2 WHERE id = $3', [nomorResiOtomatis, 'Diproses', order_id]);
         
         res.json({ success: true, resi: nomorResiOtomatis });
     } catch(err) {
