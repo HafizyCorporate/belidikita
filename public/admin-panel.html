@@ -97,7 +97,7 @@
         .btn-batal { flex: 1; padding: 12px; background: #eee; color: #555; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
         .btn-yakin { flex: 1; padding: 12px; background: #ff3b30; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
 
-        .btn-auto-resi { background: linear-gradient(135deg, #0D47A1, #1976D2); color: #fff; border: none; border-radius: 8px; padding: 12px; width: 100%; font-weight: 800; font-size: 12px; cursor: pointer; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;}
+        .btn-auto-resi { background: linear-gradient(135deg, #0D47A1, #1976D2); color: #fff; border: none; border-radius: 8px; padding: 12px; width: 100%; font-weight: 800; font-size: 12px; cursor: margin-bottom: 15px; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;}
         .btn-auto-resi:active { transform: scale(0.97); }
         .btn-auto-resi:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
     </style>
@@ -458,22 +458,23 @@
                 <div class="form-group">
                     <label>Status Pesanan Pembeli</label>
                     <select id="prosesOrderStatus" required onchange="cekTolakRetur(this.value)">
-                        <option value="Menunggu Pembayaran">Menunggu Pembayaran (Belum Transfer)</option>
+                        <option value="" disabled style="background:#eee; font-weight:bold;">--- PROSES PENGIRIMAN ---</option>
                         <option value="Diproses">Diproses (Sedang Dikemas)</option>
-                        <option value="Dikirim">Dikirim (Kurir Sudah Jalan)</option>
-                        <option value="Selesai">Pesanan Selesai</option>
-                        <option value="Dibatalkan">Pesanan Dibatalkan</option>
-                        <option value="" disabled style="background:#eee; font-weight:bold;">--- STATUS RETUR ---</option>
-                        <option value="Ajukan Retur">Ajukan Retur (Permintaan Pembeli)</option>
-                        <option value="Retur Diproses">Retur Diproses (Tunggu Barang Kembali)</option>
-                        <option value="Retur Selesai">Retur Selesai (Dana Dikembalikan)</option>
-                        <option value="Retur Ditolak">❌ Retur Ditolak (Alasan Tidak Valid)</option>
+                        <option value="Dikirim">Dikirim (Diserahkan ke Kurir)</option>
+                        <option value="Terkirim">Terkirim (Sampai di Tujuan / Masa Garansi 2 Hari)</option>
+                        
+                        <option value="" disabled style="background:#eee; font-weight:bold;">--- PROSES RETUR ---</option>
+                        <option value="Retur Diterima">✅ Retur Diterima (Disetujui Admin)</option>
+                        <option value="Retur Ditolak">❌ Retur Ditolak (Butuh Alasan)</option>
+
+                        <option value="" disabled style="background:#eee; font-weight:bold;">--- PENYELESAIAN ---</option>
+                        <option value="Selesai">Pesanan Selesai (Tamat)</option>
                     </select>
                 </div>
                 
                 <div class="form-group" id="boxAlasanTolak" style="display:none; background: #ffebee; border-left: 4px solid #ff3b30; padding: 10px; border-radius: 8px;">
-                    <label style="color:#ff3b30;">Alasan Penolakan Retur</label>
-                    <textarea id="prosesRejectReason" rows="2" placeholder="Contoh: Video unboxing tidak lengkap / putus-putus..." style="background:#fff;"></textarea>
+                    <label style="color:#ff3b30;">Alasan Penolakan / Catatan Penyelesaian</label>
+                    <textarea id="prosesRejectReason" rows="2" placeholder="Contoh: Video unboxing putus-putus atau barang sesuai..." style="background:#fff;"></textarea>
                 </div>
                 
                 <button type="submit" class="btn-submit" id="btnSimpanProses" style="background: #00AA5B; margin-top: 10px;"><i class="fas fa-save"></i> Simpan Status Ke Pembeli</button>
@@ -695,6 +696,7 @@
                         let statusColor = "color: #ff9800;"; 
                         if(order.status === 'Diproses') statusColor = "color: #0D47A1;"; 
                         if(order.status === 'Dikirim') statusColor = "color: #9c27b0;"; 
+                        if(order.status === 'Terkirim') statusColor = "color: #00838F;"; 
                         if(order.status === 'Selesai') statusColor = "color: #00AA5B;"; 
                         if(order.status.includes('Retur')) statusColor = "color: #ff3b30; font-weight: 800;"; 
                         
@@ -727,7 +729,6 @@
             } catch (err) {}
         }
 
-        // ✅ FUNGSI TARIK GUDANG ARSIP (BARU)
         async function fetchArchive() { 
             try {
                 const res = await fetch('/api/orders/archive', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -889,7 +890,7 @@
         }
         function tutupConfirm() { document.getElementById('modalConfirm').style.display = 'none'; }
         
-        // ✅ GEMBOK PENGHAPUSAN (Akan ditolak server jika pesanan masih aktif)
+        // ✅ GEMBOK PENGHAPUSAN
         document.getElementById('btnEksekusiHapus').addEventListener('click', async () => {
             tutupConfirm(); const btn = document.getElementById('btnEksekusiHapus'); btn.innerHTML = "Memproses...";
             try {
@@ -899,10 +900,9 @@
                     showToast("✅ Berhasil diarsipkan!", "success");
                     if(targetHapusTipe === 'products') fetchProducts();
                     if(targetHapusTipe === 'promos') fetchPromos();
-                    if(targetHapusTipe === 'orders') { fetchOrders(); fetchArchive(); } // Refresh tabel
+                    if(targetHapusTipe === 'orders') { fetchOrders(); fetchArchive(); } 
                     if(targetHapusTipe === 'coupons') fetchCoupons(); 
                 } else { 
-                    // Tampilkan pesan error dari Gembok Server
                     showToast("❌ Ditolak: " + (data.message || "Gagal dihapus"), "error"); 
                 }
             } catch(err) { showToast("❌ Server Error", "error"); } finally { btn.innerHTML = "Arsipkan!"; }
@@ -924,11 +924,16 @@
             } catch(err) { showToast("Server Error", "error"); } finally { btn.innerHTML = "<i class='fas fa-plus'></i> Buat Kupon Baru"; }
         });
 
-        // ✅ LOGIKA MUNCULKAN ALASAN JIKA RETUR DITOLAK
+        // ✅ LOGIKA MUNCULKAN ALASAN JIKA RETUR DITOLAK ATAU JIKA INGIN MEMBERI CATATAN SELESAI
         window.cekTolakRetur = function(val) {
             const boxAlasan = document.getElementById('boxAlasanTolak');
-            if (val === 'Retur Ditolak') { boxAlasan.style.display = 'block'; document.getElementById('prosesRejectReason').required = true; } 
-            else { boxAlasan.style.display = 'none'; document.getElementById('prosesRejectReason').required = false; }
+            if (val === 'Retur Ditolak' || val === 'Selesai') { 
+                boxAlasan.style.display = 'block'; 
+                document.getElementById('prosesRejectReason').required = (val === 'Retur Ditolak'); // Wajib jika ditolak, opsional jika selesai
+            } else { 
+                boxAlasan.style.display = 'none'; 
+                document.getElementById('prosesRejectReason').required = false; 
+            }
         }
 
         function bukaProsesPesanan(id, status, resi, kurir, alamat) { 
@@ -937,7 +942,7 @@
             document.getElementById('prosesKurirId').value = kurir;
             document.getElementById('prosesAlamatPembeli').value = alamat;
             
-            cekTolakRetur(status); // Cek apakah perlu nampilin box tolak
+            cekTolakRetur(status); 
 
             const inputResi = document.getElementById('prosesOrderResi');
             const btnResi = document.getElementById('btnPanggilKurir');
@@ -981,7 +986,7 @@
             }
         }
         
-        // ✅ SIMPAN STATUS DAN ALASAN TOLAK
+        // ✅ SIMPAN STATUS
         document.getElementById('formProsesPesanan').addEventListener('submit', async (e) => {
             e.preventDefault(); const btn = document.getElementById('btnSimpanProses'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
             const id = document.getElementById('prosesOrderId').value;
@@ -990,7 +995,7 @@
             const payload = { 
                 status: stat, 
                 resi: document.getElementById('prosesOrderResi').value || '-',
-                reject_reason: stat === 'Retur Ditolak' ? document.getElementById('prosesRejectReason').value : ''
+                reject_reason: document.getElementById('prosesRejectReason').value || ''
             };
 
             try {
