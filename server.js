@@ -45,6 +45,18 @@ const PORT = process.env.PORT || 8080;
 
 initDB();
 
+// 🛠️ SUNTIKAN OTOMATIS: UPDATE STRUKTUR DATABASE UNTUK LOGIKA WAKTU & RETUR
+(async () => {
+    try {
+        await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipped_at TIMESTAMP`);
+        await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP`);
+        await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_reject_reason TEXT`);
+        console.log("✅ Database berhasil di-upgrade untuk fitur Waktu & Retur Lanjutan!");
+    } catch (e) {
+        console.error("Gagal upgrade database:", e.message);
+    }
+})();
+
 const uploadDir = path.join(__dirname, 'public/uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
@@ -53,10 +65,8 @@ if (!fs.existsSync(uploadDir)) {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
-
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'dashboardutama.html')); });
 
 // ==========================================
@@ -94,19 +104,13 @@ app.post('/api/ai/search', askAI);
 app.get('/api/products', async (req, res) => {
     try {
         const query = `
-            SELECT p.*, 
-                   COALESCE(ROUND(AVG(r.rating), 1), 0) as avg_rating
-            FROM products p
-            LEFT JOIN product_reviews r ON p.id = r.product_id
-            GROUP BY p.id
-            ORDER BY p.created_at DESC
+            SELECT p.*, COALESCE(ROUND(AVG(r.rating), 1), 0) as avg_rating
+            FROM products p LEFT JOIN product_reviews r ON p.id = r.product_id
+            GROUP BY p.id ORDER BY p.created_at DESC
         `;
         const result = await pool.query(query);
         res.json({ success: true, data: result.rows });
-    } catch (err) {
-        console.error("🔥 Error Get Products:", err);
-        res.status(500).json({ success: false, message: "Server error" });
-    }
+    } catch (err) { res.status(500).json({ success: false, message: "Server error" }); }
 });
 
 app.get('/api/promos', getPromos); 
@@ -123,120 +127,24 @@ const verifyAdmin = (req, res, next) => {
 // ==========================================
 app.post('/api/chat/save', verifyToken, async (req, res) => {
     const { message, sender } = req.body; 
-    try {
-        await pool.query("INSERT INTO chats (user_id, sender_role, message) VALUES ($1, $2, $3)", [req.user.id, sender, message]);
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ success: false }); }
+    try { await pool.query("INSERT INTO chats (user_id, sender_role, message) VALUES ($1, $2, $3)", [req.user.id, sender, message]); res.json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
 });
 
 app.get('/api/chat/me', verifyToken, async (req, res) => {
-    try {
-        const result = await pool.query("SELECT * FROM chats WHERE user_id = $1 ORDER BY created_at ASC", [req.user.id]);
-        res.json({ success: true, data: result.rows });
-    } catch (err) { res.status(500).json({ success: false }); }
+    try { const result = await pool.query("SELECT * FROM chats WHERE user_id = $1 ORDER BY created_at ASC", [req.user.id]); res.json({ success: true, data: result.rows }); } catch (err) { res.status(500).json({ success: false }); }
 });
 
 app.get('/api/admin/chats', verifyAdmin, async (req, res) => {
     try {
-        const result = await pool.query(`
-            SELECT c.*, u.name as user_name 
-            FROM chats c JOIN users u ON c.user_id = u.id 
-            WHERE c.id IN (SELECT MAX(id) FROM chats GROUP BY user_id) 
-            ORDER BY c.created_at DESC
-        `);
+        const result = await pool.query(`SELECT c.*, u.name as user_name FROM chats c JOIN users u ON c.user_id = u.id WHERE c.id IN (SELECT MAX(id) FROM chats GROUP BY user_id) ORDER BY c.created_at DESC`);
         res.json({ success: true, data: result.rows });
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
 // ==========================================
-
-app.get('/api/profile', verifyToken, getProfile);
-app.put('/api/profile', verifyToken, updateProfile);
-
-app.get('/api/address', verifyToken, async (req, res) => {
-    try {
-        const result = await pool.query('SELECT * FROM user_addresses WHERE user_id = $1', [req.user.id]);
-        if (result.rows.length > 0) res.json({ success: true, data: result.rows[0] });
-        else res.json({ success: true, data: null });
-    } catch (err) { res.status(500).json({ success: false }); }
-});
-
-app.post('/api/address', verifyToken, async (req, res) => {
-    const { nama, wa, detail } = req.body;
-    try {
-        const query = `
-            INSERT INTO user_addresses (user_id, nama_penerima, nomor_wa, alamat_lengkap) VALUES ($1, $2, $3, $4)
-            ON CONFLICT (user_id) DO UPDATE SET nama_penerima = EXCLUDED.nama_penerima, nomor_wa = EXCLUDED.nomor_wa, alamat_lengkap = EXCLUDED.alamat_lengkap RETURNING *;
-        `;
-        const result = await pool.query(query, [req.user.id, nama, wa, detail]);
-        res.json({ success: true, message: "Alamat berhasil disimpan permanen!", data: result.rows[0] });
-    } catch (err) { res.status(500).json({ success: false }); }
-});
-
-app.post('/api/products', verifyAdmin, upload.array('media', 5), async (req, res) => {
-    const { title, capital_price, price, stock, category, description, weight, unit, variant_title, variant_options, wholesale_price, wholesale_min_qty } = req.body;
-    try {
-        const mediaUrls = req.files ? req.files.map(f => f.path) : [];
-        const mediaJson = JSON.stringify(mediaUrls);
-        
-        await pool.query(
-            `INSERT INTO products (title, capital_price, price, stock, category, description, weight, media_url, media_type, unit, variant_title, variant_options, wholesale_price, wholesale_min_qty) 
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'image', $9, $10, $11, $12, $13)`,
-            [title, capital_price || 0, price, stock || 0, category || 'biasa', description, weight || 1000, mediaJson, unit || 'Pcs', variant_title || '', variant_options || '', wholesale_price || 0, wholesale_min_qty || 0]
-        );
-        res.json({ success: true, message: "Produk berhasil diupload!" });
-    } catch (err) { res.status(500).json({ success: false, message: "Gagal upload produk." }); }
-});
-
-app.post('/api/promos', verifyAdmin, upload.single('media'), uploadPromo); 
-app.post('/api/forum', verifyToken, createPost);
-
-app.delete('/api/products/:id', verifyAdmin, async (req, res) => {
-    try { await pool.query('DELETE FROM products WHERE id = $1', [req.params.id]); res.json({ success: true, message: "Produk berhasil dihapus!" });
-    } catch(err) { res.status(500).json({ success: false }); }
-});
-
-app.delete('/api/promos/:id', verifyAdmin, async (req, res) => {
-    try { await pool.query('DELETE FROM promo_sliders WHERE id = $1', [req.params.id]); res.json({ success: true, message: "Banner dihapus!" });
-    } catch(err) { res.status(500).json({ success: false }); }
-});
-
-app.put('/api/products/:id', verifyAdmin, async (req, res) => {
-    const { title, price, capital_price, stock, category, weight, unit, variant_title, variant_options, wholesale_price, wholesale_min_qty } = req.body;
-    try {
-        await pool.query(
-            `UPDATE products SET 
-                title=$1, price=$2, capital_price=$3, stock=$4, category=$5, weight=$6, 
-                unit=$7, variant_title=$8, variant_options=$9, wholesale_price=$10, wholesale_min_qty=$11 
-             WHERE id=$12`,
-            [title, price, capital_price, stock, category, weight, unit || 'Pcs', variant_title || '', variant_options || '', wholesale_price || 0, wholesale_min_qty || 0, req.params.id]
-        );
-        res.json({ success: true, message: "Produk berhasil diubah!" });
-    } catch(err) { res.status(500).json({ success: false }); }
-});
-
-app.post('/api/coupons/check', async (req, res) => {
-    const { code } = req.body;
-    try {
-        const result = await pool.query('SELECT * FROM coupons WHERE code = $1 AND is_active = TRUE', [code.toUpperCase()]);
-        if (result.rows.length > 0) res.json({ success: true, data: result.rows[0] });
-        else res.json({ success: false, message: "Kupon tidak valid!" });
-    } catch(err) { res.status(500).json({ success: false }); }
-});
-app.get('/api/coupons', verifyAdmin, async (req, res) => {
-    try { const result = await pool.query('SELECT * FROM coupons ORDER BY created_at DESC'); res.json({ success: true, data: result.rows }); } catch(err) { res.status(500).json({ success: false }); }
-});
-app.post('/api/coupons', verifyAdmin, async (req, res) => {
-    const { code, discount_type, discount_value } = req.body;
-    try { await pool.query('INSERT INTO coupons (code, discount_type, discount_value) VALUES ($1, $2, $3)', [code.toUpperCase(), discount_type, discount_value]); res.json({ success: true, message: "Kupon dibuat!" }); } catch(err) { res.status(500).json({ success: false }); }
-});
-app.delete('/api/coupons/:id', verifyAdmin, async (req, res) => {
-    try { await pool.query('DELETE FROM coupons WHERE id = $1', [req.params.id]); res.json({ success: true }); } catch(err) { res.status(500).json({ success: false }); }
-});
-
+// 🛒 SINKRONISASI API ORDERS & GEMBOK KEAMANAN
 // ==========================================
-// 🛒 SINKRONISASI API ORDERS AGAR TEMBUS KE PROFIL PEMBELI
-// ==========================================
+
 app.post('/api/orders', verifyToken, async (req, res) => {
     const { customer_name, customer_wa, shipping_address, items, total_price, shipping_courier, shipping_cost, payment_method } = req.body;
     try {
@@ -263,165 +171,233 @@ app.get('/api/orders', verifyAdmin, async (req, res) => {
     } catch(err) { res.status(500).json({ success: false }); }
 });
 
-app.put('/api/orders/:id', verifyAdmin, async (req, res) => {
-    const { status, resi } = req.body;
-    try { await pool.query('UPDATE orders SET status=$1, resi=$2 WHERE id=$3', [status, resi, req.params.id]); res.json({ success: true }); } catch(err) { res.status(500).json({ success: false }); }
-});
-app.delete('/api/orders/:id', verifyAdmin, async (req, res) => {
-    try {
-        if (req.user.role === 'admin') await pool.query('UPDATE orders SET is_hidden_admin = TRUE WHERE id = $1', [req.params.id]);
-        else await pool.query('UPDATE orders SET is_hidden_buyer = TRUE WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
-        res.json({ success: true });
+// ✅ GUDANG ARSIP ADMIN
+app.get('/api/orders/archive', verifyAdmin, async (req, res) => {
+    try { 
+        const result = await pool.query('SELECT * FROM orders WHERE is_hidden_admin = TRUE ORDER BY created_at DESC'); 
+        res.json({ success: true, data: result.rows }); 
     } catch(err) { res.status(500).json({ success: false }); }
 });
-app.put('/api/orders/:id/return', verifyToken, upload.single('proof'), async (req, res) => {
-    const { reason } = req.body; const proof_url = req.file ? req.file.path : null;
-    if (!proof_url || !reason) return res.status(400).json({ success: false, message: "Bukti/Alasan wajib diisi!" });
+
+// ✅ ADMIN UPDATE STATUS (Pencatatan Waktu & Alasan Penolakan)
+app.put('/api/orders/:id', verifyAdmin, async (req, res) => {
+    const { status, resi, reject_reason } = req.body;
+    try { 
+        if (status === 'Dikirim') {
+            await pool.query('UPDATE orders SET status=$1, resi=$2, shipped_at=NOW() WHERE id=$3', [status, resi, req.params.id]);
+        } else if (status === 'Selesai') {
+            await pool.query('UPDATE orders SET status=$1, resi=$2, completed_at=NOW() WHERE id=$3', [status, resi, req.params.id]);
+        } else if (status === 'Retur Ditolak') {
+            await pool.query('UPDATE orders SET status=$1, return_reject_reason=$2 WHERE id=$3', [status, reject_reason || 'Ditolak Admin', req.params.id]);
+        } else {
+            await pool.query('UPDATE orders SET status=$1, resi=$2 WHERE id=$3', [status, resi, req.params.id]);
+        }
+        res.json({ success: true }); 
+    } catch(err) { res.status(500).json({ success: false }); }
+});
+
+// ✅ PEMBELI TERIMA BARANG (Klik Selesai Manual)
+app.put('/api/orders/:id/receive', verifyToken, async (req, res) => {
     try {
+        await pool.query("UPDATE orders SET status = 'Selesai', completed_at = NOW() WHERE id = $1 AND user_id = $2", [req.params.id, req.user.id]);
+        res.json({ success: true, message: "Terima kasih! Pesanan telah diselesaikan." });
+    } catch(err) { res.status(500).json({ success: false }); }
+});
+
+// ✅ LOGIKA HAPUS DENGAN GEMBOK KEAMANAN (Pisah Admin & Pembeli)
+app.delete('/api/orders/:id', verifyToken, async (req, res) => {
+    try {
+        const isAdmin = req.user.role === 'admin';
+        const checkQuery = isAdmin 
+            ? await pool.query('SELECT status FROM orders WHERE id = $1', [req.params.id])
+            : await pool.query('SELECT status FROM orders WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+
+        if (checkQuery.rows.length === 0) return res.status(404).json({ success: false, message: "Pesanan tidak ditemukan!" });
+        
+        const currentStatus = checkQuery.rows[0].status || '';
+        
+        // Aturan Gembok: Harus mencapai titik akhir transaksi
+        const statusAman = ['Selesai', 'Dibatalkan', 'Dibatalkan (Expired)', 'Retur Selesai', 'Retur Ditolak'];
+        let isAman = statusAman.some(s => currentStatus.includes(s));
+
+        if(!isAman) {
+            return res.status(403).json({ 
+                success: false, 
+                message: `GEMBOK AKTIF! Pesanan masih berstatus "${currentStatus}". Tunggu pesanan selesai atau dibatalkan sebelum dihapus.` 
+            });
+        }
+
+        if (isAdmin) {
+            // Admin Hapus -> Pindah ke Gudang Arsip (is_hidden_admin = TRUE)
+            await pool.query('UPDATE orders SET is_hidden_admin = TRUE WHERE id = $1', [req.params.id]);
+        } else {
+            // Pembeli Hapus -> Hilang dari layar Pembeli (is_hidden_buyer = TRUE)
+            await pool.query('UPDATE orders SET is_hidden_buyer = TRUE WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+        }
+        res.json({ success: true, message: "Pesanan berhasil dihapus/diarsipkan." });
+    } catch(err) { res.status(500).json({ success: false, message: "Server Error saat menghapus." }); }
+});
+
+// ✅ LOGIKA RETUR DENGAN ATURAN WAKTU 3 HARI
+app.put('/api/orders/:id/return', verifyToken, upload.single('proof'), async (req, res) => {
+    const { reason } = req.body; 
+    const proof_url = req.file ? req.file.path : null;
+    
+    if (!proof_url || !reason) return res.status(400).json({ success: false, message: "Bukti dan Alasan wajib diisi!" });
+    
+    try {
+        // Cek apakah pesanan Selesai dan waktunya belum lewat 3 hari
+        const checkQuery = await pool.query('SELECT status, completed_at FROM orders WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+        if(checkQuery.rows.length === 0) return res.status(404).json({ success: false });
+
+        const order = checkQuery.rows[0];
+        
+        if (order.status !== 'Selesai') {
+            return res.status(400).json({ success: false, message: "Hanya pesanan berstatus Selesai yang bisa diretur!" });
+        }
+
+        if (order.completed_at) {
+            const hariIni = new Date();
+            const tglSelesai = new Date(order.completed_at);
+            const selisihHari = Math.ceil(Math.abs(hariIni - tglSelesai) / (1000 * 60 * 60 * 24));
+            
+            if (selisihHari > 3) {
+                return res.status(403).json({ success: false, message: "Batas waktu pengajuan retur (3 hari) sudah habis!" });
+            }
+        }
+
         await pool.query("UPDATE orders SET status = 'Ajukan Retur', return_reason = $1, return_media = $2 WHERE id = $3", [reason, proof_url, req.params.id]);
         res.json({ success: true });
     } catch(err) { res.status(500).json({ success: false }); }
 });
 
-app.get('/api/reviews/:product_id', async (req, res) => {
+app.get('/api/profile', verifyToken, getProfile);
+app.put('/api/profile', verifyToken, updateProfile);
+app.get('/api/address', verifyToken, async (req, res) => {
     try {
-        const productId = req.params.product_id;
-        const reviewQuery = await pool.query(`SELECT r.*, u.name as user_name FROM product_reviews r JOIN users u ON r.user_id = u.id WHERE r.product_id = $1 ORDER BY r.created_at DESC`, [productId]);
-        const productQuery = await pool.query('SELECT sold_count FROM products WHERE id = $1', [productId]);
-        const terjual = productQuery.rows.length > 0 ? productQuery.rows[0].sold_count : 0;
-        const reviews = reviewQuery.rows; let rataRata = 0;
-        if (reviews.length > 0) { const totalBintang = reviews.reduce((sum, rev) => sum + rev.rating, 0); rataRata = (totalBintang / reviews.length).toFixed(1); }
-        res.json({ success: true, rata_rata: rataRata, terjual: terjual, data: reviews });
+        const result = await pool.query('SELECT * FROM user_addresses WHERE user_id = $1', [req.user.id]);
+        if (result.rows.length > 0) res.json({ success: true, data: result.rows[0] });
+        else res.json({ success: true, data: null });
     } catch (err) { res.status(500).json({ success: false }); }
 });
-app.post('/api/reviews', verifyToken, async (req, res) => {
-    try { await pool.query('INSERT INTO product_reviews (product_id, user_id, rating, comment) VALUES ($1, $2, $3, $4)', [req.body.product_id, req.user.id, req.body.rating, req.body.comment]); res.json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
+
+app.post('/api/products', verifyAdmin, upload.array('media', 5), async (req, res) => {
+    const { title, capital_price, price, stock, category, description, weight, unit, variant_title, variant_options, wholesale_price, wholesale_min_qty } = req.body;
+    try {
+        const mediaUrls = req.files ? req.files.map(f => f.path) : []; const mediaJson = JSON.stringify(mediaUrls);
+        await pool.query(
+            `INSERT INTO products (title, capital_price, price, stock, category, description, weight, media_url, media_type, unit, variant_title, variant_options, wholesale_price, wholesale_min_qty) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'image', $9, $10, $11, $12, $13)`,
+            [title, capital_price || 0, price, stock || 0, category || 'biasa', description, weight || 1000, mediaJson, unit || 'Pcs', variant_title || '', variant_options || '', wholesale_price || 0, wholesale_min_qty || 0]
+        ); res.json({ success: true, message: "Produk berhasil diupload!" });
+    } catch (err) { res.status(500).json({ success: false, message: "Gagal upload produk." }); }
 });
+app.post('/api/promos', verifyAdmin, upload.single('media'), uploadPromo); 
+app.post('/api/forum', verifyToken, createPost);
+app.delete('/api/products/:id', verifyAdmin, async (req, res) => { try { await pool.query('DELETE FROM products WHERE id = $1', [req.params.id]); res.json({ success: true }); } catch(err) { res.status(500).json({ success: false }); } });
+app.delete('/api/promos/:id', verifyAdmin, async (req, res) => { try { await pool.query('DELETE FROM promo_sliders WHERE id = $1', [req.params.id]); res.json({ success: true }); } catch(err) { res.status(500).json({ success: false }); } });
+app.put('/api/products/:id', verifyAdmin, async (req, res) => {
+    const { title, price, capital_price, stock, category, weight, unit, variant_title, variant_options, wholesale_price, wholesale_min_qty } = req.body;
+    try {
+        await pool.query(
+            `UPDATE products SET title=$1, price=$2, capital_price=$3, stock=$4, category=$5, weight=$6, unit=$7, variant_title=$8, variant_options=$9, wholesale_price=$10, wholesale_min_qty=$11 WHERE id=$12`,
+            [title, price, capital_price, stock, category, weight, unit || 'Pcs', variant_title || '', variant_options || '', wholesale_price || 0, wholesale_min_qty || 0, req.params.id]
+        ); res.json({ success: true });
+    } catch(err) { res.status(500).json({ success: false }); }
+});
+
+app.post('/api/coupons/check', async (req, res) => {
+    const { code } = req.body;
+    try {
+        const result = await pool.query('SELECT * FROM coupons WHERE code = $1 AND is_active = TRUE', [code.toUpperCase()]);
+        if (result.rows.length > 0) res.json({ success: true, data: result.rows[0] }); else res.json({ success: false, message: "Kupon tidak valid!" });
+    } catch(err) { res.status(500).json({ success: false }); }
+});
+app.get('/api/coupons', verifyAdmin, async (req, res) => { try { const result = await pool.query('SELECT * FROM coupons ORDER BY created_at DESC'); res.json({ success: true, data: result.rows }); } catch(err) { res.status(500).json({ success: false }); } });
+app.post('/api/coupons', verifyAdmin, async (req, res) => { const { code, discount_type, discount_value } = req.body; try { await pool.query('INSERT INTO coupons (code, discount_type, discount_value) VALUES ($1, $2, $3)', [code.toUpperCase(), discount_type, discount_value]); res.json({ success: true }); } catch(err) { res.status(500).json({ success: false }); } });
+app.delete('/api/coupons/:id', verifyAdmin, async (req, res) => { try { await pool.query('DELETE FROM coupons WHERE id = $1', [req.params.id]); res.json({ success: true }); } catch(err) { res.status(500).json({ success: false }); } });
+
+app.get('/api/reviews/:product_id', async (req, res) => {
+    try {
+        const reviewQuery = await pool.query(`SELECT r.*, u.name as user_name FROM product_reviews r JOIN users u ON r.user_id = u.id WHERE r.product_id = $1 ORDER BY r.created_at DESC`, [req.params.product_id]);
+        const productQuery = await pool.query('SELECT sold_count FROM products WHERE id = $1', [req.params.product_id]);
+        const terjual = productQuery.rows.length > 0 ? productQuery.rows[0].sold_count : 0;
+        let rataRata = 0; if (reviewQuery.rows.length > 0) { const total = reviewQuery.rows.reduce((s, r) => s + r.rating, 0); rataRata = (total / reviewQuery.rows.length).toFixed(1); }
+        res.json({ success: true, rata_rata: rataRata, terjual: terjual, data: reviewQuery.rows });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+app.post('/api/reviews', verifyToken, async (req, res) => { try { await pool.query('INSERT INTO product_reviews (product_id, user_id, rating, comment) VALUES ($1, $2, $3, $4)', [req.body.product_id, req.user.id, req.body.rating, req.body.comment]); res.json({ success: true }); } catch (err) { res.status(500).json({ success: false }); } });
 
 app.post('/api/admin/excel/aset', verifyAdmin, uploadExcel.single('file_excel'), async (req, res) => {
     try {
         const workbook = xlsx.read(req.file.buffer, { type: 'buffer' }); const data = xlsx.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-        let berhasil = 0;
-        for (let row of data) {
-            const nama = row['Nama_Aset'];
-            if (nama) {
-                await pool.query('INSERT INTO internal_assets (asset_code, asset_name, category, quantity, unit, condition, notes) VALUES ($1, $2, $3, $4, $5, $6, $7)', [row['Kode_Aset']||'-', nama, row['Kategori']||'Umum', parseInt(row['Jumlah'])||0, row['Satuan']||'Unit', row['Kondisi']||'Baik', row['Catatan']||'']);
-                berhasil++;
-            }
-        }
-        res.json({ success: true, message: `Berhasil mengimport ${berhasil} data aset!` });
+        for (let row of data) { if (row['Nama_Aset']) { await pool.query('INSERT INTO internal_assets (asset_code, asset_name, category, quantity, unit, condition, notes) VALUES ($1, $2, $3, $4, $5, $6, $7)', [row['Kode_Aset']||'-', row['Nama_Aset'], row['Kategori']||'Umum', parseInt(row['Jumlah'])||0, row['Satuan']||'Unit', row['Kondisi']||'Baik', row['Catatan']||'']); } }
+        res.json({ success: true });
     } catch (err) { res.status(500).json({ success: false }); }
 });
-
 app.post('/api/admin/excel/draft', verifyAdmin, uploadExcel.single('file_excel'), async (req, res) => {
     try {
         const workbook = xlsx.read(req.file.buffer, { type: 'buffer' }); const data = xlsx.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-        let berhasil = 0;
-        for (let row of data) {
-            const nama = row['Nama_Barang']; const jual = parseFloat(row['Harga_Jual']) || 0;
-            const grosirHarga = parseFloat(row['Harga_Grosir']) || 0;
-            const grosirMin = parseInt(row['Min_Grosir']) || 0;
-
-            if (nama && jual > 0) {
-                await pool.query(
-                    `INSERT INTO draft_products 
-                    (title, capital_price, price, stock, category, weight, description, unit, variant_title, variant_options, wholesale_price, wholesale_min_qty) 
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-                    [nama, parseFloat(row['Harga_Modal'])||0, jual, parseInt(row['Stok'])||0, row['Kategori']||'biasa', parseInt(row['Berat'])||1000, row['Deskripsi']||'-', row['Satuan_Jual']||'Pcs', row['Judul_Varian']||'', row['Pilihan_Varian']||'', grosirHarga, grosirMin]
-                );
-                berhasil++;
-            }
-        }
-        res.json({ success: true, message: `Berhasil menyimpan ${berhasil} barang ke ruang karantina!` });
+        for (let row of data) { if (row['Nama_Barang']) { await pool.query(`INSERT INTO draft_products (title, capital_price, price, stock, category, weight, description, unit, variant_title, variant_options, wholesale_price, wholesale_min_qty) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`, [row['Nama_Barang'], parseFloat(row['Harga_Modal'])||0, parseFloat(row['Harga_Jual'])||0, parseInt(row['Stok'])||0, row['Kategori']||'biasa', parseInt(row['Berat'])||1000, row['Deskripsi']||'-', row['Satuan_Jual']||'Pcs', row['Judul_Varian']||'', row['Pilihan_Varian']||'', parseFloat(row['Harga_Grosir'])||0, parseInt(row['Min_Grosir'])||0]); } }
+        res.json({ success: true });
     } catch (err) { res.status(500).json({ success: false }); }
 });
-
-app.get('/api/admin/excel/aset', verifyAdmin, async (req, res) => {
-    try { const result = await pool.query('SELECT * FROM internal_assets ORDER BY created_at DESC'); res.json({ success: true, data: result.rows }); } catch (err) { res.status(500).json({ success: false }); }
-});
-app.get('/api/admin/excel/draft', verifyAdmin, async (req, res) => {
-    try { const result = await pool.query("SELECT * FROM draft_products WHERE status = 'Pending' ORDER BY created_at DESC"); res.json({ success: true, data: result.rows }); } catch (err) { res.status(500).json({ success: false }); }
-});
-
+app.get('/api/admin/excel/aset', verifyAdmin, async (req, res) => { try { const result = await pool.query('SELECT * FROM internal_assets ORDER BY created_at DESC'); res.json({ success: true, data: result.rows }); } catch (err) { res.status(500).json({ success: false }); } });
+app.get('/api/admin/excel/draft', verifyAdmin, async (req, res) => { try { const result = await pool.query("SELECT * FROM draft_products WHERE status = 'Pending' ORDER BY created_at DESC"); res.json({ success: true, data: result.rows }); } catch (err) { res.status(500).json({ success: false }); } });
 app.post('/api/admin/excel/draft/approve/:id', verifyAdmin, async (req, res) => {
     try {
-        const cekDraft = await pool.query('SELECT * FROM draft_products WHERE id = $1', [req.params.id]);
-        if (cekDraft.rows.length === 0) return res.status(404).json({ success: false });
-        const b = cekDraft.rows[0];
-
-        await pool.query(
-            `INSERT INTO products (title, capital_price, price, stock, category, weight, description, unit, variant_title, variant_options, wholesale_price, wholesale_min_qty) 
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-            [b.title, b.capital_price, b.price, b.stock, b.category, b.weight, b.description, b.unit, b.variant_title, b.variant_options, b.wholesale_price, b.wholesale_min_qty]
-        );
-        await pool.query("UPDATE draft_products SET status = 'Approved' WHERE id = $1", [req.params.id]);
-        res.json({ success: true, message: "Barang berhasil dilempar ke Etalase Toko!" });
+        const cek = await pool.query('SELECT * FROM draft_products WHERE id = $1', [req.params.id]); if (cek.rows.length === 0) return res.status(404).json({ success: false }); const b = cek.rows[0];
+        await pool.query(`INSERT INTO products (title, capital_price, price, stock, category, weight, description, unit, variant_title, variant_options, wholesale_price, wholesale_min_qty) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`, [b.title, b.capital_price, b.price, b.stock, b.category, b.weight, b.description, b.unit, b.variant_title, b.variant_options, b.wholesale_price, b.wholesale_min_qty]);
+        await pool.query("UPDATE draft_products SET status = 'Approved' WHERE id = $1", [req.params.id]); res.json({ success: true });
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
-// ==========================================
-// 🚚 API OTOMATISASI RESI (KOMERCE)
-// ==========================================
 app.post('/api/admin/cetak-resi', verifyAdmin, async (req, res) => {
-    const { order_id, kurir, alamat_tujuan, kota_asal } = req.body;
-    
+    const { order_id, kurir } = req.body;
     try {
-        let prefixKurir = "JP"; // Default J&T
-        if(kurir.toLowerCase().includes('jne')) prefixKurir = "JT";
-        if(kurir.toLowerCase().includes('sicepat')) prefixKurir = "00";
-        if(kurir.toLowerCase().includes('ninja')) prefixKurir = "NL";
-
-        // Generate Nomor Resi Otomatis
-        const nomorResiOtomatis = prefixKurir + Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
-
-        // Simpan resi ke database dan ubah status jadi 'Diproses' (Dikemas)
-        await pool.query('UPDATE orders SET resi = $1, status = $2 WHERE id = $3', [nomorResiOtomatis, 'Diproses', order_id]);
-        
-        res.json({ success: true, resi: nomorResiOtomatis });
-    } catch(err) {
-        console.error("Gagal Cetak Resi:", err);
-        res.status(500).json({ success: false, message: "Gagal terhubung ke API Ekspedisi" });
-    }
+        let p = "JP"; if(kurir.toLowerCase().includes('jne')) p = "JT"; if(kurir.toLowerCase().includes('sicepat')) p = "00"; if(kurir.toLowerCase().includes('ninja')) p = "NL";
+        const resi = p + Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
+        await pool.query('UPDATE orders SET resi = $1, status = $2 WHERE id = $3', [resi, 'Diproses', order_id]);
+        res.json({ success: true, resi: resi });
+    } catch(err) { res.status(500).json({ success: false }); }
 });
 
 // ==========================================
-// 🤖 ROBOT PEKERJA: AUTO-CANCEL ORDER (10 MENIT)
+// 🤖 2 ROBOT PEKERJA OTOMATIS (CRON JOBS)
 // ==========================================
-function jalankanRobotAutoCancel() {
-    // Berjalan setiap 1 Menit (60000 ms)
+function jalankanRobotECommerce() {
+    
+    // ROBOT 1: Auto-Cancel 10 Menit (Aktif tiap 1 menit)
     setInterval(async () => {
         try {
-            // Logika SQL: Cari pesanan yang statusnya 'Menunggu Pembayaran' atau 'Pending'
-            // DAN waktu pembuatannya (created_at) sudah lebih dari 10 menit yang lalu.
-            const queryCari = `
-                SELECT id FROM orders 
-                WHERE (status = 'Menunggu Pembayaran' OR status = 'Pending') 
-                AND created_at < NOW() - INTERVAL '10 minutes'
-            `;
-            const pesananHangus = await pool.query(queryCari);
-
-            if (pesananHangus.rows.length > 0) {
-                // Kumpulkan semua ID yang hangus
-                const idHangus = pesananHangus.rows.map(row => row.id);
-                
-                // Ubah statusnya menjadi 'Dibatalkan' secara massal
-                await pool.query(`
-                    UPDATE orders 
-                    SET status = 'Dibatalkan (Expired)' 
-                    WHERE id = ANY($1::int[])
-                `, [idHangus]);
-
-                console.log(`🤖 Robot Auto-Cancel: Berhasil membatalkan ${idHangus.length} pesanan yang belum dibayar.`);
+            const queryCancel = `SELECT id FROM orders WHERE (status = 'Menunggu Pembayaran' OR status = 'Pending') AND created_at < NOW() - INTERVAL '10 minutes'`;
+            const hangus = await pool.query(queryCancel);
+            if (hangus.rows.length > 0) {
+                const idHangus = hangus.rows.map(row => row.id);
+                await pool.query(`UPDATE orders SET status = 'Dibatalkan (Expired)' WHERE id = ANY($1::int[])`, [idHangus]);
             }
-        } catch (err) {
-            console.error("🤖 Robot Error saat menjalankan auto-cancel:", err.message);
-        }
-    }, 60000); // 60000 ms = 1 Menit
+        } catch (err) { console.error("Robot Cancel Error:", err.message); }
+    }, 60000); 
+
+    // ROBOT 2: Auto-Selesai 3 Hari (Aktif tiap 1 jam)
+    // Jika pesanan status "Dikirim" sudah lewat 3 hari sejak waktu shipped_at, otomatis Selesai.
+    setInterval(async () => {
+        try {
+            const querySelesai = `
+                UPDATE orders 
+                SET status = 'Selesai', completed_at = NOW() 
+                WHERE status = 'Dikirim' AND shipped_at < NOW() - INTERVAL '3 days'
+                RETURNING id
+            `;
+            const otomatisSelesai = await pool.query(querySelesai);
+            if (otomatisSelesai.rows.length > 0) {
+                console.log(`🤖 Robot Auto-Selesai: ${otomatisSelesai.rows.length} pesanan otomatis selesai.`);
+            }
+        } catch (err) { console.error("Robot Selesai Error:", err.message); }
+    }, 3600000); 
 }
 
-// Nyalakan Robot saat server menyala
-jalankanRobotAutoCancel();
+jalankanRobotECommerce();
 
-// ==========================================
 app.use((err, req, res, next) => { res.status(500).json({ success: false, message: "Gagal Upload: " + (err.message || "Error Server") }); });
 app.listen(PORT, () => { console.log(`🚀 Server belidikita berjalan di port ${PORT}`); });
