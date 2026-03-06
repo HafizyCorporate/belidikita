@@ -139,6 +139,7 @@
         </div>
 
         <div id="secAlamat" class="hidden">
+            
             <div id="areaAlamatTersimpan" style="display: none;">
                 <h3 class="text-xs font-extrabold text-gray-700 mb-3"><i class="fas fa-address-book text-brand mr-1"></i> Buku Alamat Saya</h3>
                 
@@ -378,7 +379,7 @@
             } catch (err) { }
         }
 
-        // ✅ FUNGSI CETAK RESI RETUR DENGAN KODINGAN BERSIH
+        // ✅ FUNGSI CETAK RESI RETUR (KINI AMAN TANPA BOCOR)
         window.cetakResiRetur = function(idOrder) {
             const order = allMyOrders.find(o => o.id === idOrder);
             if(!order) return;
@@ -386,8 +387,7 @@
             let items = []; try { items = JSON.parse(order.items); } catch(e){}
             let rincianBarang = items.map(item => `<li>${item.nama} (x${item.qty})</li>`).join('');
 
-            const printWindow = window.open('', '_blank', 'width=800,height=600');
-            printWindow.document.write(`
+            const htmlContent = `
                 <html>
                 <head>
                     <title>Cetak Resi Retur - #ORD-${order.id}</title>
@@ -440,10 +440,13 @@
                     </div>
                     <script>
                         window.onload = function() { window.print(); }
-                    </script>
+                    <` + `/script>
                 </body>
                 </html>
-            `);
+            `;
+
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            printWindow.document.write(htmlContent);
             printWindow.document.close();
         }
 
