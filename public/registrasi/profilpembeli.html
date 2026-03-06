@@ -126,6 +126,7 @@
                 <div class="tab-pesanan" onclick="filterPesanan('Menunggu Pembayaran', this)">Belum Bayar</div>
                 <div class="tab-pesanan" onclick="filterPesanan('Diproses', this)">Dikemas</div>
                 <div class="tab-pesanan" onclick="filterPesanan('Dikirim', this)">Dikirim</div>
+                <div class="tab-pesanan" onclick="filterPesanan('Terkirim', this)">Terkirim (Sampai)</div>
                 <div class="tab-pesanan" onclick="filterPesanan('Selesai', this)">Selesai</div>
                 <div class="tab-pesanan" onclick="filterPesanan('Retur', this)">Retur</div>
             </div>
@@ -460,6 +461,7 @@
                     let statusColor = "bg-yellow-100 text-yellow-700"; let iconStatus = "fa-clock";
                     if(displayStatus === 'Dikemas') { statusColor = "bg-blue-100 text-blue-700"; iconStatus = "fa-box"; }
                     if(displayStatus === 'Dikirim') { statusColor = "bg-purple-100 text-purple-700"; iconStatus = "fa-shipping-fast"; }
+                    if(displayStatus === 'Terkirim') { statusColor = "bg-teal-100 text-teal-800"; iconStatus = "fa-box-open"; }
                     if(displayStatus === 'Selesai') { statusColor = "bg-green-100 text-green-700"; iconStatus = "fa-check-circle"; }
                     if(displayStatus.includes('Retur')) { statusColor = "bg-red-100 text-red-700 font-bold"; iconStatus = "fa-undo"; }
 
@@ -469,22 +471,23 @@
                     let btnAksiHtml = '';
                     let warningHtml = '';
                     let tolakHtml = '';
+                    let infoBarangSelesai = '';
 
-                    // ✅ KONDISI 1: JIKA STATUS DIKIRIM (Menunggu Penerimaan)
-                    if (displayStatus === 'Dikirim') {
-                        warningHtml = `<div style="font-size:10px; color:#F57F17; background:#FFFDE7; padding:8px; border-radius:6px; margin-top:10px; border-left:3px solid #FBC02D; line-height:1.4;"><i class="fas fa-info-circle mr-1"></i><b>Penting:</b> Klik tombol DITERIMA di bawah jika barang sudah sampai. Jika lewat dari 3 hari, sistem akan otomatis menyelesaikannya.</div>`;
-                        btnAksiHtml += `<button onclick="terimaPesananPembeli(${order.id})" class="mt-3 w-full py-2.5 bg-brand text-white text-xs font-extrabold rounded-lg hover:bg-blue-800 transition shadow-md"><i class="fas fa-box-open mr-1"></i> Pesanan Diterima (Selesai)</button>`;
+                    // ✅ KONDISI 1: JIKA STATUS TERKIRIM (Menunggu Penerimaan 2x24 Jam)
+                    if (displayStatus === 'Terkirim') {
+                        warningHtml = `<div style="font-size:10px; color:#F57F17; background:#FFFDE7; padding:8px; border-radius:6px; margin-top:10px; border-left:3px solid #FBC02D; line-height:1.4;"><i class="fas fa-info-circle mr-1"></i><b>Penting:</b> Klik tombol DITERIMA jika barang sudah sampai dan sesuai. Jika lewat dari 2 Hari (2x24 Jam), sistem akan otomatis menyelesaikannya.</div>`;
+                        btnAksiHtml += `<button onclick="bukaModalRetur(${order.id})" class="mt-3 w-full py-2 bg-white text-red-500 text-xs font-extrabold rounded-lg border border-red-200 hover:bg-red-50 transition mb-2"><i class="fas fa-undo mr-1"></i> Ajukan Retur</button>`;
+                        btnAksiHtml += `<button onclick="terimaPesananPembeli(${order.id})" class="w-full py-2.5 bg-brand text-white text-xs font-extrabold rounded-lg hover:bg-blue-800 transition shadow-md"><i class="fas fa-box-open mr-1"></i> Pesanan Diterima (Selesai)</button>`;
                     }
 
-                    // ✅ KONDISI 2: JIKA STATUS SELESAI (Aktifkan Retur & Ulasan)
+                    // ✅ KONDISI 2: JIKA STATUS SELESAI (Aktifkan Ulasan, Tutup Retur)
                     if (displayStatus === 'Selesai') {
                         const idProdukSelesai = barangPertama.id || 0; 
-                        warningHtml = `<div style="font-size:10px; color:#ff3b30; text-align:center; margin-top:10px; font-weight:bold;">⚠️ Batas waktu pengajuan Retur adalah 3 Hari sejak pesanan selesai.</div>`;
-                        btnAksiHtml += `<button onclick="bukaModalRetur(${order.id})" class="mt-2 w-full py-2 bg-white text-red-500 text-xs font-extrabold rounded-lg border border-red-200 hover:bg-red-50 transition mb-2"><i class="fas fa-undo mr-1"></i> Ajukan Retur</button>`;
-                        btnAksiHtml += `<button onclick="bukaModalUlasan(${idProdukSelesai})" class="w-full py-2 bg-brand text-white text-xs font-extrabold rounded-lg hover:bg-blue-800 transition shadow-md"><i class="fas fa-star text-yellow-400 mr-1"></i> Nilai Pesanan</button>`;
+                        infoBarangSelesai = `<div style="font-size:11px; color:#00AA5B; font-weight:bold; margin-top:10px; text-align:center;"><i class="fas fa-check-circle mr-1"></i> Barang sukses (Tidak diretur)</div>`;
+                        btnAksiHtml += `<button onclick="bukaModalUlasan(${idProdukSelesai})" class="mt-2 w-full py-2 bg-brand text-white text-xs font-extrabold rounded-lg hover:bg-blue-800 transition shadow-md"><i class="fas fa-star text-yellow-400 mr-1"></i> Nilai Pesanan</button>`;
                     }
 
-                    // ✅ KONDISI 3: JIKA RETUR DIPROSES (Bisa Cetak)
+                    // ✅ KONDISI 3: JIKA RETUR DIPROSES (Bisa Cetak Resi)
                     if (displayStatus === 'Retur Diproses') {
                         btnAksiHtml += `<button onclick="cetakResiRetur(${order.id})" class="mt-3 w-full py-2.5 bg-red-50 border border-red-200 text-red-600 text-xs font-extrabold rounded-lg hover:bg-red-100 transition shadow-sm"><i class="fas fa-print mr-1"></i> Cetak Label Retur Pengembalian</button>`;
                     }
@@ -494,7 +497,7 @@
                         tolakHtml = `<div style="font-size:10px; color:#c62828; background:#ffebee; padding:8px; border-radius:6px; margin-top:10px; border-left:3px solid #d32f2f; line-height:1.4;"><i class="fas fa-times-circle mr-1"></i><b>Retur Ditolak Admin:</b> ${order.return_reject_reason || 'Alasan tidak valid / kurang bukti yang jelas.'}</div>`;
                     }
 
-                    // ✅ KONDISI 5: TOMBOL HAPUS (GEMBOK AMAN)
+                    // ✅ KONDISI 5: TOMBOL HAPUS (GEMBOK AMAN) - Muncul jika Selesai, Batal, atau Retur Selesai/Ditolak
                     const statusAman = ['Selesai', 'Dibatalkan', 'Dibatalkan (Expired)', 'Retur Selesai', 'Retur Ditolak'];
                     if (statusAman.some(s => displayStatus.includes(s))) {
                         btnAksiHtml += `<button onclick="hapusPesananPembeli(${order.id})" class="mt-3 w-full py-2 bg-gray-50 text-gray-500 text-[11px] font-bold rounded-lg border border-gray-200 hover:bg-gray-100 transition"><i class="fas fa-trash-alt mr-1"></i> Sembunyikan Riwayat Ini</button>`;
@@ -529,6 +532,7 @@
                                 <span class="text-sm font-extrabold text-orange-500">${formatRp}</span>
                             </div>
                             
+                            ${infoBarangSelesai}
                             ${warningHtml}
                             ${tolakHtml}
                             ${btnAksiHtml}
@@ -541,6 +545,7 @@
                 if(statusFilter === 'Menunggu Pembayaran') { pesanKosong = "Yeay! Tidak ada tagihan yang belum dibayar."; iconKosong = "fa-wallet"; }
                 if(statusFilter === 'Diproses') { pesanKosong = "Belum ada pesanan yang sedang dikemas nih. Yuk jajan dulu!"; iconKosong = "fa-box-open"; }
                 if(statusFilter === 'Dikirim') { pesanKosong = "Belum ada paket yang meluncur ke rumahmu."; iconKosong = "fa-shipping-fast"; }
+                if(statusFilter === 'Terkirim') { pesanKosong = "Belum ada paket yang sampai."; iconKosong = "fa-box"; }
 
                 containerRiwayat.innerHTML = `<div class="text-center py-12 opacity-60 animate-fade-up"><i class="fas ${iconKosong} text-5xl mb-4 text-brand"></i><p class="text-xs font-bold text-gray-600">${pesanKosong}</p><button onclick="window.location.href='../dashboardutama.html'" class="mt-4 bg-brand text-white text-[10px] font-bold px-4 py-2 rounded-full hover:bg-blue-800">Mulai Belanja</button></div>`;
             }
@@ -550,7 +555,7 @@
 
         // ✅ AKSI KLIK "PESANAN DITERIMA" OLEH PEMBELI
         window.terimaPesananPembeli = async function(idOrder) {
-            if(!confirm("Pastikan Anda sudah menerima dan mengecek barang. Yakin ingin menyelesaikan pesanan?")) return;
+            if(!confirm("Pastikan Anda sudah menerima dan mengecek barang. Yakin ingin menyelesaikan pesanan? (Setelah Selesai Anda tidak bisa Retur lagi)")) return;
             try {
                 const res = await fetch(`/api/orders/${idOrder}/receive`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await res.json();
@@ -785,7 +790,48 @@
         });
 
         document.getElementById('btnLogout').addEventListener('click', () => { localStorage.removeItem('token'); showToast("Berhasil Keluar", "success"); setTimeout(() => window.location.href = '../dashboardutama.html', 1000); });
+
+        // LOGIKA PENILAIAN ULASAN
+        let bintangTerpilih = 5;
+        window.pilihBintang = function(bintang) {
+            bintangTerpilih = bintang;
+            document.getElementById('ulasanRating').value = bintang;
+            const stars = document.getElementById('starContainer').children;
+            for(let i=0; i<stars.length; i++) {
+                stars[i].style.color = i < bintang ? '#FFD700' : '#ddd';
+            }
+        }
+        
+        window.bukaModalUlasan = function(idProduk) {
+            document.getElementById('ulasanProductId').value = idProduk;
+            document.getElementById('modalUlasan').style.display = 'flex';
+        }
+
+        document.getElementById('formUlasan').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitUlasan');
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan..."; btn.disabled = true;
+
+            const payload = {
+                product_id: document.getElementById('ulasanProductId').value,
+                rating: document.getElementById('ulasanRating').value,
+                comment: document.getElementById('ulasanKomentar').value
+            };
+
+            try {
+                const res = await fetch('/api/reviews', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if(data.success) {
+                    showToast("Terima kasih atas ulasan Anda! 🌟", "success");
+                    document.getElementById('modalUlasan').style.display = 'none';
+                    document.getElementById('formUlasan').reset();
+                    pilihBintang(5); // Reset bintang
+                } else { showToast("Gagal mengirim ulasan", "error"); }
+            } catch(err) { showToast("Server Error", "error"); }
+            finally { btn.innerHTML = "<i class='fas fa-paper-plane mr-1'></i> KIRIM ULASAN"; btn.disabled = false; }
+        });
     </script>
 </body>
 </html>
-
