@@ -97,7 +97,7 @@
         .btn-batal { flex: 1; padding: 12px; background: #eee; color: #555; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
         .btn-yakin { flex: 1; padding: 12px; background: #ff3b30; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
 
-        .btn-auto-resi { background: linear-gradient(135deg, #0D47A1, #1976D2); color: #fff; border: none; border-radius: 8px; padding: 12px; width: 100%; font-weight: 800; font-size: 12px; cursor: margin-bottom: 15px; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;}
+        .btn-auto-resi { background: linear-gradient(135deg, #0D47A1, #1976D2); color: #fff; border: none; border-radius: 8px; padding: 12px; width: 100%; font-weight: 800; font-size: 12px; cursor: pointer; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;}
         .btn-auto-resi:active { transform: scale(0.97); }
         .btn-auto-resi:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
     </style>
@@ -636,7 +636,7 @@
             await fetchCoupons();
             await fetchAdminChats();
             await fetchOrders(); 
-            await fetchArchive(); // Tarik arsip
+            await fetchArchive(); 
         }
         
         setTimeout(() => { muatSemuaDataAwal(); }, 1000);
@@ -924,18 +924,19 @@
             } catch(err) { showToast("Server Error", "error"); } finally { btn.innerHTML = "<i class='fas fa-plus'></i> Buat Kupon Baru"; }
         });
 
-        // ✅ LOGIKA MUNCULKAN ALASAN JIKA RETUR DITOLAK ATAU JIKA INGIN MEMBERI CATATAN SELESAI
+        // ✅ LOGIKA MUNCULKAN ALASAN JIKA RETUR DITOLAK ATAU SELESAI
         window.cekTolakRetur = function(val) {
             const boxAlasan = document.getElementById('boxAlasanTolak');
             if (val === 'Retur Ditolak' || val === 'Selesai') { 
                 boxAlasan.style.display = 'block'; 
-                document.getElementById('prosesRejectReason').required = (val === 'Retur Ditolak'); // Wajib jika ditolak, opsional jika selesai
+                document.getElementById('prosesRejectReason').required = (val === 'Retur Ditolak'); 
             } else { 
                 boxAlasan.style.display = 'none'; 
                 document.getElementById('prosesRejectReason').required = false; 
             }
         }
 
+        // ✅ LOGIKA TOMBOL "KIRIM BARANG PENGGANTI (RESI BARU)" JIKA STATUS RETUR
         function bukaProsesPesanan(id, status, resi, kurir, alamat) { 
             document.getElementById('prosesOrderId').value = id; 
             document.getElementById('prosesOrderStatus').value = status; 
@@ -948,9 +949,22 @@
             const btnResi = document.getElementById('btnPanggilKurir');
 
             if (resi && resi !== '-' && resi !== 'null') {
-                inputResi.value = resi; btnResi.style.display = 'none';
+                inputResi.value = resi; 
+                
+                // JIKA STATUS LAGI RETUR, BUKA TOMBOL RESI UNTUK BUAT RESI BARU (PENGGANTI)
+                if (status.includes('Retur')) {
+                    btnResi.style.display = 'flex';
+                    btnResi.innerHTML = "<i class='fas fa-sync-alt'></i> Request Pickup Ulang (Kirim Barang Pengganti)";
+                    btnResi.style.background = "#ff9800"; 
+                } else {
+                    btnResi.style.display = 'none'; // Normalnya disembunyikan
+                }
+
             } else {
-                inputResi.value = ''; btnResi.style.display = 'flex';
+                inputResi.value = ''; 
+                btnResi.style.display = 'flex';
+                btnResi.innerHTML = "<i class='fas fa-truck-pickup'></i> Request Pickup & Cetak Resi (Komerce)";
+                btnResi.style.background = "linear-gradient(135deg, #0D47A1, #1976D2)";
             }
             document.getElementById('modalProsesPesanan').style.display = 'block'; 
         }
@@ -974,7 +988,7 @@
                 if(data.success) {
                     showToast("🎉 Kurir berhasil dipanggil! Resi tercetak.", "success");
                     document.getElementById('prosesOrderResi').value = data.resi;
-                    document.getElementById('prosesOrderStatus').value = 'Diproses'; // Otomatis jadi dikemas
+                    document.getElementById('prosesOrderStatus').value = 'Diproses'; // Otomatis jadi dikemas lagi
                     btn.style.display = 'none';
                 } else {
                     showToast("Gagal memanggil kurir: " + data.message, "error");
