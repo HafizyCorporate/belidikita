@@ -360,7 +360,7 @@
         }
 
         // ==========================================
-        // 1. SINKRONISASI DATA PESANAN YANG DIPERKUAT (FASE 3)
+        // 1. SINKRONISASI DATA PESANAN YANG DIPERKUAT
         // ==========================================
         let allMyOrders = [];
 
@@ -379,7 +379,7 @@
             } catch (err) { }
         }
 
-        // Fungsi Cetak Resi Retur
+        // Cetak Resi Retur
         window.cetakResiRetur = function(idOrder) {
             const order = allMyOrders.find(o => o.id === idOrder);
             if(!order) return;
@@ -410,45 +410,23 @@
                             <h2>LABEL RETUR PAKET</h2>
                             <p>PESANAN ASAL: #ORD-${order.id}</p>
                         </div>
-                        <div class="section">
-                            <div class="section-title">📍 KEPADA (PENGEMBALIAN):</div>
-                            <div class="box" style="border-color: #0D47A1; background: #f4f9ff;">
-                                <strong style="font-size: 18px;">Belidikita Official</strong> <br>
-                                Admin Retur (082240400388)<br><br>
-                                <strong>Alamat Toko:</strong><br>
-                                Padalarang, Bandung Barat (Alamat sesuai konfirmasi WA)
-                            </div>
-                        </div>
-                        <div class="section">
-                            <div class="section-title">📦 DARI (PEMBELI):</div>
-                            <div class="box">
-                                <strong>${order.customer_name}</strong><br>
-                                No HP: ${order.customer_wa}<br>
-                                ${order.shipping_address}
-                            </div>
-                        </div>
-                        <div class="section">
-                            <div class="section-title">📝 ISI PAKET RETUR:</div>
-                            <div class="box">
-                                <ul>${rincianBarang}</ul>
-                                <p style="margin-top: 10px; font-size: 12px; color: #ff3b30;"><b>Alasan:</b> ${order.return_reason}</p>
-                            </div>
-                        </div>
-                        <div class="footer">
-                            Tempelkan label ini di luar paket sebelum diserahkan ke kurir ekspedisi.
-                        </div>
+                        <div class="section"><div class="section-title">📍 KEPADA (PENGEMBALIAN):</div><div class="box" style="border-color: #0D47A1; background: #f4f9ff;"><strong style="font-size: 18px;">Belidikita Official</strong> <br>Admin Retur (082240400388)<br><br><strong>Alamat Toko:</strong><br>Padalarang, Bandung Barat</div></div>
+                        <div class="section"><div class="section-title">📦 DARI (PEMBELI):</div><div class="box"><strong>${order.customer_name}</strong><br>No HP: ${order.customer_wa}<br>${order.shipping_address}</div></div>
+                        <div class="section"><div class="section-title">📝 ISI PAKET RETUR:</div><div class="box"><ul>${rincianBarang}</ul><p style="margin-top: 10px; font-size: 12px; color: #ff3b30;"><b>Alasan:</b> ${order.return_reason}</p></div></div>
+                        <div class="footer">Tempelkan label ini di luar paket sebelum diserahkan ke kurir ekspedisi.</div>
                     </div>
                     <script> window.onload = function() { window.print(); } <` + `/script>
                 </body>
                 </html>
             `;
-
             const printWindow = window.open('', '_blank', 'width=800,height=600');
             printWindow.document.write(htmlContent);
             printWindow.document.close();
         }
 
-        // ✅ LOGIKA PENAMPILAN TOMBOL (DITERIMA, RETUR, HAPUS)
+        // ==========================================
+        // 🚀 LOGIKA RENDER TOMBOL & PERINGATAN (UX PEMBELI)
+        // ==========================================
         window.filterPesanan = function(statusFilter, elemenTab) {
             if(elemenTab) {
                 document.querySelectorAll('.tab-pesanan').forEach(tab => tab.classList.remove('active'));
@@ -487,44 +465,42 @@
 
                     const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
 
-                    // Variabel HTML untuk Modul Tombol Dinamis
-                    let btnTerimaHtml = '';
-                    let btnReturHtml = '';
-                    let btnHapusHtml = '';
-                    let warningTeksHtml = '';
-                    let alasanTolakHtml = '';
+                    // Variabel HTML Dinamis
+                    let btnAksiHtml = '';
+                    let warningHtml = '';
+                    let tolakHtml = '';
 
-                    // 1. Tombol Terima Barang (Bila sedang Dikirim)
+                    // ✅ KONDISI 1: JIKA STATUS DIKIRIM (Menunggu Penerimaan)
                     if (displayStatus === 'Dikirim') {
-                        warningTeksHtml = `<div style="font-size:10px; color:#F57F17; background:#FFFDE7; padding:8px; border-radius:6px; margin-top:10px; border-left:3px solid #FBC02D;"><i class="fas fa-info-circle mr-1"></i><b>Penting:</b> Pesanan akan otomatis "Selesai" dalam waktu 3 Hari jika Anda tidak melakukan konfirmasi klik tombol di bawah.</div>`;
-                        btnTerimaHtml = `<button onclick="terimaPesananPembeli(${order.id})" class="mt-3 w-full py-2.5 bg-brand text-white text-xs font-extrabold rounded-lg hover:bg-blue-800 transition shadow-md"><i class="fas fa-box-open mr-1"></i> Pesanan Diterima (Selesai)</button>`;
+                        warningHtml = `<div style="font-size:10px; color:#F57F17; background:#FFFDE7; padding:8px; border-radius:6px; margin-top:10px; border-left:3px solid #FBC02D; line-height:1.4;"><i class="fas fa-info-circle mr-1"></i><b>Penting:</b> Klik tombol DITERIMA di bawah jika barang sudah sampai. Jika lewat dari 3 hari, sistem akan otomatis menyelesaikannya.</div>`;
+                        btnAksiHtml += `<button onclick="terimaPesananPembeli(${order.id})" class="mt-3 w-full py-2.5 bg-brand text-white text-xs font-extrabold rounded-lg hover:bg-blue-800 transition shadow-md"><i class="fas fa-box-open mr-1"></i> Pesanan Diterima (Selesai)</button>`;
                     }
 
-                    // 2. Tombol Retur & Ulasan (Bila sudah Selesai)
+                    // ✅ KONDISI 2: JIKA STATUS SELESAI (Aktifkan Retur & Ulasan)
                     if (displayStatus === 'Selesai') {
                         const idProdukSelesai = barangPertama.id || 0; 
-                        warningTeksHtml = `<div style="font-size:10px; color:#ff3b30; text-align:center; margin-top:10px; font-weight:bold;">⚠️ Batas waktu retur adalah 3 Hari sejak pesanan selesai.</div>`;
-                        btnReturHtml = `<button onclick="bukaModalRetur(${order.id})" class="mt-2 w-full py-2 bg-white text-red-500 text-xs font-extrabold rounded-lg border border-red-200 hover:bg-red-50 transition mb-2"><i class="fas fa-undo mr-1"></i> Ajukan Retur</button>`;
-                        btnTerimaHtml = `<button onclick="bukaModalUlasan(${idProdukSelesai})" class="mt-3 w-full py-2 bg-brand text-white text-xs font-extrabold rounded-lg hover:bg-blue-800 transition shadow-md"><i class="fas fa-star text-yellow-400 mr-1"></i> Nilai Pesanan</button>`;
+                        warningHtml = `<div style="font-size:10px; color:#ff3b30; text-align:center; margin-top:10px; font-weight:bold;">⚠️ Batas waktu pengajuan Retur adalah 3 Hari sejak pesanan selesai.</div>`;
+                        btnAksiHtml += `<button onclick="bukaModalRetur(${order.id})" class="mt-2 w-full py-2 bg-white text-red-500 text-xs font-extrabold rounded-lg border border-red-200 hover:bg-red-50 transition mb-2"><i class="fas fa-undo mr-1"></i> Ajukan Retur</button>`;
+                        btnAksiHtml += `<button onclick="bukaModalUlasan(${idProdukSelesai})" class="w-full py-2 bg-brand text-white text-xs font-extrabold rounded-lg hover:bg-blue-800 transition shadow-md"><i class="fas fa-star text-yellow-400 mr-1"></i> Nilai Pesanan</button>`;
                     }
 
-                    // 3. Tombol Cetak Retur (Bila disetujui Admin)
+                    // ✅ KONDISI 3: JIKA RETUR DIPROSES (Bisa Cetak)
                     if (displayStatus === 'Retur Diproses') {
-                        btnReturHtml = `<button onclick="cetakResiRetur(${order.id})" class="mt-3 w-full py-2.5 bg-red-50 border border-red-200 text-red-600 text-xs font-extrabold rounded-lg hover:bg-red-100 transition shadow-sm"><i class="fas fa-print mr-1"></i> Cetak Label Retur Pengembalian</button>`;
+                        btnAksiHtml += `<button onclick="cetakResiRetur(${order.id})" class="mt-3 w-full py-2.5 bg-red-50 border border-red-200 text-red-600 text-xs font-extrabold rounded-lg hover:bg-red-100 transition shadow-sm"><i class="fas fa-print mr-1"></i> Cetak Label Retur Pengembalian</button>`;
                     }
 
-                    // 4. Info Alasan Ditolak Admin
+                    // ✅ KONDISI 4: JIKA RETUR DITOLAK ADMIN
                     if (displayStatus === 'Retur Ditolak') {
-                        alasanTolakHtml = `<div style="font-size:10px; color:#c62828; background:#ffebee; padding:8px; border-radius:6px; margin-top:10px; border-left:3px solid #d32f2f;"><i class="fas fa-times-circle mr-1"></i><b>Retur Ditolak Admin:</b> ${order.return_reject_reason || 'Alasan tidak valid / kurang bukti.'}</div>`;
+                        tolakHtml = `<div style="font-size:10px; color:#c62828; background:#ffebee; padding:8px; border-radius:6px; margin-top:10px; border-left:3px solid #d32f2f; line-height:1.4;"><i class="fas fa-times-circle mr-1"></i><b>Retur Ditolak Admin:</b> ${order.return_reject_reason || 'Alasan tidak valid / kurang bukti yang jelas.'}</div>`;
                     }
 
-                    // 5. Gembok Tombol Hapus Pembeli (Hanya jika status sudah titik akhir)
+                    // ✅ KONDISI 5: TOMBOL HAPUS (GEMBOK AMAN)
                     const statusAman = ['Selesai', 'Dibatalkan', 'Dibatalkan (Expired)', 'Retur Selesai', 'Retur Ditolak'];
                     if (statusAman.some(s => displayStatus.includes(s))) {
-                        btnHapusHtml = `<button onclick="hapusPesananPembeli(${order.id})" class="mt-2 w-full py-2 bg-gray-50 text-gray-500 text-[11px] font-bold rounded-lg border border-gray-200 hover:bg-gray-100 transition"><i class="fas fa-trash-alt mr-1"></i> Sembunyikan Riwayat Ini</button>`;
+                        btnAksiHtml += `<button onclick="hapusPesananPembeli(${order.id})" class="mt-3 w-full py-2 bg-gray-50 text-gray-500 text-[11px] font-bold rounded-lg border border-gray-200 hover:bg-gray-100 transition"><i class="fas fa-trash-alt mr-1"></i> Sembunyikan Riwayat Ini</button>`;
                     }
 
-                    // Render ke HTML
+                    // Render Final Kartu Pesanan
                     containerRiwayat.innerHTML += `
                         <div class="glass-card rounded-2xl p-4 mb-4 border border-light animate-fade-up shadow-md">
                             <div class="flex justify-between items-center border-b border-light pb-3 mb-3">
@@ -553,12 +529,9 @@
                                 <span class="text-sm font-extrabold text-orange-500">${formatRp}</span>
                             </div>
                             
-                            ${warningTeksHtml}
-                            ${alasanTolakHtml}
-                            ${btnTerimaHtml}
-                            ${btnReturHtml}
-                            ${btnHapusHtml}
-
+                            ${warningHtml}
+                            ${tolakHtml}
+                            ${btnAksiHtml}
                         </div>
                     `;
                 });
@@ -575,47 +548,43 @@
         
         loadRiwayatPesanan();
 
-        // ✅ AKSI KLIK "PESANAN DITERIMA"
+        // ✅ AKSI KLIK "PESANAN DITERIMA" OLEH PEMBELI
         window.terimaPesananPembeli = async function(idOrder) {
-            if(!confirm("Pastikan Anda sudah mengecek kelengkapan barang. Anda yakin pesanan sudah selesai?")) return;
+            if(!confirm("Pastikan Anda sudah menerima dan mengecek barang. Yakin ingin menyelesaikan pesanan?")) return;
             try {
                 const res = await fetch(`/api/orders/${idOrder}/receive`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await res.json();
-                if(data.success) { showToast("Pesanan Selesai! Terima kasih telah berbelanja.", "success"); loadRiwayatPesanan(); } 
+                if(data.success) { showToast("Pesanan Selesai! Silakan beri ulasan.", "success"); loadRiwayatPesanan(); } 
                 else { showToast("Gagal: " + data.message, "error"); }
-            } catch(e) { showToast("Gagal menyambung ke server.", "error"); }
+            } catch(e) { showToast("Server error.", "error"); }
         }
 
-        // ✅ AKSI KLIK "HAPUS RIWAYAT" (Hanya sembunyi dari Pembeli)
+        // ✅ AKSI KLIK "HAPUS / SEMBUNYIKAN RIWAYAT" OLEH PEMBELI
         window.hapusPesananPembeli = async function(idOrder) {
-            if(!confirm("Yakin ingin menyembunyikan pesanan ini dari riwayat Anda?")) return;
+            if(!confirm("Yakin ingin menyembunyikan pesanan ini dari riwayat belanja Anda?")) return;
             try {
                 const res = await fetch(`/api/orders/${idOrder}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await res.json();
-                if(data.success) { showToast("Riwayat pesanan berhasil dihapus.", "success"); loadRiwayatPesanan(); } 
-                else { showToast("Gagal: " + data.message, "error"); }
-            } catch(e) { showToast("Gagal menyambung ke server.", "error"); }
+                if(data.success) { showToast("Riwayat berhasil disembunyikan.", "success"); loadRiwayatPesanan(); } 
+                else { showToast("Ditolak: " + data.message, "error"); }
+            } catch(e) { showToast("Server error.", "error"); }
         }
 
-        // ✅ AKSI BUKA MODAL RETUR
+        // ✅ AKSI BUKA MODAL & KIRIM RETUR
         window.bukaModalRetur = function(idOrder) {
             document.getElementById('returOrderId').value = idOrder;
             document.getElementById('modalRetur').style.display = 'flex';
         }
 
-        // ✅ EKSEKUSI PENGIRIMAN BUKTI RETUR
         document.getElementById('formRetur').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmitRetur');
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengirim..."; btn.disabled = true;
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Mengirim Bukti..."; btn.disabled = true;
 
             const orderId = document.getElementById('returOrderId').value;
-            const reason = document.getElementById('returReason').value;
-            const proof = document.getElementById('returProof').files[0];
-
             const formData = new FormData();
-            formData.append('reason', reason);
-            formData.append('proof', proof);
+            formData.append('reason', document.getElementById('returReason').value);
+            formData.append('proof', document.getElementById('returProof').files[0]);
 
             try {
                 const res = await fetch(`/api/orders/${orderId}/return`, {
@@ -623,14 +592,12 @@
                 });
                 const data = await res.json();
                 if(data.success) {
-                    showToast("Pengajuan retur berhasil dikirim ke Admin!", "success");
+                    showToast("Pengajuan retur berhasil dikirim!", "success");
                     document.getElementById('modalRetur').style.display = 'none';
                     document.getElementById('formRetur').reset();
-                    loadRiwayatPesanan(); // Refresh UI
-                } else {
-                    showToast("Ditolak: " + data.message, "error");
-                }
-            } catch(err) { showToast("Server Error", "error"); } 
+                    loadRiwayatPesanan(); 
+                } else { showToast("Ditolak: " + data.message, "error"); }
+            } catch(err) { showToast("Gagal mengupload file bukti.", "error"); } 
             finally { btn.innerHTML = "<i class='fas fa-paper-plane mr-1'></i> KIRIM PENGAJUAN RETUR"; btn.disabled = false; }
         });
 
@@ -821,3 +788,4 @@
     </script>
 </body>
 </html>
+
