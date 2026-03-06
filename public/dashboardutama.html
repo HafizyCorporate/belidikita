@@ -96,6 +96,15 @@
         .chat-toko-footer input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 20px; background: #f4f7fa; outline: none; font-size: 13px; font-family: 'Montserrat', sans-serif;}
         .chat-toko-footer button { background: #ff9800; color: #fff; width: 40px; height: 40px; border-radius: 50%; border: none; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
+        /* ✅ CSS KOTAK MASUK (INBOX) ALA SHOPEE */
+        .inbox-item { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; background: #fff; transition: 0.2s; }
+        .inbox-item:active { background: #f4f9ff; }
+        .inbox-avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #0D47A1, #1976D2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.2);}
+        .inbox-content { flex: 1; overflow: hidden; }
+        .inbox-name { font-size: 14px; font-weight: 800; color: #333; margin-bottom: 4px; }
+        .inbox-preview { font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600;}
+        .inbox-time { font-size: 10px; color: #aaa; align-self: flex-start; padding-top: 5px; font-weight: 700;}
+
         /* ✅ CSS TOMBOL BANTUAN NGAMBANG (FLOATING AI HELP) */
         .floating-help-btn { position: fixed; bottom: 80px; right: 20px; background: #00AA5B; color: #fff; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 5px 15px rgba(0, 170, 91, 0.4); cursor: pointer; z-index: 1000; transition: transform 0.2s; border: 2px solid #fff; }
         .floating-help-btn:active { transform: scale(0.9); }
@@ -145,7 +154,7 @@
             <input type="text" id="searchInputDashboard" placeholder="Cari barang (Lalu tekan Enter)..." onkeypress="if(event.key === 'Enter') window.lakukanPencarianPintar(this.value)">
         </div>
         
-        <div class="header-admin" id="btnChatAdmin" style="cursor: pointer; font-size: 20px; color: #0D47A1; margin-right: 12px; position: relative;" onclick="window.bukaChatAdmin()">
+        <div class="header-admin" id="btnChatAdmin" style="cursor: pointer; font-size: 20px; color: #0D47A1; margin-right: 12px; position: relative;" onclick="window.bukaInbox()">
             <i class="fas fa-envelope"></i>
             <span style="position: absolute; top: -5px; right: -5px; background: #ff3b30; width: 8px; height: 8px; border-radius: 50%;"></span>
         </div>
@@ -240,18 +249,35 @@
         <div id="kontenPesananLayar" style="padding: 0 15px 15px 15px;"></div>
     </div>
 
-    <div id="modalChatAdmin" class="chat-toko-modal">
+    <div id="modalInbox" class="layar-penuh" style="background:#f4f7fa; z-index: 5500;">
+        <div class="katalog-header" style="border-bottom:1px solid #E1F5FE;">
+            <i class="fas fa-arrow-left" onclick="document.getElementById('modalInbox').style.display='none'"></i>
+            <h2 style="font-size: 16px;">Chat Toko</h2>
+        </div>
+        <div id="inboxList" style="padding-top: 10px;">
+            <div class="inbox-item" onclick="window.bukaRuangChat()">
+                <div class="inbox-avatar"><i class="fas fa-store"></i></div>
+                <div class="inbox-content">
+                    <div class="inbox-name">Belidikita Official</div>
+                    <div class="inbox-preview" id="inboxLastMsg">Memuat pesan terakhir...</div>
+                </div>
+                <div class="inbox-time" id="inboxLastTime">Sekarang</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalChatAdmin" class="chat-toko-modal" style="z-index: 6000;">
         <div class="chat-toko-header">
             <i class="fas fa-arrow-left btn-back" id="closeChatAdmin" onclick="window.tutupChatAdmin()"></i>
             <div class="store-profile">
                 <div class="store-avatar"><i class="fas fa-store"></i></div>
                 <div>
-                    <h2 style="font-size: 14px; font-weight: 800; color: #333; margin: 0;">Admin Toko</h2>
-                    <span style="font-size: 10px; color: #00AA5B;"><i class="fas fa-circle"></i> Online</span>
+                    <h2 style="font-size: 14px; font-weight: 800; color: #333; margin: 0;">Belidikita Official</h2>
+                    <span style="font-size: 10px; color: #00AA5B;"><i class="fas fa-circle"></i> Online (Admin)</span>
                 </div>
             </div>
         </div>
-        <div class="chat-toko-body" id="chatAdminBody">
+        <div class="chat-toko-body" id="chatAdminBody" style="background:#f4f9ff;">
             <div class="chat-msg-store">Halo kak! Ada yang bisa dibantu terkait pesanan? 😊</div>
         </div>
         <div class="chat-toko-footer">
@@ -260,7 +286,7 @@
         </div>
     </div>
 
-    <div id="aiChatModal" class="chat-toko-modal">
+    <div id="aiChatModal" class="chat-toko-modal" style="z-index: 6000;">
         <div class="chat-toko-header">
             <i class="fas fa-arrow-left btn-back" id="closeAIBtn" onclick="window.tutupChatAI()"></i>
             <div class="store-profile">
@@ -393,7 +419,6 @@
         window.bukaHalamanPesanan = async function(e) {
             if(e) e.preventDefault();
             
-            // Ubah gaya aktif di navbar
             document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
             const menuTransaction = document.getElementById('menuTransaction');
             if(menuTransaction) menuTransaction.classList.add('active');
@@ -705,17 +730,43 @@
         };
 
         // ==========================================
-        // KABEL CHAT ADMIN MANUAL (HEADER ATAS)
+        // ✅ 3. KABEL KOTAK MASUK (INBOX) ADMIN
         // ==========================================
-        window.bukaChatAdmin = function() {
+        window.bukaInbox = function() {
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) {
-                showToast("Silakan login dulu untuk chat dengan Admin!", "error");
+                showToast("Silakan login dulu untuk melihat pesan!", "error");
                 setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
                 return;
             }
+            
+            document.getElementById('modalInbox').style.display = 'flex';
+            
+            // Ambil pesan terakhir untuk preview
+            fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => res.json())
+                .then(result => {
+                    const previewText = document.getElementById('inboxLastMsg');
+                    const timeText = document.getElementById('inboxLastTime');
+                    if(result.success && result.data.length > 0) {
+                        const lastMsg = result.data[result.data.length - 1];
+                        previewText.innerText = lastMsg.sender_role === 'admin' ? `Admin: ${lastMsg.message}` : `Anda: ${lastMsg.message}`;
+                        const d = new Date(lastMsg.created_at);
+                        timeText.innerText = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+                    } else {
+                        previewText.innerText = "Belum ada percakapan";
+                        timeText.innerText = "";
+                    }
+                }).catch(e => {
+                    document.getElementById('inboxLastMsg').innerText = "Gagal memuat";
+                });
+        };
+
+        window.bukaRuangChat = function() {
+            document.getElementById('modalInbox').style.display = 'none';
             document.getElementById('modalChatAdmin').style.display = 'flex';
             
+            const token = localStorage.getItem('token');
             fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } })
                 .then(res => res.json())
                 .then(result => {
@@ -737,6 +788,7 @@
 
         window.tutupChatAdmin = function() {
             document.getElementById('modalChatAdmin').style.display = 'none';
+            window.bukaInbox(); // Kembali ke list inbox
         };
 
         window.kirimChatAdmin = function() {
@@ -758,7 +810,7 @@
         };
 
         // ==========================================
-        // KABEL CHAT BOT AI (POJOK KANAN BAWAH)
+        // ✅ 4. KABEL CHAT BOT AI (BANTUAN OTOMATIS)
         // ==========================================
         window.bukaChatAI = function() {
             document.getElementById('aiChatModal').style.display = 'flex';
@@ -845,9 +897,11 @@
                 } else if(document.getElementById('pesananLayarPenuh').style.display === 'flex') {
                     window.tutupHalamanPesanan();
                 } else if(document.getElementById('modalChatAdmin').style.display === 'flex') {
-                    document.getElementById('modalChatAdmin').style.display = 'none';
+                    window.tutupChatAdmin();
+                } else if(document.getElementById('modalInbox').style.display === 'flex') {
+                    document.getElementById('modalInbox').style.display = 'none';
                 } else if(document.getElementById('aiChatModal').style.display === 'flex') {
-                    document.getElementById('aiChatModal').style.display = 'none';
+                    window.tutupChatAI();
                 }
             });
 
