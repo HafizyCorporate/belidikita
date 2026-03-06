@@ -17,7 +17,7 @@
         .section { background: #fff; margin-top: 10px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .section-title { font-size: 13px; font-weight: 800; color: #0D47A1; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #eee; padding-bottom: 10px; justify-content: space-between; }
 
-        /* ✅ KOTAK ALAMAT BISA DIKLIK */
+        /* KOTAK ALAMAT */
         .address-box { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 5px 0; }
         .address-content { flex: 1; }
         .address-box p { font-size: 12px; color: #555; line-height: 1.5; margin-bottom: 5px; }
@@ -77,15 +77,15 @@
         .btn-checkout:active { transform: scale(0.95); }
 
         /* Modal Pop-up */
-        .modal-confirm { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
-        .confirm-box { background: #fff; padding: 30px 20px; border-radius: 15px; text-align: center; width: 90%; max-width: 320px; animation: popIn 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .modal-confirm { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; padding: 20px;}
+        .confirm-box { background: #fff; padding: 30px 20px; border-radius: 15px; text-align: center; width: 100%; max-width: 350px; animation: popIn 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .confirm-box i { font-size: 45px; color: #ff9800; margin-bottom: 15px; }
         .confirm-box h3 { font-size: 18px; color: #333; margin-bottom: 10px; font-weight: 800; }
         .confirm-box p { font-size: 12px; color: #666; margin-bottom: 25px; line-height: 1.5; }
         .btn-yakin { width: 100%; padding: 12px; background: #0D47A1; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3); }
 
-        /* ✅ MODAL PILIH ALAMAT (SHOPEE STYLE) */
+        /* MODAL PILIH ALAMAT */
         .modal-bottom-sheet { display: none; position: fixed; z-index: 4000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,40,80,0.6); backdrop-filter: blur(3px); align-items: flex-end; justify-content: center; }
         .bottom-sheet-content { background: #fff; width: 100%; max-width: 600px; border-radius: 20px 20px 0 0; padding: 20px; animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; max-height: 80vh; display: flex; flex-direction: column; }
         @keyframes slideUp { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
@@ -103,121 +103,150 @@
         #customToast.show { visibility: visible; opacity: 1; bottom: 100px; }
         #customToast.error { background-color: #ff3b30; }
         #customToast.success { background-color: #00AA5B; }
+
+        /* RUANG TUNGGU PEMBAYARAN (COUNTDOWN) */
+        #screenPembayaran { display: none; background: #fff; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 5000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;}
+        .timer-box { font-size: 45px; font-weight: 900; color: #ff3b30; letter-spacing: 5px; margin: 15px 0; font-variant-numeric: tabular-nums; }
+        .anim-pulse { animation: pulseWarning 1s infinite alternate; }
+        @keyframes pulseWarning { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
+        .btn-wa-transfer { background: #25D366; color: #fff; border: none; padding: 15px; border-radius: 12px; font-weight: 800; font-size: 15px; width: 100%; max-width: 300px; cursor: pointer; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4); margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s;}
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <i class="fas fa-arrow-left" onclick="history.back()"></i>
-        <h2>Checkout Pesanan</h2>
-    </div>
-
-    <div class="section">
-        <div class="section-title">
-            <span><i class="fas fa-map-marker-alt"></i> Alamat Pengiriman</span>
+    <div id="screenCheckout">
+        <div class="header">
+            <i class="fas fa-arrow-left" onclick="history.back()"></i>
+            <h2>Checkout Pesanan</h2>
         </div>
-        <div class="address-box" onclick="bukaModalPilihAlamat()">
-            <div class="address-content" id="addressBox">
-                <p>Memuat alamat...</p>
+
+        <div class="section">
+            <div class="section-title">
+                <span><i class="fas fa-map-marker-alt"></i> Alamat Pengiriman</span>
             </div>
-            <i class="fas fa-chevron-right arrow-right"></i>
+            <div class="address-box" onclick="bukaModalPilihAlamat()">
+                <div class="address-content" id="addressBox">
+                    <p>Memuat alamat...</p>
+                </div>
+                <i class="fas fa-chevron-right arrow-right"></i>
+            </div>
         </div>
-    </div>
 
-    <div class="section">
-        <div class="section-title">
-            <span><i class="fas fa-box"></i> Produk Dipesan</span>
-            <span id="infoBeratLayar" style="font-size:11px; color:#888; font-weight:600;">(Menghitung berat...)</span>
+        <div class="section">
+            <div class="section-title">
+                <span><i class="fas fa-box"></i> Produk Dipesan</span>
+                <span id="infoBeratLayar" style="font-size:11px; color:#888; font-weight:600;">(Menghitung berat...)</span>
+            </div>
+            <div id="checkoutItems"></div>
         </div>
-        <div id="checkoutItems"></div>
-    </div>
 
-    <div class="section">
-        <div class="section-title">
-            <span><i class="fas fa-ticket-alt"></i> Kupon Diskon</span>
+        <div class="section">
+            <div class="section-title">
+                <span><i class="fas fa-ticket-alt"></i> Kupon Diskon</span>
+            </div>
+            <div class="coupon-box">
+                <input type="text" id="inputKupon" placeholder="Masukkan Kode Kupon...">
+                <button onclick="cekKupon()">Terapkan</button>
+            </div>
+            <div id="couponMessage"></div>
         </div>
-        <div class="coupon-box">
-            <input type="text" id="inputKupon" placeholder="Masukkan Kode Kupon...">
-            <button onclick="cekKupon()">Terapkan</button>
-        </div>
-        <div id="couponMessage"></div>
-    </div>
 
-    <div class="section">
-        <div class="section-title">
-            <span><i class="fas fa-truck"></i> Opsi Pengiriman</span>
+        <div class="section">
+            <div class="section-title">
+                <span><i class="fas fa-truck"></i> Opsi Pengiriman</span>
+            </div>
+            <div class="option-group">
+                <label class="option-label">
+                    <input type="radio" name="shipping" value="JNE">
+                    <div class="option-content">JNE Reguler (Real-Time API)</div>
+                    <div class="option-price" id="labelJNE">Pilih kurir ini</div>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="shipping" value="JNT">
+                    <div class="option-content">J&T Express (Real-Time API)</div>
+                    <div class="option-price" id="labelJNT">Pilih kurir ini</div>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="shipping" value="Sicepat">
+                    <div class="option-content">SiCepat REG (Real-Time API)</div>
+                    <div class="option-price" id="labelSicepat">Pilih kurir ini</div>
+                </label>
+            </div>
         </div>
-        <div class="option-group">
-            <label class="option-label">
-                <input type="radio" name="shipping" value="JNE">
-                <div class="option-content">JNE Reguler (Real-Time API)</div>
-                <div class="option-price" id="labelJNE">Pilih kurir ini</div>
-            </label>
-            <label class="option-label">
-                <input type="radio" name="shipping" value="JNT">
-                <div class="option-content">J&T Express (Real-Time API)</div>
-                <div class="option-price" id="labelJNT">Pilih kurir ini</div>
-            </label>
-            <label class="option-label">
-                <input type="radio" name="shipping" value="Sicepat">
-                <div class="option-content">SiCepat REG (Real-Time API)</div>
-                <div class="option-price" id="labelSicepat">Pilih kurir ini</div>
-            </label>
-        </div>
-    </div>
 
-    <div class="section">
-        <div class="section-title">
-            <span><i class="fas fa-wallet"></i> Metode Pembayaran</span>
+        <div class="section">
+            <div class="section-title">
+                <span><i class="fas fa-wallet"></i> Metode Pembayaran</span>
+            </div>
+            <div class="option-group">
+                <label class="option-label">
+                    <input type="radio" name="payment" value="BCA">
+                    <div class="option-content"><i class="fas fa-university" style="color:#0066AE;"></i> Transfer Bank BCA</div>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="payment" value="Mandiri">
+                    <div class="option-content"><i class="fas fa-university" style="color:#F9A826;"></i> Transfer Bank Mandiri</div>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="payment" value="GoPay">
+                    <div class="option-content"><i class="fas fa-qrcode" style="color:#00AED6;"></i> E-Wallet (GoPay)</div>
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="payment" value="OVO">
+                    <div class="option-content"><i class="fas fa-qrcode" style="color:#4C3494;"></i> E-Wallet (OVO)</div>
+                </label>
+            </div>
         </div>
-        <div class="option-group">
-            <label class="option-label">
-                <input type="radio" name="payment" value="BCA">
-                <div class="option-content"><i class="fas fa-university" style="color:#0066AE;"></i> Transfer Bank BCA</div>
-            </label>
-            <label class="option-label">
-                <input type="radio" name="payment" value="Mandiri">
-                <div class="option-content"><i class="fas fa-university" style="color:#F9A826;"></i> Transfer Bank Mandiri</div>
-            </label>
-            <label class="option-label">
-                <input type="radio" name="payment" value="GoPay">
-                <div class="option-content"><i class="fas fa-qrcode" style="color:#00AED6;"></i> E-Wallet (GoPay)</div>
-            </label>
-            <label class="option-label">
-                <input type="radio" name="payment" value="OVO">
-                <div class="option-content"><i class="fas fa-qrcode" style="color:#4C3494;"></i> E-Wallet (OVO)</div>
-            </label>
-        </div>
-    </div>
 
-    <div class="section">
-        <div class="section-title">
-            <span><i class="fas fa-receipt"></i> Rincian Pembayaran</span>
+        <div class="section">
+            <div class="section-title">
+                <span><i class="fas fa-receipt"></i> Rincian Pembayaran</span>
+            </div>
+            <div class="summary-row">
+                <span>Subtotal Produk</span>
+                <span id="txtSubtotal">Rp0</span>
+            </div>
+            <div class="summary-row">
+                <span>Total Ongkos Kirim</span>
+                <span id="txtOngkir">Rp0</span>
+            </div>
+            <div class="summary-row" id="rowDiskon" style="display: none; color: #00AA5B; font-weight: bold;">
+                <span>Potongan Kupon</span>
+                <span id="txtDiskon">-Rp0</span>
+            </div>
+            <div class="summary-row total">
+                <span>Total Pembayaran</span>
+                <span id="txtTotalAkhir">Rp0</span>
+            </div>
         </div>
-        <div class="summary-row">
-            <span>Subtotal Produk</span>
-            <span id="txtSubtotal">Rp0</span>
-        </div>
-        <div class="summary-row">
-            <span>Total Ongkos Kirim</span>
-            <span id="txtOngkir">Rp0</span>
-        </div>
-        <div class="summary-row" id="rowDiskon" style="display: none; color: #00AA5B; font-weight: bold;">
-            <span>Potongan Kupon</span>
-            <span id="txtDiskon">-Rp0</span>
-        </div>
-        <div class="summary-row total">
-            <span>Total Pembayaran</span>
-            <span id="txtTotalAkhir">Rp0</span>
-        </div>
-    </div>
 
-    <div class="bottom-bar">
-        <div>
-            <div class="total-text">Total Pembayaran:</div>
-            <div class="total-price" id="bottomTotal">Rp0</div>
+        <div class="bottom-bar">
+            <div>
+                <div class="total-text">Total Pembayaran:</div>
+                <div class="total-price" id="bottomTotal">Rp0</div>
+            </div>
+            <button class="btn-checkout" id="btnBuatPesanan">Buat Pesanan</button>
         </div>
-        <button class="btn-checkout" id="btnBuatPesanan">Buat Pesanan</button>
+    </div> <div id="screenPembayaran">
+        <i class="fas fa-clock" style="font-size: 50px; color: #0D47A1; margin-bottom: 10px;"></i>
+        <h2 style="color: #0D47A1; font-weight: 800; font-size: 20px;">Selesaikan Pembayaran</h2>
+        <p style="font-size: 12px; color: #666; margin-top: 5px;">Pesanan Anda berhasil dicatat! Silakan transfer sebesar:</p>
+        
+        <div style="background: #f4f9ff; border: 2px dashed #81D4FA; padding: 15px; border-radius: 12px; margin: 15px 0; width: 100%; max-width: 300px;">
+            <p style="font-size: 11px; color: #555; margin-bottom: 5px;">Total Tagihan</p>
+            <h1 id="tagihanFinal" style="color: #ff5722; font-size: 26px; font-weight: 900;">Rp0</h1>
+        </div>
+
+        <p style="font-size: 12px; font-weight: 800; color: #333;">Sisa Waktu Pembayaran:</p>
+        <div class="timer-box anim-pulse" id="countdownTimer">10:00</div>
+
+        <p style="font-size: 11px; color: #888; max-width: 280px; line-height: 1.5;">Klik tombol di bawah untuk meminta nomor rekening/barcode dan mengirimkan bukti transfer ke Admin.</p>
+
+        <button class="btn-wa-transfer" id="btnLanjutWA" onclick="kirimKeWA()">
+            <i class="fab fa-whatsapp" style="font-size: 22px;"></i> Minta Rekening (WA Admin)
+        </button>
+
+        <button onclick="batalDariRuangTunggu()" style="margin-top: 20px; background: transparent; border: none; color: #aaa; text-decoration: underline; font-weight: 700; font-size: 11px; cursor: pointer;">Tutup & Cek Pesanan Saya</button>
     </div>
 
     <div id="modalConfirmAddress" class="modal-confirm">
@@ -235,8 +264,7 @@
                 <div class="bs-title">Pilih Alamat Pengiriman</div>
                 <div class="bs-close" onclick="tutupModalPilihAlamat()">&times;</div>
             </div>
-            <div class="address-list-container" id="listAlamatTersimpan">
-                </div>
+            <div class="address-list-container" id="listAlamatTersimpan"></div>
             <button class="btn-add-address" onclick="window.location.href='registrasi/profilpembeli.html'"><i class="fas fa-plus"></i> Tambah Alamat Baru</button>
         </div>
     </div>
@@ -251,43 +279,31 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        let subtotal = 0;
-        let ongkir = 0;
-        let diskonKupon = 0; 
-        let currentCouponType = null; 
-        let totalAkhir = 0;
-        let totalBeratGram = 0; 
-        let items = [];
-        
+        let subtotal = 0; let ongkir = 0; let diskonKupon = 0; let currentCouponType = null; let totalAkhir = 0; let totalBeratGram = 0; let items = [];
         let userInfo = { nama: "Pembeli", wa: "-", alamat: "", label: "Rumah" };
         let kotaTokoGlobal = "Bandung"; 
-
-        // Array untuk menyimpan daftar buku alamat
         let bukuAlamat = [];
+        
+        // Simpan pesan WA yang sudah digenerate saat klik "Buat Pesanan"
+        let pesanWAKonfirmasi = ""; 
+        let timerInterval;
 
         const token = localStorage.getItem('token');
         if (!token) { window.location.href = 'login.html'; }
 
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
 
-        // ✅ FUNGSI TARIK DATA ALAMAT YANG DIPERKUAT (DIBIKIN MULTI-ADDRESS LIST)
         async function fetchAddress() {
             try {
                 const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
                 if(storeData && storeData.kota) kotaTokoGlobal = storeData.kota;
-
                 const res = await fetch('/api/address', { headers: { 'Authorization': `Bearer ${token}` } });
                 const result = await res.json();
-                
-                // Ambil label dari memori HP
                 const labelTersimpan = localStorage.getItem('belidikita_label_alamat') || 'Rumah';
                 
                 if (result.success && result.data && result.data.alamat_lengkap) {
                     userInfo = { nama: result.data.nama_penerima, wa: result.data.nomor_wa, alamat: result.data.alamat_lengkap, label: labelTersimpan };
-                    
-                    // Masukkan ke array buku alamat (Untuk fitur upgrade multi-address ke depannya)
                     bukuAlamat = [userInfo];
-
                     renderAlamatTerpilih();
                 } else {
                     document.getElementById('addressBox').innerHTML = `<p style="color:red; font-weight:bold;">Alamat belum diatur. Silakan atur di Profil Akun.</p>`;
@@ -296,12 +312,10 @@
             } catch (err) { console.error(err); }
         }
 
-        // Tampilkan alamat ke layar Checkout Utama
         function renderAlamatTerpilih() {
             let classBadge = 'label-rumah';
             if(userInfo.label === 'Kantor') classBadge = 'label-kantor';
             if(userInfo.label === 'Lainnya') classBadge = 'label-lainnya';
-
             document.getElementById('addressBox').innerHTML = `
                 <div class="address-label ${classBadge}">${userInfo.label}</div>
                 <p><strong>${userInfo.nama}</strong> (${userInfo.wa})</p>
@@ -311,24 +325,18 @@
                     <span>Dikirim dari: <b>${kotaTokoGlobal}</b></span>
                 </div>
             `;
-            
-            resetOngkir(); // Jika alamat berubah, ongkir harus kereset
+            resetOngkir(); 
         }
 
-        // BUKA MODAL PILIH ALAMAT
         function bukaModalPilihAlamat() {
             document.getElementById('modalPilihAlamat').style.display = 'flex';
             const container = document.getElementById('listAlamatTersimpan');
             container.innerHTML = '';
-
             bukuAlamat.forEach((almt, idx) => {
                 let classBadge = 'label-rumah';
                 if(almt.label === 'Kantor') classBadge = 'label-kantor';
                 if(almt.label === 'Lainnya') classBadge = 'label-lainnya';
-
-                // Tampilkan sebagai yg terpilih jika sama
                 let isSelected = (almt.alamat === userInfo.alamat) ? 'selected' : '';
-
                 container.innerHTML += `
                     <div class="address-card-select ${isSelected}" onclick="pilihAlamatIni(${idx})">
                         <div class="address-label ${classBadge}">${almt.label}</div>
@@ -339,50 +347,30 @@
             });
         }
 
-        function tutupModalPilihAlamat() {
-            document.getElementById('modalPilihAlamat').style.display = 'none';
-        }
+        function tutupModalPilihAlamat() { document.getElementById('modalPilihAlamat').style.display = 'none'; }
+        window.pilihAlamatIni = function(index) { userInfo = bukuAlamat[index]; renderAlamatTerpilih(); tutupModalPilihAlamat(); showToast("Alamat pengiriman berhasil diubah!", "success"); }
 
-        // AKSI SAAT PEMBELI MEMILIH ALAMAT DI MODAL
-        window.pilihAlamatIni = function(index) {
-            userInfo = bukuAlamat[index];
-            renderAlamatTerpilih();
-            tutupModalPilihAlamat();
-            showToast("Alamat pengiriman berhasil diubah!", "success");
-        }
-
-        // LOGIKA QTY DI CHECKOUT + KALKULASI GROSIR
         function loadCheckoutItems() {
             const dataStr = sessionStorage.getItem('belidikita_checkout');
             if(!dataStr) { window.location.href = 'dashboardutama.html'; return; }
-            
             items = JSON.parse(dataStr);
-            
-            subtotal = 0;
-            totalBeratGram = 0;
-
+            subtotal = 0; totalBeratGram = 0;
             const container = document.getElementById('checkoutItems');
             container.innerHTML = '';
             
             items.forEach((item, index) => {
-                let hargaFinal = item.harga;
-                let infoGrosirHTML = '';
-
+                let hargaFinal = item.harga; let infoGrosirHTML = '';
                 if (item.wholesale_price && item.wholesale_min_qty && item.qty >= item.wholesale_min_qty) {
                     hargaFinal = item.wholesale_price; 
                     infoGrosirHTML = `<div class="grosir-badge"><i class="fas fa-tags"></i> Harga Grosir Aktif!</div>`;
                     item.hargaAwalDicoret = item.harga;
-                } else {
-                    item.hargaAwalDicoret = null; 
-                }
+                } else { item.hargaAwalDicoret = null; }
                 
                 item.hargaTerpakai = hargaFinal; 
                 subtotal += (hargaFinal * item.qty);
                 let beratPerBarang = item.weight ? item.weight : 1000; 
                 totalBeratGram += (beratPerBarang * item.qty);
-
                 const tampilanHargaCorek = infoGrosirHTML ? `<span class="harga-coret">${formatRp(item.harga)}</span>` : '';
-
                 container.innerHTML += `
                     <div class="product-item">
                         <img src="${item.foto}" alt="Foto">
@@ -399,10 +387,7 @@
                     </div>
                 `;
             });
-
-            let totalKg = Math.ceil(totalBeratGram / 1000);
-            if(totalKg === 0) totalKg = 1;
-
+            let totalKg = Math.ceil(totalBeratGram / 1000); if(totalKg === 0) totalKg = 1;
             document.getElementById('infoBeratLayar').innerText = `Total: ${totalKg} kg (${totalBeratGram} gr)`;
             hitungTotal();
         }
@@ -410,60 +395,32 @@
         window.ubahQtyCheckout = function(index, delta) {
             items[index].qty += delta;
             if(items[index].qty <= 0) items.splice(index, 1);
-            if(items.length === 0) {
-                sessionStorage.removeItem('belidikita_checkout');
-                window.location.href = 'dashboardutama.html';
-                return;
-            }
+            if(items.length === 0) { sessionStorage.removeItem('belidikita_checkout'); window.location.href = 'dashboardutama.html'; return; }
             sessionStorage.setItem('belidikita_checkout', JSON.stringify(items));
-            loadCheckoutItems(); 
-            resetOngkir(); 
+            loadCheckoutItems(); resetOngkir(); 
         }
 
         function resetOngkir() {
             ongkir = 0;
-            document.querySelectorAll('input[name="shipping"]').forEach(radio => {
-                radio.checked = false;
-                radio.nextElementSibling.nextElementSibling.innerText = "Pilih kurir";
-            });
+            document.querySelectorAll('input[name="shipping"]').forEach(radio => { radio.checked = false; radio.nextElementSibling.nextElementSibling.innerText = "Pilih kurir"; });
             hitungTotal();
         }
 
         document.querySelectorAll('input[name="shipping"]').forEach(radio => {
             radio.addEventListener('change', async function() {
-                if(userInfo.alamat === "") {
-                    showToast("Alamat pengiriman belum diatur!", "error");
-                    this.checked = false; return;
-                }
-
-                const kurirDipilih = this.value;
-                const elemenHarga = this.nextElementSibling.nextElementSibling;
-                
+                if(userInfo.alamat === "") { showToast("Alamat pengiriman belum diatur!", "error"); this.checked = false; return; }
+                const kurirDipilih = this.value; const elemenHarga = this.nextElementSibling.nextElementSibling;
                 elemenHarga.innerHTML = "<i class='fas fa-circle-notch fa-spin'></i> Menghitung...";
                 document.getElementById('txtOngkir').innerHTML = "<i class='fas fa-spinner fa-spin'></i>";
 
                 try {
                     const res = await fetch('/api/ongkir/hitung', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({
-                            kota_asal: kotaTokoGlobal,       
-                            kota_tujuan: userInfo.alamat,    
-                            berat: totalBeratGram > 0 ? totalBeratGram : 1000,
-                            kurir: kurirDipilih
-                        })
+                        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ kota_asal: kotaTokoGlobal, kota_tujuan: userInfo.alamat, berat: totalBeratGram > 0 ? totalBeratGram : 1000, kurir: kurirDipilih })
                     });
-                    
                     const result = await res.json();
-                    
-                    if(result.success) {
-                        ongkir = result.ongkir;
-                    } else {
-                        ongkir = 15000 * Math.ceil(totalBeratGram / 1000); 
-                    }
-                } catch(e) {
-                    ongkir = 15000 * Math.ceil(totalBeratGram / 1000); 
-                }
+                    if(result.success) { ongkir = result.ongkir; } else { ongkir = 15000 * Math.ceil(totalBeratGram / 1000); }
+                } catch(e) { ongkir = 15000 * Math.ceil(totalBeratGram / 1000); }
                 
                 elemenHarga.innerText = formatRp(ongkir);
                 if(currentCouponType === 'ongkir') { diskonKupon = ongkir; }
@@ -473,76 +430,46 @@
 
         async function cekKupon() {
             const kode = document.getElementById('inputKupon').value.toUpperCase().trim();
-            const msgBox = document.getElementById('couponMessage');
-            const btn = document.querySelector('.coupon-box button');
-            
+            const msgBox = document.getElementById('couponMessage'); const btn = document.querySelector('.coupon-box button');
             if(!kode) return;
-
-            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i>";
-            btn.disabled = true;
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i>"; btn.disabled = true;
 
             try {
-                const res = await fetch('/api/coupons/check', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ code: kode })
-                });
+                const res = await fetch('/api/coupons/check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: kode }) });
                 const result = await res.json();
-
                 if(result.success) {
-                    const kupon = result.data;
-                    currentCouponType = kupon.discount_type;
-                    
-                    if(kupon.discount_type === 'nominal') {
-                        diskonKupon = parseFloat(kupon.discount_value);
-                        msgBox.innerHTML = `<i class='fas fa-check-circle'></i> Berhasil! Diskon ${formatRp(diskonKupon)} diterapkan.`;
-                    } else if (kupon.discount_type === 'ongkir') {
-                        if(ongkir === 0) {
-                            showToast("Pilih Opsi Pengiriman dulu untuk Kupon Gratis Ongkir!", "error");
-                            btn.innerHTML = "Terapkan"; btn.disabled = false; return;
-                        }
-                        diskonKupon = ongkir; 
-                        msgBox.innerHTML = `<i class='fas fa-check-circle'></i> Berhasil! Gratis Ongkir diterapkan.`;
+                    const kupon = result.data; currentCouponType = kupon.discount_type;
+                    if(kupon.discount_type === 'nominal') { diskonKupon = parseFloat(kupon.discount_value); msgBox.innerHTML = `<i class='fas fa-check-circle'></i> Berhasil! Diskon ${formatRp(diskonKupon)} diterapkan.`; } 
+                    else if (kupon.discount_type === 'ongkir') {
+                        if(ongkir === 0) { showToast("Pilih Opsi Pengiriman dulu untuk Kupon Gratis Ongkir!", "error"); btn.innerHTML = "Terapkan"; btn.disabled = false; return; }
+                        diskonKupon = ongkir; msgBox.innerHTML = `<i class='fas fa-check-circle'></i> Berhasil! Gratis Ongkir diterapkan.`;
                     }
-                    
-                    msgBox.className = "coupon-success";
-                    msgBox.style.display = "block";
-                    document.getElementById('rowDiskon').style.display = "flex";
+                    msgBox.className = "coupon-success"; msgBox.style.display = "block"; document.getElementById('rowDiskon').style.display = "flex";
                 } else {
-                    diskonKupon = 0;
-                    currentCouponType = null;
-                    msgBox.innerHTML = "<i class='fas fa-times-circle'></i> " + result.message;
-                    msgBox.className = "coupon-error";
-                    msgBox.style.display = "block";
-                    document.getElementById('rowDiskon').style.display = "none";
+                    diskonKupon = 0; currentCouponType = null; msgBox.innerHTML = "<i class='fas fa-times-circle'></i> " + result.message; msgBox.className = "coupon-error"; msgBox.style.display = "block"; document.getElementById('rowDiskon').style.display = "none";
                 }
-            } catch(e) {
-                showToast("Gagal mengecek kupon. Cek koneksi internet.", "error");
-            } finally {
-                btn.innerHTML = "Terapkan";
-                btn.disabled = false;
-                hitungTotal(); 
-            }
+            } catch(e) { showToast("Gagal mengecek kupon. Cek koneksi internet.", "error"); } 
+            finally { btn.innerHTML = "Terapkan"; btn.disabled = false; hitungTotal(); }
         }
 
         function hitungTotal() {
             totalAkhir = (subtotal + ongkir) - diskonKupon;
             if(totalAkhir < 0) totalAkhir = 0; 
-
             document.getElementById('txtSubtotal').innerText = formatRp(subtotal);
             document.getElementById('txtOngkir').innerText = formatRp(ongkir);
             document.getElementById('txtDiskon').innerText = "-" + formatRp(diskonKupon); 
-            
             document.getElementById('txtTotalAkhir').innerText = formatRp(totalAkhir);
             document.getElementById('bottomTotal').innerText = formatRp(totalAkhir);
+            
+            // Update tagihan di layar tunggu
+            document.getElementById('tagihanFinal').innerText = formatRp(totalAkhir);
         }
 
+        // ==========================================
+        // ✅ LOGIKA PENYIMPANAN DAN COUNTDOWN TIMER
+        // ==========================================
         document.getElementById('btnBuatPesanan').addEventListener('click', async () => {
-            if(userInfo.wa === "-") {
-                document.getElementById('modalConfirmAddress').style.display = 'flex'; 
-                return;
-            }
-            
+            if(userInfo.wa === "-") { document.getElementById('modalConfirmAddress').style.display = 'flex'; return; }
             const shippingSelected = document.querySelector('input[name="shipping"]:checked');
             const paymentSelected = document.querySelector('input[name="payment"]:checked');
             
@@ -550,16 +477,11 @@
             if(!paymentSelected) { showToast("Silakan pilih Metode Pembayaran!", "error"); return; }
 
             const btn = document.getElementById('btnBuatPesanan');
-            btn.innerHTML = "Memproses...";
-            btn.disabled = true;
+            btn.innerHTML = "Memproses..."; btn.disabled = true;
 
             const pengiriman = shippingSelected.value;
             const pembayaran = paymentSelected.value;
-
-            const savedItems = items.map(item => ({
-                id: item.id, nama: item.nama, qty: item.qty,
-                harga_asli: item.harga, harga_final: item.hargaTerpakai 
-            }));
+            const savedItems = items.map(item => ({ id: item.id, nama: item.nama, qty: item.qty, harga_asli: item.harga, harga_final: item.hargaTerpakai }));
 
             const orderPayload = {
                 customer_name: userInfo.nama, customer_wa: userInfo.wa, shipping_address: userInfo.alamat,
@@ -568,43 +490,105 @@
             };
 
             try {
+                // 1. SIMPAN KE DATABASE DULU
                 const res = await fetch('/api/orders', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(orderPayload)
                 });
                 const dbResult = await res.json();
 
                 if(dbResult.success) {
-                    let pesanWA = `*INVOICE PESANAN BARU* 🛒\n*ID Pesanan:* #ORD-${dbResult.order_id}\n\n`;
-                    pesanWA += `*Data Penerima:*\nLabel: ${userInfo.label}\nNama: ${userInfo.nama}\nNo WA: ${userInfo.wa}\nAlamat: ${userInfo.alamat}\n\n`;
-                    pesanWA += `*Daftar Barang:*\n`;
+                    // 2. GENERATE PESAN WA (TAPI JANGAN DIKIRIM DULU)
+                    pesanWAKonfirmasi = `*INVOICE PESANAN BARU* 🛒\n*ID Pesanan:* #ORD-${dbResult.order_id}\n\n`;
+                    pesanWAKonfirmasi += `*Data Penerima:*\nLabel: ${userInfo.label}\nNama: ${userInfo.nama}\nNo WA: ${userInfo.wa}\nAlamat: ${userInfo.alamat}\n\n`;
+                    pesanWAKonfirmasi += `*Daftar Barang:*\n`;
                     
                     items.forEach(item => {
                         let infoPromo = item.hargaAwalDicoret ? ` *(Grosir)*` : '';
-                        pesanWA += `- ${item.nama}${infoPromo} (x${item.qty}) = ${formatRp(item.hargaTerpakai * item.qty)}\n`;
+                        pesanWAKonfirmasi += `- ${item.nama}${infoPromo} (x${item.qty}) = ${formatRp(item.hargaTerpakai * item.qty)}\n`;
                     });
                     
-                    pesanWA += `\n*Pengiriman:* ${pengiriman.toUpperCase()} (${formatRp(ongkir)})\n`;
-                    if (diskonKupon > 0) { pesanWA += `*Diskon Kupon:* -${formatRp(diskonKupon)}\n`; }
-                    pesanWA += `*Pembayaran:* ${pembayaran}\n\n`;
-                    pesanWA += `*TOTAL TAGIHAN: ${formatRp(totalAkhir)}*\n\n`;
-                    pesanWA += `Mohon info nomor rekening / barcode pembayarannya ya Admin. Terima kasih!`;
+                    pesanWAKonfirmasi += `\n*Pengiriman:* ${pengiriman.toUpperCase()} (${formatRp(ongkir)})\n`;
+                    if (diskonKupon > 0) { pesanWAKonfirmasi += `*Diskon Kupon:* -${formatRp(diskonKupon)}\n`; }
+                    pesanWAKonfirmasi += `*Pembayaran:* ${pembayaran}\n\n`;
+                    pesanWAKonfirmasi += `*TOTAL TAGIHAN: ${formatRp(totalAkhir)}*\n\n`;
+                    pesanWAKonfirmasi += `Mohon info nomor rekening / barcode pembayarannya ya Admin. Terima kasih!`;
 
-                    const nomorAdmin = "6282240400388"; 
-                    const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesanWA)}`;
-
-                    showToast("Pesanan Disimpan! Meneruskan ke WhatsApp...", "success");
+                    // Bersihkan keranjang
                     sessionStorage.removeItem('belidikita_checkout'); 
                     sessionStorage.removeItem('belidikita_cart'); 
-                    
-                    setTimeout(() => { window.location.href = linkWA; }, 1500);
+
+                    // 3. SEMBUNYIKAN LAYAR CHECKOUT, MUNCULKAN LAYAR TUNGGU TIMER
+                    document.getElementById('screenCheckout').style.display = 'none';
+                    document.getElementById('screenPembayaran').style.display = 'flex';
+                    window.scrollTo(0,0); // Pindah ke atas
+
+                    // 4. MULAI COUNTDOWN 10 MENIT
+                    mulaiCountdown(10); 
                 }
             } catch(err) {
                 showToast("Gagal memproses pesanan. Periksa koneksi.", "error");
                 btn.innerHTML = "Buat Pesanan"; btn.disabled = false;
             }
         });
+
+        // FUNGSI TIMER (10 Menit Mundur)
+        function mulaiCountdown(menit) {
+            let waktuDetik = menit * 60;
+            const textTimer = document.getElementById('countdownTimer');
+            const btnWA = document.getElementById('btnLanjutWA');
+
+            timerInterval = setInterval(() => {
+                let m = Math.floor(waktuDetik / 60);
+                let s = waktuDetik % 60;
+
+                m = m < 10 ? "0" + m : m;
+                s = s < 10 ? "0" + s : s;
+
+                textTimer.innerText = `${m}:${s}`;
+
+                if (waktuDetik <= 0) {
+                    clearInterval(timerInterval);
+                    textTimer.innerText = "EXPIRED";
+                    textTimer.classList.remove('anim-pulse');
+                    textTimer.style.color = "#aaa";
+                    
+                    btnWA.style.background = "#ccc";
+                    btnWA.innerHTML = "Waktu Habis (Pesanan Batal)";
+                    btnWA.disabled = true;
+                    btnWA.style.cursor = "not-allowed";
+                    btnWA.style.boxShadow = "none";
+                }
+                waktuDetik--;
+            }, 1000);
+        }
+
+        // ✅ LOGIKA BARU: KETIKA TOMBOL WA DITEKAN
+        window.kirimKeWA = function() {
+            if(!pesanWAKonfirmasi) return;
+            const nomorAdmin = "6282240400388"; 
+            const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesanWAKonfirmasi)}`;
+            
+            // 1. Buka WA di Tab Baru agar toko web kita tidak tertutup
+            window.open(linkWA, '_blank');
+            
+            // 2. BIARKAN HALAMAN INI TETAP PADA TIMER (Agar pembeli bisa lihat Total Nominal transfer)
+            // Ubah saja tombol WA-nya menjadi tombol konfirmasi
+            const btnWA = document.getElementById('btnLanjutWA');
+            btnWA.innerHTML = '<i class="fas fa-check-circle" style="font-size: 22px;"></i> Saya Sudah Transfer & WA Admin';
+            btnWA.style.background = "#0D47A1"; 
+            btnWA.style.boxShadow = "0 5px 15px rgba(13, 71, 161, 0.4)";
+            
+            // 3. Jika tombol biru ini diklik lagi, langsung bawa ke profil pesanan
+            btnWA.onclick = function() {
+                window.location.href = 'registrasi/profilpembeli.html';
+            };
+        }
+
+        // JIKA MAU KELUAR DARI RUANG TUNGGU (TANPA KE WA)
+        window.batalDariRuangTunggu = function() {
+            window.location.href = 'registrasi/profilpembeli.html';
+        }
 
         async function inisialisasiCheckout() {
             await fetchAddress(); 
