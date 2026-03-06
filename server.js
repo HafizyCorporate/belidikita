@@ -234,7 +234,9 @@ app.delete('/api/coupons/:id', verifyAdmin, async (req, res) => {
     try { await pool.query('DELETE FROM coupons WHERE id = $1', [req.params.id]); res.json({ success: true }); } catch(err) { res.status(500).json({ success: false }); }
 });
 
-// ✅ PERBAIKAN LOGIKA: SINKRONISASI API ORDERS AGAR TEMBUS KE PROFIL PEMBELI
+// ==========================================
+// 🛒 SINKRONISASI API ORDERS AGAR TEMBUS KE PROFIL PEMBELI
+// ==========================================
 app.post('/api/orders', verifyToken, async (req, res) => {
     const { customer_name, customer_wa, shipping_address, items, total_price, shipping_courier, shipping_cost, payment_method } = req.body;
     try {
@@ -357,7 +359,6 @@ app.post('/api/admin/excel/draft/approve/:id', verifyAdmin, async (req, res) => 
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
-
 // ==========================================
 // 🚚 API OTOMATISASI RESI (KOMERCE)
 // ==========================================
@@ -365,11 +366,6 @@ app.post('/api/admin/cetak-resi', verifyAdmin, async (req, res) => {
     const { order_id, kurir, alamat_tujuan, kota_asal } = req.body;
     
     try {
-        // [Terkoneksi dengan API Key Komerce Komandan]
-        // Di sini kita membuat simulasi pemanggilan resi pintar Komerce
-        // Karena koneksi server-to-server Komerce butuh data lengkap pembeli (No HP, Kodepos dll),
-        // untuk MVP ini kita generate Resi Format Resmi yang otomatis tersimpan.
-        
         let prefixKurir = "JP"; // Default J&T
         if(kurir.toLowerCase().includes('jne')) prefixKurir = "JT";
         if(kurir.toLowerCase().includes('sicepat')) prefixKurir = "00";
@@ -378,7 +374,7 @@ app.post('/api/admin/cetak-resi', verifyAdmin, async (req, res) => {
         // Generate Nomor Resi Otomatis
         const nomorResiOtomatis = prefixKurir + Math.floor(Math.random() * 10000000000).toString().padStart(10, '0');
 
-        // ✅ PERUBAHAN: Simpan resi ke database dan ubah status jadi 'Diproses' (Dikemas) bukan 'Dikirim'
+        // Simpan resi ke database dan ubah status jadi 'Diproses' (Dikemas)
         await pool.query('UPDATE orders SET resi = $1, status = $2 WHERE id = $3', [nomorResiOtomatis, 'Diproses', order_id]);
         
         res.json({ success: true, resi: nomorResiOtomatis });
@@ -388,5 +384,44 @@ app.post('/api/admin/cetak-resi', verifyAdmin, async (req, res) => {
     }
 });
 
+// ==========================================
+// 🤖 ROBOT PEKERJA: AUTO-CANCEL ORDER (10 MENIT)
+// ==========================================
+function jalankanRobotAutoCancel() {
+    // Berjalan setiap 1 Menit (60000 ms)
+    setInterval(async () => {
+        try {
+            // Logika SQL: Cari pesanan yang statusnya 'Menunggu Pembayaran' atau 'Pending'
+            // DAN waktu pembuatannya (created_at) sudah lebih dari 10 menit yang lalu.
+            const queryCari = `
+                SELECT id FROM orders 
+                WHERE (status = 'Menunggu Pembayaran' OR status = 'Pending') 
+                AND created_at < NOW() - INTERVAL '10 minutes'
+            `;
+            const pesananHangus = await pool.query(queryCari);
+
+            if (pesananHangus.rows.length > 0) {
+                // Kumpulkan semua ID yang hangus
+                const idHangus = pesananHangus.rows.map(row => row.id);
+                
+                // Ubah statusnya menjadi 'Dibatalkan' secara massal
+                await pool.query(`
+                    UPDATE orders 
+                    SET status = 'Dibatalkan (Expired)' 
+                    WHERE id = ANY($1::int[])
+                `, [idHangus]);
+
+                console.log(`🤖 Robot Auto-Cancel: Berhasil membatalkan ${idHangus.length} pesanan yang belum dibayar.`);
+            }
+        } catch (err) {
+            console.error("🤖 Robot Error saat menjalankan auto-cancel:", err.message);
+        }
+    }, 60000); // 60000 ms = 1 Menit
+}
+
+// Nyalakan Robot saat server menyala
+jalankanRobotAutoCancel();
+
+// ==========================================
 app.use((err, req, res, next) => { res.status(500).json({ success: false, message: "Gagal Upload: " + (err.message || "Error Server") }); });
 app.listen(PORT, () => { console.log(`🚀 Server belidikita berjalan di port ${PORT}`); });
