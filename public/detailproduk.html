@@ -110,7 +110,7 @@
         .review-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .review-item img { width: 35px; height: 35px; border-radius: 50%; }
         .review-detail h5 { font-size: 12px; font-weight: 800; color: #333; margin-bottom: 2px; }
-        .review-detail .stars { color: #FFD700; font-size: 10px; margin-bottom: 4px; }
+        .review-detail .stars { font-size: 10px; margin-bottom: 4px; }
         .review-detail p { font-size: 12px; color: #555; font-weight: 600; line-height: 1.4; background: #fafcff; padding: 10px; border-radius: 10px; border: 1px solid #E1F5FE; }
 
         /* BARANG SEJENIS */
@@ -290,7 +290,7 @@
         document.getElementById('txtBerat').innerHTML = `<i class="fas fa-weight-hanging mr-1"></i> ${produk.weight || 1000} Gram`;
         document.getElementById('namaTokoAsli').innerText = produk.seller_name || "Belidikita Official";
 
-        // LOGIKA VARIAN BUNGLON
+        // ✅ LOGIKA VARIAN BUNGLON (TETAP AMAN & TIDAK DIHAPUS)
         let ukuranTerpilih = null;
         const boxVarian = document.getElementById('boxVarian');
         let butuhVarian = false; 
@@ -318,14 +318,49 @@
             });
         }
 
+        // ✅ FUNGSI TARIK ULASAN & TAMPILKAN DAFTAR KOMENTAR
         async function fetchUlasanAsli() {
             try {
                 const res = await fetch(`/api/reviews/${produk.id}`); 
                 if (res.ok) {
                     const result = await res.json();
-                    if(result.success && result.data.length > 0) {
+                    
+                    if(result.success && result.data && result.data.length > 0) {
+                        // 1. Update Rating Atas
                         document.getElementById('avgRating').innerHTML = `<i class="fas fa-star"></i> ${result.rata_rata}`;
                         document.getElementById('realTerjual').innerHTML = `<i class="fas fa-shopping-bag mr-1"></i> ${result.terjual} Terjual`;
+                        
+                        // 2. Render Daftar Komentar ke Layar Ulasan
+                        const container = document.getElementById('reviewContainer');
+                        container.innerHTML = ''; 
+                        
+                        result.data.forEach(rev => {
+                            // Hitung bintang emas dan abu-abu
+                            let starsHtml = '';
+                            for(let i=0; i<5; i++) {
+                                starsHtml += i < rev.rating 
+                                    ? '<i class="fas fa-star" style="color:#FFD700;"></i> ' 
+                                    : '<i class="far fa-star" style="color:#ddd;"></i> ';
+                            }
+                            
+                            // Generate Avatar acak berdasarkan nama
+                            let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(rev.user_name)}&background=E1F5FE&color=0D47A1&rounded=true`;
+                            
+                            // Suntikkan HTML ulasan
+                            container.innerHTML += `
+                                <div class="review-item">
+                                    <img src="${avatarUrl}" alt="Avatar">
+                                    <div class="review-detail">
+                                        <h5>${rev.user_name}</h5>
+                                        <div class="stars">${starsHtml}</div>
+                                        <p>${rev.comment}</p>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else {
+                        // Jika belum ada yang komentar
+                        document.getElementById('reviewContainer').innerHTML = '<p style="font-size:12px; color:#888; text-align:center; font-weight:600;">Belum ada ulasan untuk produk ini.</p>';
                     }
                 } else { throw new Error("API belum tersedia"); }
             } catch(e) {
