@@ -87,6 +87,7 @@
         .btn-hapus { background: #ff3b30; }
         .btn-proses { background: #0D47A1; }
         .btn-acc { background: linear-gradient(135deg, #00AA5B, #00c853); box-shadow: 0 2px 5px rgba(0, 170, 91, 0.4); padding: 8px 15px;}
+        .btn-cetak { background: #607D8B; } /* Tombol Cetak Baru */
         
         .img-preview { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
         
@@ -96,7 +97,6 @@
         .btn-batal { flex: 1; padding: 12px; background: #eee; color: #555; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
         .btn-yakin { flex: 1; padding: 12px; background: #ff3b30; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
 
-        /* ✅ TOMBOL RESI OTOMATIS (KOMERCE) */
         .btn-auto-resi { background: linear-gradient(135deg, #0D47A1, #1976D2); color: #fff; border: none; border-radius: 8px; padding: 12px; width: 100%; font-weight: 800; font-size: 12px; cursor: pointer; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;}
         .btn-auto-resi:active { transform: scale(0.97); }
         .btn-auto-resi:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
@@ -596,6 +596,9 @@
             }
         }
 
+        // Variabel global untuk menyimpan data pesanan agar bisa dipanggil oleh fitur Cetak Resi
+        let adminOrdersData = [];
+
         async function fetchDraftTugas() {
             try {
                 const res = await fetch('/api/admin/excel/draft', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -651,6 +654,9 @@
                 const result = await res.json();
                 const tbody = document.getElementById('tableBodyOrders');
                 if (result.success && result.data.length > 0) {
+                    
+                    adminOrdersData = result.data; // Simpan data pesanan ke variabel global untuk keperluan cetak resi
+                    
                     tbody.innerHTML = '';
                     document.getElementById('totalPesanan').innerText = result.data.length + " Pesanan"; 
                     result.data.forEach(order => {
@@ -667,9 +673,14 @@
                             returnBadge = `<br><span style="font-size:10px; background:#ffebee; color:#c62828; padding:3px 6px; border-radius:4px; display:inline-block; margin-top:5px;">Alasan: ${order.return_reason}</span>${mediaLink}`;
                         }
                         
-                        // Pass data tambahan kurir & alamat tujuan untuk keperluan resi
                         const alamatSafe = order.shipping_address ? order.shipping_address.replace(/'/g, "\\'") : '';
                         
+                        // ✅ Tampilkan tombol Cetak jika resi sudah ada
+                        let btnCetakHtml = '';
+                        if (order.resi && order.resi !== '-' && order.resi !== 'null') {
+                            btnCetakHtml = `<button class="btn-aksi btn-cetak" onclick="cetakLabelPengiriman(${order.id})" title="Cetak Resi & Label"><i class="fas fa-print"></i> Cetak</button>`;
+                        }
+
                         tbody.innerHTML += `<tr>
                             <td><b>#ORD-${order.id}</b><br><span style="font-size:10px; color:#666;">${order.customer_name}</span></td>
                             <td>${items.length} Macam Barang</td>
@@ -677,12 +688,105 @@
                             <td><b style="${statusColor}">${order.status}</b><br><span style="font-size:10px; background:#eee; padding:2px 5px; border-radius:4px;">Resi: ${order.resi || '-'}</span>${returnBadge}</td>
                             <td>
                                 <button class="btn-aksi btn-proses" onclick="bukaProsesPesanan(${order.id}, '${order.status}', '${order.resi || ''}', '${order.shipping_courier}', '${alamatSafe}')"><i class="fas fa-truck"></i> Proses</button>
+                                ${btnCetakHtml}
                                 <button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('orders', ${order.id})"><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>`;
                     });
                 } else { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada pesanan masuk hari ini.</td></tr>'; document.getElementById('totalPesanan').innerText = "0 Pesanan"; }
             } catch (err) { console.error(err); }
+        }
+
+        // ✅ FUNGSI BARU: CETAK LABEL PENGIRIMAN
+        function cetakLabelPengiriman(id) {
+            const order = adminOrdersData.find(o => o.id === id);
+            if(!order) {
+                showToast("Data pesanan tidak ditemukan", "error");
+                return;
+            }
+
+            let items = [];
+            try { items = JSON.parse(order.items); } catch(e){}
+
+            let rincianBarang = items.map(item => `<li><b>${item.nama}</b> (Jumlah: ${item.qty})</li>`).join('');
+
+            // Ambil data toko dari Local Storage
+            const tokoData = JSON.parse(localStorage.getItem('belidikita_store_profile')) || { nama: "Belidikita Official", kota: "Padalarang, Bandung Barat", alamatLengkap: "Alamat belum diatur" };
+
+            // Buka Jendela Baru Khusus Print
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Cetak Resi AWB - #ORD-${order.id}</title>
+                    <style>
+                        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; color: #000; }
+                        .label-container { border: 3px solid #000; padding: 20px; width: 100%; max-width: 500px; margin: auto; border-radius: 10px;}
+                        .header { text-align: center; border-bottom: 3px solid #000; padding-bottom: 15px; margin-bottom: 20px; }
+                        .header h2 { margin: 0; font-size: 32px; text-transform: uppercase; font-weight: 900;}
+                        .header p { margin: 5px 0 0 0; font-size: 16px; font-weight: bold; }
+                        .section { margin-bottom: 20px; }
+                        .section-title { font-size: 14px; color: #000; text-transform: uppercase; margin-bottom: 5px; font-weight: 800;}
+                        .box { border: 2px dashed #666; padding: 15px; border-radius: 8px; font-size: 14px; line-height: 1.5;}
+                        .barcode { text-align: center; margin: 20px 0; padding: 15px; border: 2px solid #000; font-family: 'Courier New', Courier, monospace; font-size: 24px; font-weight: 900; letter-spacing: 5px; background: #f9f9f9;}
+                        .footer { font-size: 11px; text-align: center; margin-top: 30px; color: #555; border-top: 1px solid #ccc; padding-top: 10px;}
+                        ul { margin: 0; padding-left: 20px; }
+                        li { margin-bottom: 5px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="label-container">
+                        <div class="header">
+                            <h2>${order.shipping_courier ? order.shipping_courier.toUpperCase() : 'KURIR'}</h2>
+                            <p>NO RESI: ${order.resi}</p>
+                        </div>
+                        
+                        <div class="barcode">
+                            *${order.resi}*
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">📦 PENGIRIM:</div>
+                            <div class="box">
+                                <strong>${tokoData.nama}</strong><br>
+                                ${tokoData.kota}<br>
+                                ${tokoData.alamatLengkap}
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">📍 PENERIMA:</div>
+                            <div class="box">
+                                <strong style="font-size: 18px;">${order.customer_name}</strong> <br>
+                                No HP: ${order.customer_wa}<br><br>
+                                <strong>Alamat Tujuan:</strong><br>
+                                ${order.shipping_address}
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">📝 ISI PAKET:</div>
+                            <div class="box">
+                                <ul>${rincianBarang}</ul>
+                            </div>
+                        </div>
+
+                        <div class="footer">
+                            <strong>Marketplace Belidikita</strong><br>
+                            Resi tercetak otomatis pada: ${new Date().toLocaleString('id-ID')}
+                        </div>
+                    </div>
+                    <script>
+                        // Otomatis memanggil dialog print browser saat halaman selesai dimuat
+                        window.onload = function() { 
+                            window.print(); 
+                            // Bisa aktifkan window.close() jika ingin otomatis tertutup setelah print, tapi dibiarkan terbuka agar admin bisa cek.
+                        }
+                    </script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
         }
 
         async function fetchProducts() { 
@@ -824,12 +928,10 @@
             } catch(err) { showToast("Server Error", "error"); } finally { btn.innerHTML = "<i class='fas fa-plus'></i> Buat Kupon Baru"; }
         });
 
-        // ✅ LOGIKA BARU UNTUK BUKA MODAL PESANAN & DETEKSI RESI
         function bukaProsesPesanan(id, status, resi, kurir, alamat) { 
             document.getElementById('prosesOrderId').value = id; 
             document.getElementById('prosesOrderStatus').value = status; 
             
-            // Simpan info ekstra untuk Request Komerce
             document.getElementById('prosesKurirId').value = kurir;
             document.getElementById('prosesAlamatPembeli').value = alamat;
 
@@ -837,11 +939,9 @@
             const btnResi = document.getElementById('btnPanggilKurir');
 
             if (resi && resi !== '-' && resi !== 'null') {
-                // Jika sudah ada resi, sembunyikan tombol Request Pickup
                 inputResi.value = resi;
                 btnResi.style.display = 'none';
             } else {
-                // Jika belum ada resi, munculkan tombol Request Pickup
                 inputResi.value = '';
                 btnResi.style.display = 'flex';
             }
@@ -849,7 +949,6 @@
             document.getElementById('modalProsesPesanan').style.display = 'block'; 
         }
 
-        // ✅ FUNGSI REQUEST RESI OTOMATIS KE API SERVER
         async function buatResiOtomatis() {
             const idOrder = document.getElementById('prosesOrderId').value;
             const kurirDipilih = document.getElementById('prosesKurirId').value;
@@ -860,7 +959,6 @@
             btn.disabled = true;
 
             try {
-                // Tembak server.js untuk memanggil Komerce API dan generate nomor AWB/Resi
                 const res = await fetch('/api/admin/cetak-resi', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -868,7 +966,7 @@
                         order_id: idOrder,
                         kurir: kurirDipilih,
                         alamat_tujuan: tujuan,
-                        kota_asal: "Padalarang, Bandung Barat" // Sesuai instruksi toko Komandan
+                        kota_asal: "Padalarang, Bandung Barat" 
                     })
                 });
 
@@ -876,11 +974,8 @@
                 
                 if(data.success) {
                     showToast("🎉 Kurir berhasil dipanggil! Resi tercetak.", "success");
-                    // Masukkan resi otomatis ke form dan ubah status jadi Dikirim
                     document.getElementById('prosesOrderResi').value = data.resi;
                     document.getElementById('prosesOrderStatus').value = 'Dikirim';
-                    
-                    // Sembunyikan tombol agar tidak di-klik 2x
                     btn.style.display = 'none';
                 } else {
                     showToast("Gagal memanggil kurir: " + data.message, "error");
