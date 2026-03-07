@@ -260,15 +260,33 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        // 1. Tarik Data dari Memori (Dari Dashboard Utama)
+                // 1. Tarik Data dari Memori
         const dataProdukStr = localStorage.getItem('produk_detail');
         if(!dataProdukStr) window.location.href = 'dashboardutama.html';
-        const produk = JSON.parse(dataProdukStr);
+        const rawProduk = JSON.parse(dataProdukStr);
 
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
 
+        // ✅ SISTEM KEBAL UNDEFINED (Menerjemahkan data bajakan dari script.js)
+        const produk = {
+            id: rawProduk.id,
+            nama: rawProduk.nama || rawProduk.title || "Produk Belidikita",
+            harga: rawProduk.harga || rawProduk.price || 0,
+            hargaStr: rawProduk.hargaStr || formatRp(rawProduk.harga || rawProduk.price || 0),
+            deskripsi: rawProduk.deskripsi || rawProduk.description || "Tidak ada deskripsi tambahan.",
+            foto: rawProduk.foto || rawProduk.media_url || "https://via.placeholder.com/400",
+            weight: rawProduk.weight || 1000,
+            seller_name: rawProduk.seller_name || "Belidikita Official",
+            unit: rawProduk.unit || 'Pcs',
+            variant_title: rawProduk.variant_title || '',
+            variant_options: rawProduk.variant_options || '',
+            wholesale_price: rawProduk.wholesale_price || 0,
+            wholesale_min_qty: rawProduk.wholesale_min_qty || 0,
+            sold_count: rawProduk.sold_count || 0
+        };
+
         // ✅ TAMPILKAN HARGA & INFO GROSIR & BOX ESTIMASI HEMAT
-        const satuanTampil = produk.unit || 'Pcs';
+        const satuanTampil = produk.unit;
         document.getElementById('hargaProduk').innerHTML = `${produk.hargaStr} <span style="font-size:12px; font-weight:600; color:#888;">/ ${satuanTampil}</span>`;
         
         if (produk.wholesale_price > 0 && produk.wholesale_min_qty > 0) {
@@ -290,10 +308,10 @@
         
         document.getElementById('namaProduk').innerText = produk.nama;
         document.getElementById('descProduk').innerText = produk.deskripsi;
-        document.getElementById('txtBerat').innerHTML = `<i class="fas fa-weight-hanging mr-1"></i> ${produk.weight || 1000} Gram`;
-        document.getElementById('namaTokoAsli').innerText = produk.seller_name || "Belidikita Official";
+        document.getElementById('txtBerat').innerHTML = `<i class="fas fa-weight-hanging mr-1"></i> ${produk.weight} Gram`;
+        document.getElementById('namaTokoAsli').innerText = produk.seller_name;
 
-                // ✅ LOGIKA VARIAN BUNGLON CANGGIH (MEMBACA STOK)
+        // ✅ LOGIKA VARIAN BUNGLON CANGGIH (MEMBACA STOK)
         let ukuranTerpilih = null;
         const boxVarian = document.getElementById('boxVarian');
         let butuhVarian = false; 
@@ -311,7 +329,7 @@
                     let namaVarian = opsi;
                     let stokVarian = null;
 
-                    // Cek apakah formatnya S=10
+                    // Cek apakah formatnya S=10 dari Admin Panel
                     if(opsi.includes('=')) {
                         const pecah = opsi.split('=');
                         namaVarian = pecah[0].trim();
@@ -326,21 +344,21 @@
                         btn.classList.add('habis');
                         btn.innerHTML = `<span>${namaVarian}</span><span style="font-size:9px; color:#ff3b30; margin-top:2px;">Habis</span>`;
                     } else {
-                        // Jika ada stok (atau tidak pakai sistem =, biarkan normal)
-                        let teksStok = stokVarian !== null ? `<span style="font-size:9px; color:#00AA5B; margin-top:2px;">Sisa ${stokVarian}</span>` : '';
+                        // Jika ada stok (atau tidak pakai sistem =)
+                        let teksStok = (stokVarian !== null && !isNaN(stokVarian)) ? `<span style="font-size:9px; color:#00AA5B; margin-top:2px;">Sisa ${stokVarian}</span>` : '';
                         btn.innerHTML = `<span style="font-weight:900;">${namaVarian}</span>${teksStok}`;
                         
                         btn.addEventListener('click', function() {
                             document.querySelectorAll('.v-opt').forEach(b => b.classList.remove('selected'));
                             this.classList.add('selected');
-                            // Ingat nama aslinya saja yang dikirim ke keranjang, bukan jumlah stoknya
-                            ukuranTerpilih = namaVarian; 
+                            ukuranTerpilih = namaVarian; // Masukkan ke keranjang tanpa embel-embel sisa
                         });
                     }
                     containerVarian.appendChild(btn);
                 }
             });
         }
+
 
 
         // ✅ FUNGSI TARIK ULASAN & TAMPILKAN DAFTAR KOMENTAR
