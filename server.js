@@ -43,7 +43,7 @@ const verifyToken = require('./middleware/auth');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-initDB();
+initDB(); // Punggawa pembangun database dipanggil di sini. (Suntikan otomatis sudah dihapus karena tumpang tindih)
 
 const uploadDir = path.join(__dirname, 'public/uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -92,9 +92,8 @@ app.post('/api/ai/search', askAI);
 // ✅ FASE 2: API PRODUK DENGAN PAGINATION & SERVER-SIDE FILTERING
 app.get('/api/products', async (req, res) => {
     try {
-        // Menerima parameter dari Frontend (HP pembeli)
         const { search, category, sort = 'terbaru', page = 1, limit = 20 } = req.query;
-        const offset = (Math.max(1, page) - 1) * limit; // Rumus Paginasi yang aman
+        const offset = (Math.max(1, page) - 1) * limit;
 
         let baseQuery = `
             SELECT p.*, COALESCE(ROUND(AVG(r.rating), 1), 0) as avg_rating
@@ -104,14 +103,12 @@ app.get('/api/products', async (req, res) => {
         let params = [];
         let paramIndex = 1;
 
-        // 1. Filter Kategori
         if (category && category !== 'Semua') {
             baseQuery += ` AND p.category = $${paramIndex}`;
             params.push(category);
             paramIndex++;
         }
 
-        // 2. Pencarian Nama Barang (Menggunakan ILIKE agar kebal huruf besar/kecil)
         if (search && search.trim() !== '') {
             baseQuery += ` AND (p.title ILIKE $${paramIndex} OR p.description ILIKE $${paramIndex})`;
             params.push(`%${search.trim()}%`);
@@ -120,26 +117,20 @@ app.get('/api/products', async (req, res) => {
 
         baseQuery += ` GROUP BY p.id`;
 
-        // 3. Sorting (Pengurutan)
         if (sort === 'termurah') {
             baseQuery += ` ORDER BY p.price ASC`;
         } else if (sort === 'terlaris') {
             baseQuery += ` ORDER BY p.sold_count DESC NULLS LAST`;
         } else {
-            baseQuery += ` ORDER BY p.created_at DESC`; // Default: terbaru
+            baseQuery += ` ORDER BY p.created_at DESC`;
         }
 
-        // 4. Paginasi (Batasan jumlah data yang dikirim)
         baseQuery += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
         params.push(parseInt(limit), parseInt(offset));
 
-        // Eksekusi Kueri
         const result = await pool.query(baseQuery, params);
         
-        res.json({ 
-            success: true, 
-            data: result.rows
-        });
+        res.json({ success: true, data: result.rows });
 
     } catch (err) { 
         console.error("Error Fetch Products FASE 2:", err);
@@ -178,7 +169,6 @@ app.get('/api/admin/chats', verifyAdmin, async (req, res) => {
 // ==========================================
 // 🛒 SINKRONISASI API ORDERS & GEMBOK KEAMANAN
 // ==========================================
-
 app.post('/api/orders', verifyToken, async (req, res) => {
     const { customer_name, customer_wa, shipping_address, items, total_price, shipping_courier, shipping_cost, payment_method } = req.body;
     try {
