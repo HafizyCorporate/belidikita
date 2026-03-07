@@ -207,21 +207,14 @@
         <div style="height: 100px;"></div>
     </main>
 
-    <svg viewBox="0 0 160 80" style="position: fixed; bottom: 125px; right: -25px; width: 160px; height: 80px; pointer-events: none; filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.8)); z-index: 1001; animation: wiggleText 3s ease-in-out infinite;">
-        <defs>
-            <linearGradient id="goldGradientStrong" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#FF9800" />
-                <stop offset="50%" stop-color="#FFD700" />
-                <stop offset="100%" stop-color="#FFB300" />
-            </linearGradient>
-        </defs>
+     <svg viewBox="0 0 160 80" style="position: fixed; bottom: 110px; right: -25px; width: 160px; height: 80px; pointer-events: none; filter: drop-shadow(0px 1px 2px rgba(255,255,255,0.9)); z-index: 1001; animation: wiggleText 3s ease-in-out infinite;">
         <path id="curve-path-1" d="M 10 40 Q 80 0 150 40" fill="transparent" />
         <path id="curve-path-2" d="M 10 60 Q 80 20 150 60" fill="transparent" />
         
-        <text font-family="'Montserrat', sans-serif" font-size="10" font-weight="900" fill="url(#goldGradientStrong)" stroke="#000" stroke-width="0.5">
+        <text font-family="'Montserrat', sans-serif" font-size="10" font-weight="900" fill="#000">
             <textPath href="#curve-path-1" startOffset="50%" text-anchor="middle">Butuh bantuan?</textPath>
         </text>
-        <text font-family="'Montserrat', sans-serif" font-size="10" font-weight="900" fill="url(#goldGradientStrong)" stroke="#000" stroke-width="0.5">
+        <text font-family="'Montserrat', sans-serif" font-size="10" font-weight="900" fill="#000">
             <textPath href="#curve-path-2" startOffset="50%" text-anchor="middle">Klik dibawah ini</textPath>
         </text>
     </svg>
