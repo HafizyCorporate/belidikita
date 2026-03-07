@@ -861,9 +861,10 @@
             printWindow.document.close();
         }
 
+        // ✅ INI YANG DIRUBAH: Tambahan ?limit=2000 agar Admin bisa melihat semua stok
         async function fetchProducts() { 
             try {
-                const res = await fetch('/api/products');
+                const res = await fetch('/api/products?limit=2000');
                 const result = await res.json();
                 const tbody = document.getElementById('tableBodyProducts');
                 if (result.success && result.data.length > 0) {
@@ -985,6 +986,57 @@
             }
         }
 
+        // ✅ LOGIKA RUANG CHAT (BALASAN ADMIN)
+        window.bukaChatRoom = function(userIdOrName, userName) {
+            document.getElementById('chatRoomUserId').value = userIdOrName;
+            document.getElementById('chatRoomUserName').innerText = userName;
+            document.getElementById('modalAdminChatRoom').style.display = 'flex';
+            
+            const body = document.getElementById('chatRoomBodyAdmin');
+            body.innerHTML = '';
+            
+            const msgs = globalAdminChats.filter(c => (c.user_id || c.user_name) == userIdOrName);
+            const chronologicalMsgs = [...msgs].reverse(); // Urutkan dari atas ke bawah
+
+            chronologicalMsgs.forEach(msg => {
+                const isAdmin = msg.sender_role === 'admin';
+                const cssClass = isAdmin ? 'msg-admin' : 'msg-pembeli';
+                body.innerHTML += `<div class="msg-bubble ${cssClass}">${msg.message}</div>`;
+            });
+            
+            body.scrollTop = body.scrollHeight;
+        };
+
+        window.tutupChatRoomAdmin = function() {
+            document.getElementById('modalAdminChatRoom').style.display = 'none';
+        };
+
+        window.kirimBalasanDariAdmin = async function() {
+            const input = document.getElementById('chatRoomInputAdmin');
+            const teks = input.value.trim();
+            const targetUser = document.getElementById('chatRoomUserId').value;
+            
+            if(!teks) return;
+
+            const body = document.getElementById('chatRoomBodyAdmin');
+            body.innerHTML += `<div class="msg-bubble msg-admin">${teks}</div>`;
+            input.value = '';
+            body.scrollTop = body.scrollHeight;
+
+            try {
+                await fetch('/api/chat/save', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+                    body: JSON.stringify({ message: teks, sender: 'admin', target_user: targetUser }) 
+                });
+                
+                fetchInboxAdmin(); 
+            } catch(e) {
+                showToast("Gagal mengirim pesan ke pembeli", "error");
+            }
+        };
+
+
         let targetHapusTipe = ""; let targetHapusId = "";
         function konfirmasiHapus(tipe, id) { 
             targetHapusTipe = tipe; targetHapusId = id; 
@@ -992,6 +1044,7 @@
         }
         function tutupConfirm() { document.getElementById('modalConfirm').style.display = 'none'; }
         
+        // ✅ GEMBOK PENGHAPUSAN
         document.getElementById('btnEksekusiHapus').addEventListener('click', async () => {
             tutupConfirm(); const btn = document.getElementById('btnEksekusiHapus'); btn.innerHTML = "Memproses...";
             try {
@@ -1025,6 +1078,7 @@
             } catch(err) { showToast("Server Error", "error"); } finally { btn.innerHTML = "<i class='fas fa-plus'></i> Buat Kupon Baru"; }
         });
 
+        // ✅ LOGIKA MUNCULKAN ALASAN JIKA RETUR DITOLAK ATAU SELESAI
         window.cekTolakRetur = function(val) {
             const boxAlasan = document.getElementById('boxAlasanTolak');
             if (val === 'Retur Ditolak' || val === 'Selesai') { 
@@ -1036,6 +1090,7 @@
             }
         }
 
+        // ✅ LOGIKA TOMBOL "KIRIM BARANG PENGGANTI (RESI BARU)" JIKA STATUS RETUR
         function bukaProsesPesanan(id, status, resi, kurir, alamat) { 
             document.getElementById('prosesOrderId').value = id; 
             document.getElementById('prosesOrderStatus').value = status; 
@@ -1050,12 +1105,13 @@
             if (resi && resi !== '-' && resi !== 'null') {
                 inputResi.value = resi; 
                 
+                // JIKA STATUS LAGI RETUR, BUKA TOMBOL RESI UNTUK BUAT RESI BARU (PENGGANTI)
                 if (status.includes('Retur')) {
                     btnResi.style.display = 'flex';
                     btnResi.innerHTML = "<i class='fas fa-sync-alt'></i> Request Pickup Ulang (Kirim Barang Pengganti)";
                     btnResi.style.background = "#ff9800"; 
                 } else {
-                    btnResi.style.display = 'none'; 
+                    btnResi.style.display = 'none'; // Normalnya disembunyikan
                 }
 
             } else {
@@ -1086,7 +1142,7 @@
                 if(data.success) {
                     showToast("🎉 Kurir berhasil dipanggil! Resi tercetak.", "success");
                     document.getElementById('prosesOrderResi').value = data.resi;
-                    document.getElementById('prosesOrderStatus').value = 'Diproses'; 
+                    document.getElementById('prosesOrderStatus').value = 'Diproses'; // Otomatis jadi dikemas lagi
                     btn.style.display = 'none';
                 } else {
                     showToast("Gagal memanggil kurir: " + data.message, "error");
@@ -1098,6 +1154,7 @@
             }
         }
         
+        // ✅ SIMPAN STATUS
         document.getElementById('formProsesPesanan').addEventListener('submit', async (e) => {
             e.preventDefault(); const btn = document.getElementById('btnSimpanProses'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
             const id = document.getElementById('prosesOrderId').value;
@@ -1190,29 +1247,34 @@
             } catch(err) { showToast("Server Error saat mengedit!", "error"); } finally { btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan"; }
         });
         
+                // ✅ FUNGSI MESIN HITUNG STOK VARIAN OTOMATIS
         window.hitungStokOtomatis = function(inputId, stockId) {
             const val = document.getElementById(inputId).value;
+            // Jika ada tanda sama dengan (=), berarti admin masukin format stok
             if(val.includes('=')) {
                 let total = 0;
-                const parts = val.split(','); 
+                const parts = val.split(','); // Pecah per koma (S=10, M=15)
                 parts.forEach(p => {
-                    const s = p.split('='); 
+                    const s = p.split('='); // Pecah per sama dengan
                     if(s.length === 2 && !isNaN(parseInt(s[1]))) {
-                        total += parseInt(s[1]); 
+                        total += parseInt(s[1]); // Tambahkan angkanya
                     }
                 });
                 
+                // Kunci kolom Stok Total dan masukkan hasil penjumlahannya
                 if(total > 0) {
                     document.getElementById(stockId).value = total;
                     document.getElementById(stockId).setAttribute('readonly', 'true');
-                    document.getElementById(stockId).style.background = '#eef2f5'; 
+                    document.getElementById(stockId).style.background = '#eef2f5'; // Warna abu
                 }
             } else {
+                // Jika cuma teks biasa (S, M, L), buka kembali gembok stok total
                 document.getElementById(stockId).removeAttribute('readonly');
                 document.getElementById(stockId).style.background = '#fff';
             }
         };
 
+        // ✅ LOGIKA MENYIMPAN PESAN AUTO-REPLY
         document.addEventListener("DOMContentLoaded", () => {
             const savedReply = localStorage.getItem('belidikita_autoreply') || "Halo Kak! Terima kasih sudah menghubungi Belidikita. Pesan Kakak sudah kami terima dan Admin akan segera membalasnya. Mohon ditunggu ya! 😊";
             const autoReplyBox = document.getElementById('adminAutoReplyText');
