@@ -45,26 +45,6 @@ const PORT = process.env.PORT || 8080;
 
 initDB();
 
-// 🛠️ SUNTIKAN OTOMATIS: UPDATE STRUKTUR DATABASE & INDEXING (FASE 2)
-(async () => {
-    try {
-        await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipped_at TIMESTAMP`);
-        await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMP`); 
-        await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP`);
-        await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_reject_reason TEXT`);
-        
-        // ✅ DB INDEXING: Membuat aplikasi super cepat saat mencari & memfilter data (FASE 2)
-        await pool.query(`CREATE INDEX IF NOT EXISTS idx_products_category ON products(category)`);
-        await pool.query(`CREATE INDEX IF NOT EXISTS idx_products_title ON products USING GIN (to_tsvector('indonesian', title))`); 
-        await pool.query(`CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)`);
-        await pool.query(`CREATE INDEX IF NOT EXISTS idx_orders_userid ON orders(user_id)`);
-
-        console.log("✅ Database berhasil di-upgrade! (Fitur Waktu, Retur, dan DB Indexing FASE 2 Aktif 🚀)");
-    } catch (e) {
-        console.error("Gagal upgrade database:", e.message);
-    }
-})();
-
 const uploadDir = path.join(__dirname, 'public/uploads');
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
