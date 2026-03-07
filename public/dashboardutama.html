@@ -159,7 +159,7 @@
             <span style="position: absolute; top: -5px; right: -5px; background: #ff3b30; width: 8px; height: 8px; border-radius: 50%;"></span>
         </div>
 
-        <div class="header-admin" id="adminLoginIcon"><i class="fas fa-user-shield"></i></div>
+               <div class="header-admin" id="adminLoginIcon" style="cursor: pointer;" onclick="window.klikIkonAdmin()"><i class="fas fa-user-shield"></i></div>
         <div class="header-cart" style="cursor: pointer;" onclick="window.location.href='keranjang.html'"><i class="fas fa-shopping-cart"></i><span class="cart-badge">0</span></div>
     </header>
 
@@ -336,9 +336,14 @@
         <a href="#" class="nav-item" id="menuAccount"><i class="fas fa-user"></i><span>Akun</span></a>
     </nav>
 
-    <div id="modalConfirmAdmin" class="modal-confirm">
-        <div class="confirm-box"><i class="fas fa-user-shield"></i><h3>Status: Admin Aktif</h3><p>Anda sedang login sebagai Admin. Apakah Anda ingin keluar dari panel Admin sekarang?</p>
-            <div class="confirm-btn-group"><button class="btn-batal" id="btnBatalAdmin">Batal</button><button class="btn-yakin" id="btnYakinAdmin">Ya, Keluar</button></div>
+        <div id="modalConfirmAdmin" class="modal-confirm">
+        <div class="confirm-box"><i class="fas fa-user-shield" style="font-size:40px; color:#0D47A1; margin-bottom:15px;"></i>
+            <h3 style="color:#0D47A1;">Status: Admin Aktif</h3>
+            <p style="font-size:12px; color:#555;">Anda sudah terdeteksi login sebagai Super Admin. Ingin masuk ke Ruang Kerja (Admin Panel) sekarang?</p>
+            <div class="confirm-btn-group">
+                <button class="btn-batal" onclick="document.getElementById('modalConfirmAdmin').style.display='none'">Batal</button>
+                <button class="btn-yakin" style="background:#0D47A1;" onclick="window.location.href='admin-panel.html'">Masuk Panel</button>
+            </div>
         </div>
     </div>
 
@@ -1126,6 +1131,23 @@
 
             loadProdukBeranda();
         });
+        
+                // ✅ LOGIKA KLIK IKON ADMIN
+        window.klikIkonAdmin = function() {
+            const token = localStorage.getItem('token');
+            // Cek apakah pembeli atau admin yang login
+            if (token && token.startsWith('token-admin-')) {
+                // Jika Admin, munculkan Pop-up masuk ke panel
+                document.getElementById('modalConfirmAdmin').style.display = 'flex';
+            } else {
+                // Jika bukan admin / belum login, tendang ke halaman login
+                showToast("Mengarahkan ke Gerbang Admin...", "info");
+                setTimeout(() => {
+                    window.location.href = 'login.html'; // Pastikan nama file login admin Anda adalah login.html
+                }, 1000);
+            }
+        };
+
     </script>
 </body>
 </html>
