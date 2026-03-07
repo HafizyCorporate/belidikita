@@ -100,6 +100,34 @@
         .btn-auto-resi { background: linear-gradient(135deg, #0D47A1, #1976D2); color: #fff; border: none; border-radius: 8px; padding: 12px; width: 100%; font-weight: 800; font-size: 12px; cursor: pointer; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3); transition: 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;}
         .btn-auto-resi:active { transform: scale(0.97); }
         .btn-auto-resi:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        /* ✅ CSS TAMBAHAN UNTUK KOTAK MASUK MANUAL (INBOX) */
+        .inbox-container { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; padding-right: 5px; }
+        .inbox-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #fff; border: 1px solid #E1F5FE; border-radius: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .inbox-item:hover { background: #f4f9ff; border-color: #81D4FA; transform: translateY(-2px); }
+        .inbox-avatar { width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #FF9800, #F57C00); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; }
+        .inbox-details { flex: 1; overflow: hidden; }
+        .inbox-name { font-size: 14px; font-weight: 800; color: #333; margin-bottom: 5px; }
+        .inbox-last-msg { font-size: 12px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+        .inbox-time { font-size: 10px; color: #aaa; font-weight: 700; align-self: flex-start; padding-top: 5px; }
+
+        /* ✅ MODAL RUANG CHAT ADMIN */
+        .chat-room-modal { display: none; position: fixed; z-index: 4000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,40,80,0.6); align-items: center; justify-content: center; padding: 20px; }
+        .chat-room-box { background: #fff; width: 100%; max-width: 500px; border-radius: 15px; display: flex; flex-direction: column; height: 80vh; max-height: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; animation: popBounce 0.3s ease; }
+        @keyframes popBounce { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .chat-room-header { background: #ff9800; color: #fff; padding: 15px; display: flex; align-items: center; justify-content: space-between; }
+        .chat-room-header h3 { font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 10px; margin: 0;}
+        .chat-room-close { font-size: 20px; cursor: pointer; transition: 0.2s; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.2); }
+        .chat-room-close:active { transform: scale(0.9); }
+        .chat-room-body { flex: 1; padding: 15px; overflow-y: auto; background: #f4f7fa; display: flex; flex-direction: column; gap: 10px; }
+        .msg-bubble { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 12px; line-height: 1.5; font-weight: 600; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .msg-pembeli { background: #fff; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #eee;}
+        .msg-admin { background: #FFF3E0; color: #E65100; align-self: flex-end; border-bottom-right-radius: 2px; border: 1px solid #FFCC80;}
+        .chat-room-footer { padding: 15px; background: #fff; border-top: 1px solid #eee; display: flex; gap: 10px; align-items: center; }
+        .chat-room-input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 20px; font-family: 'Montserrat', sans-serif; font-size: 12px; outline: none; background: #f9f9f9; }
+        .chat-room-input:focus { border-color: #ff9800; background: #fff; }
+        .chat-room-send { width: 40px; height: 40px; border-radius: 50%; background: #ff9800; color: #fff; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; box-shadow: 0 4px 10px rgba(255,152,0,0.3); transition: 0.2s; }
+        .chat-room-send:active { transform: scale(0.9); }
     </style>
 </head>
 <body>
@@ -111,7 +139,9 @@
         <a href="#pesananSection"><i class="fas fa-shopping-cart"></i> Pesanan Masuk</a>
         <a href="#arsipSection" style="color: #9c27b0;"><i class="fas fa-archive"></i> Gudang Arsip</a>
         
-        <a href="#chatSection" style="color: #00AA5B;"><i class="fas fa-comments"></i> Pantau Live Chat</a>
+        <a href="#inboxSection" style="color: #ff9800;"><i class="fas fa-envelope"></i> Kotak Masuk</a>
+        
+        <a href="#chatSection" style="color: #00AA5B;"><i class="fas fa-comments"></i> Pantau Live Chat AI</a>
 
         <a href="#kuponSection"><i class="fas fa-ticket-alt"></i> Kelola Kupon</a>
         <a href="#promoSection"><i class="fas fa-images"></i> Upload Banner</a>
@@ -212,6 +242,14 @@
                         <tr><td colspan="4" style="text-align:center;">Memuat data arsip...</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <div class="box" id="inboxSection" style="border-top: 4px solid #ff9800; background: #fffcf8;">
+            <h3 style="color:#ff9800;"><i class="fas fa-envelope"></i> Kotak Masuk (Chat Manual Pembeli)</h3>
+            <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Klik pada nama pembeli di bawah ini untuk membalas pesan mereka secara langsung (seperti SMS).</p>
+            <div class="inbox-container" id="inboxAdminList">
+                <div style="text-align:center; padding: 20px; color:#aaa;"><i class="fas fa-spinner fa-spin"></i> Memuat kotak masuk...</div>
             </div>
         </div>
 
@@ -560,6 +598,22 @@
         </div>
     </div>
 
+    <div id="modalAdminChatRoom" class="chat-room-modal">
+        <div class="chat-room-box">
+            <div class="chat-room-header">
+                <h3><i class="fas fa-user-circle"></i> <span id="chatRoomUserName">Nama Pembeli</span></h3>
+                <div class="chat-room-close" onclick="tutupChatRoomAdmin()"><i class="fas fa-times"></i></div>
+            </div>
+            <div class="chat-room-body" id="chatRoomBodyAdmin">
+                </div>
+            <div class="chat-room-footer">
+                <input type="hidden" id="chatRoomUserId">
+                <input type="text" id="chatRoomInputAdmin" class="chat-room-input" placeholder="Ketik balasan ke pembeli..." onkeypress="if(event.key === 'Enter') kirimBalasanDariAdmin()">
+                <button class="chat-room-send" onclick="kirimBalasanDariAdmin()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
     <div id="modalConfirm" class="modal-confirm">
         <div class="confirm-box">
             <i class="fas fa-exclamation-triangle" style="font-size:40px; color:#ff3b30; margin-bottom:15px;"></i>
@@ -628,6 +682,7 @@
         }
 
         let adminOrdersData = [];
+        let globalAdminChats = []; // Variabel untuk menyimpan data chat yang di-load
 
         async function muatSemuaDataAwal() {
             await fetchDraftTugas();
@@ -637,6 +692,7 @@
             await fetchAdminChats();
             await fetchOrders(); 
             await fetchArchive(); 
+            await fetchInboxAdmin(); // ✅ TARIK DATA INBOX
         }
         
         setTimeout(() => { muatSemuaDataAwal(); }, 1000);
@@ -864,6 +920,7 @@
             } catch (err) {}
         }
 
+        // FUNGSI LAMA: MENAMPILKAN SEMUA CHAT DI TABEL
         async function fetchAdminChats() {
             try {
                 const res = await fetch('/api/admin/chats', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -874,7 +931,7 @@
                     tbody.innerHTML = '';
                     result.data.forEach(chat => {
                         const waktu = new Date(chat.created_at).toLocaleString('id-ID', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
-                        let badgeSender = chat.sender_role === 'pembeli' ? '<span style="background:#E1F5FE; color:#0D47A1; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:bold;"><i class="fas fa-user"></i> Pembeli</span>' : '<span style="background:#E8F5E9; color:#00AA5B; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:bold;"><i class="fas fa-robot"></i> Bot AI</span>';
+                        let badgeSender = chat.sender_role === 'pembeli' ? '<span style="background:#E1F5FE; color:#0D47A1; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:bold;"><i class="fas fa-user"></i> Pembeli</span>' : '<span style="background:#E8F5E9; color:#00AA5B; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:bold;"><i class="fas fa-robot"></i> AI / Admin</span>';
                         tbody.innerHTML += `<tr><td><b>${chat.user_name}</b></td><td style="max-width: 250px; white-space: normal; line-height: 1.4; color: #555;"><i>"${chat.message}"</i></td><td>${badgeSender}</td><td style="font-size:11px; color:#888;">${waktu} WIB</td></tr>`;
                     });
                 } else {
@@ -882,6 +939,116 @@
                 }
             } catch(e) {}
         }
+
+        // ✅ FUNGSI BARU: MEMUAT KOTAK MASUK MANUAL (INBOX)
+        async function fetchInboxAdmin() {
+            try {
+                const res = await fetch('/api/admin/chats', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                const container = document.getElementById('inboxAdminList');
+
+                if (result.success && result.data.length > 0) {
+                    globalAdminChats = result.data; 
+                    const groupedChats = {};
+
+                    // Filter agar hanya memunculkan chat dari "pembeli" dan balasan "admin", abaikan "AI" jika mau.
+                    // Disini kita biarkan semua agar admin tau riwayatnya.
+                    result.data.forEach(chat => {
+                        const key = chat.user_id || chat.user_name; 
+                        if (!groupedChats[key]) {
+                            groupedChats[key] = { user_id: chat.user_id, user_name: chat.user_name, messages: [] };
+                        }
+                        groupedChats[key].messages.push(chat);
+                    });
+
+                    container.innerHTML = '';
+                    
+                    const sortedKeys = Object.keys(groupedChats).sort((a, b) => {
+                        const lastA = groupedChats[a].messages[0]; 
+                        const lastB = groupedChats[b].messages[0];
+                        return new Date(lastB.created_at) - new Date(lastA.created_at);
+                    });
+
+                    sortedKeys.forEach(key => {
+                        const group = groupedChats[key];
+                        const lastMsg = group.messages[0];
+                        const time = new Date(lastMsg.created_at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                        const senderPrefix = lastMsg.sender_role === 'admin' ? 'Anda: ' : '';
+                        const avatarInitial = group.user_name ? group.user_name.charAt(0).toUpperCase() : 'U';
+
+                        container.innerHTML += `
+                            <div class="inbox-item" onclick="bukaChatRoom('${key}', '${group.user_name.replace(/'/g, "\\'")}')">
+                                <div class="inbox-avatar">${avatarInitial}</div>
+                                <div class="inbox-details">
+                                    <div class="inbox-name">${group.user_name}</div>
+                                    <div class="inbox-last-msg">${senderPrefix}${lastMsg.message}</div>
+                                </div>
+                                <div class="inbox-time">${time}</div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    container.innerHTML = '<div style="text-align:center; padding: 20px; color:#aaa;">Belum ada pesan masuk dari pembeli.</div>';
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        // ✅ LOGIKA RUANG CHAT (BALASAN ADMIN)
+        window.bukaChatRoom = function(userIdOrName, userName) {
+            document.getElementById('chatRoomUserId').value = userIdOrName;
+            document.getElementById('chatRoomUserName').innerText = userName;
+            document.getElementById('modalAdminChatRoom').style.display = 'flex';
+            
+            const body = document.getElementById('chatRoomBodyAdmin');
+            body.innerHTML = '';
+            
+            const msgs = globalAdminChats.filter(c => (c.user_id || c.user_name) == userIdOrName);
+            const chronologicalMsgs = [...msgs].reverse(); // Urutkan dari atas ke bawah
+
+            chronologicalMsgs.forEach(msg => {
+                const isAdmin = msg.sender_role === 'admin';
+                const cssClass = isAdmin ? 'msg-admin' : 'msg-pembeli';
+                body.innerHTML += `<div class="msg-bubble ${cssClass}">${msg.message}</div>`;
+            });
+            
+            body.scrollTop = body.scrollHeight;
+        };
+
+        window.tutupChatRoomAdmin = function() {
+            document.getElementById('modalAdminChatRoom').style.display = 'none';
+        };
+
+        window.kirimBalasanDariAdmin = async function() {
+            const input = document.getElementById('chatRoomInputAdmin');
+            const teks = input.value.trim();
+            const targetUser = document.getElementById('chatRoomUserId').value;
+            
+            if(!teks) return;
+
+            const body = document.getElementById('chatRoomBodyAdmin');
+            body.innerHTML += `<div class="msg-bubble msg-admin">${teks}</div>`;
+            input.value = '';
+            body.scrollTop = body.scrollHeight;
+
+            try {
+                // Admin membalas pesan menggunakan API yang sama, dengan sender = 'admin'
+                await fetch('/api/chat/save', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+                    // Kita asumsikan API backend Anda dapat menerima "target_user" untuk admin
+                    body: JSON.stringify({ message: teks, sender: 'admin', target_user: targetUser }) 
+                });
+                
+                // Segarkan inbox di latar belakang
+                fetchInboxAdmin();
+                fetchAdminChats(); 
+            } catch(e) {
+                showToast("Gagal mengirim pesan ke pembeli", "error");
+            }
+        };
+
 
         let targetHapusTipe = ""; let targetHapusId = "";
         function konfirmasiHapus(tipe, id) { 
