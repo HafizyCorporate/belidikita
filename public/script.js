@@ -395,25 +395,48 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-
-    window.bukaDetailGlobal = function(id, foto, nama, hargaStr, deskripsi, hargaRaw, beratRaw, sellerName, unit, vTitle, vOpt, wsPrice, wsMin) {
-        if(typeof id === 'string' && id.includes('%7B')) {
-            const decodedObj = decodeURIComponent(id);
-            localStorage.setItem('produk_detail', decodedObj);
-            window.location.href = 'detailproduk.html';
-            return;
+    window.bukaDetailGlobal = function(arg1, foto, nama, hargaStr, deskripsi, hargaRaw, beratRaw, sellerName, unit, vTitle, vOpt, wsPrice, wsMin) {
+        // Mode 1: Jika data dikirim dalam bentuk 1 bingkisan utuh (String JSON Encoded)
+        if (typeof arg1 === 'string' && (arg1.includes('%7B') || arg1.startsWith('%'))) {
+            try {
+                // Beri penangkal anti-patah karakter kutip
+                const antiPatah = arg1.replace(/'/g, "%27");
+                const decodedObj = decodeURIComponent(antiPatah);
+                localStorage.setItem('produk_detail', decodedObj);
+                window.location.href = 'detailproduk.html';
+                return;
+            } catch (e) {
+                console.error("Gagal membaca bingkisan data:", e);
+                showToast("Terjadi kesalahan saat memuat produk.", "error");
+                return;
+            }
         }
 
+        // Mode 2: Jika data dikirim secara eceran (parameter terpisah)
         const dataProduk = { 
-            id: id, foto: foto, nama: nama, hargaStr: hargaStr, deskripsi: deskripsi, 
-            harga: hargaRaw, weight: beratRaw || 1000, seller_name: sellerName || "Belidikita Official", qty: 1,
-            unit: unit || 'Pcs', variant_title: vTitle || '', variant_options: vOpt || '',
-            wholesale_price: wsPrice || 0, wholesale_min_qty: wsMin || 0
+            id: arg1, // arg1 di sini adalah ID
+            foto: foto || "https://via.placeholder.com/400", 
+            nama: nama || "Produk Belidikita", 
+            hargaStr: hargaStr || "Rp0", 
+            deskripsi: deskripsi || "Tidak ada deskripsi.", 
+            harga: hargaRaw || 0, 
+            weight: beratRaw || 1000, 
+            seller_name: sellerName || "Belidikita Official", 
+            qty: 1,
+            unit: unit || 'Pcs', 
+            variant_title: vTitle || '', 
+            variant_options: vOpt || '',
+            wholesale_price: wsPrice || 0, 
+            wholesale_min_qty: wsMin || 0
         };
         localStorage.setItem('produk_detail', JSON.stringify(dataProduk));
         window.location.href = 'detailproduk.html';
-    }
+    };
 
+    // Sambungkan juga kabel "Tunggal" agar tidak mati rasa
+    window.bukaDetailTunggal = window.bukaDetailGlobal;
+
+    
     const kamusKategori = {
         'Sembako': ['Beras, minyak, gula', 'Mie instan', 'Telur', 'Air galon', 'Gas LPG'],
         'Fashion': ['Baju pria / wanita / anak', 'Celana', 'Jaket', 'Hijab', 'Sepatu', 'Tas'],
