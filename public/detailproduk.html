@@ -79,13 +79,16 @@
         .p-stats .sold { background: #E8F5E9; color: #00AA5B; padding: 3px 8px; border-radius: 6px; border: 1px solid #C8E6C9;}
         .p-stats .weight { background: #F3E5F5; color: #6A1B9A; padding: 3px 8px; border-radius: 6px; border: 1px solid #E1BEE7;}
 
-        /* UKURAN / VARIAN BARANG (BUNGLON) */
+        
+                /* UKURAN / VARIAN BARANG (BUNGLON) */
         .variant-box { display: none; } 
         .variant-box h4 { font-size: 13px; font-weight: 800; color: #0D47A1; margin-bottom: 10px; border-bottom: 1px dashed #E1F5FE; padding-bottom: 8px; display: flex; align-items: center; gap: 6px; }
         .variant-options { display: flex; gap: 10px; flex-wrap: wrap; }
-        .v-opt { padding: 8px 16px; border: 2px solid #E1F5FE; border-radius: 10px; font-size: 13px; font-weight: 800; color: #555; cursor: pointer; transition: 0.2s; background: #fafcff; }
+        .v-opt { padding: 8px 16px; border: 2px solid #E1F5FE; border-radius: 10px; font-size: 13px; font-weight: 800; color: #555; cursor: pointer; transition: 0.2s; background: #fafcff; display: flex; flex-direction: column; align-items: center; justify-content: center;}
         .v-opt.selected { border-color: #FF9800; background: #FFF3E0; color: #FF9800; box-shadow: 0 4px 10px rgba(255, 152, 0, 0.2); transform: translateY(-2px); }
+        .v-opt.habis { background: #eee; border-color: #ddd; color: #aaa; cursor: not-allowed; text-decoration: line-through; }
 
+        
         /* INFO TOKO */
         .store-box { display: flex; align-items: center; gap: 12px; }
         .store-avatar { width: 45px; height: 45px; background: linear-gradient(135deg, #FF9800, #FFD700); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 20px; box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3); }
@@ -290,7 +293,7 @@
         document.getElementById('txtBerat').innerHTML = `<i class="fas fa-weight-hanging mr-1"></i> ${produk.weight || 1000} Gram`;
         document.getElementById('namaTokoAsli').innerText = produk.seller_name || "Belidikita Official";
 
-        // ✅ LOGIKA VARIAN BUNGLON (TETAP AMAN & TIDAK DIHAPUS)
+                // ✅ LOGIKA VARIAN BUNGLON CANGGIH (MEMBACA STOK)
         let ukuranTerpilih = null;
         const boxVarian = document.getElementById('boxVarian');
         let butuhVarian = false; 
@@ -305,18 +308,40 @@
             
             listVarian.forEach(opsi => {
                 if(opsi !== "") {
+                    let namaVarian = opsi;
+                    let stokVarian = null;
+
+                    // Cek apakah formatnya S=10
+                    if(opsi.includes('=')) {
+                        const pecah = opsi.split('=');
+                        namaVarian = pecah[0].trim();
+                        stokVarian = parseInt(pecah[1].trim());
+                    }
+
                     const btn = document.createElement('div');
                     btn.className = 'v-opt';
-                    btn.innerText = opsi;
-                    btn.addEventListener('click', function() {
-                        document.querySelectorAll('.v-opt').forEach(b => b.classList.remove('selected'));
-                        this.classList.add('selected');
-                        ukuranTerpilih = this.innerText;
-                    });
+
+                    // Jika stok varian = 0, matikan tombolnya
+                    if(stokVarian === 0) {
+                        btn.classList.add('habis');
+                        btn.innerHTML = `<span>${namaVarian}</span><span style="font-size:9px; color:#ff3b30; margin-top:2px;">Habis</span>`;
+                    } else {
+                        // Jika ada stok (atau tidak pakai sistem =, biarkan normal)
+                        let teksStok = stokVarian !== null ? `<span style="font-size:9px; color:#00AA5B; margin-top:2px;">Sisa ${stokVarian}</span>` : '';
+                        btn.innerHTML = `<span style="font-weight:900;">${namaVarian}</span>${teksStok}`;
+                        
+                        btn.addEventListener('click', function() {
+                            document.querySelectorAll('.v-opt').forEach(b => b.classList.remove('selected'));
+                            this.classList.add('selected');
+                            // Ingat nama aslinya saja yang dikirim ke keranjang, bukan jumlah stoknya
+                            ukuranTerpilih = namaVarian; 
+                        });
+                    }
                     containerVarian.appendChild(btn);
                 }
             });
         }
+
 
         // ✅ FUNGSI TARIK ULASAN & TAMPILKAN DAFTAR KOMENTAR
         async function fetchUlasanAsli() {
