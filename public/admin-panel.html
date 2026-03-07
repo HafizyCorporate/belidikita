@@ -939,16 +939,22 @@
                     sortedKeys.forEach(key => {
                         const group = groupedChats[key];
                         const lastMsg = group.messages[0];
-                        const time = new Date(lastMsg.created_at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                                                const time = new Date(lastMsg.created_at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit' });
                         const senderPrefix = lastMsg.sender_role === 'admin' ? 'Anda: ' : '';
                         const avatarInitial = group.user_name ? group.user_name.charAt(0).toUpperCase() : 'U';
+
+                        // Cegah teks gambar panjang merusak desain Inbox
+                        let previewTeks = lastMsg.message;
+                        if(previewTeks.includes('<img')) {
+                            previewTeks = previewTeks.split('<br><img')[0] + ' 📷 [Mengirim Laporan Gambar]';
+                        }
 
                         container.innerHTML += `
                             <div class="inbox-item" onclick="bukaChatRoom('${key}', '${group.user_name.replace(/'/g, "\\'")}')">
                                 <div class="inbox-avatar">${avatarInitial}</div>
                                 <div class="inbox-details">
                                     <div class="inbox-name">${group.user_name}</div>
-                                    <div class="inbox-last-msg">${senderPrefix}${lastMsg.message}</div>
+                                    <div class="inbox-last-msg">${senderPrefix}${previewTeks}</div>
                                 </div>
                                 <div class="inbox-time">${time}</div>
                             </div>
