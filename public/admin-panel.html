@@ -10,9 +10,9 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
         body { background-color: #f4f7fa; color: #333; scroll-behavior: smooth; }
 
-        .sidebar { width: 250px; background: #0D47A1; color: #fff; height: 100vh; padding: 20px; position: fixed; top:0; left:0; overflow-y: auto;}
+        .sidebar { width: 250px; background: #0D47A1; color: #fff; height: 100vh; padding: 20px; position: fixed; top:0; left:0; overflow-y: auto; transition: transform 0.3s ease;}
         .sidebar h2 { font-weight: 800; font-size: 22px; margin-bottom: 30px; text-align: center; color: #81D4FA; }
-        .sidebar a { display: block; color: #fff; text-decoration: none; padding: 15px; margin-bottom: 10px; border-radius: 8px; font-weight: 600; transition: 0.3s; }
+        .sidebar a { display: block; color: #fff; text-decoration: none; padding: 15px; margin-bottom: 10px; border-radius: 8px; font-weight: 600; transition: 0.3s; cursor: pointer; }
         .sidebar a:hover, .sidebar a.active { background: #1976D2; transform: translateX(5px); }
         .sidebar i { margin-right: 10px; width: 20px; text-align: center; }
         .logout-btn { background: #ff3b30 !important; margin-top: 50px; }
@@ -37,6 +37,15 @@
         .box { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 25px;}
         .box h3 { font-size: 14px; font-weight: 800; margin-bottom: 15px; color: #0D47A1; border-bottom: 2px solid #f4f7fa; padding-bottom: 10px; }
         
+        /* ✅ CSS SISTEM LACI (DRAWERS) */
+        .admin-section { display: none; animation: fadeIn 0.4s ease; }
+        .active-section { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ✅ CSS MOBILE POP-UP MENU */
+        .close-sidebar-btn { display: none; position: absolute; top: 15px; right: 20px; font-size: 28px; color: #fff; cursor: pointer; }
+        .sidebar-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9998; }
+
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 12px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1.5fr 1.5fr; gap: 10px; margin-bottom: 12px; } 
 
@@ -55,22 +64,24 @@
         .badge-keranjang { background: #E1F5FE; color: #0D47A1; }
         .badge-biasa { background: #eee; color: #555; }
         
-        .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); border-top: 1px solid #eee;}
-        .mobile-nav a { color: #888; text-align: center; font-size: 10px; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight:600;}
-        .mobile-nav a i { font-size: 20px; }
+        .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; background: #fff; justify-content: space-around; padding: 10px 0; z-index: 5000; box-shadow: 0 -2px 15px rgba(0,0,0,0.1); border-top: 1px solid #eee;}
+        .mobile-nav a { color: #888; text-align: center; font-size: 10px; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 4px; font-weight:700; width: 20%;}
+        .mobile-nav a i { font-size: 20px; margin-bottom: 2px;}
         .mobile-nav a.active { color: #0D47A1; }
 
         @media (min-width: 769px) { .mobile-nav { display: none !important; } }
         @media (max-width: 768px) {
-            .sidebar { display: none; } 
+            .sidebar { transform: translateX(-100%); z-index: 9999; box-shadow: 5px 0 15px rgba(0,0,0,0.3); width: 280px;} 
+            .sidebar.mobile-open { transform: translateX(0); }
+            .sidebar.mobile-open .close-sidebar-btn { display: block; }
             .mobile-nav { display: flex !important; } 
-            .main-content { margin-left: 0; width: 100%; padding: 15px; margin-bottom: 70px; } 
+            .main-content { margin-left: 0; width: 100%; padding: 15px; margin-bottom: 80px; } 
             .cards { grid-template-columns: 1fr; gap: 10px; } 
             .grid-2 { grid-template-columns: 1fr; gap: 0; }
             .grid-3 { grid-template-columns: 1fr; gap: 0; }
         }
 
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); overflow: auto; }
+        .modal { display: none; position: fixed; z-index: 8000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); overflow: auto; }
         .modal-content { background-color: #fefefe; margin: 10% auto; padding: 20px; border-radius: 15px; width: 90%; max-width: 500px; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .close-modal { position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
 
@@ -91,7 +102,7 @@
         
         .img-preview { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
         
-        .modal-confirm { display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
+        .modal-confirm { display: none; position: fixed; z-index: 9000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
         .confirm-box { background: #fff; padding: 30px 20px; border-radius: 15px; text-align: center; width: 90%; max-width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
         .confirm-btn-group { display: flex; gap: 10px; justify-content: center; margin-top:20px; }
         .btn-batal { flex: 1; padding: 12px; background: #eee; color: #555; border: none; border-radius: 10px; font-weight: bold; font-size: 13px; cursor: pointer; }
@@ -101,7 +112,6 @@
         .btn-auto-resi:active { transform: scale(0.97); }
         .btn-auto-resi:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
 
-        /* CSS TAMBAHAN UNTUK KOTAK MASUK MANUAL (INBOX) */
         .inbox-container { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; padding-right: 5px; }
         .inbox-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #fff; border: 1px solid #E1F5FE; border-radius: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .inbox-item:hover { background: #f4f9ff; border-color: #81D4FA; transform: translateY(-2px); }
@@ -111,8 +121,7 @@
         .inbox-last-msg { font-size: 12px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
         .inbox-time { font-size: 10px; color: #aaa; font-weight: 700; align-self: flex-start; padding-top: 5px; }
 
-        /* MODAL RUANG CHAT ADMIN */
-        .chat-room-modal { display: none; position: fixed; z-index: 4000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,40,80,0.6); align-items: center; justify-content: center; padding: 20px; }
+        .chat-room-modal { display: none; position: fixed; z-index: 8500; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,40,80,0.6); align-items: center; justify-content: center; padding: 20px; }
         .chat-room-box { background: #fff; width: 100%; max-width: 500px; border-radius: 15px; display: flex; flex-direction: column; height: 80vh; max-height: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; animation: popBounce 0.3s ease; }
         @keyframes popBounce { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .chat-room-header { background: #ff9800; color: #fff; padding: 15px; display: flex; align-items: center; justify-content: space-between; }
@@ -132,20 +141,23 @@
 </head>
 <body>
 
-    <div class="sidebar">
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="tutupMenuMobile()"></div>
+
+    <div class="sidebar" id="sidebarMenu">
+        <span class="close-sidebar-btn" onclick="tutupMenuMobile()"><i class="fas fa-times"></i></span>
         <h2><i class="fas fa-store"></i> Belidikita</h2>
-        <a href="#" class="active"><i class="fas fa-chart-pie"></i> Dasbor</a>
-        <a href="#accSection" style="color: #FFD700;"><i class="fas fa-check-circle"></i> Tugas Persetujuan</a>
-        <a href="#pesananSection"><i class="fas fa-shopping-cart"></i> Pesanan Masuk</a>
-        <a href="#arsipSection" style="color: #9c27b0;"><i class="fas fa-archive"></i> Gudang Arsip</a>
+        <a class="nav-link active" onclick="window.switchTab('dasborSection', this)"><i class="fas fa-chart-pie"></i> Dasbor Utama</a>
+        <a class="nav-link" style="color: #FFD700;" onclick="window.switchTab('accSection', this)"><i class="fas fa-check-circle"></i> Tugas Persetujuan</a>
+        <a class="nav-link" onclick="window.switchTab('pesananSection', this)"><i class="fas fa-shopping-cart"></i> Pesanan Masuk</a>
+        <a class="nav-link" id="linkArsip" style="color: #9c27b0;" onclick="window.switchTab('arsipSection', this)"><i class="fas fa-archive"></i> Gudang Arsip</a>
         
-        <a href="#inboxSection" style="color: #ff9800;"><i class="fas fa-envelope"></i> Kotak Masuk Pembeli</a>
+        <a class="nav-link" style="color: #ff9800;" onclick="window.switchTab('inboxTabContainer', this)"><i class="fas fa-envelope"></i> Kotak Masuk Chat</a>
         
-        <a href="#kuponSection"><i class="fas fa-ticket-alt"></i> Kelola Kupon</a>
-        <a href="#promoSection"><i class="fas fa-images"></i> Upload Banner</a>
-        <a href="#uploadSection"><i class="fas fa-upload"></i> Upload Barang</a>
-        <a href="#stokSection"><i class="fas fa-boxes"></i> Daftar Stok</a>
-        <a href="#" id="btnKeluarPC" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+        <a class="nav-link" onclick="window.switchTab('kuponSection', this)"><i class="fas fa-ticket-alt"></i> Kelola Kupon</a>
+        <a class="nav-link" onclick="window.switchTab('promoTabContainer', this)"><i class="fas fa-images"></i> Kelola Banner</a>
+        <a class="nav-link" onclick="window.switchTab('uploadSection', this)"><i class="fas fa-upload"></i> Upload Barang</a>
+        <a class="nav-link" onclick="window.switchTab('stokSection', this)"><i class="fas fa-boxes"></i> Daftar Stok Toko</a>
+        <a id="btnKeluarPC" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Keluar Akses</a>
     </div>
 
     <div class="main-content">
@@ -154,44 +166,40 @@
                 <h1 id="adminGreeting">Halo, Super Admin!</h1>
                 <p>Silakan kelola barang tokomu.</p>
             </div>
-          <button onclick="lihatTokoDepan()" style="padding: 10px 15px; background:#1976D2; color:#fff; border:none; border-radius:20px; cursor:pointer; font-weight:bold; font-size:11px;"><i class="fas fa-eye"></i> Lihat Toko Depan</button>
+          <button onclick="lihatTokoDepan()" style="padding: 10px 15px; background:#1976D2; color:#fff; border:none; border-radius:20px; cursor:pointer; font-weight:bold; font-size:11px; box-shadow: 0 4px 10px rgba(13,71,161,0.2);"><i class="fas fa-eye"></i> Lihat Toko Depan</button>
         </div>
 
-        <div class="portal-group">
-            <a href="admin-aset.html" class="btn-portal portal-aset"><i class="fas fa-archive"></i> Buka Brankas Aset</a>
-            <a href="admin-persediaan.html" class="btn-portal portal-draft"><i class="fas fa-file-excel"></i> Import Excel ke Karantina</a>
-        </div>
-
-        <div class="cards">
-            <div class="card">
-                <div class="card-info">
-                    <h3>Produk Terupload</h3>
-                    <h2 id="totalProduk">0 Barang</h2>
-                </div>
-                <i class="fas fa-box-open card-icon"></i>
+        <div id="dasborSection" class="admin-section active-section">
+            <div class="portal-group">
+                <a href="admin-aset.html" class="btn-portal portal-aset"><i class="fas fa-archive"></i> Buka Brankas Aset</a>
+                <a href="admin-persediaan.html" class="btn-portal portal-draft"><i class="fas fa-file-excel"></i> Import Excel ke Karantina</a>
             </div>
-            <div class="card">
-                <div class="card-info">
-                    <h3>Pesanan Aktif</h3>
-                    <h2 id="totalPesanan">0 Pesanan</h2>
+
+            <div class="cards">
+                <div class="card">
+                    <div class="card-info">
+                        <h3>Produk Terupload</h3>
+                        <h2 id="totalProduk">0 Barang</h2>
+                    </div>
+                    <i class="fas fa-box-open card-icon"></i>
                 </div>
-                <i class="fas fa-shopping-cart card-icon" style="color: #ff9800;"></i>
+                <div class="card">
+                    <div class="card-info">
+                        <h3>Pesanan Aktif</h3>
+                        <h2 id="totalPesanan">0 Pesanan</h2>
+                    </div>
+                    <i class="fas fa-shopping-cart card-icon" style="color: #ff9800;"></i>
+                </div>
             </div>
         </div>
 
-        <div class="box" id="accSection" style="border-top: 4px solid #00AA5B; background: #fafcff;">
+        <div id="accSection" class="box admin-section" style="border-top: 4px solid #00AA5B; background: #fafcff;">
             <h3 style="color:#00AA5B;"><i class="fas fa-tasks"></i> Menunggu Persetujuan Anda (Draft Excel)</h3>
             <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Barang di bawah ini adalah hasil import Excel Admin Persediaan. Klik "ACC" agar barang ini muncul di Toko. Setelah di-ACC, Anda bisa menambahkan foto di menu "Daftar Stok".</p>
-            
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr>
-                            <th>Kategori</th>
-                            <th>Nama Barang</th>
-                            <th>Harga & Stok</th>
-                            <th>Aksi Super Admin</th>
-                        </tr>
+                        <tr><th>Kategori</th><th>Nama Barang</th><th>Harga & Stok</th><th>Aksi Super Admin</th></tr>
                     </thead>
                     <tbody id="tableBodyDraft">
                         <tr><td colspan="4" style="text-align:center; padding: 20px;">Tidak ada tugas persetujuan saat ini.</td></tr>
@@ -200,21 +208,15 @@
             </div>
         </div>
 
-        <div class="box" id="pesananSection" style="border-top: 4px solid #ff9800;">
+        <div id="pesananSection" class="box admin-section" style="border-top: 4px solid #ff9800;">
             <h3 style="display:flex; justify-content:space-between; align-items:center;">
                 <span><i class="fas fa-shopping-cart"></i> Daftar Pesanan (Aktif)</span>
-                <button onclick="window.location.href='#arsipSection'" style="background: #9c27b0; color:#fff; border:none; padding:5px 10px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer;"><i class="fas fa-archive"></i> Buka Arsip</button>
+                <button onclick="window.switchTab('arsipSection', document.getElementById('linkArsip'))" style="background: #9c27b0; color:#fff; border:none; padding:5px 10px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer;"><i class="fas fa-archive"></i> Buka Arsip</button>
             </h3>
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr>
-                            <th>No. Order / Nama</th>
-                            <th>Jml. Barang</th>
-                            <th>Total & Kurir</th>
-                            <th>Status & Resi</th>
-                            <th>Aksi</th>
-                        </tr>
+                        <tr><th>No. Order / Nama</th><th>Jml. Barang</th><th>Total & Kurir</th><th>Status & Resi</th><th>Aksi</th></tr>
                     </thead>
                     <tbody id="tableBodyOrders">
                         <tr><td colspan="5" style="text-align:center;">Memuat data pesanan...</td></tr>
@@ -223,18 +225,13 @@
             </div>
         </div>
 
-        <div class="box" id="arsipSection" style="border-top: 4px solid #9c27b0; background: #faf5fc;">
+        <div id="arsipSection" class="box admin-section" style="border-top: 4px solid #9c27b0; background: #faf5fc;">
             <h3 style="color:#9c27b0;"><i class="fas fa-archive"></i> Gudang Arsip (Riwayat Selesai/Batal)</h3>
-            <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Pesanan yang dihapus akan diamankan di sini sebagai bukti transaksi untuk keperluan audit.</p>
+            <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Pesanan yang dihapus akan diamankan di sini sebagai bukti transaksi untuk audit.</p>
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr>
-                            <th>Waktu Arsip</th>
-                            <th>No. Order / Pembeli</th>
-                            <th>Status Akhir</th>
-                            <th>Total Tagihan</th>
-                        </tr>
+                        <tr><th>Waktu Arsip</th><th>No. Order / Pembeli</th><th>Status Akhir</th><th>Total Tagihan</th></tr>
                     </thead>
                     <tbody id="tableBodyArchive">
                         <tr><td colspan="4" style="text-align:center;">Memuat data arsip...</td></tr>
@@ -243,24 +240,26 @@
             </div>
         </div>
         
-                <div class="box" style="border-top: 4px solid #1976D2; background: #f4f9ff;">
-            <h3 style="color:#1976D2;"><i class="fas fa-reply-all"></i> Pengaturan Pesan Otomatis (Auto-Reply)</h3>
-            <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Pesan ini akan otomatis terkirim membalas pembeli yang baru pertama kali chat ke toko Anda.</p>
-            <div class="form-group">
-                <textarea id="adminAutoReplyText" rows="3" placeholder="Contoh: Halo! Pesan kamu sudah diterima, mohon tunggu sebentar ya..."></textarea>
+        <div id="inboxTabContainer" class="admin-section">
+            <div class="box" style="border-top: 4px solid #1976D2; background: #f4f9ff; margin-bottom: 20px;">
+                <h3 style="color:#1976D2;"><i class="fas fa-reply-all"></i> Pengaturan Pesan Otomatis (Auto-Reply)</h3>
+                <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Pesan ini akan otomatis terkirim membalas pembeli yang baru pertama kali chat ke toko Anda.</p>
+                <div class="form-group">
+                    <textarea id="adminAutoReplyText" rows="3" placeholder="Contoh: Halo! Pesan kamu sudah diterima, mohon tunggu sebentar ya..."></textarea>
+                </div>
+                <button class="btn-submit" style="background:#1976D2;" onclick="window.simpanAutoReply()"><i class="fas fa-save"></i> Simpan Teks Auto-Reply</button>
             </div>
-            <button class="btn-submit" style="background:#1976D2;" onclick="window.simpanAutoReply()"><i class="fas fa-save"></i> Simpan Teks Auto-Reply</button>
+
+            <div class="box" id="inboxSection" style="border-top: 4px solid #ff9800; background: #fffcf8;">
+                <h3 style="color:#ff9800;"><i class="fas fa-envelope"></i> Kotak Masuk Pembeli</h3>
+                <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Klik pada nama pembeli di bawah ini untuk membalas pesan secara manual.</p>
+                <div class="inbox-container" id="inboxAdminList">
+                    <div style="text-align:center; padding: 20px; color:#aaa;"><i class="fas fa-spinner fa-spin"></i> Memuat kotak masuk...</div>
+                </div>
+            </div>
         </div>
 
-        <div class="box" id="inboxSection" style="border-top: 4px solid #ff9800; background: #fffcf8;">
-            <h3 style="color:#ff9800;"><i class="fas fa-envelope"></i> Kotak Masuk Pembeli</h3>
-            <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Klik pada nama pembeli di bawah ini untuk membalas pesan mereka secara langsung.</p>
-            <div class="inbox-container" id="inboxAdminList">
-                <div style="text-align:center; padding: 20px; color:#aaa;"><i class="fas fa-spinner fa-spin"></i> Memuat kotak masuk...</div>
-            </div>
-        </div>
-
-        <div class="box" id="kuponSection" style="border-top: 4px solid #00AA5B;">
+        <div id="kuponSection" class="box admin-section" style="border-top: 4px solid #00AA5B;">
             <h3><i class="fas fa-ticket-alt"></i> Kelola Kupon Diskon</h3>
             <form id="formUploadKupon" style="margin-bottom: 20px;">
                 <div class="grid-2">
@@ -282,57 +281,41 @@
                 </div>
                 <button type="submit" class="btn-submit" id="btnSimpanKupon" style="background: #00AA5B;"><i class="fas fa-plus"></i> Buat Kupon Baru</button>
             </form>
-
             <div class="table-responsive">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Kode Kupon</th>
-                            <th>Tipe & Nilai</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBodyCoupons">
-                        <tr><td colspan="4" style="text-align:center;">Memuat data...</td></tr>
-                    </tbody>
+                    <thead><tr><th>Kode Kupon</th><th>Tipe & Nilai</th><th>Status</th><th>Aksi</th></tr></thead>
+                    <tbody id="tableBodyCoupons"><tr><td colspan="4" style="text-align:center;">Memuat data...</td></tr></tbody>
                 </table>
             </div>
         </div>
 
-        <div class="box" id="promoSection" style="border-top: 4px solid #FFD700;">
-            <h3><i class="fas fa-images"></i> Upload Banner Promo Depan</h3>
-            <form id="formUploadPromo">
-                <div class="form-group">
-                    <label>Pilih Gambar Banner (Landscape disarankan)</label>
-                    <input type="file" id="promoMedia" accept="image/*" required>
+        <div id="promoTabContainer" class="admin-section">
+            <div class="box" id="promoSection" style="border-top: 4px solid #FFD700; margin-bottom: 20px;">
+                <h3><i class="fas fa-images"></i> Upload Banner Promo Depan</h3>
+                <form id="formUploadPromo">
+                    <div class="form-group">
+                        <label>Pilih Gambar Banner (Landscape disarankan)</label>
+                        <input type="file" id="promoMedia" accept="image/*" required>
+                    </div>
+                    <div class="upload-warning">
+                        <i class="fas fa-lightbulb"></i>
+                        <span><b>TIPS BANNER:</b> Gunakan foto mendatar (Landscape / 16:9). Sistem otomatis memotong bagian yang tidak pas!</span>
+                    </div>
+                    <button type="submit" class="btn-submit" id="btnSimpanPromo" style="background: #0D47A1;"><i class="fas fa-cloud-upload-alt"></i> Pasang Banner Promo</button>
+                </form>
+            </div>
+            <div class="box" id="daftarPromoSection">
+                <h3><i class="fas fa-list-alt"></i> Daftar Banner Promo Aktif</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Preview Banner</th><th>Aksi</th></tr></thead>
+                        <tbody id="tableBodyPromos"><tr><td colspan="2" style="text-align:center;">Memuat data dari Server...</td></tr></tbody>
+                    </table>
                 </div>
-                <div class="upload-warning">
-                    <i class="fas fa-lightbulb"></i>
-                    <span><b>TIPS BANNER:</b> Gunakan foto mendatar (Landscape / 16:9). Sistem otomatis memotong bagian yang tidak pas!</span>
-                </div>
-                <button type="submit" class="btn-submit" id="btnSimpanPromo" style="background: #0D47A1;"><i class="fas fa-cloud-upload-alt"></i> Pasang Banner Promo</button>
-            </form>
-        </div>
-
-        <div class="box" id="daftarPromoSection">
-            <h3><i class="fas fa-list-alt"></i> Daftar Banner Promo Aktif</h3>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Preview Banner</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBodyPromos">
-                        <tr><td colspan="2" style="text-align:center;">Memuat data dari Server...</td></tr>
-                    </tbody>
-                </table>
             </div>
         </div>
 
-        <div class="box" id="uploadSection">
+        <div id="uploadSection" class="box admin-section">
             <h3><i class="fas fa-upload"></i> Upload Barang Manual (Satu per satu)</h3>
             <form id="formUploadBarang">
                 <div class="form-group">
@@ -390,7 +373,7 @@
                     </div>
                 </div>
 
-                            <div style="background: #FFFDE7; padding: 15px; border-radius: 12px; border-left: 4px solid #FBC02D; margin-bottom: 12px;">
+                <div style="background: #FFFDE7; padding: 15px; border-radius: 12px; border-left: 4px solid #FBC02D; margin-bottom: 12px;">
                     <div class="grid-3">
                         <div class="form-group" style="margin-bottom:0;">
                             <label style="color:#F57F17;"><i class="fas fa-balance-scale"></i> Satuan</label>
@@ -441,19 +424,13 @@
             </form>
         </div>
 
-        <div class="box" id="stokSection">
+        <div id="stokSection" class="box admin-section">
             <h3><i class="fas fa-list"></i> Daftar Barang di Etalase Toko</h3>
             <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-camera"></i> Tips: Klik tombol kuning "Edit" untuk menambahkan atau mengubah FOTO barang hasil upload Excel.</p>
             <div class="table-responsive">
                 <table>
                     <thead>
-                        <tr>
-                            <th>Etalase</th>
-                            <th>Nama Barang</th>
-                            <th>Stok</th>
-                            <th>Harga Jual & Satuan</th>
-                            <th>Aksi</th>
-                        </tr>
+                        <tr><th>Etalase</th><th>Nama Barang</th><th>Stok</th><th>Harga Jual & Satuan</th><th>Aksi</th></tr>
                     </thead>
                     <tbody id="tableBodyProducts">
                         <tr><td colspan="5" style="text-align:center;">Memuat data dari Server...</td></tr>
@@ -461,6 +438,14 @@
                 </table>
             </div>
         </div>
+    </div>
+
+    <div class="mobile-nav">
+        <a class="nav-link active" onclick="window.switchTab('dasborSection', this)"><i class="fas fa-home"></i> Dasbor</a>
+        <a class="nav-link" onclick="window.switchTab('pesananSection', this)"><i class="fas fa-shopping-cart"></i> Pesanan</a>
+        <a class="nav-link" onclick="window.switchTab('uploadSection', this)"><i class="fas fa-upload"></i> Upload</a>
+        <a class="nav-link" onclick="window.switchTab('inboxTabContainer', this)"><i class="fas fa-envelope"></i> Pesan</a>
+        <a onclick="window.bukaMenuMobile()"><i class="fas fa-bars"></i> Menu</a>
     </div>
 
     <div id="modalProsesPesanan" class="modal">
@@ -632,6 +617,40 @@
             setTimeout(() => window.location.href = 'login.html', 1500);
         }
 
+        // ✅ FUNGSI MESIN PENARIK LACI (TAB SWITCHER)
+        window.switchTab = function(tabId, element) {
+            // Sembunyikan semua laci
+            document.querySelectorAll('.admin-section').forEach(function(sec) {
+                sec.classList.remove('active-section');
+            });
+            // Tampilkan laci yang diminta
+            document.getElementById(tabId).classList.add('active-section');
+            
+            // Atur warna aktif untuk tombol yang diklik
+            if(element) {
+                document.querySelectorAll('.nav-link').forEach(function(btn) {
+                    btn.classList.remove('active');
+                });
+                element.classList.add('active');
+            }
+            
+            tutupMenuMobile(); // Jika di HP, tutup menu samping setelah milih laci
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Gulir otomatis ke atas
+        };
+
+        // ✅ FUNGSI BUKA TUTUP MENU SAMPING DI HP
+        window.bukaMenuMobile = function() {
+            document.getElementById('sidebarMenu').classList.add('mobile-open');
+            document.getElementById('sidebarOverlay').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.tutupMenuMobile = function() {
+            document.getElementById('sidebarMenu').classList.remove('mobile-open');
+            document.getElementById('sidebarOverlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
+
         function lihatTokoDepan() {
             sessionStorage.setItem('skipSplash', 'true'); 
             window.location.href = 'toko.html'; 
@@ -672,7 +691,7 @@
         }
 
         let adminOrdersData = [];
-        let globalAdminChats = []; // Variabel untuk menyimpan data chat yang di-load
+        let globalAdminChats = []; 
 
         async function muatSemuaDataAwal() {
             await fetchDraftTugas();
@@ -681,7 +700,7 @@
             await fetchCoupons();
             await fetchOrders(); 
             await fetchArchive(); 
-            await fetchInboxAdmin(); // ✅ TARIK DATA INBOX
+            await fetchInboxAdmin(); 
         }
         
         setTimeout(() => { muatSemuaDataAwal(); }, 1000);
@@ -909,7 +928,6 @@
             } catch (err) {}
         }
 
-        // ✅ FUNGSI BARU: MEMUAT KOTAK MASUK MANUAL (INBOX) SAJA
         async function fetchInboxAdmin() {
             try {
                 const res = await fetch('/api/admin/chats', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -939,11 +957,10 @@
                     sortedKeys.forEach(key => {
                         const group = groupedChats[key];
                         const lastMsg = group.messages[0];
-                                                const time = new Date(lastMsg.created_at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                        const time = new Date(lastMsg.created_at).toLocaleString('id-ID', { hour: '2-digit', minute: '2-digit' });
                         const senderPrefix = lastMsg.sender_role === 'admin' ? 'Anda: ' : '';
                         const avatarInitial = group.user_name ? group.user_name.charAt(0).toUpperCase() : 'U';
 
-                        // Cegah teks gambar panjang merusak desain Inbox
                         let previewTeks = lastMsg.message;
                         if(previewTeks.includes('<img')) {
                             previewTeks = previewTeks.split('<br><img')[0] + ' 📷 [Mengirim Laporan Gambar]';
@@ -968,57 +985,6 @@
             }
         }
 
-        // ✅ LOGIKA RUANG CHAT (BALASAN ADMIN)
-        window.bukaChatRoom = function(userIdOrName, userName) {
-            document.getElementById('chatRoomUserId').value = userIdOrName;
-            document.getElementById('chatRoomUserName').innerText = userName;
-            document.getElementById('modalAdminChatRoom').style.display = 'flex';
-            
-            const body = document.getElementById('chatRoomBodyAdmin');
-            body.innerHTML = '';
-            
-            const msgs = globalAdminChats.filter(c => (c.user_id || c.user_name) == userIdOrName);
-            const chronologicalMsgs = [...msgs].reverse(); // Urutkan dari atas ke bawah
-
-            chronologicalMsgs.forEach(msg => {
-                const isAdmin = msg.sender_role === 'admin';
-                const cssClass = isAdmin ? 'msg-admin' : 'msg-pembeli';
-                body.innerHTML += `<div class="msg-bubble ${cssClass}">${msg.message}</div>`;
-            });
-            
-            body.scrollTop = body.scrollHeight;
-        };
-
-        window.tutupChatRoomAdmin = function() {
-            document.getElementById('modalAdminChatRoom').style.display = 'none';
-        };
-
-        window.kirimBalasanDariAdmin = async function() {
-            const input = document.getElementById('chatRoomInputAdmin');
-            const teks = input.value.trim();
-            const targetUser = document.getElementById('chatRoomUserId').value;
-            
-            if(!teks) return;
-
-            const body = document.getElementById('chatRoomBodyAdmin');
-            body.innerHTML += `<div class="msg-bubble msg-admin">${teks}</div>`;
-            input.value = '';
-            body.scrollTop = body.scrollHeight;
-
-            try {
-                await fetch('/api/chat/save', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
-                    body: JSON.stringify({ message: teks, sender: 'admin', target_user: targetUser }) 
-                });
-                
-                fetchInboxAdmin(); 
-            } catch(e) {
-                showToast("Gagal mengirim pesan ke pembeli", "error");
-            }
-        };
-
-
         let targetHapusTipe = ""; let targetHapusId = "";
         function konfirmasiHapus(tipe, id) { 
             targetHapusTipe = tipe; targetHapusId = id; 
@@ -1026,7 +992,6 @@
         }
         function tutupConfirm() { document.getElementById('modalConfirm').style.display = 'none'; }
         
-        // ✅ GEMBOK PENGHAPUSAN
         document.getElementById('btnEksekusiHapus').addEventListener('click', async () => {
             tutupConfirm(); const btn = document.getElementById('btnEksekusiHapus'); btn.innerHTML = "Memproses...";
             try {
@@ -1060,7 +1025,6 @@
             } catch(err) { showToast("Server Error", "error"); } finally { btn.innerHTML = "<i class='fas fa-plus'></i> Buat Kupon Baru"; }
         });
 
-        // ✅ LOGIKA MUNCULKAN ALASAN JIKA RETUR DITOLAK ATAU SELESAI
         window.cekTolakRetur = function(val) {
             const boxAlasan = document.getElementById('boxAlasanTolak');
             if (val === 'Retur Ditolak' || val === 'Selesai') { 
@@ -1072,7 +1036,6 @@
             }
         }
 
-        // ✅ LOGIKA TOMBOL "KIRIM BARANG PENGGANTI (RESI BARU)" JIKA STATUS RETUR
         function bukaProsesPesanan(id, status, resi, kurir, alamat) { 
             document.getElementById('prosesOrderId').value = id; 
             document.getElementById('prosesOrderStatus').value = status; 
@@ -1087,13 +1050,12 @@
             if (resi && resi !== '-' && resi !== 'null') {
                 inputResi.value = resi; 
                 
-                // JIKA STATUS LAGI RETUR, BUKA TOMBOL RESI UNTUK BUAT RESI BARU (PENGGANTI)
                 if (status.includes('Retur')) {
                     btnResi.style.display = 'flex';
                     btnResi.innerHTML = "<i class='fas fa-sync-alt'></i> Request Pickup Ulang (Kirim Barang Pengganti)";
                     btnResi.style.background = "#ff9800"; 
                 } else {
-                    btnResi.style.display = 'none'; // Normalnya disembunyikan
+                    btnResi.style.display = 'none'; 
                 }
 
             } else {
@@ -1124,7 +1086,7 @@
                 if(data.success) {
                     showToast("🎉 Kurir berhasil dipanggil! Resi tercetak.", "success");
                     document.getElementById('prosesOrderResi').value = data.resi;
-                    document.getElementById('prosesOrderStatus').value = 'Diproses'; // Otomatis jadi dikemas lagi
+                    document.getElementById('prosesOrderStatus').value = 'Diproses'; 
                     btn.style.display = 'none';
                 } else {
                     showToast("Gagal memanggil kurir: " + data.message, "error");
@@ -1136,7 +1098,6 @@
             }
         }
         
-        // ✅ SIMPAN STATUS
         document.getElementById('formProsesPesanan').addEventListener('submit', async (e) => {
             e.preventDefault(); const btn = document.getElementById('btnSimpanProses'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
             const id = document.getElementById('prosesOrderId').value;
@@ -1229,34 +1190,29 @@
             } catch(err) { showToast("Server Error saat mengedit!", "error"); } finally { btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan"; }
         });
         
-                // ✅ FUNGSI MESIN HITUNG STOK VARIAN OTOMATIS
         window.hitungStokOtomatis = function(inputId, stockId) {
             const val = document.getElementById(inputId).value;
-            // Jika ada tanda sama dengan (=), berarti admin masukin format stok
             if(val.includes('=')) {
                 let total = 0;
-                const parts = val.split(','); // Pecah per koma (S=10, M=15)
+                const parts = val.split(','); 
                 parts.forEach(p => {
-                    const s = p.split('='); // Pecah per sama dengan
+                    const s = p.split('='); 
                     if(s.length === 2 && !isNaN(parseInt(s[1]))) {
-                        total += parseInt(s[1]); // Tambahkan angkanya
+                        total += parseInt(s[1]); 
                     }
                 });
                 
-                // Kunci kolom Stok Total dan masukkan hasil penjumlahannya
                 if(total > 0) {
                     document.getElementById(stockId).value = total;
                     document.getElementById(stockId).setAttribute('readonly', 'true');
-                    document.getElementById(stockId).style.background = '#eef2f5'; // Warna abu
+                    document.getElementById(stockId).style.background = '#eef2f5'; 
                 }
             } else {
-                // Jika cuma teks biasa (S, M, L), buka kembali gembok stok total
                 document.getElementById(stockId).removeAttribute('readonly');
                 document.getElementById(stockId).style.background = '#fff';
             }
         };
 
-        // ✅ LOGIKA MENYIMPAN PESAN AUTO-REPLY
         document.addEventListener("DOMContentLoaded", () => {
             const savedReply = localStorage.getItem('belidikita_autoreply') || "Halo Kak! Terima kasih sudah menghubungi Belidikita. Pesan Kakak sudah kami terima dan Admin akan segera membalasnya. Mohon ditunggu ya! 😊";
             const autoReplyBox = document.getElementById('adminAutoReplyText');
