@@ -673,7 +673,7 @@
             window.renderHasilKatalog(); 
         };
 
-        window.renderHasilKatalog = function() {
+                window.renderHasilKatalog = function() {
             const containerGrid = document.getElementById('gridHasilKategori');
             const filterDrop = document.getElementById('filterKatalog');
             let finalData = [...window.katalogDataSementara]; 
@@ -699,8 +699,17 @@
                     const avgRating = parseFloat(product.avg_rating) || 0;
                     const ratingHtml = avgRating > 0 ? `<i class="fas fa-star" style="color:#FFD700;"></i> ${avgRating.toFixed(1)}` : `<i class="fas fa-star" style="color:#ccc;"></i> 0.0`;
 
-                    const prodObj = { id: product.id, foto: fotoUtama, nama: product.title, hargaStr: priceRp, deskripsi: product.description || '', harga: product.price, weight: product.weight || 1000, seller_name: product.seller_name || "Belidikita Official", qty: 1, unit: product.unit || 'Pcs', variant_title: product.variant_title || '', variant_options: product.variant_options || '', wholesale_price: product.wholesale_price || 0, wholesale_min_qty: product.wholesale_min_qty || 0 };
-                    const strObj = encodeURIComponent(JSON.stringify(prodObj));
+                    // ✅ DATA DILENGKAPI
+                    const prodObj = { 
+                        id: product.id, foto: fotoUtama, nama: product.title, hargaStr: priceRp, 
+                        deskripsi: product.description || '', harga: product.price, weight: product.weight || 1000, 
+                        seller_name: product.seller_name || "Belidikita Official", qty: 1, unit: product.unit || 'Pcs', 
+                        variant_title: product.variant_title || '', variant_options: product.variant_options || '', 
+                        wholesale_price: product.wholesale_price || 0, wholesale_min_qty: product.wholesale_min_qty || 0 
+                    };
+                    
+                    // ✅ ANTI-PATAH DITAMBAHKAN
+                    const strObj = encodeURIComponent(JSON.stringify(prodObj)).replace(/'/g, "%27");
 
                     let labelGrosir = '';
                     if(product.wholesale_price > 0 && product.wholesale_min_qty > 0) labelGrosir = `<div style="position:absolute; top:5px; left:5px; background:#4CAF50; color:#fff; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;"><i class="fas fa-tags"></i> GROSIR</div>`;
@@ -1002,7 +1011,7 @@
                 }
             });
 
-            async function loadProdukBeranda() {
+                        async function loadProdukBeranda() {
                 try {
                     const res = await fetch('/api/products');
                     const result = await res.json();
@@ -1033,16 +1042,19 @@
                             const ratingReal = parseFloat(p.avg_rating) || 0;
                             const tampilanRating = ratingReal > 0 ? ratingReal.toFixed(1) : "0.0"; 
 
+                            // ✅ DATA DILENGKAPI SAMA PERSIS DENGAN KATALOG
                             const prodObj = { 
                                 id: p.id, nama: p.title, harga: p.price, hargaStr: hargaRp, 
                                 deskripsi: p.description, foto: p.media_url, 
-                                weight: p.weight || 1000, wholesale_price: p.wholesale_price, wholesale_min_qty: p.wholesale_min_qty 
+                                weight: p.weight || 1000, seller_name: p.seller_name || "Belidikita Official", 
+                                qty: 1, unit: p.unit || 'Pcs', variant_title: p.variant_title || '', 
+                                variant_options: p.variant_options || '', wholesale_price: p.wholesale_price || 0, 
+                                wholesale_min_qty: p.wholesale_min_qty || 0 
                             };
                             
+                             // ✅ ANTI-PATAH DITAMBAHKAN
+                             const strObj = encodeURIComponent(JSON.stringify(prodObj)).replace(/'/g, "%27");
 
-                             const strObj = encodeURIComponent(JSON.stringify(prodObj));
-
-                            // ✅ TAMBAHAN LOGIKA MUNCULKAN LABEL GROSIR
                             let labelGrosir = '';
                             if(p.wholesale_price > 0 && p.wholesale_min_qty > 0) {
                                 labelGrosir = `<div style="position:absolute; top:5px; left:5px; background:#4CAF50; color:#fff; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;"><i class="fas fa-tags"></i> GROSIR</div>`;
@@ -1099,6 +1111,7 @@
                     }
                 } catch(e) { }
             }
+
 
                        window.bukaDetailGlobal = function(encodedObj) {
                 const decodedObj = decodeURIComponent(encodedObj);
