@@ -620,49 +620,43 @@
             printWindow.document.close();
         };
 
+        // ✅ FASE 2: PENCARIAN PINTAR LANGSUNG KE DATABASE
         window.lakukanPencarianPintar = async function(keyword) {
+            if(!keyword || keyword.trim() === '') return;
             try {
-                const res = await fetch('/api/products');
+                const res = await fetch(`/api/products?search=${encodeURIComponent(keyword)}&limit=50`);
                 const result = await res.json();
-                if (result.success) {
-                    const keywordLower = keyword.toLowerCase();
-                    const filtered = result.data.filter(p => 
-                        p.title.toLowerCase().includes(keywordLower) || 
-                        p.category.toLowerCase().includes(keywordLower) ||
-                        (p.description && p.description.toLowerCase().includes(keywordLower))
-                    );
-                    
-                    if (filtered.length === 0) {
-                        document.getElementById('modalNotFound').style.display = 'flex';
-                    } else {
-                        window.katalogDataSementara = filtered;
-                        window.bukaHasilPencarianPintar(keyword, filtered);
-                    }
+                
+                window.katalogDataSementara = result.success ? result.data : [];
+                
+                if (window.katalogDataSementara.length === 0) {
+                    document.getElementById('modalNotFound').style.display = 'flex';
+                } else {
+                    window.bukaHasilPencarianPintar(keyword, window.katalogDataSementara);
                 }
             } catch (err) { showToast("Sistem sibuk. Coba lagi.", "error"); }
         };
 
         window.lakukanPencarianDariKatalog = async function(keyword) {
-            if(!keyword.trim()) return;
+            if(!keyword || keyword.trim() === '') return;
+            const containerGrid = document.getElementById('gridHasilKategori');
+            containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:#0D47A1; grid-column:span 2; padding: 50px 20px; font-weight:bold;"><i class="fas fa-spinner fa-spin mr-2"></i> Mencari...</p>';
+            
             try {
-                const res = await fetch('/api/products');
+                const res = await fetch(`/api/products?search=${encodeURIComponent(keyword)}&limit=50`);
                 const result = await res.json();
-                if (result.success) {
-                    const keywordLower = keyword.toLowerCase();
-                    const filtered = result.data.filter(p => 
-                        p.title.toLowerCase().includes(keywordLower) || 
-                        p.category.toLowerCase().includes(keywordLower) ||
-                        (p.description && p.description.toLowerCase().includes(keywordLower))
-                    );
-                    if (filtered.length === 0) {
-                        document.getElementById('gridHasilKategori').innerHTML = `<div style="text-align:center; width:100%; grid-column:span 2; padding: 50px 20px;"><i class="fas fa-box-open" style="font-size: 60px; color: #ddd; margin-bottom: 15px;"></i><p style="color:#888; font-weight:600; font-size: 13px;">Ups, "${keyword}" tidak ditemukan.</p></div>`;
-                    } else {
-                        window.katalogDataSementara = filtered;
-                        document.getElementById('judulHalamanKategori').innerText = `Hasil: "${keyword}"`;
-                        window.renderHasilKatalog();
-                    }
+                
+                window.katalogDataSementara = result.success ? result.data : [];
+                
+                if (window.katalogDataSementara.length === 0) {
+                    containerGrid.innerHTML = `<div style="text-align:center; width:100%; grid-column:span 2; padding: 50px 20px;"><i class="fas fa-box-open" style="font-size: 60px; color: #ddd; margin-bottom: 15px;"></i><p style="color:#888; font-weight:600; font-size: 13px;">Ups, "${keyword}" tidak ditemukan.</p></div>`;
+                } else {
+                    document.getElementById('judulHalamanKategori').innerText = `Hasil: "${keyword}"`;
+                    window.renderHasilKatalog();
                 }
-            } catch(e) {}
+            } catch(e) {
+                containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:red; grid-column:span 2; padding: 50px 20px;">Gagal memuat barang dari server.</p>';
+            }
         };
 
         window.bukaHasilPencarianPintar = function(keyword, dataProduk) {
@@ -673,7 +667,7 @@
             window.renderHasilKatalog(); 
         };
 
-                window.renderHasilKatalog = function() {
+        window.renderHasilKatalog = function() {
             const containerGrid = document.getElementById('gridHasilKategori');
             const filterDrop = document.getElementById('filterKatalog');
             let finalData = [...window.katalogDataSementara]; 
@@ -699,7 +693,6 @@
                     const avgRating = parseFloat(product.avg_rating) || 0;
                     const ratingHtml = avgRating > 0 ? `<i class="fas fa-star" style="color:#FFD700;"></i> ${avgRating.toFixed(1)}` : `<i class="fas fa-star" style="color:#ccc;"></i> 0.0`;
 
-                    // ✅ DATA DILENGKAPI
                     const prodObj = { 
                         id: product.id, foto: fotoUtama, nama: product.title, hargaStr: priceRp, 
                         deskripsi: product.description || '', harga: product.price, weight: product.weight || 1000, 
@@ -708,7 +701,6 @@
                         wholesale_price: product.wholesale_price || 0, wholesale_min_qty: product.wholesale_min_qty || 0 
                     };
                     
-                    // ✅ ANTI-PATAH DITAMBAHKAN
                     const strObj = encodeURIComponent(JSON.stringify(prodObj)).replace(/'/g, "%27");
 
                     let labelGrosir = '';
@@ -726,6 +718,7 @@
             }
         };
 
+        // ✅ FASE 2: FILTER KATEGORI LANGSUNG KE DATABASE
         window.bukaSubKategori = function(mainCat) {
             document.getElementById('judulSubKategori').innerHTML = `<i class="fas fa-tags" style="color:#FF9800;"></i> Etalase ${mainCat}`;
             const container = document.getElementById('listSubKategori');
@@ -771,29 +764,33 @@
             document.getElementById('katalogLayarPenuh').style.display = 'flex';
             document.body.style.overflow = 'hidden'; 
             document.getElementById('judulHalamanKategori').innerText = teksPencarian;
-            document.getElementById('gridHasilKategori').innerHTML = '<p style="text-align:center; width:100%; color:#0D47A1; grid-column:span 2; padding: 50px 20px; font-weight:bold;"><i class="fas fa-spinner fa-spin mr-2"></i> Mengambil data...</p>';
+            const containerGrid = document.getElementById('gridHasilKategori');
+            containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:#0D47A1; grid-column:span 2; padding: 50px 20px; font-weight:bold;"><i class="fas fa-spinner fa-spin mr-2"></i> Mengambil data...</p>';
 
             window.history.pushState({ page: 'katalog' }, "", "");
 
             try {
-                const res = await fetch('/api/products');
+                // Request Paginasi dan Filter Server-Side (Fase 2)
+                let apiUrl = `/api/products?category=${encodeURIComponent(mainCat)}&limit=50`;
+                
+                // Jika mencari sub-kategori spesifik, kita gunakan parameter search
+                if (subCat !== 'Semua') {
+                    let keyword = subCat.toLowerCase().split(/[,\/ ]/)[0]; 
+                    if(keyword === "buku" && subCat.includes("sekolah")) keyword = "sekolah";
+                    apiUrl = `/api/products?category=${encodeURIComponent(mainCat)}&search=${encodeURIComponent(keyword)}&limit=50`;
+                }
+
+                const res = await fetch(apiUrl);
                 const result = await res.json();
 
                 if (result.success && result.data.length > 0) {
-                    let keyword = teksPencarian.toLowerCase().split(/[,\/ ]/)[0]; 
-                    if(keyword === "buku" && subCat.includes("sekolah")) keyword = "sekolah";
-
-                    window.katalogDataSementara = result.data.filter(p => {
-                        const title = (p.title || '').toLowerCase();
-                        const desc = (p.description || '').toLowerCase();
-                        return title.includes(keyword) || desc.includes(keyword);
-                    });
+                    window.katalogDataSementara = result.data;
                     window.renderHasilKatalog();
                 } else {
-                    document.getElementById('gridHasilKategori').innerHTML = '<p style="text-align:center; width:100%; color:#888; grid-column:span 2; padding: 50px 20px;">Toko belum mengunggah barang.</p>';
+                    containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:#888; grid-column:span 2; padding: 50px 20px;">Toko belum mengunggah barang di kategori ini.</p>';
                 }
             } catch (e) {
-                document.getElementById('gridHasilKategori').innerHTML = '<p style="text-align:center; width:100%; color:red; grid-column:span 2; padding: 50px 20px;">Gagal memuat barang dari server.</p>';
+                containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:red; grid-column:span 2; padding: 50px 20px;">Gagal memuat barang dari server.</p>';
             }
         };
 
@@ -1011,9 +1008,10 @@
                 }
             });
 
-                        async function loadProdukBeranda() {
+            async function loadProdukBeranda() {
                 try {
-                    const res = await fetch('/api/products');
+                    // Fase 2: Ambil produk menggunakan limit agar enteng
+                    const res = await fetch('/api/products?limit=50');
                     const result = await res.json();
                     
                     if(result.success) {
@@ -1042,7 +1040,6 @@
                             const ratingReal = parseFloat(p.avg_rating) || 0;
                             const tampilanRating = ratingReal > 0 ? ratingReal.toFixed(1) : "0.0"; 
 
-                            // ✅ DATA DILENGKAPI SAMA PERSIS DENGAN KATALOG
                             const prodObj = { 
                                 id: p.id, nama: p.title, harga: p.price, hargaStr: hargaRp, 
                                 deskripsi: p.description, foto: p.media_url, 
@@ -1052,7 +1049,6 @@
                                 wholesale_min_qty: p.wholesale_min_qty || 0 
                             };
                             
-                             // ✅ ANTI-PATAH DITAMBAHKAN
                              const strObj = encodeURIComponent(JSON.stringify(prodObj)).replace(/'/g, "%27");
 
                             let labelGrosir = '';
@@ -1090,7 +1086,6 @@
                                 </div>
                             `;
 
-
                             if (p.category === 'laris') {
                                 if(cLaris) cLaris.innerHTML += htmlCardHorizontal;
                                 countLaris++;
@@ -1112,10 +1107,7 @@
                 } catch(e) { }
             }
 
-
-                                   // ✅ MESIN HYBRID PENJINJING DATA ANTI-UNDEFINED
             window.bukaDetailGlobal = function(arg1, foto, nama, hargaStr, deskripsi, hargaRaw, beratRaw, sellerName, unit, vTitle, vOpt, wsPrice, wsMin) {
-                // Mode 1: Jika diklik dari Katalog / Slider (Bentuk JSON Encoded String)
                 if (typeof arg1 === 'string' && (arg1.includes('%7B') || arg1.startsWith('%'))) {
                     try {
                         const antiPatah = arg1.replace(/'/g, "%27");
@@ -1125,7 +1117,6 @@
                     } catch (e) { console.error(e); }
                 }
 
-                // Mode 2: Jika diklik dari Daftar Barang Bawah (Bentuk Parameter Eceran)
                 const dataProduk = { 
                     id: arg1, 
                     foto: foto || "https://via.placeholder.com/400", 
@@ -1146,7 +1137,6 @@
                 window.location.href = 'detailproduk.html';
             };
             
-            // Kabel penghubung
             window.bukaDetailTunggal = window.bukaDetailGlobal; 
 
             loadProdukBeranda();
