@@ -207,17 +207,22 @@
         <div style="height: 100px;"></div>
     </main>
 
-    <svg viewBox="0 0 140 60" style="position: fixed; bottom: 125px; right: -22px; width: 140px; height: 60px; pointer-events: none; filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.5)); z-index: 1001; animation: wiggleText 3s ease-in-out infinite;">
+    <svg viewBox="0 0 160 80" style="position: fixed; bottom: 125px; right: -25px; width: 160px; height: 80px; pointer-events: none; filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.8)); z-index: 1001; animation: wiggleText 3s ease-in-out infinite;">
         <defs>
-            <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stop-color="#FFD700" />
-                <stop offset="50%" stop-color="#FFF8E1" />
+            <linearGradient id="goldGradientStrong" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#FF9800" />
+                <stop offset="50%" stop-color="#FFD700" />
                 <stop offset="100%" stop-color="#FFB300" />
             </linearGradient>
         </defs>
-        <path id="curve-path" d="M 0 55 Q 70 5 140 55" fill="transparent" />
-        <text font-family="'Montserrat', sans-serif" font-size="8.5" font-weight="800" fill="url(#goldGradient)">
-            <textPath href="#curve-path" startOffset="50%" text-anchor="middle">Butuh bantuan klik dibawah ini</textPath>
+        <path id="curve-path-1" d="M 10 40 Q 80 0 150 40" fill="transparent" />
+        <path id="curve-path-2" d="M 10 60 Q 80 20 150 60" fill="transparent" />
+        
+        <text font-family="'Montserrat', sans-serif" font-size="10" font-weight="900" fill="url(#goldGradientStrong)" stroke="#000" stroke-width="0.5">
+            <textPath href="#curve-path-1" startOffset="50%" text-anchor="middle">Butuh bantuan?</textPath>
+        </text>
+        <text font-family="'Montserrat', sans-serif" font-size="10" font-weight="900" fill="url(#goldGradientStrong)" stroke="#000" stroke-width="0.5">
+            <textPath href="#curve-path-2" startOffset="50%" text-anchor="middle">Klik dibawah ini</textPath>
         </text>
     </svg>
 
@@ -234,7 +239,7 @@
         <div class="katalog-tools">
             <div class="katalog-search">
                 <i class="fas fa-search"></i>
-                <input type="text" id="inputCariKatalog" placeholder="Cari di sini lalu tekan Enter..." onkeypress="if(event.key === 'Enter') window.renderHasilKatalog()">
+                <input type="text" id="inputCariKatalog" placeholder="Cari di sini lalu tekan Enter..." onkeypress="if(event.key === 'Enter') window.lakukanPencarianDariKatalog(this.value)">
             </div>
             <select id="filterKatalog" onchange="window.renderHasilKatalog()">
                 <option value="terbaru">Terbaru</option>
@@ -348,8 +353,8 @@
             <i class="fas fa-gift exit-icon"></i>
             <h3>Yakin Mau Keluar Sekarang? 🥺</h3>
             <p>Kamu belum pakai <b>Voucher Diskon 10%</b> dan <b>Gratis Ongkir</b> edisi spesial Ramadhan lho! Yakin mau dilewatin aja?</p>
-            <button class="btn-stay" id="btnStayShopping"><i class="fas fa-shopping-bag mr-1"></i> Oke, Aku Belanja Dulu!</button>
-            <button class="btn-leave" id="btnLeaveApp">Nggak deh, mau keluar aja</button>
+            <button class="btn-stay" id="btnStayShopping" onclick="window.batalKeluar()"><i class="fas fa-shopping-bag mr-1"></i> Oke, Aku Belanja Dulu!</button>
+            <button class="btn-leave" id="btnLeaveApp" onclick="window.jadiKeluar()">Nggak deh, mau keluar aja</button>
         </div>
     </div>
 
@@ -409,7 +414,7 @@
 
     <script>
         // ==========================================
-        // ✅ 1. KUMPULAN FUNGSI GLOBAL (Agar bisa dipanggil langsung dari HTML onClick)
+        // ✅ 1. KUMPULAN FUNGSI GLOBAL 
         // ==========================================
         function showToast(msg, type = 'info') {
             const toast = document.getElementById("customToast");
@@ -424,11 +429,26 @@
 
         window.kembaliDariKatalog = function() {
             document.getElementById('katalogLayarPenuh').style.display = 'none';
+            // Kembalikan ke halaman utama yang sama (jangan hilang)
         };
 
         window.tutupHalamanPesanan = function() {
             document.getElementById('pesananLayarPenuh').style.display = 'none';
             document.body.style.overflow = 'auto';
+        };
+
+        window.batalKeluar = function() {
+            document.getElementById('modalExitIntent').style.display = 'none';
+            // Pancing user ke atas untuk lihat promo
+            document.getElementById('promoSlider').scrollIntoView({ behavior: 'smooth' });
+            // Push state lagi agar tombol back bisa kepancing lagi
+            window.history.pushState({ page: 1 }, "", "");
+        };
+
+        window.jadiKeluar = function() {
+            document.getElementById('modalExitIntent').style.display = 'none';
+            window.history.back(); 
+            // Jika di aplikasi Android, ini akan trigger penutupan app
         };
 
         // KABEL UNTUK NAVBAR PESANAN BAWAH
@@ -443,6 +463,7 @@
             const kontenPesanan = document.getElementById('kontenPesananLayar');
             layarPesanan.style.display = 'flex';
             document.body.style.overflow = 'hidden';
+            window.history.pushState({ page: 'pesanan' }, "", ""); // Daftarkan state untuk modal ini
 
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) {
@@ -596,24 +617,54 @@
             printWindow.document.close();
         };
 
+        // ==========================================
+        // ✅ 2. LOGIKA PENCARIAN (DIPERBAIKI)
+        // ==========================================
         window.lakukanPencarianPintar = async function(keyword) {
             try {
                 const res = await fetch('/api/products');
                 const result = await res.json();
                 if (result.success) {
+                    // Cari produk berdasarkan judul ATAU deskripsi
                     const filtered = result.data.filter(p => 
-                        p.title.toLowerCase().includes(keyword) || 
-                        p.category.toLowerCase().includes(keyword) ||
-                        (p.description && p.description.toLowerCase().includes(keyword))
+                        p.title.toLowerCase().includes(keyword.toLowerCase()) || 
+                        p.category.toLowerCase().includes(keyword.toLowerCase()) ||
+                        (p.description && p.description.toLowerCase().includes(keyword.toLowerCase()))
                     );
+                    
                     if (filtered.length === 0) {
+                        // Jika gak ada, panggil modal Not Found
                         document.getElementById('modalNotFound').style.display = 'flex';
                     } else {
+                        // Pindah ke halaman hasil tanpa menutup elemen awal
                         window.katalogDataSementara = filtered;
                         window.bukaHasilPencarianPintar(keyword, filtered);
                     }
                 }
             } catch (err) { showToast("Sistem sibuk. Coba lagi.", "error"); }
+        };
+
+        // Khusus ketika pencarian di enter dari input layar katalog
+        window.lakukanPencarianDariKatalog = async function(keyword) {
+            if(!keyword.trim()) return;
+            try {
+                const res = await fetch('/api/products');
+                const result = await res.json();
+                if (result.success) {
+                    const filtered = result.data.filter(p => 
+                        p.title.toLowerCase().includes(keyword.toLowerCase()) || 
+                        p.category.toLowerCase().includes(keyword.toLowerCase()) ||
+                        (p.description && p.description.toLowerCase().includes(keyword.toLowerCase()))
+                    );
+                    if (filtered.length === 0) {
+                        document.getElementById('gridHasilKategori').innerHTML = `<div style="text-align:center; width:100%; grid-column:span 2; padding: 50px 20px;"><i class="fas fa-box-open" style="font-size: 60px; color: #ddd; margin-bottom: 15px;"></i><p style="color:#888; font-weight:600; font-size: 13px;">Ups, "${keyword}" tidak ditemukan.</p></div>`;
+                    } else {
+                        window.katalogDataSementara = filtered;
+                        document.getElementById('judulHalamanKategori').innerText = `Hasil: "${keyword}"`;
+                        window.renderHasilKatalog();
+                    }
+                }
+            } catch(e) {}
         };
 
         window.bukaHasilPencarianPintar = function(keyword, dataProduk) {
@@ -626,18 +677,9 @@
 
         window.renderHasilKatalog = function() {
             const containerGrid = document.getElementById('gridHasilKategori');
-            const inputCari = document.getElementById('inputCariKatalog');
             const filterDrop = document.getElementById('filterKatalog');
             let finalData = [...window.katalogDataSementara]; 
 
-            if(inputCari && inputCari.value.trim() !== '') {
-                const searchTxt = inputCari.value.toLowerCase().trim();
-                finalData = finalData.filter(p => {
-                    const title = (p.title || '').toLowerCase();
-                    const desc = (p.description || '').toLowerCase();
-                    return title.includes(searchTxt) || desc.includes(searchTxt);
-                });
-            }
             if(filterDrop) {
                 if(filterDrop.value === 'termurah') finalData.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
                 else if (filterDrop.value === 'terlaris') finalData.sort((a, b) => (parseInt(b.sold_count) || 0) - (parseInt(a.sold_count) || 0));
@@ -666,14 +708,14 @@
                     if(product.wholesale_price > 0 && product.wholesale_min_qty > 0) labelGrosir = `<div style="position:absolute; top:5px; left:5px; background:#4CAF50; color:#fff; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;"><i class="fas fa-tags"></i> GROSIR</div>`;
 
                     containerGrid.innerHTML += `
-                        <div class="product-card" onclick="window.bukaDetailGlobal('${strObj}')" style="position:relative;">
+                        <div class="product-card" onclick="window.bukaDetailGlobal('${strObj}')" style="position:relative; cursor:pointer;">
                             ${labelGrosir}
                             ${mediaTag}
                             <div class="product-info"><div class="product-title">${product.title}</div><div class="product-price">${priceRp}</div><div class="product-stats"><span>${ratingHtml}</span><span>${terjual} Terjual</span></div></div>
                         </div>`;
                 });
             } else {
-                containerGrid.innerHTML = `<div style="text-align:center; width:100%; grid-column:span 2; padding: 50px 20px;"><i class="fas fa-box-open" style="font-size: 60px; color: #ddd; margin-bottom: 15px;"></i><p style="color:#888; font-weight:600; font-size: 13px;">Ups, barang yang kamu ketik tidak ditemukan di kategori ini.</p></div>`;
+                containerGrid.innerHTML = `<div style="text-align:center; width:100%; grid-column:span 2; padding: 50px 20px;"><i class="fas fa-box-open" style="font-size: 60px; color: #ddd; margin-bottom: 15px;"></i><p style="color:#888; font-weight:600; font-size: 13px;">Ups, barang tidak ditemukan.</p></div>`;
             }
         };
 
@@ -705,6 +747,7 @@
 
             document.getElementById('modalSubKategori').style.display = 'flex';
             document.body.style.overflow = 'hidden'; 
+            window.history.pushState({ page: 'subkategori' }, "", "");
         };
 
         window.tutupSubKategori = function() {
@@ -722,6 +765,8 @@
             document.body.style.overflow = 'hidden'; 
             document.getElementById('judulHalamanKategori').innerText = teksPencarian;
             document.getElementById('gridHasilKategori').innerHTML = '<p style="text-align:center; width:100%; color:#0D47A1; grid-column:span 2; padding: 50px 20px; font-weight:bold;"><i class="fas fa-spinner fa-spin mr-2"></i> Mengambil data...</p>';
+
+            window.history.pushState({ page: 'katalog' }, "", "");
 
             try {
                 const res = await fetch('/api/products');
@@ -757,6 +802,7 @@
             }
             
             document.getElementById('modalInbox').style.display = 'flex';
+            window.history.pushState({ page: 'inbox' }, "", "");
             
             // Ambil pesan terakhir untuk preview
             fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } })
@@ -781,6 +827,7 @@
         window.bukaRuangChat = function() {
             document.getElementById('modalInbox').style.display = 'none';
             document.getElementById('modalChatAdmin').style.display = 'flex';
+            window.history.pushState({ page: 'chat_admin' }, "", "");
             
             const token = localStorage.getItem('token');
             fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } })
@@ -830,6 +877,7 @@
         // ==========================================
         window.bukaChatAI = function() {
             document.getElementById('aiChatModal').style.display = 'flex';
+            window.history.pushState({ page: 'chat_ai' }, "", "");
         };
 
         window.tutupChatAI = function() {
@@ -874,55 +922,47 @@
 
 
         // ==========================================
-        // ✅ INISIALISASI SAAT HALAMAN DIMUAT
+        // ✅ INISIALISASI SAAT HALAMAN DIMUAT (TOMBOL BACK)
         // ==========================================
         document.addEventListener("DOMContentLoaded", () => {
-            
-            // Handle form submission untuk Retur dan Ulasan di Navbar
-            document.getElementById('formReturNav')?.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const token = localStorage.getItem('token');
-                const id = document.getElementById('returOrderIdNav').value;
-                const formData = new FormData();
-                formData.append('reason', document.getElementById('returReasonNav').value);
-                formData.append('proof', document.getElementById('returProofNav').files[0]);
-                try {
-                    await fetch(`/api/orders/${id}/return`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
-                    showToast("Pengajuan Retur Terkirim!", "success"); 
-                    document.getElementById('modalReturNav').style.display = 'none'; window.bukaHalamanPesanan();
-                } catch(e) { showToast("Gagal Retur", "error"); }
-            });
+            // Pasang gembok pop state agar jika di-back di HP, pop-up nya yg tutup bukan exit aplikasi
+            window.history.pushState({ page: 'home' }, "", "");
 
-            document.getElementById('formUlasanNav')?.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const token = localStorage.getItem('token');
-                const payload = { product_id: document.getElementById('ulasanProductIdNav').value, rating: document.getElementById('ulasanRatingNav').value, comment: document.getElementById('ulasanKomentarNav').value };
-                try {
-                    await fetch('/api/reviews', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
-                    showToast("Terima kasih atas ulasannya!", "success"); 
-                    document.getElementById('modalUlasanNav').style.display = 'none';
-                    // Reload beranda agar bintang terupdate
-                    window.location.reload();
-                } catch(e) { showToast("Gagal Menilai", "error"); }
-            });
-
-            // Handle back button HP (Kembali)
             window.addEventListener('popstate', function(event) {
+                let isModalOpen = false;
+                
                 if(document.getElementById('katalogLayarPenuh').style.display === 'flex') {
                     document.getElementById('katalogLayarPenuh').style.display = 'none';
-                } else if(document.getElementById('pesananLayarPenuh').style.display === 'flex') {
-                    window.tutupHalamanPesanan();
-                } else if(document.getElementById('modalChatAdmin').style.display === 'flex') {
-                    window.tutupChatAdmin();
-                } else if(document.getElementById('modalInbox').style.display === 'flex') {
+                    isModalOpen = true;
+                } 
+                if(document.getElementById('pesananLayarPenuh').style.display === 'flex') {
+                    document.getElementById('pesananLayarPenuh').style.display = 'none';
+                    isModalOpen = true;
+                } 
+                if(document.getElementById('modalChatAdmin').style.display === 'flex') {
+                    document.getElementById('modalChatAdmin').style.display = 'none';
+                    isModalOpen = true;
+                } 
+                if(document.getElementById('modalInbox').style.display === 'flex') {
                     document.getElementById('modalInbox').style.display = 'none';
-                } else if(document.getElementById('aiChatModal').style.display === 'flex') {
-                    window.tutupChatAI();
+                    isModalOpen = true;
+                } 
+                if(document.getElementById('aiChatModal').style.display === 'flex') {
+                    document.getElementById('aiChatModal').style.display = 'none';
+                    isModalOpen = true;
+                }
+                if(document.getElementById('modalSubKategori').style.display === 'flex') {
+                    document.getElementById('modalSubKategori').style.display = 'none';
+                    isModalOpen = true;
+                }
+
+                // Jika TIDAK ADA modal yang sedang terbuka, baru munculkan EXIT INTENT
+                if(!isModalOpen) {
+                    document.getElementById('modalExitIntent').style.display = 'flex';
                 }
             });
 
             // Load data barang saat pertama dibuka
-            // (Logika rating bintang dan tampilan produk ini saya JAMIN tidak disentuh)
             async function loadProdukBeranda() {
                 try {
                     const res = await fetch('/api/products');
@@ -962,7 +1002,7 @@
                             const strObj = encodeURIComponent(JSON.stringify(prodObj));
 
                             const htmlCardHorizontal = `
-                                <div class="h-card" onclick="window.bukaDetailTunggal('${strObj}')">
+                                <div class="h-card" onclick="window.bukaDetailGlobal('${strObj}')">
                                     <img src="${imgUrl}" class="h-card-img" alt="Produk" loading="lazy">
                                     <div class="h-card-info">
                                         <h3 class="h-card-title">${p.title}</h3>
@@ -976,7 +1016,7 @@
                             `;
 
                             const htmlCardGrid = `
-                                <div class="product-card" onclick="window.bukaDetailTunggal('${strObj}')">
+                                <div class="product-card" onclick="window.bukaDetailGlobal('${strObj}')">
                                     <img src="${imgUrl}" class="product-media" alt="Produk" loading="lazy">
                                     <div class="product-info">
                                         <h3 class="product-title">${p.title}</h3>
@@ -1008,7 +1048,7 @@
                 } catch(e) { }
             }
 
-            window.bukaDetailTunggal = function(encodedObj) {
+            window.bukaDetailGlobal = function(encodedObj) {
                 const decodedObj = decodeURIComponent(encodedObj);
                 localStorage.setItem('produk_detail', decodedObj);
                 window.location.href = 'detailproduk.html';
