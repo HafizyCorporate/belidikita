@@ -1038,10 +1038,19 @@
                                 deskripsi: p.description, foto: p.media_url, 
                                 weight: p.weight || 1000, wholesale_price: p.wholesale_price, wholesale_min_qty: p.wholesale_min_qty 
                             };
-                            const strObj = encodeURIComponent(JSON.stringify(prodObj));
+                            
+
+                             const strObj = encodeURIComponent(JSON.stringify(prodObj));
+
+                            // ✅ TAMBAHAN LOGIKA MUNCULKAN LABEL GROSIR
+                            let labelGrosir = '';
+                            if(p.wholesale_price > 0 && p.wholesale_min_qty > 0) {
+                                labelGrosir = `<div style="position:absolute; top:5px; left:5px; background:#4CAF50; color:#fff; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;"><i class="fas fa-tags"></i> GROSIR</div>`;
+                            }
 
                             const htmlCardHorizontal = `
-                                <div class="h-card" onclick="window.bukaDetailGlobal('${strObj}')">
+                                <div class="h-card" onclick="window.bukaDetailTunggal('${strObj}')">
+                                    ${labelGrosir}
                                     <img src="${imgUrl}" class="h-card-img" alt="Produk" loading="lazy">
                                     <div class="h-card-info">
                                         <h3 class="h-card-title">${p.title}</h3>
@@ -1056,6 +1065,7 @@
 
                             const htmlCardGrid = `
                                 <div class="product-card" onclick="window.bukaDetailTunggal('${strObj}')">
+                                    ${labelGrosir}
                                     <img src="${imgUrl}" class="product-media" alt="Produk" loading="lazy">
                                     <div class="product-info">
                                         <h3 class="product-title">${p.title}</h3>
@@ -1067,6 +1077,7 @@
                                     </div>
                                 </div>
                             `;
+
 
                             if (p.category === 'laris') {
                                 if(cLaris) cLaris.innerHTML += htmlCardHorizontal;
