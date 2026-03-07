@@ -69,7 +69,6 @@ const initDB = async () => {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
-        -- ✅ RUANG KARANTINA DENGAN TAMBAHAN DNA GROSIR (RUDAL 2)
         CREATE TABLE IF NOT EXISTS draft_products (
             id SERIAL PRIMARY KEY,
             title VARCHAR(200) NOT NULL,
@@ -88,7 +87,6 @@ const initDB = async () => {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
-        -- ✅ TABEL BARU UNTUK KOTAK MASUK & LIVE CHAT (BEDIKI/ADMIN/PEMBELI)
         CREATE TABLE IF NOT EXISTS chats (
             id SERIAL PRIMARY KEY,
             user_id INT REFERENCES users(id) ON DELETE CASCADE,
@@ -96,6 +94,31 @@ const initDB = async () => {
             message TEXT,
             is_read BOOLEAN DEFAULT FALSE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- ✅ PENGGANTI LOCAL STORAGE: KERANJANG BELANJA
+        CREATE TABLE IF NOT EXISTS carts (
+            id SERIAL PRIMARY KEY,
+            user_id INT REFERENCES users(id) ON DELETE CASCADE,
+            product_id INT REFERENCES products(id) ON DELETE CASCADE,
+            variant VARCHAR(100) DEFAULT '',
+            qty INT DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- ✅ PENGGANTI SESSION STORAGE: ANTRIAN CHECKOUT SEMENTARA
+        CREATE TABLE IF NOT EXISTS checkout_sessions (
+            id SERIAL PRIMARY KEY,
+            user_id INT REFERENCES users(id) ON DELETE CASCADE UNIQUE,
+            items_json TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- ✅ PENGGANTI LOCAL STORAGE ADMIN: PENGATURAN TOKO (Auto Reply dll)
+        CREATE TABLE IF NOT EXISTS store_settings (
+            id SERIAL PRIMARY KEY,
+            setting_key VARCHAR(50) UNIQUE NOT NULL,
+            setting_value TEXT
         );
     `;
 
@@ -112,7 +135,6 @@ const initDB = async () => {
         ALTER TABLE products ADD COLUMN IF NOT EXISTS variant_title VARCHAR(100);
         ALTER TABLE products ADD COLUMN IF NOT EXISTS variant_options TEXT;
         
-        -- ✅ RUDAL 2: SUNTIKAN KOLOM GROSIR DI TABEL UTAMA
         ALTER TABLE products ADD COLUMN IF NOT EXISTS wholesale_price DECIMAL(12,2) DEFAULT 0;
         ALTER TABLE products ADD COLUMN IF NOT EXISTS wholesale_min_qty INT DEFAULT 0;
         
@@ -123,14 +145,13 @@ const initDB = async () => {
         
         ALTER TABLE internal_assets ADD COLUMN IF NOT EXISTS unit VARCHAR(50) DEFAULT 'Unit';
 
-        -- ✅ FASE 2: KOLOM TAMBAHAN UNTUK LOGIKA WAKTU & RETUR
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipped_at TIMESTAMP;
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMP;
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP;
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_reject_reason TEXT;
     `;
 
-    // ✅ FASE 2: INDEXING DATABASE AGAR SUPER CEPAT
+    // ✅ INDEXING DATABASE AGAR SUPER CEPAT
     const createIndexes = `
         CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
         CREATE INDEX IF NOT EXISTS idx_products_title ON products USING GIN (to_tsvector('indonesian', title));
@@ -142,8 +163,16 @@ const initDB = async () => {
         console.log("⏳ Sedang mencoba membangun tabel di Database...");
         await pool.query(createTables);
         await pool.query(alterTables);
-        await pool.query(createIndexes); // Eksekusi Indexing Fase 2
-        console.log("✅ SUKSES! Database 'belidikita' sudah nempel, tabel siap, dan Indexing FASE 2 Aktif! 🚀");
+        await pool.query(createIndexes); 
+        
+        // Suntikkan default Auto Reply agar tidak kosong saat admin pertama kali buka
+        await pool.query(`
+            INSERT INTO store_settings (setting_key, setting_value) 
+            VALUES ('autoreply', 'Halo Kak! Pesan diterima. Admin akan segera merespon.') 
+            ON CONFLICT (setting_key) DO NOTHING;
+        `);
+
+        console.log("✅ SUKSES! Database 'belidikita' siap dengan Keranjang Server-Side!");
     } catch (err) {
         console.error("❌ GAGAL MEMBANGUN TABEL:", err.message);
     }
