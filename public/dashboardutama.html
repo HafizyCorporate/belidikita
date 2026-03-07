@@ -1089,13 +1089,16 @@
                 } catch(e) { }
             }
 
-            window.bukaDetailGlobal = function(encodedObj) {
+                       window.bukaDetailGlobal = function(encodedObj) {
                 const decodedObj = decodeURIComponent(encodedObj);
                 localStorage.setItem('produk_detail', decodedObj);
                 window.location.href = 'detailproduk.html';
             };
+            // ✅ KABEL PENGHUBUNG YANG MEMPERBAIKI KLIK BARANG DI BERANDA
+            window.bukaDetailTunggal = window.bukaDetailGlobal; 
 
             loadProdukBeranda();
+
         });
         
         window.klikIkonAdmin = function() {
