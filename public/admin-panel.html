@@ -381,10 +381,28 @@
                     </div>
                 </div>
 
+                            <div style="background: #FFFDE7; padding: 15px; border-radius: 12px; border-left: 4px solid #FBC02D; margin-bottom: 12px;">
+                    <div class="grid-3">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label style="color:#F57F17;"><i class="fas fa-balance-scale"></i> Satuan</label>
+                            <input type="text" id="prodUnit" placeholder="Pcs, Kg..." value="Pcs" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label style="color:#F57F17;"><i class="fas fa-list-ul"></i> Judul Varian</label>
+                            <input type="text" id="prodVariantTitle" placeholder="Contoh: Ukuran">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label style="color:#F57F17;"><i class="fas fa-th-large"></i> Isi Varian & Stok</label>
+                            <input type="text" id="prodVariantOptions" placeholder="Contoh: S=10, M=15" oninput="window.hitungStokOtomatis('prodVariantOptions', 'prodStock')">
+                        </div>
+                    </div>
+                    <p style="font-size:10px; color:#ff3b30; font-weight:bold; margin-top:8px;">*FORMAT WAJIB JIKA BEDA STOK: NamaVarian=JumlahStok (Pisahkan dengan koma). Contoh: S=10, M=15, L=5. Stok Total akan terisi otomatis!</p>
+                </div>
+
                 <div class="grid-2">
                     <div class="form-group">
-                        <label>Stok Awal</label>
-                        <input type="number" id="prodStock" placeholder="Contoh: 50" required>
+                        <label>Stok Total Barang</label>
+                        <input type="number" id="prodStock" placeholder="Isi manual jika tidak ada varian" required>
                     </div>
                     <div class="form-group">
                         <label>Penempatan Etalase Depan</label>
@@ -396,23 +414,6 @@
                     </div>
                 </div>
 
-                <div style="background: #FFFDE7; padding: 15px; border-radius: 12px; border-left: 4px solid #FBC02D; margin-bottom: 12px;">
-                    <div class="grid-3">
-                        <div class="form-group" style="margin-bottom:0;">
-                            <label style="color:#F57F17;"><i class="fas fa-balance-scale"></i> Satuan Jual</label>
-                            <input type="text" id="prodUnit" placeholder="Pcs, Kg, Meter..." value="Pcs" required>
-                        </div>
-                        <div class="form-group" style="margin-bottom:0;">
-                            <label style="color:#F57F17;"><i class="fas fa-list-ul"></i> Judul Varian (Opsional)</label>
-                            <input type="text" id="prodVariantTitle" placeholder="Contoh: Pilih Ukuran">
-                        </div>
-                        <div class="form-group" style="margin-bottom:0;">
-                            <label style="color:#F57F17;"><i class="fas fa-th-large"></i> Isi Varian (Pisahkan koma)</label>
-                            <input type="text" id="prodVariantOptions" placeholder="Contoh: S, M, L, XL">
-                        </div>
-                    </div>
-                    <p style="font-size:9px; color:#888; margin-top:5px;">Kosongkan Judul & Isi Varian jika barang ini tidak memiliki pilihan (Misal: Kulkas).</p>
-                </div>
 
                 <div class="form-group">
                     <label>Berat Barang Aktual (Gram)</label>
@@ -536,9 +537,26 @@
                     </div>
                 </div>
 
+             
+                <div class="grid-3" style="background:#f4f7fa; padding:10px; border-radius:8px; border-left: 4px solid #1976D2; margin-bottom: 12px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Satuan</label>
+                        <input type="text" id="editProdUnit" required>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Judul Varian</label>
+                        <input type="text" id="editProdVariantTitle">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Isi Varian & Stok</label>
+                        <input type="text" id="editProdVariantOptions" placeholder="S=10, M=15" oninput="window.hitungStokOtomatis('editProdVariantOptions', 'editProdStock')">
+                    </div>
+                </div>
+                <p style="font-size:10px; color:#ff3b30; font-weight:bold; margin-bottom: 12px;">*Format Varian: S=10, M=15. Stok Total di bawah akan dihitung otomatis!</p>
+
                 <div class="grid-2">
                     <div class="form-group">
-                        <label>Stok Baru</label>
+                        <label>Stok Total Baru</label>
                         <input type="number" id="editProdStock" required>
                     </div>
                     <div class="form-group">
@@ -550,21 +568,7 @@
                         </select>
                     </div>
                 </div>
-                
-                <div class="grid-3" style="background:#f4f7fa; padding:10px; border-radius:8px;">
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label>Satuan</label>
-                        <input type="text" id="editProdUnit" required>
-                    </div>
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label>Judul Varian</label>
-                        <input type="text" id="editProdVariantTitle">
-                    </div>
-                    <div class="form-group" style="margin-bottom:0;">
-                        <label>Isi Varian</label>
-                        <input type="text" id="editProdVariantOptions">
-                    </div>
-                </div>
+
 
                 <div class="form-group">
                     <label>Berat Barang (Gram)</label>
@@ -1209,6 +1213,34 @@
                 if(data.success) { showToast("✅ Barang berhasil diupdate!", "success"); document.getElementById('modalEditProduk').style.display = 'none'; fetchProducts(); } else { showToast("Gagal: " + data.message, "error"); }
             } catch(err) { showToast("Server Error saat mengedit!", "error"); } finally { btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan"; }
         });
+        
+                // ✅ FUNGSI MESIN HITUNG STOK VARIAN OTOMATIS
+        window.hitungStokOtomatis = function(inputId, stockId) {
+            const val = document.getElementById(inputId).value;
+            // Jika ada tanda sama dengan (=), berarti admin masukin format stok
+            if(val.includes('=')) {
+                let total = 0;
+                const parts = val.split(','); // Pecah per koma (S=10, M=15)
+                parts.forEach(p => {
+                    const s = p.split('='); // Pecah per sama dengan
+                    if(s.length === 2 && !isNaN(parseInt(s[1]))) {
+                        total += parseInt(s[1]); // Tambahkan angkanya
+                    }
+                });
+                
+                // Kunci kolom Stok Total dan masukkan hasil penjumlahannya
+                if(total > 0) {
+                    document.getElementById(stockId).value = total;
+                    document.getElementById(stockId).setAttribute('readonly', 'true');
+                    document.getElementById(stockId).style.background = '#eef2f5'; // Warna abu
+                }
+            } else {
+                // Jika cuma teks biasa (S, M, L), buka kembali gembok stok total
+                document.getElementById(stockId).removeAttribute('readonly');
+                document.getElementById(stockId).style.background = '#fff';
+            }
+        };
+
     </script>
 </body>
 </html>
