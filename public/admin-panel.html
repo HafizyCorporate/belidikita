@@ -242,6 +242,15 @@
                 </table>
             </div>
         </div>
+        
+                <div class="box" style="border-top: 4px solid #1976D2; background: #f4f9ff;">
+            <h3 style="color:#1976D2;"><i class="fas fa-reply-all"></i> Pengaturan Pesan Otomatis (Auto-Reply)</h3>
+            <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Pesan ini akan otomatis terkirim membalas pembeli yang baru pertama kali chat ke toko Anda.</p>
+            <div class="form-group">
+                <textarea id="adminAutoReplyText" rows="3" placeholder="Contoh: Halo! Pesan kamu sudah diterima, mohon tunggu sebentar ya..."></textarea>
+            </div>
+            <button class="btn-submit" style="background:#1976D2;" onclick="window.simpanAutoReply()"><i class="fas fa-save"></i> Simpan Teks Auto-Reply</button>
+        </div>
 
         <div class="box" id="inboxSection" style="border-top: 4px solid #ff9800; background: #fffcf8;">
             <h3 style="color:#ff9800;"><i class="fas fa-envelope"></i> Kotak Masuk Pembeli</h3>
@@ -1239,6 +1248,19 @@
                 document.getElementById(stockId).removeAttribute('readonly');
                 document.getElementById(stockId).style.background = '#fff';
             }
+        };
+
+        // ✅ LOGIKA MENYIMPAN PESAN AUTO-REPLY
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedReply = localStorage.getItem('belidikita_autoreply') || "Halo Kak! Terima kasih sudah menghubungi Belidikita. Pesan Kakak sudah kami terima dan Admin akan segera membalasnya. Mohon ditunggu ya! 😊";
+            const autoReplyBox = document.getElementById('adminAutoReplyText');
+            if(autoReplyBox) autoReplyBox.value = savedReply;
+        });
+
+        window.simpanAutoReply = function() {
+            const text = document.getElementById('adminAutoReplyText').value;
+            localStorage.setItem('belidikita_autoreply', text);
+            showToast("Pesan Auto-Reply berhasil disimpan!", "success");
         };
 
     </script>
