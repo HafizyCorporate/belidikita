@@ -66,8 +66,8 @@
         .product-price { color: #ff9800; font-weight: 800; font-size: 14px; }
         .product-stats { display: flex; justify-content: space-between; font-size: 10px; color: #888; font-weight: 600; margin-top: auto; padding-top: 10px; align-items: center;}
 
-        /* HALAMAN BARU UNTUK KATEGORI & PESANAN (FULLSCREEN) */
-        .layar-penuh { position: fixed; top: 0; left: 0; right: 0; bottom: 65px; height: auto; background: #f4f7fa; z-index: 5000; overflow-y: auto; display: none; flex-direction: column; animation: slideInRight 0.3s ease; }
+        /* ✅ HALAMAN BARU UNTUK KATEGORI & PESANAN (PERBAIKAN NAVBAR) */
+        .layar-penuh { position: fixed; top: 0; left: 0; right: 0; bottom: 65px; background: #f4f7fa; z-index: 5000; overflow-y: auto; display: none; flex-direction: column; animation: slideInRight 0.3s ease; }
         @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
         .katalog-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .katalog-header i { font-size: 20px; color: #0D47A1; cursor: pointer; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: #E1F5FE; border-radius: 50%;}
@@ -84,8 +84,8 @@
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
         @keyframes wiggleText { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
 
-        /* CSS TAMPILAN KOTAK MASUK TOKO & AI */
-        .chat-toko-modal { display: none; position: fixed; z-index: 6000; left: 0; top: 0; right: 0; bottom: 65px; height: auto; background: #f4f7fa; flex-direction: column; animation: slideInRight 0.3s ease; }
+        /* ✅ CSS TAMPILAN KOTAK MASUK TOKO & AI (PERBAIKAN NAVBAR) */
+        .chat-toko-modal { display: none; position: fixed; z-index: 6000; left: 0; top: 0; right: 0; bottom: 65px; background: #f4f7fa; flex-direction: column; animation: slideInRight 0.3s ease; }
         .chat-toko-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .chat-toko-header i.btn-back { font-size: 20px; color: #0D47A1; cursor: pointer; }
         .chat-toko-header .store-profile { display: flex; align-items: center; gap: 10px; flex: 1; }
@@ -159,7 +159,7 @@
             <span style="position: absolute; top: -5px; right: -5px; background: #ff3b30; width: 8px; height: 8px; border-radius: 50%;"></span>
         </div>
 
-               <div class="header-admin" id="adminLoginIcon" style="cursor: pointer;" onclick="window.klikIkonAdmin()"><i class="fas fa-user-shield"></i></div>
+        <div class="header-admin" id="adminLoginIcon" style="cursor: pointer;" onclick="window.klikIkonAdmin()"><i class="fas fa-user-shield"></i></div>
         <div class="header-cart" style="cursor: pointer;" onclick="window.location.href='keranjang.html'"><i class="fas fa-shopping-cart"></i><span class="cart-badge">0</span></div>
     </header>
 
@@ -207,7 +207,7 @@
         <div style="height: 100px;"></div>
     </main>
 
-     <svg viewBox="0 0 160 80" style="position: fixed; bottom: 110px; right: -25px; width: 160px; height: 80px; pointer-events: none; filter: drop-shadow(0px 1px 2px rgba(255,255,255,0.9)); z-index: 1001; animation: wiggleText 3s ease-in-out infinite;">
+    <svg viewBox="0 0 160 80" style="position: fixed; bottom: 110px; right: -25px; width: 160px; height: 80px; pointer-events: none; filter: drop-shadow(0px 1px 2px rgba(255,255,255,0.9)); z-index: 1001; animation: wiggleText 3s ease-in-out infinite;">
         <path id="curve-path-1" d="M 10 40 Q 80 0 150 40" fill="transparent" />
         <path id="curve-path-2" d="M 10 60 Q 80 20 150 60" fill="transparent" />
         
@@ -230,10 +230,10 @@
         </div>
         
         <div class="katalog-tools">
-                    <div class="katalog-search">
-            <i class="fas fa-search"></i>
-            <input type="text" id="inputCariKatalog" placeholder="Cari di sini lalu tekan Enter..." onkeypress="if(event.key === 'Enter') window.lakukanPencarianDariKatalog(this.value)">
-        </div>
+            <div class="katalog-search">
+                <i class="fas fa-search"></i>
+                <input type="text" id="inputCariKatalog" placeholder="Cari di sini lalu tekan Enter..." onkeypress="if(event.key === 'Enter') window.lakukanPencarianDariKatalog(this.value)">
+            </div>
             <select id="filterKatalog" onchange="window.renderHasilKatalog()">
                 <option value="terbaru">Terbaru</option>
                 <option value="termurah">Termurah</option>
@@ -292,7 +292,7 @@
         <div class="chat-toko-body" id="chatAdminBody" style="background:#f4f9ff;">
             <div class="chat-msg-store">Halo kak! Ada yang bisa dibantu terkait pesanan? 😊</div>
         </div>
-                <div class="chat-toko-footer" style="flex-wrap: wrap; padding: 10px; padding-bottom: max(15px, env(safe-area-inset-bottom)); position: relative; z-index: 999999;">
+        <div class="chat-toko-footer" style="flex-wrap: wrap; padding: 10px;">
             <div id="chatImagePreviewContainer" style="display:none; width: 100%; margin-bottom: 10px; align-items: center; background: #f4f7fa; padding: 5px 10px; border-radius: 10px;">
                 <span style="font-size: 11px; color: #888;">Lampiran: </span>
                 <img id="chatImagePreview" style="height: 40px; border-radius: 5px; margin-left: 10px; border: 1px solid #ddd;">
@@ -306,6 +306,7 @@
                 <button id="btnKirimAdmin" style="background:#0D47A1; width: 40px; height: 40px; border-radius: 50%; border: none; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="window.kirimChatAdmin()"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
+    </div>
 
     <div id="aiChatModal" class="chat-toko-modal" style="z-index: 6000;">
         <div class="chat-toko-header">
@@ -336,7 +337,7 @@
         <a href="#" class="nav-item" id="menuAccount"><i class="fas fa-user"></i><span>Akun</span></a>
     </nav>
 
-        <div id="modalConfirmAdmin" class="modal-confirm">
+    <div id="modalConfirmAdmin" class="modal-confirm">
         <div class="confirm-box"><i class="fas fa-user-shield" style="font-size:40px; color:#0D47A1; margin-bottom:15px;"></i>
             <h3 style="color:#0D47A1;">Status: Admin Aktif</h3>
             <p style="font-size:12px; color:#555;">Anda sudah terdeteksi login sebagai Super Admin. Ingin masuk ke Ruang Kerja (Admin Panel) sekarang?</p>
@@ -436,7 +437,6 @@
 
         window.kembaliDariKatalog = function() {
             document.getElementById('katalogLayarPenuh').style.display = 'none';
-            // Kembalikan ke halaman utama yang sama (jangan hilang)
         };
 
         window.tutupHalamanPesanan = function() {
@@ -446,19 +446,15 @@
 
         window.batalKeluar = function() {
             document.getElementById('modalExitIntent').style.display = 'none';
-            // Pancing user ke atas untuk lihat promo
             document.getElementById('promoSlider').scrollIntoView({ behavior: 'smooth' });
-            // Push state lagi agar tombol back bisa kepancing lagi
             window.history.pushState({ page: 1 }, "", "");
         };
 
         window.jadiKeluar = function() {
             document.getElementById('modalExitIntent').style.display = 'none';
             window.history.back(); 
-            // Jika di aplikasi Android, ini akan trigger penutupan app
         };
 
-        // KABEL UNTUK NAVBAR PESANAN BAWAH
         window.bukaHalamanPesanan = async function(e) {
             if(e) e.preventDefault();
             
@@ -470,7 +466,7 @@
             const kontenPesanan = document.getElementById('kontenPesananLayar');
             layarPesanan.style.display = 'flex';
             document.body.style.overflow = 'hidden';
-            window.history.pushState({ page: 'pesanan' }, "", ""); // Daftarkan state untuk modal ini
+            window.history.pushState({ page: 'pesanan' }, "", ""); 
 
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) {
@@ -624,26 +620,21 @@
             printWindow.document.close();
         };
 
-        // ==========================================
-        // ✅ 2. LOGIKA PENCARIAN (DIPERBAIKI)
-        // ==========================================
         window.lakukanPencarianPintar = async function(keyword) {
             try {
                 const res = await fetch('/api/products');
                 const result = await res.json();
                 if (result.success) {
-                    // Cari produk berdasarkan judul ATAU deskripsi
+                    const keywordLower = keyword.toLowerCase();
                     const filtered = result.data.filter(p => 
-                        p.title.toLowerCase().includes(keyword.toLowerCase()) || 
-                        p.category.toLowerCase().includes(keyword.toLowerCase()) ||
-                        (p.description && p.description.toLowerCase().includes(keyword.toLowerCase()))
+                        p.title.toLowerCase().includes(keywordLower) || 
+                        p.category.toLowerCase().includes(keywordLower) ||
+                        (p.description && p.description.toLowerCase().includes(keywordLower))
                     );
                     
                     if (filtered.length === 0) {
-                        // Jika gak ada, panggil modal Not Found
                         document.getElementById('modalNotFound').style.display = 'flex';
                     } else {
-                        // Pindah ke halaman hasil tanpa menutup elemen awal
                         window.katalogDataSementara = filtered;
                         window.bukaHasilPencarianPintar(keyword, filtered);
                     }
@@ -651,17 +642,17 @@
             } catch (err) { showToast("Sistem sibuk. Coba lagi.", "error"); }
         };
 
-        // Khusus ketika pencarian di enter dari input layar katalog
         window.lakukanPencarianDariKatalog = async function(keyword) {
             if(!keyword.trim()) return;
             try {
                 const res = await fetch('/api/products');
                 const result = await res.json();
                 if (result.success) {
+                    const keywordLower = keyword.toLowerCase();
                     const filtered = result.data.filter(p => 
-                        p.title.toLowerCase().includes(keyword.toLowerCase()) || 
-                        p.category.toLowerCase().includes(keyword.toLowerCase()) ||
-                        (p.description && p.description.toLowerCase().includes(keyword.toLowerCase()))
+                        p.title.toLowerCase().includes(keywordLower) || 
+                        p.category.toLowerCase().includes(keywordLower) ||
+                        (p.description && p.description.toLowerCase().includes(keywordLower))
                     );
                     if (filtered.length === 0) {
                         document.getElementById('gridHasilKategori').innerHTML = `<div style="text-align:center; width:100%; grid-column:span 2; padding: 50px 20px;"><i class="fas fa-box-open" style="font-size: 60px; color: #ddd; margin-bottom: 15px;"></i><p style="color:#888; font-weight:600; font-size: 13px;">Ups, "${keyword}" tidak ditemukan.</p></div>`;
@@ -797,9 +788,6 @@
             }
         };
 
-        // ==========================================
-        // ✅ 3. KABEL KOTAK MASUK (INBOX) ADMIN
-        // ==========================================
         window.bukaInbox = function() {
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) {
@@ -811,7 +799,6 @@
             document.getElementById('modalInbox').style.display = 'flex';
             window.history.pushState({ page: 'inbox' }, "", "");
             
-            // Ambil pesan terakhir untuk preview
             fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } })
                 .then(res => res.json())
                 .then(result => {
@@ -858,17 +845,16 @@
 
         window.tutupChatAdmin = function() {
             document.getElementById('modalChatAdmin').style.display = 'none';
-            window.bukaInbox(); // Kembali ke list inbox
+            window.bukaInbox(); 
         };
 
-                        // ✅ LOGIKA BARU: BACA GAMBAR KE BASE64
         window.chatBase64Image = null;
 
         window.previewChatImage = function(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    window.chatBase64Image = e.target.result; // Simpan wujud aslinya
+                    window.chatBase64Image = e.target.result; 
                     document.getElementById('chatImagePreview').src = e.target.result;
                     document.getElementById('chatImagePreviewContainer').style.display = 'flex';
                 };
@@ -883,37 +869,31 @@
             document.getElementById('chatImagePreview').src = '';
         };
 
-        // ✅ LOGIKA KIRIM CHAT DENGAN GAMBAR
         window.kirimChatAdmin = async function() {
             const chatAdminInput = document.getElementById('chatAdminInput');
             const chatAdminBody = document.getElementById('chatAdminBody');
             const teks = chatAdminInput.value.trim();
             
-            // Cegah kirim kosong (harus ada teks ATAU gambar)
             if(!teks && !window.chatBase64Image) return; 
             const token = localStorage.getItem('token');
 
-            // Gabungkan Teks + Gambar menjadi 1 pesan Injeksi HTML
             let finalMessage = teks;
             if(window.chatBase64Image) {
                 finalMessage += `<br><img src="${window.chatBase64Image}" style="max-width: 100%; border-radius: 8px; margin-top: 5px; border: 1px solid #ddd;">`;
             }
 
-            // 1. Munculkan di layar pembeli seketika
             chatAdminBody.innerHTML += `<div class="chat-msg-user">${finalMessage}</div>`;
             chatAdminInput.value = '';
-            window.batalChatImage(); // Kosongkan kotak preview
+            window.batalChatImage(); 
             chatAdminBody.scrollTop = chatAdminBody.scrollHeight;
 
             try {
-                // 2. Simpan ke Database (Kabel koneksi SAMA PERSIS, tidak ada yang dirubah!)
                 await fetch('/api/chat/save', { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
                     body: JSON.stringify({ message: finalMessage, sender: 'pembeli' }) 
                 });
 
-                // 3. Auto Reply Mengetik...
                 if(!window.sudahDapatAutoReply) {
                     window.sudahDapatAutoReply = true; 
                     const idKetik = "ketik-" + Date.now();
@@ -924,7 +904,7 @@
                         const elemenKetik = document.getElementById(idKetik);
                         if(elemenKetik) elemenKetik.remove();
 
-                        const autoReplyMsg = "Halo Kak! Terima kasih atas laporannya. Admin akan segera mengecek dan membalas pesan ini. Mohon ditunggu sebentar ya! 😊";
+                        const autoReplyMsg = localStorage.getItem('belidikita_autoreply') || "Halo Kak! Terima kasih atas laporannya. Admin akan segera mengecek dan membalas pesan ini. Mohon ditunggu sebentar ya! 😊";
                         
                         chatAdminBody.innerHTML += `<div class="chat-msg-store">${autoReplyMsg}</div>`;
                         chatAdminBody.scrollTop = chatAdminBody.scrollHeight;
@@ -941,10 +921,6 @@
             }
         };
 
-
-        // ==========================================
-        // ✅ 4. KABEL CHAT BOT AI (BANTUAN OTOMATIS)
-        // ==========================================
         window.bukaChatAI = function() {
             document.getElementById('aiChatModal').style.display = 'flex';
             window.history.pushState({ page: 'chat_ai' }, "", "");
@@ -990,12 +966,7 @@
             aiBody.scrollTop = aiBody.scrollHeight;
         };
 
-
-        // ==========================================
-        // ✅ INISIALISASI SAAT HALAMAN DIMUAT (TOMBOL BACK)
-        // ==========================================
         document.addEventListener("DOMContentLoaded", () => {
-            // Pasang gembok pop state agar jika di-back di HP, pop-up nya yg tutup bukan exit aplikasi
             window.history.pushState({ page: 'home' }, "", "");
 
             window.addEventListener('popstate', function(event) {
@@ -1026,13 +997,11 @@
                     isModalOpen = true;
                 }
 
-                // Jika TIDAK ADA modal yang sedang terbuka, baru munculkan EXIT INTENT
                 if(!isModalOpen) {
                     document.getElementById('modalExitIntent').style.display = 'flex';
                 }
             });
 
-                       // Load data barang saat pertama dibuka
             async function loadProdukBeranda() {
                 try {
                     const res = await fetch('/api/products');
@@ -1072,7 +1041,7 @@
                             const strObj = encodeURIComponent(JSON.stringify(prodObj));
 
                             const htmlCardHorizontal = `
-                                <div class="h-card" onclick="window.bukaDetailTunggal('${strObj}')">
+                                <div class="h-card" onclick="window.bukaDetailGlobal('${strObj}')">
                                     <img src="${imgUrl}" class="h-card-img" alt="Produk" loading="lazy">
                                     <div class="h-card-info">
                                         <h3 class="h-card-title">${p.title}</h3>
@@ -1099,7 +1068,6 @@
                                 </div>
                             `;
 
-                            // Masukkan ke etalase slider (jika kategorinya masuk)
                             if (p.category === 'laris') {
                                 if(cLaris) cLaris.innerHTML += htmlCardHorizontal;
                                 countLaris++;
@@ -1108,7 +1076,6 @@
                                 countKeranjang++;
                             } 
                             
-                            // ✅ LOGIKA BARU: APAPUN KATEGORINYA, SELALU TAMPILKAN DI "JELAJAHI SEMUA BARANG"
                             if(cGeneral) {
                                 cGeneral.innerHTML += htmlCardGrid;
                                 countGeneral++;
@@ -1122,7 +1089,6 @@
                 } catch(e) { }
             }
 
-
             window.bukaDetailGlobal = function(encodedObj) {
                 const decodedObj = decodeURIComponent(encodedObj);
                 localStorage.setItem('produk_detail', decodedObj);
@@ -1132,18 +1098,14 @@
             loadProdukBeranda();
         });
         
-                // ✅ LOGIKA KLIK IKON ADMIN
         window.klikIkonAdmin = function() {
             const token = localStorage.getItem('token');
-            // Cek apakah pembeli atau admin yang login
             if (token && token.startsWith('token-admin-')) {
-                // Jika Admin, munculkan Pop-up masuk ke panel
                 document.getElementById('modalConfirmAdmin').style.display = 'flex';
             } else {
-                // Jika bukan admin / belum login, tendang ke halaman login
                 showToast("Mengarahkan ke Gerbang Admin...", "info");
                 setTimeout(() => {
-                    window.location.href = 'login.html'; // Pastikan nama file login admin Anda adalah login.html
+                    window.location.href = 'login.html'; 
                 }, 1000);
             }
         };
