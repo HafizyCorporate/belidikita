@@ -101,7 +101,7 @@
         .btn-auto-resi:active { transform: scale(0.97); }
         .btn-auto-resi:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
 
-        /* ✅ CSS TAMBAHAN UNTUK KOTAK MASUK MANUAL (INBOX) */
+        /* CSS TAMBAHAN UNTUK KOTAK MASUK MANUAL (INBOX) */
         .inbox-container { display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto; padding-right: 5px; }
         .inbox-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #fff; border: 1px solid #E1F5FE; border-radius: 12px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
         .inbox-item:hover { background: #f4f9ff; border-color: #81D4FA; transform: translateY(-2px); }
@@ -111,7 +111,7 @@
         .inbox-last-msg { font-size: 12px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
         .inbox-time { font-size: 10px; color: #aaa; font-weight: 700; align-self: flex-start; padding-top: 5px; }
 
-        /* ✅ MODAL RUANG CHAT ADMIN */
+        /* MODAL RUANG CHAT ADMIN */
         .chat-room-modal { display: none; position: fixed; z-index: 4000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,40,80,0.6); align-items: center; justify-content: center; padding: 20px; }
         .chat-room-box { background: #fff; width: 100%; max-width: 500px; border-radius: 15px; display: flex; flex-direction: column; height: 80vh; max-height: 600px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; animation: popBounce 0.3s ease; }
         @keyframes popBounce { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
@@ -139,10 +139,8 @@
         <a href="#pesananSection"><i class="fas fa-shopping-cart"></i> Pesanan Masuk</a>
         <a href="#arsipSection" style="color: #9c27b0;"><i class="fas fa-archive"></i> Gudang Arsip</a>
         
-        <a href="#inboxSection" style="color: #ff9800;"><i class="fas fa-envelope"></i> Kotak Masuk</a>
+        <a href="#inboxSection" style="color: #ff9800;"><i class="fas fa-envelope"></i> Kotak Masuk Pembeli</a>
         
-        <a href="#chatSection" style="color: #00AA5B;"><i class="fas fa-comments"></i> Pantau Live Chat AI</a>
-
         <a href="#kuponSection"><i class="fas fa-ticket-alt"></i> Kelola Kupon</a>
         <a href="#promoSection"><i class="fas fa-images"></i> Upload Banner</a>
         <a href="#uploadSection"><i class="fas fa-upload"></i> Upload Barang</a>
@@ -246,31 +244,10 @@
         </div>
 
         <div class="box" id="inboxSection" style="border-top: 4px solid #ff9800; background: #fffcf8;">
-            <h3 style="color:#ff9800;"><i class="fas fa-envelope"></i> Kotak Masuk (Chat Manual Pembeli)</h3>
-            <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Klik pada nama pembeli di bawah ini untuk membalas pesan mereka secara langsung (seperti SMS).</p>
+            <h3 style="color:#ff9800;"><i class="fas fa-envelope"></i> Kotak Masuk Pembeli</h3>
+            <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Klik pada nama pembeli di bawah ini untuk membalas pesan mereka secara langsung.</p>
             <div class="inbox-container" id="inboxAdminList">
                 <div style="text-align:center; padding: 20px; color:#aaa;"><i class="fas fa-spinner fa-spin"></i> Memuat kotak masuk...</div>
-            </div>
-        </div>
-
-        <div class="box" id="chatSection" style="border-top: 4px solid #00AA5B;">
-            <h3 style="color:#00AA5B;"><i class="fas fa-robot"></i> Pantau Percakapan (Bot AI & Pembeli)</h3>
-            <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Bot AI sudah otomatis membalas semua pesan di bawah ini. Anda cukup memantau saja sambil ngopi santai ☕.</p>
-            
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nama Pembeli</th>
-                            <th>Pesan Terakhir</th>
-                            <th>Pengirim Terakhir</th>
-                            <th>Waktu</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBodyChats">
-                        <tr><td colspan="4" style="text-align:center; padding: 20px;">Memuat data chat dari server...</td></tr>
-                    </tbody>
-                </table>
             </div>
         </div>
 
@@ -689,7 +666,6 @@
             await fetchProducts();
             await fetchPromos();
             await fetchCoupons();
-            await fetchAdminChats();
             await fetchOrders(); 
             await fetchArchive(); 
             await fetchInboxAdmin(); // ✅ TARIK DATA INBOX
@@ -920,27 +896,7 @@
             } catch (err) {}
         }
 
-        // FUNGSI LAMA: MENAMPILKAN SEMUA CHAT DI TABEL
-        async function fetchAdminChats() {
-            try {
-                const res = await fetch('/api/admin/chats', { headers: { 'Authorization': `Bearer ${token}` } });
-                const result = await res.json();
-                const tbody = document.getElementById('tableBodyChats');
-                
-                if (result.success && result.data.length > 0) {
-                    tbody.innerHTML = '';
-                    result.data.forEach(chat => {
-                        const waktu = new Date(chat.created_at).toLocaleString('id-ID', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'});
-                        let badgeSender = chat.sender_role === 'pembeli' ? '<span style="background:#E1F5FE; color:#0D47A1; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:bold;"><i class="fas fa-user"></i> Pembeli</span>' : '<span style="background:#E8F5E9; color:#00AA5B; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:bold;"><i class="fas fa-robot"></i> AI / Admin</span>';
-                        tbody.innerHTML += `<tr><td><b>${chat.user_name}</b></td><td style="max-width: 250px; white-space: normal; line-height: 1.4; color: #555;"><i>"${chat.message}"</i></td><td>${badgeSender}</td><td style="font-size:11px; color:#888;">${waktu} WIB</td></tr>`;
-                    });
-                } else {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color:#aaa;"><i class="fas fa-comment-slash" style="font-size:24px; margin-bottom:10px; display:block;"></i>Belum ada percakapan dari pembeli.</td></tr>';
-                }
-            } catch(e) {}
-        }
-
-        // ✅ FUNGSI BARU: MEMUAT KOTAK MASUK MANUAL (INBOX)
+        // ✅ FUNGSI BARU: MEMUAT KOTAK MASUK MANUAL (INBOX) SAJA
         async function fetchInboxAdmin() {
             try {
                 const res = await fetch('/api/admin/chats', { headers: { 'Authorization': `Bearer ${token}` } });
@@ -951,8 +907,6 @@
                     globalAdminChats = result.data; 
                     const groupedChats = {};
 
-                    // Filter agar hanya memunculkan chat dari "pembeli" dan balasan "admin", abaikan "AI" jika mau.
-                    // Disini kita biarkan semua agar admin tau riwayatnya.
                     result.data.forEach(chat => {
                         const key = chat.user_id || chat.user_name; 
                         if (!groupedChats[key]) {
@@ -1033,17 +987,13 @@
             body.scrollTop = body.scrollHeight;
 
             try {
-                // Admin membalas pesan menggunakan API yang sama, dengan sender = 'admin'
                 await fetch('/api/chat/save', { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
-                    // Kita asumsikan API backend Anda dapat menerima "target_user" untuk admin
                     body: JSON.stringify({ message: teks, sender: 'admin', target_user: targetUser }) 
                 });
                 
-                // Segarkan inbox di latar belakang
-                fetchInboxAdmin();
-                fetchAdminChats(); 
+                fetchInboxAdmin(); 
             } catch(e) {
                 showToast("Gagal mengirim pesan ke pembeli", "error");
             }
