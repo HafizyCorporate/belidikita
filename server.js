@@ -43,7 +43,7 @@ const verifyToken = require('./middleware/auth');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-initDB(); // Punggawa pembangun database dipanggil di sini. (Suntikan otomatis sudah dihapus karena tumpang tindih)
+initDB();
 
 const uploadDir = path.join(__dirname, 'public/uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -202,7 +202,6 @@ app.get('/api/orders/archive', verifyAdmin, async (req, res) => {
     } catch(err) { res.status(500).json({ success: false }); }
 });
 
-// ✅ FASE 1: ADMIN UPDATE STATUS (Ditambah Waktu Terkirim)
 app.put('/api/orders/:id', verifyAdmin, async (req, res) => {
     const { status, resi, reject_reason } = req.body;
     try { 
@@ -221,7 +220,6 @@ app.put('/api/orders/:id', verifyAdmin, async (req, res) => {
     } catch(err) { res.status(500).json({ success: false }); }
 });
 
-// ✅ PEMBELI TERIMA BARANG (Klik Selesai Manual - Harus dari status Terkirim/Dikirim)
 app.put('/api/orders/:id/receive', verifyToken, async (req, res) => {
     try {
         await pool.query("UPDATE orders SET status = 'Selesai', completed_at = NOW() WHERE id = $1 AND user_id = $2", [req.params.id, req.user.id]);
@@ -229,7 +227,6 @@ app.put('/api/orders/:id/receive', verifyToken, async (req, res) => {
     } catch(err) { res.status(500).json({ success: false }); }
 });
 
-// LOGIKA HAPUS DENGAN GEMBOK KEAMANAN
 app.delete('/api/orders/:id', verifyToken, async (req, res) => {
     try {
         const isAdmin = req.user.role === 'admin';
@@ -241,7 +238,6 @@ app.delete('/api/orders/:id', verifyToken, async (req, res) => {
         
         const currentStatus = checkQuery.rows[0].status || '';
         
-        // Aturan Gembok: Harus mencapai titik akhir transaksi
         const statusAman = ['Selesai', 'Dibatalkan', 'Dibatalkan (Expired)', 'Retur Selesai', 'Retur Ditolak'];
         let isAman = statusAman.some(s => currentStatus.includes(s));
 
@@ -258,7 +254,6 @@ app.delete('/api/orders/:id', verifyToken, async (req, res) => {
     } catch(err) { res.status(500).json({ success: false, message: "Server Error saat menghapus." }); }
 });
 
-// ✅ FASE 1: LOGIKA RETUR DENGAN ATURAN WAKTU 2 HARI DARI TERKIRIM
 app.put('/api/orders/:id/return', verifyToken, upload.single('proof'), async (req, res) => {
     const { reason } = req.body; 
     const proof_url = req.file ? req.file.path : null;
@@ -271,7 +266,6 @@ app.put('/api/orders/:id/return', verifyToken, upload.single('proof'), async (re
 
         const order = checkQuery.rows[0];
         
-        // Retur HANYA BISA saat paket sudah Terkirim (dalam masa garansi)
         if (order.status !== 'Terkirim') {
             return res.status(400).json({ success: false, message: "Hanya pesanan berstatus TERKIRIM (Sampai) yang bisa diajukan retur!" });
         }
@@ -281,7 +275,7 @@ app.put('/api/orders/:id/return', verifyToken, upload.single('proof'), async (re
             const tglTerkirim = new Date(order.delivered_at);
             const selisihHari = Math.ceil(Math.abs(hariIni - tglTerkirim) / (1000 * 60 * 60 * 24));
             
-            if (selisihHari > 2) { // 2 Hari (2x24 Jam)
+            if (selisihHari > 2) { 
                 return res.status(403).json({ success: false, message: "Batas waktu pengajuan retur (2x24 Jam) sudah lewat!" });
             }
         }
@@ -381,6 +375,107 @@ app.post('/api/admin/cetak-resi', verifyAdmin, async (req, res) => {
         res.json({ success: true, resi: resi });
     } catch(err) { res.status(500).json({ success: false }); }
 });
+
+// ==========================================
+// 🛒 API KERANJANG DATABASE (ANTI-LOCAL STORAGE)
+// ==========================================
+app.get('/api/cart', verifyToken, async (req, res) => {
+    try {
+        const query = `
+            SELECT c.id as cart_id, c.qty, c.variant, p.id as product_id, p.title, p.price, p.media_url, p.weight, p.wholesale_price, p.wholesale_min_qty, p.unit
+            FROM carts c JOIN products p ON c.product_id = p.id
+            WHERE c.user_id = $1 ORDER BY c.created_at DESC
+        `;
+        const result = await pool.query(query, [req.user.id]);
+        res.json({ success: true, data: result.rows });
+    } catch (err) { res.status(500).json({ success: false, message: "Gagal mengambil keranjang" }); }
+});
+
+app.post('/api/cart', verifyToken, async (req, res) => {
+    const { product_id, variant, qty } = req.body;
+    try {
+        // Cek apakah barang & varian yang sama sudah ada di keranjang
+        const check = await pool.query('SELECT id, qty FROM carts WHERE user_id = $1 AND product_id = $2 AND variant = $3', [req.user.id, product_id, variant || '']);
+        
+        if (check.rows.length > 0) {
+            // Update jumlah (ditambah)
+            await pool.query('UPDATE carts SET qty = qty + $1 WHERE id = $2', [qty, check.rows[0].id]);
+        } else {
+            // Masukkan baru
+            await pool.query('INSERT INTO carts (user_id, product_id, variant, qty) VALUES ($1, $2, $3, $4)', [req.user.id, product_id, variant || '', qty]);
+        }
+        res.json({ success: true, message: "Masuk ke keranjang database!" });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+app.delete('/api/cart/:id', verifyToken, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM carts WHERE id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+app.delete('/api/cart/clear/all', verifyToken, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM carts WHERE user_id = $1', [req.user.id]);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+// ==========================================
+// 🛍️ API SESSIONS CHECKOUT 
+// ==========================================
+app.post('/api/checkout-session', verifyToken, async (req, res) => {
+    const { items_json } = req.body;
+    try {
+        // Hapus session lama jika ada, lalu buat baru (Upsert style)
+        await pool.query('DELETE FROM checkout_sessions WHERE user_id = $1', [req.user.id]);
+        await pool.query('INSERT INTO checkout_sessions (user_id, items_json) VALUES ($1, $2)', [req.user.id, items_json]);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+app.get('/api/checkout-session', verifyToken, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT items_json FROM checkout_sessions WHERE user_id = $1', [req.user.id]);
+        if(result.rows.length > 0) res.json({ success: true, data: result.rows[0].items_json });
+        else res.json({ success: false });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+// ==========================================
+// 🔍 API GET 1 PRODUK (UNTUK LINK SHARE URL)
+// ==========================================
+app.get('/api/products/:id', async (req, res) => {
+    try {
+        const query = `
+            SELECT p.*, COALESCE(ROUND(AVG(r.rating), 1), 0) as avg_rating
+            FROM products p LEFT JOIN product_reviews r ON p.id = r.product_id
+            WHERE p.id = $1 GROUP BY p.id
+        `;
+        const result = await pool.query(query, [req.params.id]);
+        if(result.rows.length > 0) res.json({ success: true, data: result.rows[0] });
+        else res.status(404).json({ success: false, message: "Produk tidak ditemukan" });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+// ==========================================
+// ⚙️ API PENGATURAN TOKO (Auto Reply Admin dll)
+// ==========================================
+app.get('/api/settings/autoreply', async (req, res) => {
+    try {
+        const result = await pool.query(`SELECT setting_value FROM store_settings WHERE setting_key = 'autoreply'`);
+        res.json({ success: true, text: result.rows.length > 0 ? result.rows[0].setting_value : "" });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
+app.post('/api/settings/autoreply', verifyAdmin, async (req, res) => {
+    try {
+        await pool.query(`UPDATE store_settings SET setting_value = $1 WHERE setting_key = 'autoreply'`, [req.body.text]);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ success: false }); }
+});
+
 
 // ==========================================
 // 🤖 2 ROBOT PEKERJA OTOMATIS (CRON JOBS)
