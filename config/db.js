@@ -14,7 +14,7 @@ const pool = new Pool({
 const initDB = async () => {
     // Kita jalankan query secara berurutan agar jika 1 gagal, kita tahu yang mana.
     
-        const createTables = `
+    const createTables = `
         CREATE TABLE IF NOT EXISTS users ( id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, email VARCHAR(100) UNIQUE NOT NULL, password VARCHAR(255), otp VARCHAR(10), is_verified BOOLEAN DEFAULT FALSE, google_id VARCHAR(255), role VARCHAR(20) DEFAULT 'pembeli', avatar_url VARCHAR(255), bio TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP );
 
         CREATE TABLE IF NOT EXISTS products ( id SERIAL PRIMARY KEY, user_id INT REFERENCES users(id) ON DELETE CASCADE, title VARCHAR(200) NOT NULL, description TEXT, price DECIMAL(12,2) NOT NULL, media_url VARCHAR(255), media_type VARCHAR(10), category VARCHAR(50) DEFAULT 'biasa', capital_price DECIMAL(12,2) DEFAULT 0, stock INT DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP );
@@ -100,7 +100,7 @@ const initDB = async () => {
     `;
 
     // Modifikasi tabel jika ada kolom baru (Tanpa menghapus data lama)
-        const alterTables = `
+    const alterTables = `
         ALTER TABLE products ADD COLUMN IF NOT EXISTS category VARCHAR(50) DEFAULT 'biasa';
         ALTER TABLE products ADD COLUMN IF NOT EXISTS capital_price DECIMAL(12,2) DEFAULT 0;
         ALTER TABLE products ADD COLUMN IF NOT EXISTS stock INT DEFAULT 0;
@@ -122,13 +122,28 @@ const initDB = async () => {
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_media TEXT;
         
         ALTER TABLE internal_assets ADD COLUMN IF NOT EXISTS unit VARCHAR(50) DEFAULT 'Unit';
+
+        -- ✅ FASE 2: KOLOM TAMBAHAN UNTUK LOGIKA WAKTU & RETUR
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipped_at TIMESTAMP;
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMP;
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP;
+        ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_reject_reason TEXT;
+    `;
+
+    // ✅ FASE 2: INDEXING DATABASE AGAR SUPER CEPAT
+    const createIndexes = `
+        CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+        CREATE INDEX IF NOT EXISTS idx_products_title ON products USING GIN (to_tsvector('indonesian', title));
+        CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+        CREATE INDEX IF NOT EXISTS idx_orders_userid ON orders(user_id);
     `;
 
     try {
         console.log("⏳ Sedang mencoba membangun tabel di Database...");
         await pool.query(createTables);
         await pool.query(alterTables);
-        console.log("✅ SUKSES! Database 'belidikita' sudah nempel dan semua tabel berhasil dibangun!");
+        await pool.query(createIndexes); // Eksekusi Indexing Fase 2
+        console.log("✅ SUKSES! Database 'belidikita' sudah nempel, tabel siap, dan Indexing FASE 2 Aktif! 🚀");
     } catch (err) {
         console.error("❌ GAGAL MEMBANGUN TABEL:", err.message);
     }
