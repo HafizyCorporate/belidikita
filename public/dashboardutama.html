@@ -1113,12 +1113,40 @@
             }
 
 
-                       window.bukaDetailGlobal = function(encodedObj) {
-                const decodedObj = decodeURIComponent(encodedObj);
-                localStorage.setItem('produk_detail', decodedObj);
+                                   // ✅ MESIN HYBRID PENJINJING DATA ANTI-UNDEFINED
+            window.bukaDetailGlobal = function(arg1, foto, nama, hargaStr, deskripsi, hargaRaw, beratRaw, sellerName, unit, vTitle, vOpt, wsPrice, wsMin) {
+                // Mode 1: Jika diklik dari Katalog / Slider (Bentuk JSON Encoded String)
+                if (typeof arg1 === 'string' && (arg1.includes('%7B') || arg1.startsWith('%'))) {
+                    try {
+                        const antiPatah = arg1.replace(/'/g, "%27");
+                        localStorage.setItem('produk_detail', decodeURIComponent(antiPatah));
+                        window.location.href = 'detailproduk.html';
+                        return;
+                    } catch (e) { console.error(e); }
+                }
+
+                // Mode 2: Jika diklik dari Daftar Barang Bawah (Bentuk Parameter Eceran)
+                const dataProduk = { 
+                    id: arg1, 
+                    foto: foto || "https://via.placeholder.com/400", 
+                    nama: nama || "Produk Belidikita", 
+                    hargaStr: hargaStr || "Rp0", 
+                    deskripsi: deskripsi || "Tidak ada deskripsi.", 
+                    harga: hargaRaw || 0, 
+                    weight: beratRaw || 1000, 
+                    seller_name: sellerName || "Belidikita Official", 
+                    qty: 1,
+                    unit: unit || 'Pcs', 
+                    variant_title: vTitle || '', 
+                    variant_options: vOpt || '',
+                    wholesale_price: wsPrice || 0, 
+                    wholesale_min_qty: wsMin || 0
+                };
+                localStorage.setItem('produk_detail', JSON.stringify(dataProduk));
                 window.location.href = 'detailproduk.html';
             };
-            // ✅ KABEL PENGHUBUNG YANG MEMPERBAIKI KLIK BARANG DI BERANDA
+            
+            // Kabel penghubung
             window.bukaDetailTunggal = window.bukaDetailGlobal; 
 
             loadProdukBeranda();
