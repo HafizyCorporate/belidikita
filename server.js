@@ -45,14 +45,21 @@ const PORT = process.env.PORT || 8080;
 
 initDB();
 
-// 🛠️ SUNTIKAN OTOMATIS: UPDATE STRUKTUR DATABASE UNTUK LOGIKA WAKTU & RETUR TERBARU
+// 🛠️ SUNTIKAN OTOMATIS: UPDATE STRUKTUR DATABASE & INDEXING (FASE 2)
 (async () => {
     try {
         await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipped_at TIMESTAMP`);
-        await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMP`); // Waktu saat paket "Terkirim"
+        await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMP`); 
         await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP`);
         await pool.query(`ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_reject_reason TEXT`);
-        console.log("✅ Database berhasil di-upgrade untuk fitur Waktu & Retur 2x24 Jam!");
+        
+        // ✅ DB INDEXING: Membuat aplikasi super cepat saat mencari & memfilter data (FASE 2)
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_products_category ON products(category)`);
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_products_title ON products USING GIN (to_tsvector('indonesian', title))`); 
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)`);
+        await pool.query(`CREATE INDEX IF NOT EXISTS idx_orders_userid ON orders(user_id)`);
+
+        console.log("✅ Database berhasil di-upgrade! (Fitur Waktu, Retur, dan DB Indexing FASE 2 Aktif 🚀)");
     } catch (e) {
         console.error("Gagal upgrade database:", e.message);
     }
@@ -102,16 +109,62 @@ app.post('/api/login', async (req, res) => {
 
 app.post('/api/ai/search', askAI);
 
+// ✅ FASE 2: API PRODUK DENGAN PAGINATION & SERVER-SIDE FILTERING
 app.get('/api/products', async (req, res) => {
     try {
-        const query = `
+        // Menerima parameter dari Frontend (HP pembeli)
+        const { search, category, sort = 'terbaru', page = 1, limit = 20 } = req.query;
+        const offset = (Math.max(1, page) - 1) * limit; // Rumus Paginasi yang aman
+
+        let baseQuery = `
             SELECT p.*, COALESCE(ROUND(AVG(r.rating), 1), 0) as avg_rating
             FROM products p LEFT JOIN product_reviews r ON p.id = r.product_id
-            GROUP BY p.id ORDER BY p.created_at DESC
+            WHERE 1=1
         `;
-        const result = await pool.query(query);
-        res.json({ success: true, data: result.rows });
-    } catch (err) { res.status(500).json({ success: false, message: "Server error" }); }
+        let params = [];
+        let paramIndex = 1;
+
+        // 1. Filter Kategori
+        if (category && category !== 'Semua') {
+            baseQuery += ` AND p.category = $${paramIndex}`;
+            params.push(category);
+            paramIndex++;
+        }
+
+        // 2. Pencarian Nama Barang (Menggunakan ILIKE agar kebal huruf besar/kecil)
+        if (search && search.trim() !== '') {
+            baseQuery += ` AND (p.title ILIKE $${paramIndex} OR p.description ILIKE $${paramIndex})`;
+            params.push(`%${search.trim()}%`);
+            paramIndex++;
+        }
+
+        baseQuery += ` GROUP BY p.id`;
+
+        // 3. Sorting (Pengurutan)
+        if (sort === 'termurah') {
+            baseQuery += ` ORDER BY p.price ASC`;
+        } else if (sort === 'terlaris') {
+            baseQuery += ` ORDER BY p.sold_count DESC NULLS LAST`;
+        } else {
+            baseQuery += ` ORDER BY p.created_at DESC`; // Default: terbaru
+        }
+
+        // 4. Paginasi (Batasan jumlah data yang dikirim)
+        baseQuery += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+        params.push(parseInt(limit), parseInt(offset));
+
+        // Eksekusi Kueri
+        const result = await pool.query(baseQuery, params);
+        
+        res.json({ 
+            success: true, 
+            data: result.rows
+        });
+
+    } catch (err) { 
+        console.error("Error Fetch Products FASE 2:", err);
+        res.status(500).json({ success: false, message: "Server error saat mengambil produk" }); 
+    }
 });
 
 app.get('/api/promos', getPromos); 
