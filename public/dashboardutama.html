@@ -955,7 +955,7 @@
                 }
             });
 
-            // Load data barang saat pertama dibuka
+                       // Load data barang saat pertama dibuka
             async function loadProdukBeranda() {
                 try {
                     const res = await fetch('/api/products');
@@ -995,7 +995,7 @@
                             const strObj = encodeURIComponent(JSON.stringify(prodObj));
 
                             const htmlCardHorizontal = `
-                                <div class="h-card" onclick="window.bukaDetailGlobal('${strObj}')">
+                                <div class="h-card" onclick="window.bukaDetailTunggal('${strObj}')">
                                     <img src="${imgUrl}" class="h-card-img" alt="Produk" loading="lazy">
                                     <div class="h-card-info">
                                         <h3 class="h-card-title">${p.title}</h3>
@@ -1009,7 +1009,7 @@
                             `;
 
                             const htmlCardGrid = `
-                                <div class="product-card" onclick="window.bukaDetailGlobal('${strObj}')">
+                                <div class="product-card" onclick="window.bukaDetailTunggal('${strObj}')">
                                     <img src="${imgUrl}" class="product-media" alt="Produk" loading="lazy">
                                     <div class="product-info">
                                         <h3 class="product-title">${p.title}</h3>
@@ -1022,14 +1022,18 @@
                                 </div>
                             `;
 
+                            // Masukkan ke etalase slider (jika kategorinya masuk)
                             if (p.category === 'laris') {
                                 if(cLaris) cLaris.innerHTML += htmlCardHorizontal;
                                 countLaris++;
                             } else if (p.category === 'keranjang') {
                                 if(cKeranjang) cKeranjang.innerHTML += htmlCardHorizontal;
                                 countKeranjang++;
-                            } else {
-                                if(cGeneral) cGeneral.innerHTML += htmlCardGrid;
+                            } 
+                            
+                            // ✅ LOGIKA BARU: APAPUN KATEGORINYA, SELALU TAMPILKAN DI "JELAJAHI SEMUA BARANG"
+                            if(cGeneral) {
+                                cGeneral.innerHTML += htmlCardGrid;
                                 countGeneral++;
                             }
                         });
@@ -1040,6 +1044,7 @@
                     }
                 } catch(e) { }
             }
+
 
             window.bukaDetailGlobal = function(encodedObj) {
                 const decodedObj = decodeURIComponent(encodedObj);
