@@ -230,10 +230,10 @@
         </div>
         
         <div class="katalog-tools">
-            <div class="katalog-search">
-                <i class="fas fa-search"></i>
-                <input type="text" id="inputCariKatalog" placeholder="Cari di sini lalu tekan Enter..." onkeypress="if(event.key === 'Enter') window.lakukanPencarianDariKatalog(this.value)">
-            </div>
+                    <div class="katalog-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="inputCariKatalog" placeholder="Cari di sini lalu tekan Enter..." onkeypress="if(event.key === 'Enter') window.lakukanPencarianDariKatalog(this.value)">
+        </div>
             <select id="filterKatalog" onchange="window.renderHasilKatalog()">
                 <option value="terbaru">Terbaru</option>
                 <option value="termurah">Termurah</option>
@@ -302,7 +302,7 @@
             <div style="display: flex; gap: 10px; align-items: center; width: 100%;">
                 <input type="file" id="chatAdminImage" accept="image/*" style="display: none;" onchange="window.previewChatImage(this)">
                 <label for="chatAdminImage" style="cursor: pointer; color: #00AA5B; font-size: 22px; margin: 0;"><i class="fas fa-image"></i></label>
-                <input type="text" id="chatAdminInput" placeholder="Ketik laporan/pesan..." onkeypress="if(event.key === 'Enter') window.kirimChatAdmin()" style="flex:1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 20px; outline: none; font-size: 13px;">
+               <input type="text" id="chatAdminInput" enterkeyhint="send" placeholder="Ketik laporan/pesan..." onkeydown="if(event.key === 'Enter') { event.preventDefault(); window.kirimChatAdmin(); }" style="flex:1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 20px; outline: none; font-size: 13px;">
                 <button id="btnKirimAdmin" style="background:#0D47A1; width: 40px; height: 40px; border-radius: 50%; border: none; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="window.kirimChatAdmin()"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
@@ -324,7 +324,7 @@
             <div class="chat-msg-store">Halo Kak! Bediki di sini siap membantu. Mau cari barang apa hari ini? 😊</div>
         </div>
         <div class="chat-toko-footer">
-            <input type="text" id="aiInput" placeholder="Tanya sesuatu ke Bediki..." onkeypress="if(event.key === 'Enter') window.kirimChatAI()">
+            <input type="text" id="aiInput" enterkeyhint="send" placeholder="Tanya sesuatu ke Bediki..." onkeydown="if(event.key === 'Enter') { event.preventDefault(); window.kirimChatAI(); }">
             <button id="aiSendBtn" style="background:#00AA5B;" onclick="window.kirimChatAI()"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
