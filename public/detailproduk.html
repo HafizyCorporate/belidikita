@@ -16,7 +16,6 @@
             background-size: 20px 20px;
         }
         
-        /* --- DEKORASI RAMADHAN MELAYANG --- */
         .ramadhan-decor { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
         .lantern {
             position: absolute; top: -10px; width: 35px; height: 50px;
@@ -27,29 +26,24 @@
         .lantern.right { right: 5%; animation: swing 4s ease-in-out infinite alternate-reverse; width: 25px; height: 40px; }
         @keyframes swing { 0% { transform: rotate(10deg); } 100% { transform: rotate(-10deg); } }
 
-        /* Tombol Melayang */
         .floating-header { position: fixed; top: 15px; left: 0; width: 100%; display: flex; justify-content: space-between; padding: 0 15px; z-index: 100; pointer-events: none; }
         .btn-circle { pointer-events: auto; width: 40px; height: 40px; background: rgba(255,255,255,0.85); color: #0D47A1; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 18px; backdrop-filter: blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s;}
         .btn-circle:active { transform: scale(0.9); }
         .cart-wrapper { position: relative; }
         .cart-badge-detail { position: absolute; top: -5px; right: -5px; background: #ff3b30; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 10px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(255,59,48,0.5);}
 
-        /* SLIDER FOTO PRODUK */
         .slider-container { width: 100%; position: relative; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.05); z-index: 10; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; overflow: hidden;}
         .product-image-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; aspect-ratio: 1/1; }
         .product-image-slider::-webkit-scrollbar { display: none; }
         .product-image-slider img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; scroll-snap-align: start; cursor: zoom-in; }
         
-        /* Indikator Titik Slider */
         .slider-dots { position: absolute; bottom: 15px; left: 0; width: 100%; display: flex; justify-content: center; gap: 6px; pointer-events: none; }
         .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.6); border-radius: 50%; transition: 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);}
         .dot.active { background: #0D47A1; width: 20px; border-radius: 10px; }
 
-        /* WADAH KONTEN GLASSMORPHISM */
         .content-wrapper { position: relative; z-index: 10; max-width: 600px; margin: 0 auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
         .glass-box { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); padding: 18px; border-radius: 20px; box-shadow: 0 8px 25px rgba(13, 71, 161, 0.08); border: 2px solid #fff; animation: fadeUp 0.5s ease forwards; opacity: 0; transform: translateY(20px); }
         
-        /* Delay Animasi Berurutan */
         .glass-box:nth-child(1) { animation-delay: 0.1s; }
         .glass-box:nth-child(2) { animation-delay: 0.2s; }
         .glass-box:nth-child(3) { animation-delay: 0.3s; }
@@ -59,28 +53,21 @@
         .glass-box:nth-child(7) { animation-delay: 0.7s; }
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-        /* 1. INFO UTAMA (Harga, Judul, Terjual) */
         .price-share-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
         .p-price { color: #FF9800; font-size: 26px; font-weight: 800; text-shadow: 0 2px 4px rgba(255, 152, 0, 0.2); }
         .btn-share { background: #E1F5FE; color: #0D47A1; border: none; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; transition: 0.2s; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.1); }
         .btn-share:active { transform: scale(0.9); }
         .p-title { font-size: 16px; font-weight: 800; color: #0D47A1; line-height: 1.4; margin-bottom: 10px; }
         
-        /* Lencana Harga Grosir */
         .promo-grosir { font-size: 11px; font-weight: 800; color: #00AA5B; background: #E8F5E9; padding: 4px 8px; border-radius: 6px; display: inline-block; margin-bottom: 5px; border: 1px dashed #4CAF50;}
-
-        /* ✅ KOTAK TIPS HEMAT BARU */
         .box-estimasi { background: #FFF9C4; border: 1px dashed #F57F17; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 11px; color: #E65100; line-height: 1.5; font-weight: 600; display: none; }
         .box-estimasi b { font-weight: 800; }
 
-        /* RATING, TERJUAL & BERAT */
         .p-stats { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; color: #666; margin-bottom: 12px; }
         .p-stats .rating { color: #FFD700; background: #FFFDE7; padding: 3px 8px; border-radius: 6px; border: 1px solid #FFF59D; }
         .p-stats .sold { background: #E8F5E9; color: #00AA5B; padding: 3px 8px; border-radius: 6px; border: 1px solid #C8E6C9;}
         .p-stats .weight { background: #F3E5F5; color: #6A1B9A; padding: 3px 8px; border-radius: 6px; border: 1px solid #E1BEE7;}
 
-        
-                /* UKURAN / VARIAN BARANG (BUNGLON) */
         .variant-box { display: none; } 
         .variant-box h4 { font-size: 13px; font-weight: 800; color: #0D47A1; margin-bottom: 10px; border-bottom: 1px dashed #E1F5FE; padding-bottom: 8px; display: flex; align-items: center; gap: 6px; }
         .variant-options { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -88,8 +75,6 @@
         .v-opt.selected { border-color: #FF9800; background: #FFF3E0; color: #FF9800; box-shadow: 0 4px 10px rgba(255, 152, 0, 0.2); transform: translateY(-2px); }
         .v-opt.habis { background: #eee; border-color: #ddd; color: #aaa; cursor: not-allowed; text-decoration: line-through; }
 
-        
-        /* INFO TOKO */
         .store-box { display: flex; align-items: center; gap: 12px; }
         .store-avatar { width: 45px; height: 45px; background: linear-gradient(135deg, #FF9800, #FFD700); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 20px; box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3); }
         .store-info { display: flex; flex-direction: column; }
@@ -98,16 +83,13 @@
         .btn-visit { margin-left: auto; background: #0D47A1; color: #fff; border: none; padding: 8px 15px; border-radius: 12px; font-size: 11px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.2); transition: 0.2s; }
         .btn-visit:active { transform: scale(0.95); }
 
-        /* PILIH EKSPEDISI AWAL */
         .shipping-box h4 { font-size: 13px; font-weight: 800; color: #0D47A1; margin-bottom: 10px; border-bottom: 1px dashed #E1F5FE; padding-bottom: 8px; display: flex; align-items: center; gap: 6px; }
         .select-shipping { width: 100%; padding: 12px; border: 2px solid #E1F5FE; border-radius: 10px; outline: none; font-size: 13px; font-weight: 700; color: #333; background: #fafcff; appearance: none; cursor: pointer; }
         .select-shipping:focus { border-color: #0D47A1; }
 
-        /* DESKRIPSI */
         .desc-title { font-size: 14px; font-weight: 800; color: #0D47A1; margin-bottom: 10px; border-bottom: 2px dashed #E1F5FE; padding-bottom: 10px; display: flex; align-items: center; gap: 5px; }
         .desc-content { font-size: 13px; color: #555; line-height: 1.6; white-space: pre-wrap; font-weight: 600; }
 
-        /* ULASAN PEMBELI */
         .review-box h4 { font-size: 14px; font-weight: 800; color: #0D47A1; margin-bottom: 15px; border-bottom: 2px dashed #E1F5FE; padding-bottom: 10px; display: flex; align-items: center; gap: 6px; }
         .review-item { display: flex; gap: 12px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #f4f7fa; }
         .review-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
@@ -116,7 +98,6 @@
         .review-detail .stars { font-size: 10px; margin-bottom: 4px; }
         .review-detail p { font-size: 12px; color: #555; font-weight: 600; line-height: 1.4; background: #fafcff; padding: 10px; border-radius: 10px; border: 1px solid #E1F5FE; }
 
-        /* BARANG SEJENIS */
         .similar-box h4 { font-size: 14px; font-weight: 800; color: #0D47A1; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;}
         .similar-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; scroll-behavior: smooth; }
         .similar-scroll::-webkit-scrollbar { display: none; }
@@ -127,21 +108,18 @@
         .sim-info h5 { font-size: 11px; font-weight: 700; color: #0D47A1; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .sim-info span { font-size: 13px; font-weight: 800; color: #FF9800; }
 
-        /* FULLSCREEN MODAL */
         .fullscreen-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,40,80,0.95); backdrop-filter: blur(10px); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
         .fullscreen-modal img { max-width: 95vw; max-height: 80vh; object-fit: contain; border-radius: 10px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: zoomIn 0.3s ease; }
         @keyframes zoomIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .close-fullscreen { position: absolute; top: 20px; right: 20px; color: #0D47A1; background: #fff; font-size: 24px; font-weight: bold; cursor: pointer; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s;}
         .close-fullscreen:active { transform: scale(0.9); }
 
-        /* Bottom Bar Checkout */
         .bottom-action-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); display: flex; box-shadow: 0 -5px 25px rgba(13, 71, 161, 0.15); z-index: 100; border-top: 1px solid #E1F5FE; border-radius: 20px 20px 0 0; padding: 10px 15px; gap: 10px; }
         .btn-add-cart { flex: 1; background: #E1F5FE; color: #0D47A1; border: 2px solid #81D4FA; border-radius: 12px; font-size: 12px; font-weight: 800; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;}
         .btn-add-cart:active { transform: scale(0.95); }
         .btn-buy-now { flex: 1.5; background: linear-gradient(135deg, #FF9800, #F57C00); color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); text-transform: uppercase; transition: 0.2s;}
         .btn-buy-now:active { transform: scale(0.95); }
 
-        /* Toast */
         #customToast { visibility: hidden; min-width: 280px; margin-left: -140px; background: rgba(13, 71, 161, 0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 9999; left: 50%; bottom: -50px; font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; border: 2px solid rgba(255,255,255,0.2); }
         #customToast.show { visibility: visible; opacity: 1; bottom: 90px; }
         #customToast.success { background: rgba(0, 170, 91, 0.95); border-color: #A5D6A7; }
@@ -182,7 +160,6 @@
             </div>
             
             <div id="promoGrosir" class="promo-grosir" style="display: none;"></div>
-            
             <div id="estimasiGrosir" class="box-estimasi"></div>
 
             <div class="p-title" id="namaProduk">Memuat nama produk...</div>
@@ -197,7 +174,7 @@
         <div class="glass-box variant-box" id="boxVarian">
             <h4 id="judulVarian"><i class="fas fa-tags"></i> Pilih Varian</h4>
             <div class="variant-options" id="pilihanVarianContainer">
-                </div>
+            </div>
         </div>
 
         <div class="glass-box shipping-box">
@@ -217,7 +194,10 @@
             <div class="store-avatar"><i class="fas fa-store"></i></div>
             <div class="store-info">
                 <h4 id="namaTokoAsli">Toko Belidikita</h4>
-                <span><i class="fas fa-check-circle"></i> Terverifikasi</span>
+                <div style="display: flex; gap: 5px; align-items: center; margin-top: 2px;">
+                    <span><i class="fas fa-check-circle"></i> Terverifikasi</span>
+                    <span style="background: #E8F5E9; color: #00AA5B;"><i class="fas fa-circle" style="font-size: 8px;"></i> Online saat ini</span>
+                </div>
             </div>
             <button class="btn-visit" onclick="window.location.href='toko.html'">Kunjungi Toko</button>
         </div>
@@ -260,14 +240,12 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-                // 1. Tarik Data dari Memori
         const dataProdukStr = localStorage.getItem('produk_detail');
         if(!dataProdukStr) window.location.href = 'dashboardutama.html';
         const rawProduk = JSON.parse(dataProdukStr);
 
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
 
-        // ✅ SISTEM KEBAL UNDEFINED (Menerjemahkan data bajakan dari script.js)
         const produk = {
             id: rawProduk.id,
             nama: rawProduk.nama || rawProduk.title || "Produk Belidikita",
@@ -285,7 +263,6 @@
             sold_count: rawProduk.sold_count || 0
         };
 
-        // ✅ TAMPILKAN HARGA & INFO GROSIR & BOX ESTIMASI HEMAT
         const satuanTampil = produk.unit;
         document.getElementById('hargaProduk').innerHTML = `${produk.hargaStr} <span style="font-size:12px; font-weight:600; color:#888;">/ ${satuanTampil}</span>`;
         
@@ -294,7 +271,6 @@
             elPromo.style.display = 'inline-block';
             elPromo.innerHTML = `<i class="fas fa-percent"></i> Beli Min ${produk.wholesale_min_qty} Harga Jadi ${formatRp(produk.wholesale_price)}/${satuanTampil}`;
 
-            // LOGIKA ESTIMASI HEMAT (MATEMATIKA MARKETING)
             const totalSatuan = produk.harga * produk.wholesale_min_qty;
             const totalGrosir = produk.wholesale_price * produk.wholesale_min_qty;
             const hemat = totalSatuan - totalGrosir;
@@ -311,7 +287,6 @@
         document.getElementById('txtBerat').innerHTML = `<i class="fas fa-weight-hanging mr-1"></i> ${produk.weight} Gram`;
         document.getElementById('namaTokoAsli').innerText = produk.seller_name;
 
-        // ✅ LOGIKA VARIAN BUNGLON CANGGIH (MEMBACA STOK)
         let ukuranTerpilih = null;
         const boxVarian = document.getElementById('boxVarian');
         let butuhVarian = false; 
@@ -329,7 +304,6 @@
                     let namaVarian = opsi;
                     let stokVarian = null;
 
-                    // Cek apakah formatnya S=10 dari Admin Panel
                     if(opsi.includes('=')) {
                         const pecah = opsi.split('=');
                         namaVarian = pecah[0].trim();
@@ -339,19 +313,17 @@
                     const btn = document.createElement('div');
                     btn.className = 'v-opt';
 
-                    // Jika stok varian = 0, matikan tombolnya
                     if(stokVarian === 0) {
                         btn.classList.add('habis');
                         btn.innerHTML = `<span>${namaVarian}</span><span style="font-size:9px; color:#ff3b30; margin-top:2px;">Habis</span>`;
                     } else {
-                        // Jika ada stok (atau tidak pakai sistem =)
                         let teksStok = (stokVarian !== null && !isNaN(stokVarian)) ? `<span style="font-size:9px; color:#00AA5B; margin-top:2px;">Sisa ${stokVarian}</span>` : '';
                         btn.innerHTML = `<span style="font-weight:900;">${namaVarian}</span>${teksStok}`;
                         
                         btn.addEventListener('click', function() {
                             document.querySelectorAll('.v-opt').forEach(b => b.classList.remove('selected'));
                             this.classList.add('selected');
-                            ukuranTerpilih = namaVarian; // Masukkan ke keranjang tanpa embel-embel sisa
+                            ukuranTerpilih = namaVarian; 
                         });
                     }
                     containerVarian.appendChild(btn);
@@ -359,9 +331,6 @@
             });
         }
 
-
-
-        // ✅ FUNGSI TARIK ULASAN & TAMPILKAN DAFTAR KOMENTAR
         async function fetchUlasanAsli() {
             try {
                 const res = await fetch(`/api/reviews/${produk.id}`); 
@@ -369,27 +338,21 @@
                     const result = await res.json();
                     
                     if(result.success && result.data && result.data.length > 0) {
-                        // 1. Update Rating Atas
                         document.getElementById('avgRating').innerHTML = `<i class="fas fa-star"></i> ${result.rata_rata}`;
                         document.getElementById('realTerjual').innerHTML = `<i class="fas fa-shopping-bag mr-1"></i> ${result.terjual} Terjual`;
                         
-                        // 2. Render Daftar Komentar ke Layar Ulasan
                         const container = document.getElementById('reviewContainer');
                         container.innerHTML = ''; 
                         
                         result.data.forEach(rev => {
-                            // Hitung bintang emas dan abu-abu
                             let starsHtml = '';
                             for(let i=0; i<5; i++) {
                                 starsHtml += i < rev.rating 
                                     ? '<i class="fas fa-star" style="color:#FFD700;"></i> ' 
                                     : '<i class="far fa-star" style="color:#ddd;"></i> ';
                             }
-                            
-                            // Generate Avatar acak berdasarkan nama
                             let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(rev.user_name)}&background=E1F5FE&color=0D47A1&rounded=true`;
                             
-                            // Suntikkan HTML ulasan
                             container.innerHTML += `
                                 <div class="review-item">
                                     <img src="${avatarUrl}" alt="Avatar">
@@ -402,7 +365,6 @@
                             `;
                         });
                     } else {
-                        // Jika belum ada yang komentar
                         document.getElementById('reviewContainer').innerHTML = '<p style="font-size:12px; color:#888; text-align:center; font-weight:600;">Belum ada ulasan untuk produk ini.</p>';
                     }
                 } else { throw new Error("API belum tersedia"); }
@@ -438,9 +400,21 @@
         function bukaFullscreen(url) { document.getElementById('fullscreenImg').src = url; document.getElementById('fullscreenModal').style.display = 'flex'; }
         function tutupFullscreen() { document.getElementById('fullscreenModal').style.display = 'none'; }
 
+        // ✅ LOGIKA BAGIKAN DIPERBAIKI MENJADI LEBIH LENGKAP
         function bagikanProduk() {
-            if (navigator.share) { navigator.share({ title: produk.nama, text: `Cek ${produk.nama} di Belidikita!`, url: window.location.href }).catch(err => console.log(err)); } 
-            else { navigator.clipboard.writeText(window.location.href); showToast("Link produk berhasil disalin!", "success"); }
+            const textBagikan = `*${produk.nama}*\n💰 Harga: ${produk.hargaStr}\n\n📝 *Deskripsi:*\n${produk.deskripsi.substring(0, 150)}...\n\n📸 *Lihat Gambar & Beli di sini:*\n${window.location.href}\n\nLink Gambar Utama: ${daftarFoto[0]}`;
+            
+            if (navigator.share) { 
+                navigator.share({ 
+                    title: produk.nama, 
+                    text: textBagikan, 
+                    url: window.location.href 
+                }).catch(err => console.log(err)); 
+            } 
+            else { 
+                navigator.clipboard.writeText(textBagikan); 
+                showToast("Detail & Link produk berhasil disalin!", "success"); 
+            }
         }
 
         function updateBadge() {
@@ -522,7 +496,7 @@
                             unit: p.unit || 'Pcs', variant_title: p.variant_title || '', variant_options: p.variant_options || '',
                             wholesale_price: p.wholesale_price || 0, wholesale_min_qty: p.wholesale_min_qty || 0 
                         };
-                        const strObj = encodeURIComponent(JSON.stringify(prodObj));
+                        const strObj = encodeURIComponent(JSON.stringify(prodObj)).replace(/'/g, "%27");
 
                         container.innerHTML += `
                             <div class="sim-card" onclick="bukaProdukLain('${strObj}')">
