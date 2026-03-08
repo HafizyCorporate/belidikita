@@ -141,11 +141,22 @@
         .fs-dot { width: 8px; height: 8px; background: rgba(255,255,255,0.4); border-radius: 50%; transition: 0.3s; }
         .fs-dot.active { background: #fff; width: 20px; border-radius: 10px; }
 
-        .bottom-action-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); display: flex; box-shadow: 0 -5px 25px rgba(13, 71, 161, 0.15); z-index: 100; border-top: 1px solid #E1F5FE; border-radius: 20px 20px 0 0; padding: 10px 15px; gap: 10px; }
+        /* ✅ TOMBOL KERANJANG DIANGKAT KE ATAS NAVBAR (bottom: 65px) */
+        .bottom-action-bar { position: fixed; bottom: 65px; left: 0; width: 100%; height: 70px; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); display: flex; box-shadow: 0 -5px 25px rgba(13, 71, 161, 0.15); z-index: 100; border-top: 1px solid #E1F5FE; border-radius: 20px 20px 0 0; padding: 10px 15px; gap: 10px; }
         .btn-add-cart { flex: 1; background: #E1F5FE; color: #0D47A1; border: 2px solid #81D4FA; border-radius: 12px; font-size: 12px; font-weight: 800; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;}
         .btn-add-cart:active { transform: scale(0.95); }
         .btn-buy-now { flex: 1.5; background: linear-gradient(135deg, #FF9800, #F57C00); color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); text-transform: uppercase; transition: 0.2s;}
         .btn-buy-now:active { transform: scale(0.95); }
+
+        /* ✅ CSS NAVBAR BAWAH (Sama seperti Dashboard) */
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -5px 25px rgba(0, 105, 92, 0.15); z-index: 1000; border-top: 1px solid #E8F5E9;}
+        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 10px; font-weight: 700; transition: 0.3s; position: relative; width: 60px;}
+        .nav-item i { font-size: 20px; margin-bottom: 4px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .nav-item.active { color: #0D47A1; }
+        .nav-item.active i { transform: translateY(-5px) scale(1.1); color: #00AA5B; }
+        .nav-item.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background: #00AA5B; border-radius: 50%; }
+        .nav-item:active i { transform: scale(0.8); }
+
 
         /* ✅ CSS CHAT MODAL TOKO */
         .chat-toko-modal { display: none; position: fixed; z-index: 8000; left: 0; top: 0; right: 0; bottom: 0; background: #f4f7fa; flex-direction: column; animation: slideInRight 0.3s ease; }
@@ -302,13 +313,30 @@
         <div class="chat-toko-body" id="chatTokoBody">
             <div class="chat-msg-store">Halo kak! Ada yang bisa dibantu mengenai produk ini? 😊</div>
         </div>
-        <div class="chat-toko-footer">
+        
+                <div class="chat-toko-footer">
             <input type="text" id="chatTokoInput" enterkeyhint="send" placeholder="Ketik pesan..." onkeydown="if(event.key === 'Enter') { event.preventDefault(); kirimChatToko(); }">
             <button onclick="kirimChatToko()"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
+    <nav id="bottomNav">
+        <a href="dashboardutama.html" class="nav-item">
+            <i class="fas fa-mosque"></i><span>Beranda</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-play-circle"></i><span>Video</span>
+        </a>
+        <a href="dashboardutama.html?openPesanan=true" class="nav-item">
+            <i class="fas fa-receipt"></i><span>Pesanan</span>
+        </a>
+        <a href="registrasi/profilpembeli.html" class="nav-item">
+            <i class="fas fa-user"></i><span>Akun</span>
+        </a>
+    </nav>
+
     <div id="customToast"></div>
+
 
     <script>
         function showToast(msg, type = 'info') {
