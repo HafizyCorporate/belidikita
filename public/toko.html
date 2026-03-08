@@ -1027,7 +1027,7 @@
             });
         }
 
-        // 4. TEMBAK DATA KE DATABASE VIA API (POST)
+                // 4. TEMBAK DATA KE DATABASE VIA API (POST)
         async function simpanDataKeDatabase(logoStr, btnElem) {
             const token = localStorage.getItem('token');
             const payloadData = {
@@ -1040,7 +1040,6 @@
             };
             
             try {
-                // Sesuaikan URL ini dengan Endpoint API Backend Anda untuk update setting
                 const res = await fetch('/api/settings/update_store_profile', {
                     method: 'POST',
                     headers: { 
@@ -1050,18 +1049,32 @@
                     body: JSON.stringify(payloadData)
                 });
 
+                // Cek apakah server memblokir karena file kepanjangan (Error 413)
+                if (res.status === 413) {
+                    showToast("Gagal! Foto terlalu besar, server menolak.", "error");
+                    return;
+                }
+                
+                // Cek apakah API tidak ditemukan (Error 404)
+                if (res.status === 404) {
+                    showToast("Gagal! API Backend belum terpasang.", "error");
+                    return;
+                }
+
                 const result = await res.json();
 
                 if (result.success || res.ok) {
-                    showToast("Profil Toko berhasil disimpan ke Database!", "success");
-                    muatProfilTokoDB(); // Tarik ulang data segar dari database
-                    window.history.back(); // Tutup modal
+                    showToast("Profil berhasil disimpan ke Database!", "success");
+                    muatProfilTokoDB(); // Refresh tampilan
+                    window.history.back(); // Tutup modal otomatis
                 } else {
                     showToast(result.message || "Gagal menyimpan ke database.", "error");
                 }
             } catch (error) {
-                showToast("Error koneksi ke server database.", "error");
+                console.error(error);
+                showToast("Error koneksi! Cek terminal backend Anda.", "error");
             } finally {
+                // Apapun yang terjadi, tombol kembali bisa diklik
                 btnElem.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan";
                 btnElem.disabled = false;
             }
