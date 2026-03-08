@@ -50,7 +50,6 @@
         .cart-wrapper { position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;}
         .cart-badge-detail { position: absolute; top: -5px; right: -8px; background: #ff3b30; color: #fff; font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 10px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(255,59,48,0.5);}
 
-        /* Jarak top margin ditambahkan agar gambar tidak tertutup header */
         .slider-container { width: 100%; position: relative; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.05); z-index: 10; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; overflow: hidden; min-height: 300px; display: flex; align-items: center; justify-content: center; margin-top: 65px;}
         .product-image-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; aspect-ratio: 1/1; width: 100%;}
         .product-image-slider::-webkit-scrollbar { display: none; }
@@ -121,12 +120,12 @@
         .similar-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; scroll-behavior: smooth; }
         .similar-scroll::-webkit-scrollbar { display: none; }
         
-        /* ✅ PERBAIKAN UKURAN KARTU REKOMENDASI (SERAGAM) */
+        /* ✅ PERBAIKAN UKURAN KARTU REKOMENDASI AGAR SAMA RATA */
         .sim-card { min-width: 140px; max-width: 140px; background: #fff; border: 2px solid #E1F5FE; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; }
         .sim-card:active { transform: scale(0.95); }
-        .sim-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-bottom: 1px solid #E1F5FE; }
-        .sim-info { padding: 8px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; }
-        .sim-info h5 { font-size: 11px; font-weight: 700; color: #0D47A1; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+        .sim-card img { width: 100%; aspect-ratio: 1/1; height: 140px; object-fit: cover; border-bottom: 1px solid #E1F5FE; }
+        .sim-info { padding: 10px 8px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; }
+        .sim-info h5 { font-size: 11px; font-weight: 700; color: #0D47A1; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
         .sim-info span { font-size: 13px; font-weight: 800; color: #FF9800; }
 
         .fullscreen-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,40,80,0.95); backdrop-filter: blur(10px); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
@@ -155,7 +154,7 @@
     </div>
 
     <div class="top-header-detail">
-        <i class="fas fa-arrow-left btn-back" onclick="history.back()"></i>
+        <i class="fas fa-arrow-left btn-back" onclick="window.location.href='dashboardutama.html'"></i>
         
         <div class="search-bar-detail">
             <i class="fas fa-search" style="color: #888; font-size: 13px;"></i>
@@ -163,7 +162,7 @@
         </div>
         
         <div class="header-icons">
-            <i class="fas fa-envelope" onclick="window.location.href='dashboardutama.html'"></i>
+            <i class="fas fa-envelope" onclick="window.location.href='dashboardutama.html?openInbox=true'"></i>
             <div class="cart-wrapper" onclick="window.location.href='keranjang.html'">
                 <i class="fas fa-shopping-cart"></i>
                 <span class="cart-badge-detail" id="badgeKeranjang">0</span>
@@ -202,6 +201,11 @@
             </div>
         </div>
 
+        <div class="glass-box">
+            <div class="desc-title"><i class="fas fa-align-left"></i> Rincian Produk</div>
+            <div class="desc-content" id="descProduk">Memuat deskripsi...</div>
+        </div>
+
         <div class="glass-box variant-box" id="boxVarian">
             <h4 id="judulVarian"><i class="fas fa-tags"></i> Pilih Varian</h4>
             <div class="variant-options" id="pilihanVarianContainer">
@@ -210,6 +214,7 @@
 
         <div class="glass-box shipping-box">
             <h4><i class="fas fa-truck-fast"></i> Ekspedisi Pilihanmu</h4>
+            
             <div id="lokasiPengiriman" style="font-size: 11px; font-weight: 700; color: #555; margin-bottom: 12px; background: #f4f9ff; padding: 10px 12px; border-radius: 8px; border: 1px dashed #81D4FA; display: flex; align-items: center; gap: 8px;">
                 <i class="fas fa-map-marker-alt" style="color:#ff3b30; font-size: 14px;"></i> 
                 <span>Dikirim dari: <b id="teksLokasiToko" style="color: #0D47A1;">Memuat lokasi...</b></span>
@@ -236,11 +241,6 @@
                 </div>
             </div>
             <button class="btn-visit" onclick="window.location.href='toko.html'">Kunjungi Toko</button>
-        </div>
-
-        <div class="glass-box">
-            <div class="desc-title"><i class="fas fa-align-left"></i> Rincian Produk</div>
-            <div class="desc-content" id="descProduk">Memuat deskripsi...</div>
         </div>
 
         <div class="glass-box review-box">
@@ -292,7 +292,7 @@
                 return; 
             }
 
-            // ✅ AMBIL LOKASI TOKO DARI SETTING LOKAL ADMIN (Default: Bandung)
+            // AMBIL LOKASI TOKO DARI SETTING LOKAL (Default: Bandung)
             let kotaToko = "Kota Bandung";
             try {
                 const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
@@ -477,6 +477,7 @@
         window.eksekusiPencarianDetail = function() {
             const keyword = document.getElementById('inputSearchDetail').value.trim();
             if(keyword) {
+                // Melempar kata kunci ke dashboard utama
                 window.location.href = 'dashboardutama.html?search=' + encodeURIComponent(keyword);
             }
         };
