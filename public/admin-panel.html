@@ -1274,18 +1274,37 @@
             }
         };
 
-        // ✅ LOGIKA MENYIMPAN PESAN AUTO-REPLY
+                // ✅ FASE 2: LOGIKA MENYIMPAN PESAN AUTO-REPLY KE DATABASE
+        async function fetchAutoReplyFromDB() {
+            try {
+                const res = await fetch('/api/settings/autoreply');
+                const result = await res.json();
+                if(result.success && result.text) {
+                    const autoReplyBox = document.getElementById('adminAutoReplyText');
+                    if(autoReplyBox) autoReplyBox.value = result.text;
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        window.simpanAutoReply = async function() {
+            const text = document.getElementById('adminAutoReplyText').value;
+            try {
+                const res = await fetch('/api/settings/autoreply', {
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ text: text })
+                });
+                const result = await res.json();
+                if(result.success) showToast("Pesan Auto-Reply berhasil disimpan ke Database!", "success");
+                else showToast("Gagal menyimpan pengaturan.", "error");
+            } catch(e) { showToast("Error koneksi.", "error"); }
+        };
+
+        // Panggil fungsi tarik data DB saat Admin Panel dimuat
         document.addEventListener("DOMContentLoaded", () => {
-            const savedReply = localStorage.getItem('belidikita_autoreply') || "Halo Kak! Terima kasih sudah menghubungi Belidikita. Pesan Kakak sudah kami terima dan Admin akan segera membalasnya. Mohon ditunggu ya! 😊";
-            const autoReplyBox = document.getElementById('adminAutoReplyText');
-            if(autoReplyBox) autoReplyBox.value = savedReply;
+            fetchAutoReplyFromDB();
         });
 
-        window.simpanAutoReply = function() {
-            const text = document.getElementById('adminAutoReplyText').value;
-            localStorage.setItem('belidikita_autoreply', text);
-            showToast("Pesan Auto-Reply berhasil disimpan!", "success");
-        };
 
     </script>
 </body>
