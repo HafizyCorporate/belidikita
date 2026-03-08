@@ -174,7 +174,7 @@
         <div class="lantern right"></div>
     </div>
 
-    <div class="header-store">
+      <div class="header-store">
         <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
         
         <div class="search-bar-advanced">
@@ -184,25 +184,34 @@
             </select>
             <i class="fas fa-caret-down" style="font-size: 10px; color: #888; margin-right: 5px; pointer-events: none;"></i>
             <div style="width: 1px; height: 15px; background: #ddd; margin-right: 5px;"></div>
-            <input type="text" id="inputSearchToko" placeholder="Cari di toko ini..." onkeypress="if(event.key === 'Enter') eksekusiPencarian()">
-            <i class="fas fa-search" onclick="eksekusiPencarian()" style="color: #FF9800; font-size: 16px; cursor: pointer;"></i>
+            <input type="text" id="inputSearchToko" placeholder="Cari..." onkeypress="if(event.key === 'Enter') eksekusiPencarian()">
+            <i class="fas fa-search" onclick="eksekusiPencarian()" style="color: #FF9800; font-size: 14px; cursor: pointer;"></i>
         </div>
 
-        <i class="fas fa-ellipsis-v" id="btnSettingToko" style="padding: 5px 10px; display: none;"></i>
+        <div style="display: flex; gap: 15px; align-items: center; margin-left: 5px;">
+            <i class="fas fa-envelope" onclick="window.bukaInbox()" style="font-size: 18px; color: #00695C; cursor: pointer;"></i>
+            <div onclick="window.location.href='keranjang.html'" style="position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                <i class="fas fa-shopping-cart" style="font-size: 18px; color: #00695C;"></i>
+                <span id="badgeKeranjang" style="position: absolute; top: -6px; right: -8px; background: #ff3b30; color: #fff; font-size: 8px; font-weight: 800; padding: 2px 4px; border-radius: 10px; border: 2px solid #fff;">0</span>
+            </div>
+        </div>
     </div>
 
     <div class="content-wrapper">
         
+                <i class="fas fa-ellipsis-v" id="btnSettingToko" style="position: absolute; top: 20px; right: 20px; color: #fff; font-size: 16px; cursor: pointer; z-index: 100; text-shadow: 0 1px 3px rgba(0,0,0,0.5);"></i>
+
         <div class="store-profile-card">
             <div class="store-bg-accent"></div>
             <div class="store-info-top">
                 <div class="store-avatar" id="displayStoreAvatar"><i class="fas fa-store"></i></div>
                 <div class="store-name-box">
-                    <h2><span id="displayStoreName">Belidikita Official</span> <span class="badge-mall">MALL</span></h2>
+                    <h2><span id="displayStoreName">Belidikita Official</span> <i class="fas fa-check-circle" style="color: #0D47A1; font-size: 14px;" title="Terverifikasi"></i></h2>
                     <div class="store-status"><i class="fas fa-circle" style="font-size:8px;"></i> Aktif 2 menit lalu</div>
                     <div style="font-size:10px; color:#888; font-weight:600; margin-top:2px;"><i class="fas fa-map-marker-alt"></i> <span id="displayStoreCity">Kota Bandung</span></div>
                 </div>
             </div>
+
 
                     <div class="store-stats">
                 <div class="stat-item">
@@ -223,35 +232,16 @@
                 </div>
             </div>
 
-                        <div style="display: flex; gap: 10px; margin-top: 15px; position: relative; z-index: 2;">
+                             <div style="display: flex; gap: 10px; margin-top: 15px; position: relative; z-index: 2;">
                 <button class="btn-follow" id="btnFollowToko" onclick="followToko()" style="margin-top: 0; flex: 1;"><i class="fas fa-plus"></i> Ikuti Toko</button>
-                <button class="btn-follow" onclick="window.bukaInbox()" style="margin-top: 0; flex: 1; background: #FF9800; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);"><i class="fas fa-envelope"></i> Kirim Pesan</button>
+                <button class="btn-follow" onclick="window.bukaChatTokoLangsung()" style="margin-top: 0; flex: 1; background: #FF9800; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);"><i class="fas fa-envelope"></i> Kirim Pesan</button>
             </div>
-
-        </div>
-
-        <div class="voucher-section">
+  
+        
+        <div class="voucher-section" id="containerVoucherToko" style="display: none;">
             <div class="section-title"><i class="fas fa-ticket-alt" style="color:#FF9800;"></i> Voucher Toko Spesial</div>
-            <div class="voucher-scroll">
-                <div class="voucher-card">
-                    <div class="v-left">
-                        <h4>Diskon 10%</h4>
-                        <p>Semua Produk</p>
-                    </div>
-                    <div class="v-right" onclick="klaimVoucher('RAMADANSALINGSABAR')">
-                        <span>KLAIM</span>
-                    </div>
+            <div class="voucher-scroll" id="scrollVoucherIsi">
                 </div>
-                <div class="voucher-card" style="background: linear-gradient(135deg, #00AA5B, #00c853);">
-                    <div class="v-left">
-                        <h4>Gratis Ongkir</h4>
-                        <p>Ke Seluruh Indonesia</p>
-                    </div>
-                    <div class="v-right" onclick="klaimVoucher('RAMADANRASATEMU')">
-                        <span>KLAIM</span>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div class="store-tabs">
@@ -727,7 +717,120 @@
                 setTimeout(tampilkanFotoProfilToko, 1000); 
             });
         }
+        
+        
+        // ==================================================
+        // ✅ TAMPILKAN LOGO TOKO & TOMBOL SETTING (JIKA ADMIN)
+        // ==================================================
+        function muatProfilTokoLokal() {
+            try {
+                const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
+                if (storeData) {
+                    if (storeData.nama) document.getElementById('displayStoreName').innerText = storeData.nama;
+                    if (storeData.kota) document.getElementById('displayStoreCity').innerText = storeData.kota;
+                    if (storeData.logo) {
+                        const imgTag = `<img src="${storeData.logo}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                        document.getElementById('displayStoreAvatar').innerHTML = imgTag;
+                    }
+                }
+            } catch (e) {}
 
+            // Cek apakah login sebagai admin untuk memunculkan titik 3
+            const token = localStorage.getItem('token');
+            if (token && token.startsWith('token-admin-')) {
+                document.getElementById('btnSettingToko').style.display = 'block';
+            }
+        }
+        
+        // Panggil saat halaman dimuat
+        document.addEventListener("DOMContentLoaded", muatProfilTokoLokal);
+
+
+        // ==================================================
+        // ✅ LOGIKA TARIK VOUCHER DARI ADMIN PANEL
+        // ==================================================
+        async function loadVoucherToko() {
+            try {
+                const res = await fetch('/api/settings/all');
+                const data = await res.json();
+                
+                if(data.success && data.settings) {
+                    const statusVoucher = data.settings.find(s => s.key_name === 'promo_ramadhan')?.value_text === 'true';
+                    const containerVoucher = document.getElementById('containerVoucherToko');
+                    const scrollVoucher = document.getElementById('scrollVoucherIsi');
+
+                    if(statusVoucher) {
+                        containerVoucher.style.display = 'block';
+                        scrollVoucher.innerHTML = `
+                            <div class="voucher-card">
+                                <div class="v-left">
+                                    <h4>Diskon 10%</h4>
+                                    <p>Semua Produk</p>
+                                </div>
+                                <div class="v-right" onclick="klaimVoucher('RAMADANSALINGSABAR')">
+                                    <span>KLAIM</span>
+                                </div>
+                            </div>
+                            <div class="voucher-card" style="background: linear-gradient(135deg, #00AA5B, #00c853);">
+                                <div class="v-left">
+                                    <h4>Gratis Ongkir</h4>
+                                    <p>Seluruh Indonesia</p>
+                                </div>
+                                <div class="v-right" onclick="klaimVoucher('RAMADANRASATEMU')">
+                                    <span>KLAIM</span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        containerVoucher.style.display = 'none';
+                    }
+                }
+            } catch(e) { console.log("Gagal cek status voucher."); }
+        }
+
+        // Panggil cek voucher
+        loadVoucherToko();
+        
+                // ==================================================
+        // ✅ LOGIKA BADGE KERANJANG DAN BUKA CHAT LANGSUNG
+        // ==================================================
+        
+        // Fungsi update angka merah keranjang
+        async function updateBadgeKeranjang() {
+            const token = localStorage.getItem('token');
+            const badge = document.getElementById('badgeKeranjang');
+            if(!badge) return;
+            if(!token || token.startsWith('token-admin-')) { badge.innerText = "0"; return; }
+            try {
+                const res = await fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                if(result.success) { badge.innerText = result.data.reduce((sum, item) => sum + item.qty, 0); }
+            } catch(e) {}
+        }
+
+        // Panggil badge saat halaman dimuat
+        document.addEventListener("DOMContentLoaded", updateBadgeKeranjang);
+
+        // Fungsi bypass Inbox dan masuk ke Chat Room
+        window.bukaChatTokoLangsung = function() {
+            const token = localStorage.getItem('token');
+            if (!token || token.startsWith('token-admin-')) {
+                showToast("Silakan login pembeli dulu untuk chat!", "error");
+                setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
+                return;
+            }
+            
+            // Sembunyikan inbox (jika tadinya terbuka) dan langsung buka modal chat
+            const modalInbox = document.getElementById('modalInbox');
+            if (modalInbox) modalInbox.style.display = 'none';
+            
+            document.getElementById('modalChatToko').style.display = 'flex';
+            
+            // Panggil riwayat
+            if(typeof muatRiwayatChatToko === 'function') {
+                muatRiwayatChatToko();
+            }
+        };
 
     </script>
 </body>
