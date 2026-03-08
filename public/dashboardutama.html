@@ -149,10 +149,18 @@
 
     <header id="topHeader" class="hidden">
         <div class="header-logo-box"><img src="assets/nama_logo_kamu.png" alt="Logo" class="main-logo-header"></div>
-        <div class="header-search">
-            <i class="fas fa-search"></i>
-            <input type="text" id="searchInputDashboard" placeholder="Cari barang (Lalu tekan Enter)..." onkeypress="if(event.key === 'Enter') window.location.href='search.html?q=' + encodeURIComponent(this.value)">
+                <div class="header-search" style="display: flex; align-items: center; background: #f4f9ff; border: 2px solid #E1F5FE; border-radius: 20px; padding: 6px 12px; margin: 0 15px; flex: 1;">
+            <select id="pilihanSortir" style="border: none; background: transparent; font-size: 10px; font-weight: 800; color: #0D47A1; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none;">
+                <option value="terbaru">Terbaru</option>
+                <option value="termurah">Termurah</option>
+                <option value="terlaris">Terlaris</option>
+            </select>
+            <i class="fas fa-caret-down" style="font-size: 10px; color: #888; margin-left: 3px; margin-right: 8px;"></i>
+            <div style="width: 1px; height: 15px; background: #ddd; margin-right: 8px;"></div>
+            <i class="fas fa-search" style="color: #888; font-size: 12px;" onclick="window.lakukanPencarianPintar(document.getElementById('searchInputDashboard').value)"></i>
+            <input type="text" id="searchInputDashboard" placeholder="Ketik barang..." onkeypress="if(event.key === 'Enter') window.lakukanPencarianPintar(this.value)" style="border: none; background: transparent; outline: none; width: 100%; font-size: 12px; font-weight: 600; color: #333; margin-left: 5px;">
         </div>
+
         
         <div class="header-admin" id="btnChatAdmin" style="cursor: pointer; font-size: 20px; color: #0D47A1; margin-right: 12px; position: relative;" onclick="window.bukaInbox()">
             <i class="fas fa-envelope"></i>
@@ -620,10 +628,17 @@
             printWindow.document.close();
         };
 
-                window.lakukanPencarianPintar = function(keyword) {
+                        // ✅ LOGIKA BARU: LEMPAR KEYWORD DAN FILTER KE SEARCH.HTML
+        window.lakukanPencarianPintar = function(keyword) {
             if(!keyword || keyword.trim() === '') return;
-            window.location.href = 'search.html?q=' + encodeURIComponent(keyword.trim());
+            
+            // Ambil pilihan filter dari dropdown sebelah kolom pencarian
+            const sortPilihan = document.getElementById('pilihanSortir').value;
+            
+            // Lempar ke search.html beserta parameter sort-nya
+            window.location.href = 'search.html?q=' + encodeURIComponent(keyword.trim()) + '&sort=' + sortPilihan;
         };
+
 
         window.lakukanPencarianDariKatalog = async function(keyword) {
             if(!keyword || keyword.trim() === '') return;
@@ -980,7 +995,16 @@
                         if(cKeranjang) cKeranjang.innerHTML = '';
                         if(cGeneral) cGeneral.innerHTML = '';
 
-                        let countLaris = 0, countKeranjang = 0, countGeneral = 0;
+                                                let countLaris = 0, countKeranjang = 0, countGeneral = 0;
+
+                        // ✅ LOGIKA BARU: AMBIL NAMA & KOTA TOKO
+                        let namaToko = "Belidikita Official";
+                        let kotaToko = "Kota Bandung";
+                        try {
+                            const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
+                            if (storeData && storeData.nama) namaToko = storeData.nama;
+                            if (storeData && storeData.kota) kotaToko = storeData.kota;
+                        } catch (e) {}
 
                         data.forEach(p => {
                             let arrFoto = [];
@@ -999,7 +1023,7 @@
                             const prodObj = { 
                                 id: p.id, nama: p.title, harga: p.price, hargaStr: hargaRp, 
                                 deskripsi: p.description, foto: p.media_url, 
-                                weight: p.weight || 1000, seller_name: p.seller_name || "Belidikita Official", 
+                                weight: p.weight || 1000, seller_name: namaToko, // Terapkan nama toko dinamis
                                 qty: 1, unit: p.unit || 'Pcs', variant_title: p.variant_title || '', 
                                 variant_options: p.variant_options || '', wholesale_price: p.wholesale_price || 0, 
                                 wholesale_min_qty: p.wholesale_min_qty || 0 
@@ -1012,6 +1036,13 @@
                                 labelGrosir = `<div style="position:absolute; top:5px; left:5px; background:#4CAF50; color:#fff; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;"><i class="fas fa-tags"></i> GROSIR</div>`;
                             }
 
+                            // ✅ TAMBAHAN TAMPILAN LOKASI DAN NAMA TOKO
+                            const htmlLokasiToko = `
+                                <div style="font-size: 9px; color: #888; font-weight: 600; margin-top: 4px; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    <i class="fas fa-map-marker-alt" style="color: #00AA5B;"></i> ${kotaToko} | <i class="fas fa-store" style="color: #0D47A1; margin-left: 2px;"></i> ${namaToko}
+                                </div>
+                            `;
+
                             const htmlCardHorizontal = `
                                 <div class="h-card" onclick="window.bukaDetailTunggal('${strObj}')">
                                     ${labelGrosir}
@@ -1019,6 +1050,7 @@
                                     <div class="h-card-info">
                                         <h3 class="h-card-title">${p.title}</h3>
                                         <div class="h-card-price">${hargaRp}</div>
+                                        ${htmlLokasiToko}
                                         <div class="h-card-stats">
                                             <span><i class="fas fa-star" style="color:#FFD700;"></i> ${tampilanRating}</span>
                                             <span>${terjualReal} Terjual</span>
@@ -1034,6 +1066,7 @@
                                     <div class="product-info">
                                         <h3 class="product-title">${p.title}</h3>
                                         <div class="product-price">${hargaRp}</div>
+                                        ${htmlLokasiToko}
                                         <div class="product-stats">
                                             <span><i class="fas fa-star" style="color:#FFD700;"></i> ${tampilanRating}</span>
                                             <span>${terjualReal} Terjual</span>
@@ -1041,6 +1074,7 @@
                                     </div>
                                 </div>
                             `;
+
 
                             if (p.category === 'laris') {
                                 if(cLaris) cLaris.innerHTML += htmlCardHorizontal;
