@@ -151,8 +151,7 @@ const initDB = async () => {
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_reject_reason TEXT;
     `;
 
-    
-    /    // ✅ INDEXING DATABASE AGAR SUPER CEPAT
+        // ✅ INDEXING DATABASE AGAR SUPER CEPAT
     const createIndexes = `
         CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
         CREATE INDEX IF NOT EXISTS idx_products_title ON products USING GIN (to_tsvector('simple', title));
@@ -180,3 +179,5 @@ const initDB = async () => {
 };
 
 module.exports = { pool, initDB };
+
+   
