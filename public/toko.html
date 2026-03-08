@@ -60,7 +60,8 @@
             font-size: 12px; font-weight: 600; color: #333; margin-left: 8px; 
         }
 
-        .content-wrapper { position: relative; z-index: 10; max-width: 600px; margin: 0 auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+                 /* Tampilan dilebarkan dengan mengecilkan padding horizontal */
+        .content-wrapper { position: relative; z-index: 10; max-width: 600px; margin: 0 auto; padding: 15px 6px; display: flex; flex-direction: column; gap: 15px; }
         
         .store-profile-card { 
             background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
@@ -459,10 +460,7 @@
 
         loadStoreProducts();
 
-
-                // ==================================================
-        // 5. LOGIKA KOTAK MASUK & CHAT TOKO KE DATABASE
-        // ==================================================
+        // ✅ LOGIKA INBOX & CHAT (ANTI NYASAR KE DASHBOARD)
         window.bukaInbox = function() {
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) {
@@ -472,14 +470,13 @@
             }
             
             document.getElementById('modalInbox').style.display = 'flex';
+            window.history.pushState({ modal: 'inbox' }, "", ""); // Kunci Tombol Back
             
-            // Coba ambil nama toko dari setting lokal (biar dinamis)
             try {
                 const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
                 if (storeData && storeData.nama) document.getElementById('namaTokoInbox').innerText = storeData.nama;
             } catch(e) {}
 
-            // Ambil pesan terakhir untuk preview di kotak masuk
             fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } })
                 .then(res => res.json())
                 .then(result => {
@@ -502,14 +499,33 @@
         window.bukaRuangChat = function() {
             document.getElementById('modalInbox').style.display = 'none';
             document.getElementById('modalChatToko').style.display = 'flex';
+            document.getElementById('modalInbox').setAttribute('data-was-open', 'true');
+            window.history.pushState({ modal: 'chat' }, "", ""); // Kunci Tombol Back
             muatRiwayatChatToko();
+        };
+
+        window.bukaChatTokoLangsung = function() {
+            const token = localStorage.getItem('token');
+            if (!token || token.startsWith('token-admin-')) {
+                showToast("Silakan login pembeli dulu untuk chat!", "error");
+                setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
+                return;
+            }
+            const modalInbox = document.getElementById('modalInbox');
+            if (modalInbox) modalInbox.style.display = 'none';
+            
+            document.getElementById('modalChatToko').style.display = 'flex';
+            window.history.pushState({ modal: 'chat_langsung' }, "", ""); // Kunci Tombol Back
+            
+            if(typeof muatRiwayatChatToko === 'function') muatRiwayatChatToko();
         };
 
         window.tutupChatToko = function() {
             document.getElementById('modalChatToko').style.display = 'none';
-            document.getElementById('modalInbox').style.display = 'flex'; // Kembali ke list inbox saat di-back
+            window.history.back(); // Trigger popstate
         };
 
+            
         async function muatRiwayatChatToko() {
             const token = localStorage.getItem('token');
             try {
@@ -831,6 +847,42 @@
                 muatRiwayatChatToko();
             }
         };
+        
+                // ==================================================
+        // ✅ PENGENDALI TOMBOL BACK FISIK HP (POPSTATE)
+        // ==================================================
+        window.addEventListener('popstate', function(event) {
+            const searchModal = document.getElementById('searchLayarPenuh');
+            const inboxModal = document.getElementById('modalInbox');
+            const chatModal = document.getElementById('modalChatToko');
+            const settingModal = document.getElementById('modalSettingToko');
+
+            if(searchModal && searchModal.style.display === 'flex') {
+                searchModal.style.display = 'none';
+            } 
+            else if(chatModal && chatModal.style.display === 'flex') {
+                chatModal.style.display = 'none';
+                // Jika masuk dari inbox, kembalikan ke inbox. Jika direct, tutup total.
+                if (inboxModal && inboxModal.hasAttribute('data-was-open')) {
+                    inboxModal.style.display = 'flex';
+                    inboxModal.removeAttribute('data-was-open');
+                }
+            } 
+            else if(inboxModal && inboxModal.style.display === 'flex') {
+                inboxModal.style.display = 'none';
+            }
+            else if(settingModal && settingModal.style.display === 'flex') {
+                settingModal.style.display = 'none';
+            }
+        });
+
+        // Modifikasi fungsi pencarian agar dikunci tombol back-nya
+        const fungsiAsliPencarian = window.lakukanPencarianKhususToko;
+        window.lakukanPencarianKhususToko = async function(keyword) {
+            window.history.pushState({ modal: 'search_toko' }, "", "");
+            await fungsiAsliPencarian(keyword);
+        };
+
 
     </script>
 </body>
