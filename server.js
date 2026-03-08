@@ -461,9 +461,52 @@ app.get('/api/products/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
+
 // ==========================================
-// ⚙️ API PENGATURAN TOKO (Auto Reply Admin dll)
+// ⚙️ API PENGATURAN TOKO (Profil, Auto Reply, dll)
 // ==========================================
+
+// ✅ 1. API UNTUK MENGAMBIL SEMUA PENGATURAN (Dibutuhkan oleh Frontend)
+app.get('/api/settings/all', async (req, res) => {
+    try {
+        // Menggunakan alias AS key_name dan value_text agar sesuai dengan yang dicari Frontend
+        const result = await pool.query(`SELECT setting_key AS key_name, setting_value AS value_text FROM store_settings`);
+        res.json({ success: true, settings: result.rows });
+    } catch (err) { 
+        res.status(500).json({ success: false }); 
+    }
+});
+
+// ✅ 2. API UNTUK MENYIMPAN PROFIL TOKO DARI MODAL SETTING
+app.post('/api/settings/update_store_profile', verifyAdmin, async (req, res) => {
+    const { store_name, store_bio, store_phone, store_city, store_address, store_logo, admin_last_active } = req.body;
+    
+    try {
+        // Kita gunakan teknik UPSERT (Insert jika belum ada, Update jika sudah ada)
+        const upsertQuery = `
+            INSERT INTO store_settings (setting_key, setting_value) 
+            VALUES ($1, $2) 
+            ON CONFLICT (setting_key) 
+            DO UPDATE SET setting_value = EXCLUDED.setting_value
+        `;
+
+        // Simpan satu per satu ke database jika datanya dikirim dari frontend
+        if (store_name !== undefined) await pool.query(upsertQuery, ['store_name', store_name]);
+        if (store_bio !== undefined) await pool.query(upsertQuery, ['store_bio', store_bio]);
+        if (store_phone !== undefined) await pool.query(upsertQuery, ['store_phone', store_phone]);
+        if (store_city !== undefined) await pool.query(upsertQuery, ['store_city', store_city]);
+        if (store_address !== undefined) await pool.query(upsertQuery, ['store_address', store_address]);
+        if (store_logo !== undefined) await pool.query(upsertQuery, ['store_logo', store_logo]);
+        if (admin_last_active !== undefined) await pool.query(upsertQuery, ['admin_last_active', admin_last_active]);
+
+        res.json({ success: true, message: "Profil toko berhasil disimpan!" });
+    } catch (err) { 
+        console.error("Error Update Profil Toko:", err);
+        res.status(500).json({ success: false, message: "Gagal menyimpan ke database." }); 
+    }
+});
+
+// 3. API Auto Reply (Bawaan asli Anda, biarkan saja)
 app.get('/api/settings/autoreply', async (req, res) => {
     try {
         const result = await pool.query(`SELECT setting_value FROM store_settings WHERE setting_key = 'autoreply'`);
@@ -473,11 +516,14 @@ app.get('/api/settings/autoreply', async (req, res) => {
 
 app.post('/api/settings/autoreply', verifyAdmin, async (req, res) => {
     try {
-        await pool.query(`UPDATE store_settings SET setting_value = $1 WHERE setting_key = 'autoreply'`, [req.body.text]);
+        await pool.query(`
+            INSERT INTO store_settings (setting_key, setting_value) 
+            VALUES ('autoreply', $1) 
+            ON CONFLICT (setting_key) DO UPDATE SET setting_value = EXCLUDED.setting_value
+        `, [req.body.text]);
         res.json({ success: true });
     } catch (err) { res.status(500).json({ success: false }); }
 });
-
 
 // ==========================================
 // 🤖 2 ROBOT PEKERJA OTOMATIS (CRON JOBS)
