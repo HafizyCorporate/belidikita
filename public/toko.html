@@ -279,36 +279,51 @@
         </a>
     </nav>
 
-    <div id="modalSettingToko" class="modal-setting">
+        <div id="modalSettingToko" class="modal-setting">
         <div class="setting-box">
             <span class="setting-close" id="closeSettingToko">&times;</span>
-            <h3><i class="fas fa-cog"></i> Pengaturan Toko</h3>
+            <h3><i class="fas fa-cog"></i> Atur Profil Toko</h3>
             
             <form id="formStoreSetting">
                 <div class="form-group">
-                    <label>Nama Toko</label>
-                    <input type="text" id="inputStoreName" placeholder="Contoh: Belidikita Official" required>
-                </div>
-                
-                <div class="form-group">
-                    <label><i class="fas fa-image"></i> Logo Toko (Upload File)</label>
+                    <label><i class="fas fa-image" style="color:#00AA5B;"></i> Foto Profil Toko (Upload)</label>
                     <input type="file" id="inputStoreLogoFile" accept="image/*" style="background:#fff;">
                 </div>
 
+                <div class="form-group">
+                    <label>Nama Toko <span style="font-weight:normal; color:#888;">(Batas ubah 1 bulan sekali)</span></label>
+                    <input type="text" id="inputStoreName" placeholder="Contoh: Belidikita Official" required>
+                    <div id="warningName" style="color:#ff3b30; font-size:9px; font-weight:800; margin-top:4px; display:none;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-info-circle"></i> Bio / Deskripsi Singkat Toko</label>
+                    <textarea id="inputStoreBio" rows="2" placeholder="Contoh: Toko termurah dan terpercaya sejak 2026..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 12px; font-family: 'Montserrat', sans-serif;"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fab fa-whatsapp" style="color:#25D366;"></i> Nomor WhatsApp (Bantuan/CS)</label>
+                    <input type="number" id="inputStorePhone" placeholder="Contoh: 081234567890">
+                </div>
+
                 <div class="form-group" style="background: #FFFDE7; border-left: 3px solid #FBC02D; padding: 10px; border-radius: 8px;">
-                    <label style="color:#F57F17;"><i class="fas fa-map-marker-alt"></i> Kota Asal (Patokan Ongkir Utama)</label>
+                    <label style="color:#F57F17;"><i class="fas fa-map-marker-alt"></i> Kota Asal (Patokan Ongkir)</label>
                     <input type="text" id="inputStoreCity" placeholder="Contoh: Kota Bandung" required>
                 </div>
 
                 <div class="form-group" style="background: #E8F5E9; border-left: 3px solid #4CAF50; padding: 10px; border-radius: 8px;">
-                    <label style="color:#2E7D32;"><i class="fas fa-truck"></i> Alamat Lengkap (Untuk Kurir Pickup)</label>
+                    <label style="color:#2E7D32;"><i class="fas fa-truck"></i> Alamat Lengkap <span style="font-weight:normal; color:#555;">(Batas ubah 1 minggu sekali)</span></label>
                     <textarea id="inputStoreFullAddress" rows="3" placeholder="Contoh: Jl. Sudirman No. 10, RT 01/RW 02..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; font-size: 12px; font-family: 'Montserrat', sans-serif;" required></textarea>
+                    <div id="warningAddress" style="color:#ff3b30; font-size:9px; font-weight:800; margin-top:4px; display:none;"></div>
                 </div>
 
                 <button type="submit" class="btn-save-store" id="btnSimpanSettingToko"><i class="fas fa-save"></i> Simpan Perubahan</button>
             </form>
         </div>
     </div>
+
+        
+  
 
         <div id="modalInbox" class="layar-penuh-search" style="z-index: 7500;">
         <div class="katalog-header" style="border-bottom:1px solid #E1F5FE;">
@@ -733,72 +748,7 @@
         }
         
         
-                // ==================================================
-        // ✅ TAMPILKAN LOGO, TOMBOL SETTING, DAN WAKTU AKTIF REAL
-        // ==================================================
-        function muatProfilTokoLokal() {
-            try {
-                const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
-                if (storeData) {
-                    if (storeData.nama) document.getElementById('displayStoreName').innerText = storeData.nama;
-                    if (storeData.kota) document.getElementById('displayStoreCity').innerText = storeData.kota;
-                    if (storeData.logo) {
-                        const imgTag = `<img src="${storeData.logo}" style="width: 100%; height: 100%; object-fit: cover;">`;
-                        document.getElementById('displayStoreAvatar').innerHTML = imgTag;
-                    }
-                }
-            } catch (e) {}
-
-            const token = localStorage.getItem('token');
-            if (token && token.startsWith('token-admin-')) {
-                // Tampilkan tombol Atur Profil
-                document.getElementById('btnSettingToko').style.display = 'block';
-                
-                // Jika Admin yang buka, perbarui catatan waktu terakhir aktif ke detik ini!
-                localStorage.setItem('admin_last_active_time', new Date().toISOString());
-            }
-
-            // Panggil fungsi untuk menghitung tulisan "Aktif ... lalu"
-            hitungWaktuAktifToko();
-        }
-
-        // Fungsi Kalkulator Waktu Aktif
-        function hitungWaktuAktifToko() {
-            const elStatus = document.getElementById('displayStoreActive');
-            if (!elStatus) return;
-
-            // Ambil waktu dari penyimpanan (tercatat saat admin buka toko/dashboard)
-            let lastActiveStr = localStorage.getItem('admin_last_active_time');
-            
-            // Jika belum ada data sama sekali (belum pernah login), set ke beberapa saat lalu agar tetap realistis
-            if (!lastActiveStr) {
-                const dummyTime = new Date();
-                dummyTime.setMinutes(dummyTime.getMinutes() - 2); 
-                lastActiveStr = dummyTime.toISOString();
-            }
-
-            const waktuTerakhir = new Date(lastActiveStr);
-            const sekarang = new Date();
-            const selisihMenit = Math.floor((sekarang - waktuTerakhir) / (1000 * 60));
-
-            let teksWaktu = "Aktif baru saja";
-            if (selisihMenit > 0 && selisihMenit < 60) {
-                teksWaktu = `Aktif ${selisihMenit} menit lalu`;
-            } else if (selisihMenit >= 60 && selisihMenit < 1440) {
-                const jam = Math.floor(selisihMenit / 60);
-                teksWaktu = `Aktif ${jam} jam lalu`;
-            } else if (selisihMenit >= 1440) {
-                const hari = Math.floor(selisihMenit / 1440);
-                teksWaktu = `Aktif ${hari} hari lalu`;
-            }
-
-            elStatus.innerText = teksWaktu;
-        }
-        
-        // Panggil saat halaman dimuat
-        document.addEventListener("DOMContentLoaded", muatProfilTokoLokal);
-
-
+         
 
         // ==================================================
         // ✅ LOGIKA TARIK VOUCHER DARI ADMIN PANEL
@@ -920,6 +870,204 @@
             window.history.pushState({ modal: 'search_toko' }, "", "");
             await fungsiAsliPencarian(keyword);
         };
+        
+                        // ==================================================
+        // ✅ LOGIKA PENGATURAN TOKO (100% DATABASE / API)
+        // ==================================================
+        const btnSetting = document.getElementById('btnSettingToko');
+        const modalSetting = document.getElementById('modalSettingToko');
+        const closeSetting = document.getElementById('closeSettingToko');
+        const formSetting = document.getElementById('formStoreSetting');
+
+                // ==================================================
+        // ✅ 1. MUAT PROFIL TOKO & WAKTU AKTIF (100% DARI DATABASE)
+        // ==================================================
+        async function muatProfilTokoDB() {
+            try {
+                // Tarik profil dari Database
+                const res = await fetch('/api/settings/all');
+                const data = await res.json();
+                
+                if (data.success && data.settings) {
+                    const dbName = data.settings.find(s => s.key_name === 'store_name')?.value_text || 'Belidikita Official';
+                    const dbCity = data.settings.find(s => s.key_name === 'store_city')?.value_text || 'Kota Bandung';
+                    const dbLogo = data.settings.find(s => s.key_name === 'store_logo')?.value_text || '';
+
+                    // Tampilkan ke layar
+                    document.getElementById('displayStoreName').innerText = dbName;
+                    document.getElementById('displayStoreCity').innerText = dbCity;
+                    if (dbLogo) {
+                        document.getElementById('displayStoreAvatar').innerHTML = `<img src="${dbLogo}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                    }
+
+                    // Simpan sementara di variabel global untuk mengisi form setting nantinya
+                    window.tempStoreData = { 
+                        nama: dbName, 
+                        kota: dbCity, 
+                        logo: dbLogo,
+                        bio: data.settings.find(s => s.key_name === 'store_bio')?.value_text || '',
+                        phone: data.settings.find(s => s.key_name === 'store_phone')?.value_text || '',
+                        alamatLengkap: data.settings.find(s => s.key_name === 'store_address')?.value_text || ''
+                    };
+                }
+            } catch (e) {
+                console.log("Gagal menarik profil toko dari Database.");
+            }
+
+            // Atur Visibilitas Tombol Setting dan Waktu Aktif Admin
+            const token = localStorage.getItem('token'); 
+            let lastActiveStr = null;
+
+            if (token && token.startsWith('token-admin-')) {
+                // Tampilkan tombol Atur Profil jika admin
+                const btnSet = document.getElementById('btnSettingToko');
+                if(btnSet) btnSet.style.display = 'block';
+                
+                // Jika Admin yang buka, set waktu aktif saat ini dan simpan ke database (Opsional, tapi disini kita simpan ke DB via API)
+                try {
+                    await fetch('/api/settings/update_store_profile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ admin_last_active: new Date().toISOString() })
+                    });
+                } catch(e) {}
+                lastActiveStr = new Date().toISOString(); 
+            } else {
+                // Jika pembeli yang buka, tarik waktu terakhir admin online dari DB
+                try {
+                    const resTime = await fetch('/api/settings/all');
+                    const dataTime = await resTime.json();
+                    if(dataTime.success) {
+                        lastActiveStr = dataTime.settings.find(s => s.key_name === 'admin_last_active')?.value_text;
+                    }
+                } catch(e) {}
+            }
+
+            // Hitung tulisan "Aktif ... lalu"
+            hitungWaktuAktifToko(lastActiveStr);
+        }
+
+        function hitungWaktuAktifToko(lastActiveStr) {
+            const elStatus = document.getElementById('displayStoreActive');
+            if (!elStatus) return;
+
+            // Jika belum pernah login, set seolah 2 menit lalu
+            if (!lastActiveStr) {
+                const dummyTime = new Date();
+                dummyTime.setMinutes(dummyTime.getMinutes() - 2); 
+                lastActiveStr = dummyTime.toISOString();
+            }
+
+            const waktuTerakhir = new Date(lastActiveStr);
+            const sekarang = new Date();
+            const selisihMenit = Math.floor((sekarang - waktuTerakhir) / (1000 * 60));
+
+            let teksWaktu = "Aktif baru saja";
+            if (selisihMenit > 0 && selisihMenit < 60) teksWaktu = `Aktif ${selisihMenit} menit lalu`;
+            else if (selisihMenit >= 60 && selisihMenit < 1440) teksWaktu = `Aktif ${Math.floor(selisihMenit / 60)} jam lalu`;
+            else if (selisihMenit >= 1440) teksWaktu = `Aktif ${Math.floor(selisihMenit / 1440)} hari lalu`;
+
+            elStatus.innerText = teksWaktu;
+        }
+
+        // Panggil fungsi gabungan ini saat web pertama kali dimuat
+        document.addEventListener("DOMContentLoaded", muatProfilTokoDB);
+
+        // 2. BUKA MODAL SETTING & ISI DENGAN DATA DATABASE
+        if(btnSetting) {
+            btnSetting.addEventListener('click', () => {
+                modalSetting.style.display = 'flex';
+                window.history.pushState({ modal: 'setting' }, "", "");
+
+                const dataDB = window.tempStoreData || {};
+                document.getElementById('inputStoreName').value = dataDB.nama || "";
+                document.getElementById('inputStoreBio').value = dataDB.bio || "";
+                document.getElementById('inputStorePhone').value = dataDB.phone || "";
+                document.getElementById('inputStoreCity').value = dataDB.kota || "";
+                document.getElementById('inputStoreFullAddress').value = dataDB.alamatLengkap || "";
+            });
+        }
+
+        if(closeSetting) {
+            closeSetting.addEventListener('click', () => { window.history.back(); });
+        }
+
+        // 3. PROSES SUBMIT & KOMPRESI GAMBAR
+        if(formSetting) {
+            formSetting.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('btnSimpanSettingToko');
+                btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan ke Database...";
+                btn.disabled = true;
+
+                const fileInput = document.getElementById('inputStoreLogoFile');
+                let logoBase64 = window.tempStoreData?.logo || ""; 
+
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const img = new Image();
+                        img.onload = function() {
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 250; 
+                            const scaleSize = MAX_WIDTH / img.width;
+                            canvas.width = img.width < MAX_WIDTH ? img.width : MAX_WIDTH;
+                            canvas.height = img.width < MAX_WIDTH ? img.height : img.height * scaleSize;
+                            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                            logoBase64 = canvas.toDataURL('image/jpeg', 0.5); 
+                            simpanDataKeDatabase(logoBase64, btn);
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    simpanDataKeDatabase(logoBase64, btn);
+                }
+            });
+        }
+
+        // 4. TEMBAK DATA KE DATABASE VIA API (POST)
+        async function simpanDataKeDatabase(logoStr, btnElem) {
+            const token = localStorage.getItem('token');
+            const payloadData = {
+                store_name: document.getElementById('inputStoreName').value,
+                store_bio: document.getElementById('inputStoreBio').value,
+                store_phone: document.getElementById('inputStorePhone').value,
+                store_city: document.getElementById('inputStoreCity').value,
+                store_address: document.getElementById('inputStoreFullAddress').value,
+                store_logo: logoStr
+            };
+            
+            try {
+                // Sesuaikan URL ini dengan Endpoint API Backend Anda untuk update setting
+                const res = await fetch('/api/settings/update_store_profile', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payloadData)
+                });
+
+                const result = await res.json();
+
+                if (result.success || res.ok) {
+                    showToast("Profil Toko berhasil disimpan ke Database!", "success");
+                    muatProfilTokoDB(); // Tarik ulang data segar dari database
+                    window.history.back(); // Tutup modal
+                } else {
+                    showToast(result.message || "Gagal menyimpan ke database.", "error");
+                }
+            } catch (error) {
+                showToast("Error koneksi ke server database.", "error");
+            } finally {
+                btnElem.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan";
+                btnElem.disabled = false;
+            }
+        }
+
+
 
 
     </script>
