@@ -151,7 +151,7 @@
         <div class="header-logo-box"><img src="assets/nama_logo_kamu.png" alt="Logo" class="main-logo-header"></div>
         <div class="header-search">
             <i class="fas fa-search"></i>
-            <input type="text" id="searchInputDashboard" placeholder="Cari barang (Lalu tekan Enter)..." onkeypress="if(event.key === 'Enter') window.lakukanPencarianPintar(this.value)">
+            <input type="text" id="searchInputDashboard" placeholder="Cari barang (Lalu tekan Enter)..." onkeypress="if(event.key === 'Enter') window.location.href='search.html?q=' + encodeURIComponent(this.value)">
         </div>
         
         <div class="header-admin" id="btnChatAdmin" style="cursor: pointer; font-size: 20px; color: #0D47A1; margin-right: 12px; position: relative;" onclick="window.bukaInbox()">
