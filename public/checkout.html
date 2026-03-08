@@ -270,8 +270,7 @@
     </div>
 
     <div id="customToast"></div>
-
-                       <script>
+    <script>
         function showToast(msg, type = 'info') {
             const toast = document.getElementById("customToast");
             toast.innerText = msg;
@@ -294,18 +293,18 @@
 
         async function fetchAddress() {
             try {
+                // Di masa depan, pengaturan kota toko juga bisa ditarik dari DB (store_settings)
                 const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
                 if(storeData && storeData.kota) kotaTokoGlobal = storeData.kota;
                 const res = await fetch('/api/address', { headers: { 'Authorization': `Bearer ${token}` } });
                 const result = await res.json();
-                const labelTersimpan = localStorage.getItem('belidikita_label_alamat') || 'Rumah';
                 
                 if (result.success && result.data && result.data.alamat_lengkap) {
-                    userInfo = { nama: result.data.nama_penerima, wa: result.data.nomor_wa, alamat: result.data.alamat_lengkap, label: labelTersimpan };
+                    userInfo = { nama: result.data.nama_penerima, wa: result.data.nomor_wa, alamat: result.data.alamat_lengkap, label: result.data.label || 'Rumah' };
                     bukuAlamat = [userInfo];
                     renderAlamatTerpilih();
                 } else {
-                    document.getElementById('addressBox').innerHTML = `<p style="color:red; font-weight:bold;">Alamat belum diatur. Silakan atur di Profil Akun.</p>`;
+                    document.getElementById('addressBox').innerHTML = `<p style="color:red; font-weight:bold;">Alamat belum diatur. Silakan kembali dan atur profil Anda.</p>`;
                     document.getElementById('modalConfirmAddress').style.display = 'flex'; 
                 }
             } catch (err) { console.error(err); }
@@ -349,7 +348,7 @@
         function tutupModalPilihAlamat() { document.getElementById('modalPilihAlamat').style.display = 'none'; }
         window.pilihAlamatIni = function(index) { userInfo = bukuAlamat[index]; renderAlamatTerpilih(); tutupModalPilihAlamat(); showToast("Alamat pengiriman berhasil diubah!", "success"); }
 
-        // ✅ PERUBAHAN 1: MENGAMBIL DATA CHECKOUT DARI DATABASE SESSION
+        // ✅ DATA DARI DATABASE SESSIONS CHECKOUT
         async function loadCheckoutItems() {
             const container = document.getElementById('checkoutItems');
             container.innerHTML = '<p style="text-align:center; padding: 20px;"><i class="fas fa-spinner fa-spin mr-2"></i> Menyiapkan pesanan...</p>';
@@ -403,7 +402,6 @@
             }
         }
 
-        // ✅ PERUBAHAN 2: UPDATE SESSIONS DATABASE SECARA REAL-TIME
         window.ubahQtyCheckout = async function(index, delta) {
             items[index].qty += delta;
             if(items[index].qty <= 0) items.splice(index, 1);
@@ -414,7 +412,6 @@
                 return; 
             }
             
-            // Simpan perubahan ke Database
             await fetch('/api/checkout-session', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -533,7 +530,7 @@
                     pesanWAKonfirmasi += `*TOTAL TAGIHAN: ${formatRp(totalAkhir)}*\n\n`;
                     pesanWAKonfirmasi += `Mohon info nomor rekening / barcode pembayarannya ya Admin. Terima kasih!`;
 
-                    // ✅ PERUBAHAN 3: BERSIHKAN KERANJANG SERVER SETELAH CHECKOUT SUKSES
+                    // Bersihkan keranjang DB
                     await fetch('/api/checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ items_json: '[]' }) });
                     await fetch('/api/cart/clear/all', { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
 
@@ -591,13 +588,15 @@
             btnWA.style.background = "#0D47A1"; 
             btnWA.style.boxShadow = "0 5px 15px rgba(13, 71, 161, 0.4)";
             
+            // ✅ PERBAIKAN: Lempar ke dashboard utama, bukan halaman mati profilpembeli
             btnWA.onclick = function() {
-                window.location.href = 'registrasi/profilpembeli.html';
+                window.location.href = 'dashboardutama.html';
             };
         }
 
+        // ✅ PERBAIKAN: Batal juga lempar ke dashboard utama
         window.batalDariRuangTunggu = function() {
-            window.location.href = 'registrasi/profilpembeli.html';
+            window.location.href = 'dashboardutama.html';
         }
 
         async function inisialisasiCheckout() {
@@ -606,8 +605,6 @@
         }
 
         inisialisasiCheckout();
-                      
-
     </script>
 </body>
 </html>
