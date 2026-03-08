@@ -52,13 +52,32 @@ document.addEventListener("DOMContentLoaded", () => {
         initDashboard();
     }
 
-    function updateCartBadge() {
-        let cart = JSON.parse(localStorage.getItem('belidikita_cart')) || [];
-        let total = cart.reduce((sum, item) => sum + item.qty, 0);
+        async function updateCartBadge() {
+        const token = localStorage.getItem('token');
         let badge = document.querySelector('.cart-badge');
-        if(badge) badge.innerText = total;
+        if (!badge) return;
+        
+        // Jika belum login atau login sebagai admin, badge keranjang = 0
+        if (!token || token.startsWith('token-admin-')) {
+            badge.innerText = "0";
+            return;
+        }
+
+        try {
+            // Minta jumlah keranjang langsung ke Server (Database)
+            const res = await fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } });
+            const result = await res.json();
+            if (result.success) {
+                // Hitung total barang dari database
+                let total = result.data.reduce((sum, item) => sum + item.qty, 0);
+                badge.innerText = total;
+            }
+        } catch (e) {
+            console.error("Gagal update badge keranjang");
+        }
     }
     updateCartBadge(); 
+
 
     async function cekStatusPembeli() {
         const token = localStorage.getItem('token');
