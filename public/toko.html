@@ -200,7 +200,7 @@
 
     <div class="content-wrapper">
         
-                <i class="fas fa-ellipsis-v" id="btnSettingToko" style="position: absolute; top: 20px; right: 20px; color: #fff; font-size: 16px; cursor: pointer; z-index: 100; text-shadow: 0 1px 3px rgba(0,0,0,0.5);"></i>
+                        <div id="btnSettingToko" style="position: absolute; top: 15px; right: 15px; background: rgba(0, 105, 92, 0.8); color: #fff; font-size: 10px; font-weight: 800; padding: 6px 12px; border-radius: 12px; cursor: pointer; z-index: 100; display: none; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 10px rgba(0,0,0,0.1);"><i class="fas fa-cog mr-1"></i> Atur Profil Toko</div>
 
         <div class="store-profile-card">
             <div class="store-bg-accent"></div>
@@ -208,12 +208,10 @@
                 <div class="store-avatar" id="displayStoreAvatar"><i class="fas fa-store"></i></div>
                 <div class="store-name-box">
                     <h2><span id="displayStoreName">Belidikita Official</span> <i class="fas fa-check-circle" style="color: #0D47A1; font-size: 14px;" title="Terverifikasi"></i></h2>
-                    <div class="store-status"><i class="fas fa-circle" style="font-size:8px;"></i> Aktif 2 menit lalu</div>
+                    <div class="store-status"><i class="fas fa-circle" style="font-size:8px;"></i> <span id="displayStoreActive">Menghitung...</span></div>
                     <div style="font-size:10px; color:#888; font-weight:600; margin-top:2px;"><i class="fas fa-map-marker-alt"></i> <span id="displayStoreCity">Kota Bandung</span></div>
                 </div>
             </div>
-
-
                     <div class="store-stats">
                 <div class="stat-item">
                     <div class="stat-num" id="totalStoreSold">0</div>
@@ -735,8 +733,8 @@
         }
         
         
-        // ==================================================
-        // ✅ TAMPILKAN LOGO TOKO & TOMBOL SETTING (JIKA ADMIN)
+                // ==================================================
+        // ✅ TAMPILKAN LOGO, TOMBOL SETTING, DAN WAKTU AKTIF REAL
         // ==================================================
         function muatProfilTokoLokal() {
             try {
@@ -751,15 +749,55 @@
                 }
             } catch (e) {}
 
-            // Cek apakah login sebagai admin untuk memunculkan titik 3
             const token = localStorage.getItem('token');
             if (token && token.startsWith('token-admin-')) {
+                // Tampilkan tombol Atur Profil
                 document.getElementById('btnSettingToko').style.display = 'block';
+                
+                // Jika Admin yang buka, perbarui catatan waktu terakhir aktif ke detik ini!
+                localStorage.setItem('admin_last_active_time', new Date().toISOString());
             }
+
+            // Panggil fungsi untuk menghitung tulisan "Aktif ... lalu"
+            hitungWaktuAktifToko();
+        }
+
+        // Fungsi Kalkulator Waktu Aktif
+        function hitungWaktuAktifToko() {
+            const elStatus = document.getElementById('displayStoreActive');
+            if (!elStatus) return;
+
+            // Ambil waktu dari penyimpanan (tercatat saat admin buka toko/dashboard)
+            let lastActiveStr = localStorage.getItem('admin_last_active_time');
+            
+            // Jika belum ada data sama sekali (belum pernah login), set ke beberapa saat lalu agar tetap realistis
+            if (!lastActiveStr) {
+                const dummyTime = new Date();
+                dummyTime.setMinutes(dummyTime.getMinutes() - 2); 
+                lastActiveStr = dummyTime.toISOString();
+            }
+
+            const waktuTerakhir = new Date(lastActiveStr);
+            const sekarang = new Date();
+            const selisihMenit = Math.floor((sekarang - waktuTerakhir) / (1000 * 60));
+
+            let teksWaktu = "Aktif baru saja";
+            if (selisihMenit > 0 && selisihMenit < 60) {
+                teksWaktu = `Aktif ${selisihMenit} menit lalu`;
+            } else if (selisihMenit >= 60 && selisihMenit < 1440) {
+                const jam = Math.floor(selisihMenit / 60);
+                teksWaktu = `Aktif ${jam} jam lalu`;
+            } else if (selisihMenit >= 1440) {
+                const hari = Math.floor(selisihMenit / 1440);
+                teksWaktu = `Aktif ${hari} hari lalu`;
+            }
+
+            elStatus.innerText = teksWaktu;
         }
         
         // Panggil saat halaman dimuat
         document.addEventListener("DOMContentLoaded", muatProfilTokoLokal);
+
 
 
         // ==================================================
