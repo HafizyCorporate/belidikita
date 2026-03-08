@@ -50,6 +50,7 @@
         .cart-wrapper { position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;}
         .cart-badge-detail { position: absolute; top: -5px; right: -8px; background: #ff3b30; color: #fff; font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 10px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(255,59,48,0.5);}
 
+        /* Jarak top margin ditambahkan agar gambar tidak tertutup header */
         .slider-container { width: 100%; position: relative; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.05); z-index: 10; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; overflow: hidden; min-height: 300px; display: flex; align-items: center; justify-content: center; margin-top: 65px;}
         .product-image-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; aspect-ratio: 1/1; width: 100%;}
         .product-image-slider::-webkit-scrollbar { display: none; }
@@ -128,17 +129,43 @@
         .sim-info h5 { font-size: 11px; font-weight: 700; color: #0D47A1; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
         .sim-info span { font-size: 13px; font-weight: 800; color: #FF9800; }
 
-        .fullscreen-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,40,80,0.95); backdrop-filter: blur(10px); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
-        .fullscreen-modal img { max-width: 95vw; max-height: 80vh; object-fit: contain; border-radius: 10px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: zoomIn 0.3s ease; }
-        @keyframes zoomIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        .close-fullscreen { position: absolute; top: 20px; right: 20px; color: #0D47A1; background: #fff; font-size: 24px; font-weight: bold; cursor: pointer; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s;}
+        /* ✅ FULLSCREEN SLIDER MANUAL */
+        .fullscreen-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
+        .close-fullscreen { position: absolute; top: 20px; right: 20px; color: #333; background: #fff; font-size: 24px; font-weight: bold; cursor: pointer; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s; z-index: 10002;}
         .close-fullscreen:active { transform: scale(0.9); }
+        .fs-slider-container { width: 100vw; height: 100vh; display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; align-items: center; }
+        .fs-slider-container::-webkit-scrollbar { display: none; }
+        .fs-slide { flex: 0 0 100vw; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; scroll-snap-align: start; }
+        .fs-slide img { max-width: 100vw; max-height: 100vh; object-fit: contain; } 
+        .fs-dots { position: absolute; bottom: 30px; left: 0; width: 100%; display: flex; justify-content: center; gap: 8px; pointer-events: none; z-index: 10001; }
+        .fs-dot { width: 8px; height: 8px; background: rgba(255,255,255,0.4); border-radius: 50%; transition: 0.3s; }
+        .fs-dot.active { background: #fff; width: 20px; border-radius: 10px; }
 
         .bottom-action-bar { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); display: flex; box-shadow: 0 -5px 25px rgba(13, 71, 161, 0.15); z-index: 100; border-top: 1px solid #E1F5FE; border-radius: 20px 20px 0 0; padding: 10px 15px; gap: 10px; }
         .btn-add-cart { flex: 1; background: #E1F5FE; color: #0D47A1; border: 2px solid #81D4FA; border-radius: 12px; font-size: 12px; font-weight: 800; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;}
         .btn-add-cart:active { transform: scale(0.95); }
         .btn-buy-now { flex: 1.5; background: linear-gradient(135deg, #FF9800, #F57C00); color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); text-transform: uppercase; transition: 0.2s;}
         .btn-buy-now:active { transform: scale(0.95); }
+
+        /* ✅ CSS SEARCH MODAL & CHAT MODAL (Seperti Dashboard) */
+        .layar-penuh-search { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #f4f7fa; z-index: 7000; overflow-y: auto; display: none; flex-direction: column; animation: slideInRight 0.3s ease; }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .katalog-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .katalog-header i { font-size: 20px; color: #0D47A1; cursor: pointer; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: #E1F5FE; border-radius: 50%;}
+        .katalog-header h2 { font-size: 16px; font-weight: 800; color: #0D47A1; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .product-grid-search { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; overflow-y: auto; flex: 1; align-content: start; }
+
+        .chat-toko-modal { display: none; position: fixed; z-index: 8000; left: 0; top: 0; right: 0; bottom: 0; background: #f4f7fa; flex-direction: column; animation: slideInRight 0.3s ease; }
+        .chat-toko-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .chat-toko-header i.btn-back { font-size: 20px; color: #0D47A1; cursor: pointer; }
+        .chat-toko-header .store-profile { display: flex; align-items: center; gap: 10px; flex: 1; }
+        .chat-toko-header .store-avatar-chat { width: 35px; height: 35px; background: #0D47A1; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; overflow: hidden; }
+        .chat-toko-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .chat-msg-store { background: #fff; color: #333; padding: 12px 15px; border-radius: 15px 15px 15px 0; max-width: 80%; align-self: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 13px; line-height: 1.5; border: 1px solid #eee; }
+        .chat-msg-user { background: #E1F5FE; color: #0D47A1; padding: 12px 15px; border-radius: 15px 15px 0 15px; max-width: 80%; align-self: flex-end; box-shadow: 0 2px 5px rgba(13, 71, 161, 0.1); font-size: 13px; line-height: 1.5; }
+        .chat-toko-footer { background: #fff; padding: 10px 15px; display: flex; gap: 10px; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .chat-toko-footer input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 20px; background: #f4f7fa; outline: none; font-size: 13px; font-family: 'Montserrat', sans-serif;}
+        .chat-toko-footer button { background: #FF9800; color: #fff; width: 40px; height: 40px; border-radius: 50%; border: none; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
         #customToast { visibility: hidden; min-width: 280px; margin-left: -140px; background: rgba(13, 71, 161, 0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 9999; left: 50%; bottom: -50px; font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; border: 2px solid rgba(255,255,255,0.2); }
         #customToast.show { visibility: visible; opacity: 1; bottom: 90px; }
@@ -162,7 +189,7 @@
         </div>
         
         <div class="header-icons">
-            <i class="fas fa-envelope" onclick="window.location.href='dashboardutama.html?openInbox=true'"></i>
+            <i class="fas fa-envelope" onclick="bukaChatToko()"></i>
             <div class="cart-wrapper" onclick="window.location.href='keranjang.html'">
                 <i class="fas fa-shopping-cart"></i>
                 <span class="cart-badge-detail" id="badgeKeranjang">0</span>
@@ -178,7 +205,8 @@
 
     <div class="fullscreen-modal" id="fullscreenModal">
         <span class="close-fullscreen" onclick="tutupFullscreen()"><i class="fas fa-times"></i></span>
-        <img id="fullscreenImg" src="" alt="Fullscreen">
+        <div class="fs-slider-container" id="fsSliderContainer"></div>
+        <div class="fs-dots" id="fsSliderDots"></div>
     </div>
 
     <div class="content-wrapper">
@@ -264,6 +292,34 @@
             <i class="fas fa-cart-plus"></i> <span style="font-size:9px; margin-top:2px;">KERANJANG</span>
         </button>
         <button class="btn-buy-now" id="btnBeliLangsung">BELI SEKARANG <i class="fas fa-bolt ml-1"></i></button>
+    </div>
+
+    <div id="searchLayarPenuh" class="layar-penuh-search">
+        <div class="katalog-header">
+            <i class="fas fa-arrow-left" onclick="document.getElementById('searchLayarPenuh').style.display='none'"></i>
+            <h2 id="judulHalamanSearch">Hasil Pencarian</h2>
+        </div>
+        <div class="product-grid-search" id="gridHasilSearchDetail"></div>
+    </div>
+
+    <div id="modalChatToko" class="chat-toko-modal">
+        <div class="chat-toko-header">
+            <i class="fas fa-arrow-left btn-back" onclick="tutupChatToko()"></i>
+            <div class="store-profile">
+                <div class="store-avatar-chat"><i class="fas fa-store"></i></div>
+                <div>
+                    <h2 style="font-size: 14px; font-weight: 800; color: #333; margin: 0;">Belidikita Official</h2>
+                    <span style="font-size: 10px; color: #00AA5B;"><i class="fas fa-circle"></i> Online</span>
+                </div>
+            </div>
+        </div>
+        <div class="chat-toko-body" id="chatTokoBody">
+            <div class="chat-msg-store">Halo kak! Ada yang bisa dibantu? 😊</div>
+        </div>
+        <div class="chat-toko-footer">
+            <input type="text" id="chatTokoInput" enterkeyhint="send" placeholder="Ketik pesan..." onkeydown="if(event.key === 'Enter') { event.preventDefault(); kirimChatToko(); }">
+            <button onclick="kirimChatToko()"><i class="fas fa-paper-plane"></i></button>
+        </div>
     </div>
 
     <div id="customToast"></div>
@@ -404,17 +460,38 @@
 
                 const slider = document.getElementById('imageSlider');
                 const dotsContainer = document.getElementById('sliderDots');
+                
+                // ✅ LOGIKA BARU: FULLSCREEN SLIDER MANUAL
+                const fsSlider = document.getElementById('fsSliderContainer');
+                const fsDotsContainer = document.getElementById('fsSliderDots');
 
                 daftarFoto.forEach((url, index) => {
-                    const img = document.createElement('img'); img.src = url; img.onclick = () => bukaFullscreen(url); slider.appendChild(img);
+                    // Slider Normal
+                    const img = document.createElement('img'); img.src = url; 
+                    img.onclick = () => bukaFullscreen(index); 
+                    slider.appendChild(img);
+                    
+                    // Slider Fullscreen
+                    const fsSlide = document.createElement('div');
+                    fsSlide.className = 'fs-slide';
+                    const fsImg = document.createElement('img'); fsImg.src = url;
+                    fsSlide.appendChild(fsImg);
+                    fsSlider.appendChild(fsSlide);
+
                     if(daftarFoto.length > 1) {
                         const dot = document.createElement('div'); dot.className = `dot ${index === 0 ? 'active' : ''}`; dotsContainer.appendChild(dot);
+                        const fsDot = document.createElement('div'); fsDot.className = `fs-dot ${index === 0 ? 'active' : ''}`; fsDotsContainer.appendChild(fsDot);
                     }
                 });
 
                 slider.addEventListener('scroll', () => {
                     const scrollLeft = slider.scrollLeft; const width = slider.clientWidth; const activeIndex = Math.round(scrollLeft / width);
                     document.querySelectorAll('.dot').forEach((dot, idx) => { dot.classList.toggle('active', idx === activeIndex); });
+                });
+                
+                fsSlider.addEventListener('scroll', () => {
+                    const scrollLeft = fsSlider.scrollLeft; const width = fsSlider.clientWidth; const activeIndex = Math.round(scrollLeft / width);
+                    document.querySelectorAll('.fs-dot').forEach((dot, idx) => { dot.classList.toggle('active', idx === activeIndex); });
                 });
 
                 loadSimilarProducts();
@@ -464,8 +541,14 @@
             }
         }
 
-        function bukaFullscreen(url) { document.getElementById('fullscreenImg').src = url; document.getElementById('fullscreenModal').style.display = 'flex'; }
-        function tutupFullscreen() { document.getElementById('fullscreenModal').style.display = 'none'; }
+        window.bukaFullscreen = function(index) { 
+            document.getElementById('fullscreenModal').style.display = 'flex'; 
+            setTimeout(() => {
+                const fsSlider = document.getElementById('fsSliderContainer');
+                fsSlider.scrollLeft = fsSlider.clientWidth * index;
+            }, 10);
+        }
+        window.tutupFullscreen = function() { document.getElementById('fullscreenModal').style.display = 'none'; }
 
         function bagikanProduk() {
             const textBagikan = `*${produk.nama}*\n💰 Harga: ${produk.hargaStr}\n\n📝 *Deskripsi:*\n${produk.deskripsi.substring(0, 150)}...\n\n📸 *Lihat Gambar & Beli di sini:*\n${window.location.href}\n\nLink Gambar Utama: ${daftarFoto[0]}`;
@@ -473,12 +556,149 @@
             else { navigator.clipboard.writeText(textBagikan); showToast("Detail & Link produk berhasil disalin!", "success"); }
         }
 
-        // ✅ LOGIKA EKSEKUSI PENCARIAN DI HEADER DETAIL
-        window.eksekusiPencarianDetail = function() {
+        // ✅ LOGIKA BARU: PENCARIAN LAYAR PENUH DARI DATABASE
+        window.eksekusiPencarianDetail = async function() {
             const keyword = document.getElementById('inputSearchDetail').value.trim();
-            if(keyword) {
-                // Melempar kata kunci ke dashboard utama
-                window.location.href = 'dashboardutama.html?search=' + encodeURIComponent(keyword);
+            if(!keyword) return;
+
+            const modalSearch = document.getElementById('searchLayarPenuh');
+            const containerGrid = document.getElementById('gridHasilSearchDetail');
+            const judul = document.getElementById('judulHalamanSearch');
+
+            modalSearch.style.display = 'flex';
+            containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:#0D47A1; grid-column:span 2; padding: 50px 20px; font-weight:bold;"><i class="fas fa-spinner fa-spin mr-2"></i> Mencari...</p>';
+            judul.innerText = `Hasil: "${keyword}"`;
+
+            try {
+                const res = await fetch(`/api/products?search=${encodeURIComponent(keyword)}&limit=50`);
+                const result = await res.json();
+
+                if(result.success && result.data.length > 0) {
+                    containerGrid.innerHTML = '';
+                    result.data.forEach(p => {
+                        let arrFoto = [];
+                        try { arrFoto = JSON.parse(p.media_url); if (!Array.isArray(arrFoto)) arrFoto = [p.media_url];} catch(e) { arrFoto = [p.media_url]; }
+                        const imgUrl = arrFoto[0] || 'https://via.placeholder.com/150';
+                        const hargaRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.price);
+                        const terjualReal = p.sold_count || 0; 
+                        const ratingReal = parseFloat(p.avg_rating) || 0;
+                        const tampilanRating = ratingReal > 0 ? ratingReal.toFixed(1) : "0.0";
+
+                        containerGrid.innerHTML += `
+                            <div class="product-card" onclick="window.location.href='detailproduk.html?id=${p.id}'" style="background:#fff; border: 2px solid #E1F5FE; border-radius: 15px; overflow: hidden; display: flex; flex-direction: column; cursor:pointer; position:relative;">
+                                <img src="${imgUrl}" style="width:100%; height:160px; object-fit:cover; border-bottom:2px solid #E1F5FE;">
+                                <div style="padding:12px; display:flex; flex-direction:column; flex-grow:1;">
+                                    <h3 style="font-size:12px; font-weight:700; color:#0D47A1; margin-bottom:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${p.title}</h3>
+                                    <div style="color:#FF9800; font-weight:800; font-size:15px; margin-bottom:8px;">${hargaRp}</div>
+                                    <div style="display:flex; justify-content:space-between; font-size:10px; color:#888; font-weight:600; margin-top:auto;">
+                                        <span><i class="fas fa-star" style="color:#FFD700;"></i> ${tampilanRating}</span>
+                                        <span>${terjualReal} Terjual</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    containerGrid.innerHTML = `
+                        <div style="text-align:center; width:100%; grid-column:span 2; padding: 50px 20px;">
+                            <i class="fas fa-box-open" style="font-size: 60px; color: #ddd; margin-bottom: 15px;"></i>
+                            <p style="color:#ff3b30; font-weight:800; font-size: 14px;">Produk ini belum tersedia 🥺</p>
+                            <p style="color:#888; font-weight:600; font-size: 11px; margin-top:5px;">Coba gunakan kata kunci yang lain.</p>
+                        </div>
+                    `;
+                }
+            } catch(e) {
+                containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:red; grid-column:span 2; padding: 30px;">Gagal memuat data pencarian.</p>';
+            }
+        };
+
+        // ✅ LOGIKA BARU: CHAT TERINTEGRASI
+        window.bukaChatToko = function() {
+            const token = localStorage.getItem('token');
+            if (!token || token.startsWith('token-admin-')) {
+                showToast("Silakan login pembeli dulu untuk chat!", "error");
+                setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
+                return;
+            }
+            document.getElementById('modalChatToko').style.display = 'flex';
+            muatRiwayatChatToko();
+        };
+
+        window.tutupChatToko = function() {
+            document.getElementById('modalChatToko').style.display = 'none';
+        };
+
+        async function muatRiwayatChatToko() {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                const chatBody = document.getElementById('chatTokoBody');
+                
+                if (result.success && result.data.length > 0) {
+                    chatBody.innerHTML = '';
+                    result.data.forEach(msg => {
+                        let isUser = msg.sender_role === 'pembeli';
+                        let cssClass = isUser ? 'chat-msg-user' : 'chat-msg-store';
+                        let labelAdmin = msg.sender_role === 'admin' ? '<br><small style="color:#0D47A1; font-weight:bold;">- Admin -</small>' : '';
+                        chatBody.innerHTML += `<div class="${cssClass}">${msg.message} ${labelAdmin}</div>`;
+                    });
+                } else {
+                    chatBody.innerHTML = `<div class="chat-msg-store">Halo kak! Ada yang bisa dibantu mengenai produk ini? 😊</div>`;
+                }
+                chatBody.scrollTop = chatBody.scrollHeight;
+            } catch(e) {}
+        }
+
+        window.kirimChatToko = async function() {
+            const input = document.getElementById('chatTokoInput');
+            const chatBody = document.getElementById('chatTokoBody');
+            const teks = input.value.trim();
+            if (!teks) return;
+            
+            const token = localStorage.getItem('token');
+            
+            chatBody.innerHTML += `<div class="chat-msg-user">${teks}</div>`;
+            input.value = '';
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            try {
+                await fetch('/api/chat/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ message: teks, sender: 'pembeli' })
+                });
+
+                if(!window.sudahChatDiToko) {
+                    window.sudahChatDiToko = true;
+                    
+                    const idKetik = "ketik-" + Date.now();
+                    chatBody.innerHTML += `<div class="chat-msg-store" id="${idKetik}"><i class="fas fa-ellipsis-h fa-fade"></i> Admin mengetik...</div>`;
+                    chatBody.scrollTop = chatBody.scrollHeight;
+
+                    setTimeout(async () => {
+                        const elemenKetik = document.getElementById(idKetik);
+                        if(elemenKetik) elemenKetik.remove();
+
+                        let autoReplyMsg = "Halo Kak! Pesan Kakak sudah kami terima dan Admin akan segera mengeceknya. Mohon ditunggu ya! 😊";
+                        try {
+                            const resSet = await fetch('/api/settings/autoreply');
+                            const resultSet = await resSet.json();
+                            if(resultSet.success && resultSet.text) autoReplyMsg = resultSet.text;
+                        } catch(err) {}
+
+                        chatBody.innerHTML += `<div class="chat-msg-store">${autoReplyMsg}</div>`;
+                        chatBody.scrollTop = chatBody.scrollHeight;
+                        
+                        await fetch('/api/chat/save', { 
+                            method: 'POST', 
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+                            body: JSON.stringify({ message: autoReplyMsg, sender: 'admin' }) 
+                        });
+                    }, 1500);
+                }
+            } catch(e) {
+                showToast("Gagal mengirim pesan", "error");
             }
         };
 
