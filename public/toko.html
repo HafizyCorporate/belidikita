@@ -223,10 +223,11 @@
                 </div>
             </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 15px; position: relative; z-index: 2;">
+                        <div style="display: flex; gap: 10px; margin-top: 15px; position: relative; z-index: 2;">
                 <button class="btn-follow" id="btnFollowToko" onclick="followToko()" style="margin-top: 0; flex: 1;"><i class="fas fa-plus"></i> Ikuti Toko</button>
-                <button class="btn-follow" onclick="bukaChatToko()" style="margin-top: 0; flex: 1; background: #FF9800; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);"><i class="fas fa-envelope"></i> Kirim Pesan</button>
+                <button class="btn-follow" onclick="window.bukaInbox()" style="margin-top: 0; flex: 1; background: #FF9800; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);"><i class="fas fa-envelope"></i> Kirim Pesan</button>
             </div>
+
         </div>
 
         <div class="voucher-section">
@@ -320,8 +321,26 @@
         </div>
     </div>
 
+        <div id="modalInbox" class="layar-penuh-search" style="z-index: 7500;">
+        <div class="katalog-header" style="border-bottom:1px solid #E1F5FE;">
+            <i class="fas fa-arrow-left" onclick="document.getElementById('modalInbox').style.display='none'"></i>
+            <h2 style="font-size: 16px;">Kotak Masuk</h2>
+        </div>
+        <div id="inboxList" style="padding-top: 10px;">
+            <div onclick="window.bukaRuangChat()" style="display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; background: #fff;">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background: #00695C; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px;"><i class="fas fa-store"></i></div>
+                <div style="flex: 1; overflow: hidden;">
+                    <div style="font-size: 14px; font-weight: 800; color: #333; margin-bottom: 4px;" id="namaTokoInbox">Belidikita Official</div>
+                    <div id="inboxLastMsg" style="font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600;">Memuat pesan terakhir...</div>
+                </div>
+                <div id="inboxLastTime" style="font-size: 10px; color: #aaa; align-self: flex-start; padding-top: 5px; font-weight: 700;">Sekarang</div>
+            </div>
+        </div>
+    </div>
+
     <div id="modalChatToko" class="chat-toko-modal">
         <div class="chat-toko-header">
+
             <i class="fas fa-arrow-left btn-back" onclick="tutupChatToko()"></i>
             <div class="store-profile">
                 <div class="store-avatar-chat"><i class="fas fa-store"></i></div>
@@ -350,17 +369,16 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-                // ==================================================
+                 // ==================================================
         // 1 & 4. DATA STATISTIK DAN PRODUK REAL DARI DATABASE
         // ==================================================
         let isFollowing = localStorage.getItem('belidikita_is_following') === 'true';
-        let baseFollowersFromDB = 1250; // Angka dasar pengikut organik
 
         function followToko() {
             isFollowing = !isFollowing;
             localStorage.setItem('belidikita_is_following', isFollowing);
             showToast(isFollowing ? "Berhasil mengikuti toko!" : "Batal mengikuti toko.", isFollowing ? "success" : "error");
-            loadStoreProducts(); // Refresh data angka pengikut secara instan
+            loadStoreProducts(); 
         }
 
         function bukaDetail(idProduk) {
@@ -378,7 +396,7 @@
                     
                     let totalRatingKeseluruhan = 0;
                     let produkYangPunyaRating = 0;
-                    let totalTerjualKeseluruhan = 0; // ✅ Murni akumulasi dari Database
+                    let totalTerjualKeseluruhan = 0;
 
                     result.data.forEach(p => {
                         let arrFoto = [];
@@ -386,12 +404,11 @@
                         const imgUrl = arrFoto[0] || 'https://via.placeholder.com/150';
                         const hargaRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.price);
 
-                        // ✅ Tarik angka asli (Real) dari masing-masing produk
+                        // ✅ Tarik angka asli (Real) dari database
                         const terjualReal = parseInt(p.sold_count) || 0; 
                         const ratingReal = parseFloat(p.avg_rating) || 0;
                         const tampilanRating = ratingReal > 0 ? ratingReal.toFixed(1) : "0.0";
 
-                        // Akumulasikan untuk Statistik Toko Utama
                         totalTerjualKeseluruhan += terjualReal;
                         if (ratingReal > 0) {
                             totalRatingKeseluruhan += ratingReal;
@@ -400,11 +417,11 @@
 
                         container.innerHTML += `
                             <div class="product-card" onclick="bukaDetail(${p.id})">
-                                <img src="${imgUrl}" alt="Produk" loading="lazy">
-                                <div class="product-info">
-                                    <h3 class="product-title">${p.title}</h3>
-                                    <div class="product-price">${hargaRp}</div>
-                                    <div class="p-sold-rating">
+                                <img src="${imgUrl}" alt="Produk" loading="lazy" style="width:100%; height:160px; object-fit:cover; border-bottom:2px solid #E8F5E9;">
+                                <div class="product-info" style="padding:12px; display:flex; flex-direction:column; flex-grow:1;">
+                                    <h3 class="product-title" style="font-size:12px; font-weight:700; color:#00695C; margin-bottom:5px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${p.title}</h3>
+                                    <div class="product-price" style="color:#FF9800; font-weight:800; font-size:15px; margin-bottom:8px;">${hargaRp}</div>
+                                    <div class="p-sold-rating" style="display:flex; justify-content:space-between; font-size:10px; color:#888; font-weight:600; margin-top:auto;">
                                         <span><i class="fas fa-star" style="color:#FFD700;"></i> ${tampilanRating}</span>
                                         <span>${terjualReal} Terjual</span>
                                     </div>
@@ -413,25 +430,22 @@
                         `;
                     });
 
-                    // ✅ RENDER DATA TOKO REAL KE LAYAR
-                    // 1. Total Terjual Semua Produk
-                    document.getElementById('totalStoreSold').innerText = totalTerjualKeseluruhan >= 1000 ? (totalTerjualKeseluruhan / 1000).toFixed(1).replace('.0','') + 'RB' : totalTerjualKeseluruhan;
+                    // ✅ RENDER DATA TOKO REAL (Murni angka tanpa rekayasa/template)
+                    document.getElementById('totalStoreSold').innerText = totalTerjualKeseluruhan;
                     
-                    // 2. Rating Toko Asli (Rata-rata dari semua produk yang ada nilainya)
                     let ratingTokoReal = "0.0";
                     if (produkYangPunyaRating > 0) {
                         ratingTokoReal = (totalRatingKeseluruhan / produkYangPunyaRating).toFixed(1);
                     }
                     document.getElementById('displayStoreRating').innerText = ratingTokoReal;
 
-                    // 3. Persentase Chat (Statik 100% karena toko Anda pakai AI & Auto-Reply)
-                    document.getElementById('displayChatReply').innerText = "100%";
+                    // Balas Chat jadi 0% jika memang belum ada histori chat khusus
+                    document.getElementById('displayChatReply').innerText = "0%";
 
-                    // 4. Pengikut Organik (Angka dasar + Rasio penjualan 3:1 + Status user)
-                    let followerReal = baseFollowersFromDB + (totalTerjualKeseluruhan * 3) + (isFollowing ? 1 : 0);
-                    document.getElementById('displayFollowers').innerText = followerReal >= 1000 ? (followerReal / 1000).toFixed(1).replace('.0','') + 'RB' : followerReal;
+                    // Pengikut murni
+                    let followerReal = isFollowing ? 1 : 0;
+                    document.getElementById('displayFollowers').innerText = followerReal;
 
-                    // 5. Update Visual Tombol Follow
                     const btnFol = document.getElementById('btnFollowToko');
                     if(isFollowing) {
                         btnFol.innerHTML = "<i class='fas fa-check'></i> Mengikuti";
@@ -444,6 +458,8 @@
                 } else {
                     document.getElementById('totalStoreSold').innerText = "0";
                     document.getElementById('displayStoreRating').innerText = "0.0";
+                    document.getElementById('displayChatReply').innerText = "0%";
+                    document.getElementById('displayFollowers').innerText = isFollowing ? "1" : "0";
                     container.innerHTML = '<p style="text-align:center; width:100%; grid-column: span 2; color:#888;">Toko ini belum mengupload barang.</p>';
                 }
             } catch (err) {
@@ -454,22 +470,54 @@
         loadStoreProducts();
 
 
+                // ==================================================
+        // 5. LOGIKA KOTAK MASUK & CHAT TOKO KE DATABASE
         // ==================================================
-        // 5. LOGIKA CHAT TOKO KE DATABASE
-        // ==================================================
-        window.bukaChatToko = function() {
+        window.bukaInbox = function() {
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) {
                 showToast("Silakan login pembeli dulu untuk chat!", "error");
                 setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
                 return;
             }
+            
+            document.getElementById('modalInbox').style.display = 'flex';
+            
+            // Coba ambil nama toko dari setting lokal (biar dinamis)
+            try {
+                const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
+                if (storeData && storeData.nama) document.getElementById('namaTokoInbox').innerText = storeData.nama;
+            } catch(e) {}
+
+            // Ambil pesan terakhir untuk preview di kotak masuk
+            fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => res.json())
+                .then(result => {
+                    const previewText = document.getElementById('inboxLastMsg');
+                    const timeText = document.getElementById('inboxLastTime');
+                    if(result.success && result.data.length > 0) {
+                        const lastMsg = result.data[result.data.length - 1];
+                        previewText.innerText = lastMsg.sender_role === 'admin' ? `Admin: ${lastMsg.message}` : `Anda: ${lastMsg.message}`;
+                        const d = new Date(lastMsg.created_at);
+                        timeText.innerText = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+                    } else {
+                        previewText.innerText = "Belum ada percakapan";
+                        timeText.innerText = "";
+                    }
+                }).catch(e => {
+                    document.getElementById('inboxLastMsg').innerText = "Gagal memuat";
+                });
+        };
+
+        window.bukaRuangChat = function() {
+            document.getElementById('modalInbox').style.display = 'none';
             document.getElementById('modalChatToko').style.display = 'flex';
             muatRiwayatChatToko();
         };
 
         window.tutupChatToko = function() {
             document.getElementById('modalChatToko').style.display = 'none';
+            document.getElementById('modalInbox').style.display = 'flex'; // Kembali ke list inbox saat di-back
         };
 
         async function muatRiwayatChatToko() {
