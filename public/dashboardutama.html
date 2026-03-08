@@ -147,18 +147,37 @@
         </div>
     </div> 
 
+  
     <header id="topHeader" class="hidden">
         <div class="header-logo-box"><img src="assets/nama_logo_kamu.png" alt="Logo" class="main-logo-header"></div>
-                <div class="header-search" style="display: flex; align-items: center; background: #f4f9ff; border: 2px solid #E1F5FE; border-radius: 20px; padding: 6px 12px; margin: 0 15px; flex: 1;">
-            <select id="pilihanSortir" style="border: none; background: transparent; font-size: 10px; font-weight: 800; color: #0D47A1; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none;">
-                <option value="terbaru">Terbaru</option>
-                <option value="termurah">Termurah</option>
-                <option value="terlaris">Terlaris</option>
-            </select>
-            <i class="fas fa-caret-down" style="font-size: 10px; color: #888; margin-left: 3px; margin-right: 8px;"></i>
-            <div style="width: 1px; height: 15px; background: #ddd; margin-right: 8px;"></div>
-            <i class="fas fa-search" style="color: #888; font-size: 12px;" onclick="window.lakukanPencarianPintar(document.getElementById('searchInputDashboard').value)"></i>
-            <input type="text" id="searchInputDashboard" placeholder="Ketik barang..." onkeypress="if(event.key === 'Enter') window.lakukanPencarianPintar(this.value)" style="border: none; background: transparent; outline: none; width: 100%; font-size: 12px; font-weight: 600; color: #333; margin-left: 5px;">
+        <div class="header-search" style="display: flex; align-items: center; background: #f4f9ff; border: 2px solid #E1F5FE; border-radius: 20px; padding: 5px 15px; margin: 0 15px; flex: 1; position: relative;">
+            <i class="fas fa-search" style="color: #888; font-size: 13px;" onclick="window.lakukanPencarianPintar(document.getElementById('searchInputDashboard').value)"></i>
+            <input type="text" id="searchInputDashboard" placeholder="Cari barang..." onkeypress="if(event.key === 'Enter') window.lakukanPencarianPintar(this.value)" style="border: none; background: transparent; outline: none; width: 100%; font-size: 12px; font-weight: 600; color: #333; margin-left: 8px;">
+            <div style="width: 1px; height: 15px; background: #ddd; margin: 0 8px;"></div>
+            
+            <i class="fas fa-ellipsis-v" style="color: #0D47A1; font-size: 14px; cursor: pointer; padding: 5px;" onclick="document.getElementById('filterDashboardBox').style.display = document.getElementById('filterDashboardBox').style.display === 'none' ? 'block' : 'none'"></i>
+            
+            <div id="filterDashboardBox" style="display: none; position: absolute; top: 40px; right: 0; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.15); border-radius: 12px; padding: 15px; width: 200px; z-index: 2000; border: 1px solid #E1F5FE;">
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size: 10px; font-weight: bold; color: #888;">Urutkan</label>
+                    <select id="dashSort" style="width: 100%; padding: 6px; font-size: 11px; border-radius: 8px; border: 1px solid #E1F5FE; outline: none; background: #f4f9ff;">
+                        <option value="terbaru">Terbaru</option><option value="termurah">Termurah</option><option value="terlaris">Terlaris</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size: 10px; font-weight: bold; color: #888;">Tipe Toko</label>
+                    <select id="dashToko" style="width: 100%; padding: 6px; font-size: 11px; border-radius: 8px; border: 1px solid #E1F5FE; outline: none; background: #f4f9ff;">
+                        <option value="">Semua Toko</option><option value="official">Official Store</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size: 10px; font-weight: bold; color: #888;">Lokasi Toko</label>
+                    <select id="dashLokasi" style="width: 100%; padding: 6px; font-size: 11px; border-radius: 8px; border: 1px solid #E1F5FE; outline: none; background: #f4f9ff;">
+                        <option value="">Semua Kota</option><option value="Jakarta">Jakarta</option><option value="Bandung">Bandung</option><option value="Surabaya">Surabaya</option>
+                    </select>
+                </div>
+                <button onclick="window.lakukanPencarianPintar(document.getElementById('searchInputDashboard').value)" style="width: 100%; background: #0D47A1; color: #fff; border: none; padding: 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer;">Cari & Filter</button>
+            </div>
         </div>
 
         
@@ -628,15 +647,16 @@
             printWindow.document.close();
         };
 
-                        // ✅ LOGIKA BARU: LEMPAR KEYWORD DAN FILTER KE SEARCH.HTML
+                             // ✅ LOGIKA PENCARIAN DENGAN TITIK TIGA
         window.lakukanPencarianPintar = function(keyword) {
             if(!keyword || keyword.trim() === '') return;
             
-            // Ambil pilihan filter dari dropdown sebelah kolom pencarian
-            const sortPilihan = document.getElementById('pilihanSortir').value;
+            let sortVal = document.getElementById('dashSort') ? document.getElementById('dashSort').value : 'terbaru';
+            let tokoVal = document.getElementById('dashToko') ? document.getElementById('dashToko').value : '';
+            let lokasiVal = document.getElementById('dashLokasi') ? document.getElementById('dashLokasi').value : '';
             
-            // Lempar ke search.html beserta parameter sort-nya
-            window.location.href = 'search.html?q=' + encodeURIComponent(keyword.trim()) + '&sort=' + sortPilihan;
+            let url = `search.html?q=${encodeURIComponent(keyword.trim())}&sort=${sortVal}&toko=${tokoVal}&lokasi=${lokasiVal}`;
+            window.location.href = url;
         };
 
 
@@ -1036,15 +1056,21 @@
                                 labelGrosir = `<div style="position:absolute; top:5px; left:5px; background:#4CAF50; color:#fff; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;"><i class="fas fa-tags"></i> GROSIR</div>`;
                             }
 
-                            // ✅ TAMBAHAN TAMPILAN LOKASI DAN NAMA TOKO
+                                                       // ✅ TAMPILAN LOKASI & NAMA TOKO (2 BARIS RAPI)
                             const htmlLokasiToko = `
-                                <div style="font-size: 9px; color: #888; font-weight: 600; margin-top: 4px; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    <i class="fas fa-map-marker-alt" style="color: #00AA5B;"></i> ${kotaToko} | <i class="fas fa-store" style="color: #0D47A1; margin-left: 2px;"></i> ${namaToko}
+                                <div style="font-size: 9px; color: #888; font-weight: 600; margin-top: 6px; line-height: 1.4;">
+                                    <div style="display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                        <i class="fas fa-map-marker-alt" style="color: #ff3b30;"></i> ${kotaToko}
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
+                                        <i class="fas fa-store" style="color: #0D47A1;"></i> ${namaToko}
+                                    </div>
                                 </div>
                             `;
 
+                            // ✅ ID LANGSUNG DI URL (ANTI ID KOSONG)
                             const htmlCardHorizontal = `
-                                <div class="h-card" onclick="window.bukaDetailTunggal('${strObj}')">
+                                <div class="h-card" onclick="window.location.href='detailproduk.html?id=${p.id}'">
                                     ${labelGrosir}
                                     <img src="${imgUrl}" class="h-card-img" alt="Produk" loading="lazy">
                                     <div class="h-card-info">
@@ -1060,14 +1086,14 @@
                             `;
 
                             const htmlCardGrid = `
-                                <div class="product-card" onclick="window.bukaDetailTunggal('${strObj}')">
+                                <div class="product-card" onclick="window.location.href='detailproduk.html?id=${p.id}'">
                                     ${labelGrosir}
                                     <img src="${imgUrl}" class="product-media" alt="Produk" loading="lazy">
                                     <div class="product-info">
                                         <h3 class="product-title">${p.title}</h3>
                                         <div class="product-price">${hargaRp}</div>
                                         ${htmlLokasiToko}
-                                        <div class="product-stats">
+                                        <div class="product-stats" style="margin-top: 8px;">
                                             <span><i class="fas fa-star" style="color:#FFD700;"></i> ${tampilanRating}</span>
                                             <span>${terjualReal} Terjual</span>
                                         </div>
