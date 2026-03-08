@@ -158,6 +158,22 @@
         <div class="product-grid" id="gridHasil"></div>
     </div>
 
+        <nav id="bottomNav">
+        <a href="dashboardutama.html" class="nav-item">
+            <i class="fas fa-mosque"></i><span>Beranda</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-play-circle"></i><span>Video</span>
+        </a>
+        <a href="dashboardutama.html?openPesanan=true" class="nav-item">
+            <i class="fas fa-receipt"></i><span>Pesanan</span>
+        </a>
+        <a href="registrasi/profilpembeli.html" class="nav-item">
+            <i class="fas fa-user"></i><span>Akun</span>
+        </a>
+    </nav>
+
+
     <div id="modalChatToko" class="chat-toko-modal">
         <div class="chat-toko-header">
             <i class="fas fa-arrow-left btn-back" onclick="tutupChatToko()"></i>
@@ -448,6 +464,19 @@
 
         // Jalankan pencarian pertama kali halaman dibuka
         muatPencarian(kataKunci);
+
+                /* ✅ CSS NAVBAR BAWAH (Sama seperti Dashboard) */
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -5px 25px rgba(0, 105, 92, 0.15); z-index: 1000; border-top: 1px solid #E8F5E9; border-radius: 20px 20px 0 0;}
+        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 10px; font-weight: 700; transition: 0.3s; position: relative; width: 60px;}
+        .nav-item i { font-size: 20px; margin-bottom: 4px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .nav-item.active { color: #00695C; }
+        .nav-item.active i { transform: translateY(-5px) scale(1.1); color: #00AA5B; }
+        .nav-item.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background: #00AA5B; border-radius: 50%; }
+        .nav-item:active i { transform: scale(0.8); }
+        
+        /* Penyesuaian agar grid hasil tidak tertutup navbar */
+        .product-grid { padding-bottom: 80px; }
+
     </script>
 </body>
 </html>
