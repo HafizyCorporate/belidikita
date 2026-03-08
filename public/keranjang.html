@@ -72,112 +72,169 @@
     </div>
 
     <script>
-        const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+                const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+        
+        let globalCartData = []; // Menyimpan data dari server sementara untuk dipakai di checkout
 
-        function loadCart() {
-            const cartStr = localStorage.getItem('belidikita_cart');
+        async function loadCart() {
+            const token = localStorage.getItem('token');
             const container = document.getElementById('cartList');
             const btnCheckout = document.getElementById('btnCheckout');
             
-            if (!cartStr || JSON.parse(cartStr).length === 0) {
-                container.innerHTML = `
-                    <div class="empty-cart">
-                        <i class="fas fa-shopping-basket"></i>
-                        <p>Keranjang masih kosong nih.<br>Yuk cari barang buat persiapan Ramadhan!</p>
-                        <a href="dashboardutama.html" class="btn-shop">Belanja Sekarang</a>
-                    </div>
-                `;
-                document.getElementById('totalHarga').innerText = "Rp0";
-                document.getElementById('totalItem').innerText = "0";
-                btnCheckout.disabled = true;
+            if (!token || token.startsWith('token-admin-')) {
+                window.location.href = 'dashboardutama.html';
                 return;
             }
 
-            let cart = JSON.parse(cartStr);
-            let totalBiaya = 0;
-            let totalBarang = 0;
-            container.innerHTML = '';
+            container.innerHTML = '<p style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat keranjang...</p>';
 
-            cart.forEach((item, index) => {
-                // ✅ LOGIKA BARU: HITUNG GROSIR REAL-TIME DI KERANJANG
-                let hargaFinal = item.harga;
-                let infoGrosirHTML = '';
+            try {
+                const res = await fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
 
-                if (item.wholesale_price > 0 && item.wholesale_min_qty > 0) {
-                    if (item.qty >= item.wholesale_min_qty) {
-                        hargaFinal = item.wholesale_price; // Aktifkan diskon grosir
-                        infoGrosirHTML = `<div class="grosir-badge"><i class="fas fa-tags"></i> Harga Grosir Aktif!</div>`;
-                    } else {
-                        // Tampilkan pesan target untuk grosir
-                        let kurangBerapa = item.wholesale_min_qty - item.qty;
-                        infoGrosirHTML = `<div style="font-size:9px; color:#888; margin-top:2px;">Tambah ${kurangBerapa} lg dpt Harga Grosir: ${formatRp(item.wholesale_price)}</div>`;
-                    }
+                if (!result.success || result.data.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-cart">
+                            <i class="fas fa-shopping-basket"></i>
+                            <p>Keranjang masih kosong nih.<br>Yuk cari barang buat persiapan Ramadhan!</p>
+                            <a href="dashboardutama.html" class="btn-shop">Belanja Sekarang</a>
+                        </div>
+                    `;
+                    document.getElementById('totalHarga').innerText = "Rp0";
+                    document.getElementById('totalItem').innerText = "0";
+                    btnCheckout.disabled = true;
+                    return;
                 }
 
-                totalBiaya += (hargaFinal * item.qty);
-                totalBarang += item.qty;
+                globalCartData = result.data;
+                let totalBiaya = 0;
+                let totalBarang = 0;
+                container.innerHTML = '';
 
-                const tampilanHargaCorek = (hargaFinal < item.harga) ? `<span class="harga-coret">${formatRp(item.harga)}</span>` : '';
+                globalCartData.forEach((item) => {
+                    // Mencegah array gambar dari database pecah
+                    let fotoUtama = item.media_url;
+                    try { const parsedMedia = JSON.parse(item.media_url); if (Array.isArray(parsedMedia) && parsedMedia.length > 0) fotoUtama = parsedMedia[0]; } catch(e) {} 
+                    
+                    // Nama varian digabungkan jika ada
+                    const namaVarianTeks = item.variant ? ` (${item.variant})` : '';
+                    const namaTampil = `${item.title}${namaVarianTeks}`;
 
-                container.innerHTML += `
-                    <div class="cart-item">
-                        <img src="${item.foto}" alt="${item.nama}">
-                        <div class="item-info">
-                            <h4>${item.nama}</h4>
-                            <div class="item-price">${formatRp(hargaFinal)} ${tampilanHargaCorek}</div>
-                            ${infoGrosirHTML}
-                            <div class="item-actions">
-                                <div class="qty-control">
-                                    <button class="qty-btn" onclick="ubahQty(${index}, -1)">-</button>
-                                    <input type="text" class="qty-input" value="${item.qty}" readonly>
-                                    <button class="qty-btn" onclick="ubahQty(${index}, 1)">+</button>
+                    // LOGIKA GROSIR ASLI
+                    let hargaFinal = parseFloat(item.price);
+                    let infoGrosirHTML = '';
+
+                    if (item.wholesale_price > 0 && item.wholesale_min_qty > 0) {
+                        if (item.qty >= item.wholesale_min_qty) {
+                            hargaFinal = parseFloat(item.wholesale_price); 
+                            infoGrosirHTML = `<div class="grosir-badge"><i class="fas fa-tags"></i> Harga Grosir Aktif!</div>`;
+                        } else {
+                            let kurangBerapa = item.wholesale_min_qty - item.qty;
+                            infoGrosirHTML = `<div style="font-size:9px; color:#888; margin-top:2px;">Tambah ${kurangBerapa} lg dpt Harga Grosir: ${formatRp(item.wholesale_price)}</div>`;
+                        }
+                    }
+
+                    totalBiaya += (hargaFinal * item.qty);
+                    totalBarang += item.qty;
+
+                    const tampilanHargaCorek = (hargaFinal < parseFloat(item.price)) ? `<span class="harga-coret">${formatRp(item.price)}</span>` : '';
+
+                    container.innerHTML += `
+                        <div class="cart-item">
+                            <img src="${fotoUtama}" alt="${namaTampil}">
+                            <div class="item-info">
+                                <h4>${namaTampil}</h4>
+                                <div class="item-price">${formatRp(hargaFinal)} ${tampilanHargaCorek}</div>
+                                ${infoGrosirHTML}
+                                <div class="item-actions">
+                                    <div class="qty-control">
+                                        <button class="qty-btn" onclick="ubahQtyDb(${item.cart_id}, ${item.product_id}, '${item.variant}', -1)">-</button>
+                                        <input type="text" class="qty-input" value="${item.qty}" readonly>
+                                        <button class="qty-btn" onclick="ubahQtyDb(${item.cart_id}, ${item.product_id}, '${item.variant}', 1)">+</button>
+                                    </div>
+                                    <button class="btn-delete" onclick="hapusItemDb(${item.cart_id})"><i class="fas fa-trash-alt"></i></button>
                                 </div>
-                                <button class="btn-delete" onclick="hapusItem(${index})"><i class="fas fa-trash-alt"></i></button>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                });
+
+                document.getElementById('totalHarga').innerText = formatRp(totalBiaya);
+                document.getElementById('totalItem').innerText = totalBarang;
+                btnCheckout.disabled = false;
+
+            } catch (err) {
+                container.innerHTML = '<p style="text-align:center; padding:30px; color:red;">Gagal terhubung ke server.</p>';
+            }
+        }
+
+        // ✅ LOGIKA BARU: UPDATE QTY LANGSUNG KE DATABASE
+        async function ubahQtyDb(cartId, productId, variant, perubahan) {
+            const token = localStorage.getItem('token');
+            const targetItem = globalCartData.find(c => c.cart_id === cartId);
+            if(!targetItem) return;
+
+            let qtyBaru = targetItem.qty + perubahan;
+            if (qtyBaru <= 0) { hapusItemDb(cartId); return; }
+
+            try {
+                // Endpoint POST di keranjang kita sudah bergaya Upsert (Bisa update jika barang ada)
+                await fetch('/api/cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ product_id: productId, variant: variant, qty: perubahan }) // Kirim selisih perubahannya (+1 atau -1)
+                });
+                loadCart(); // Refresh layar keranjang
+            } catch(e) {}
+        }
+
+        // ✅ LOGIKA BARU: HAPUS ITEM LANGSUNG DARI DATABASE
+        async function hapusItemDb(cartId) {
+            const token = localStorage.getItem('token');
+            try {
+                await fetch(`/api/cart/${cartId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                loadCart();
+            } catch(e) {}
+        }
+
+        // ✅ LOGIKA BARU: PINDAHKAN KERANJANG KE CHECKOUT_SESSIONS DATABASE
+        async function lanjutCheckout() {
+            if (globalCartData.length === 0) return;
+            const token = localStorage.getItem('token');
+            const btnCheckout = document.getElementById('btnCheckout');
+            btnCheckout.innerText = "Memproses..."; btnCheckout.disabled = true;
+
+            // Format ulang data keranjang agar strukturnya sama dengan yang biasa masuk ke checkout
+            const dataCheckout = globalCartData.map(item => {
+                let fotoUtama = item.media_url;
+                try { const parsedMedia = JSON.parse(item.media_url); if (Array.isArray(parsedMedia) && parsedMedia.length > 0) fotoUtama = parsedMedia[0]; } catch(e) {} 
+                const namaVarianTeks = item.variant ? ` (${item.variant})` : '';
+                return {
+                    id: item.product_id,
+                    foto: fotoUtama, 
+                    nama: `${item.title}${namaVarianTeks}`,
+                    harga: parseFloat(item.price),
+                    qty: item.qty,
+                    weight: item.weight || 1000,
+                    wholesale_price: parseFloat(item.wholesale_price) || 0, 
+                    wholesale_min_qty: item.wholesale_min_qty || 0
+                };
             });
 
-            document.getElementById('totalHarga').innerText = formatRp(totalBiaya);
-            document.getElementById('totalItem').innerText = totalBarang;
-            btnCheckout.disabled = false;
-        }
-
-        // ✅ LOGIKA BARU: SAAT TOMBOL PLUS/MINUS DITEKAN, LOGIKA GROSIR DIEVALUASI ULANG
-        function ubahQty(index, perubahan) {
-            let cart = JSON.parse(localStorage.getItem('belidikita_cart'));
-            cart[index].qty += perubahan;
-            
-            if(cart[index].qty <= 0) {
-                hapusItem(index);
-                return;
-            }
-
-            // Batasi pembelian massal jika ternyata stok aslinya kurang (Opsional, saat ini dibebaskan)
-            if(cart[index].qty > 999) cart[index].qty = 999; 
-
-            localStorage.setItem('belidikita_cart', JSON.stringify(cart));
-            loadCart(); // Render ulang keranjang secara instan
-        }
-
-        function hapusItem(index) {
-            let cart = JSON.parse(localStorage.getItem('belidikita_cart'));
-            cart.splice(index, 1);
-            localStorage.setItem('belidikita_cart', JSON.stringify(cart));
-            loadCart();
-        }
-
-        function lanjutCheckout() {
-            const cartStr = localStorage.getItem('belidikita_cart');
-            if (cartStr && JSON.parse(cartStr).length > 0) {
-                // Salin isi keranjang ke memori checkout
-                sessionStorage.setItem('belidikita_checkout', cartStr);
-                window.location.href = 'checkout.html';
-            }
+            try {
+                const res = await fetch('/api/checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ items_json: JSON.stringify(dataCheckout) })
+                });
+                const result = await res.json();
+                if(result.success) { window.location.href = 'checkout.html'; } 
+                else { alert("Gagal memproses checkout."); btnCheckout.innerText = "Checkout"; btnCheckout.disabled = false; }
+            } catch(e) { alert("Error koneksi."); btnCheckout.innerText = "Checkout"; btnCheckout.disabled = false; }
         }
 
         loadCart();
+
     </script>
 </body>
 </html>
