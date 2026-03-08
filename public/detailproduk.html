@@ -427,32 +427,235 @@
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) { showToast("Silakan Login Pembeli terlebih dahulu!", "error"); setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500); return; }
             if(butuhVarian && !ukuranTerpilih) { showToast("Silakan pilih " + produk.variant_title + " terlebih dahulu!", "error"); return; }
+    <script>
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById("customToast");
+            toast.innerText = msg;
+            toast.className = type + " show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
 
-            let cart = JSON.parse(localStorage.getItem('belidikita_cart')) || [];
-            const namaVarianTeks = butuhVarian ? ` (${ukuranTerpilih})` : '';
-            const identitasUnik = `${produk.nama}${namaVarianTeks}`;
-            const existingItem = cart.find(item => item.nama === identitasUnik);
+        const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+
+        let produk = {};
+        let ukuranTerpilih = null;
+        let butuhVarian = false;
+        let daftarFoto = [];
+
+        // ✅ PERUBAHAN 1: MENGAMBIL DATA DARI DATABASE BERDASARKAN URL ID
+        async function inisialisasiHalaman() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idProduk = urlParams.get('id');
             
-            if(existingItem) {
-                existingItem.qty += 1; 
-            } else {
-                cart.push({
-                    id: produk.id,
-                    foto: daftarFoto[0], 
-                    nama: identitasUnik,
-                    harga: produk.harga,
-                    qty: 1,
-                    weight: produk.weight || 1000,
-                    wholesale_price: produk.wholesale_price || 0, 
-                    wholesale_min_qty: produk.wholesale_min_qty || 0
-                }); 
+            if(!idProduk) { window.location.href = 'dashboardutama.html'; return; }
+
+            try {
+                const res = await fetch(`/api/products/${idProduk}`);
+                const result = await res.json();
+                
+                if(!result.success) { window.location.href = 'dashboardutama.html'; return; }
+                
+                const rawProduk = result.data;
+                produk = {
+                    id: rawProduk.id,
+                    nama: rawProduk.title || "Produk Belidikita",
+                    harga: rawProduk.price || 0,
+                    hargaStr: formatRp(rawProduk.price || 0),
+                    deskripsi: rawProduk.description || "Tidak ada deskripsi tambahan.",
+                    foto: rawProduk.media_url || "https://via.placeholder.com/400",
+                    weight: rawProduk.weight || 1000,
+                    seller_name: "Belidikita Official",
+                    unit: rawProduk.unit || 'Pcs',
+                    variant_title: rawProduk.variant_title || '',
+                    variant_options: rawProduk.variant_options || '',
+                    wholesale_price: rawProduk.wholesale_price || 0,
+                    wholesale_min_qty: rawProduk.wholesale_min_qty || 0,
+                    sold_count: rawProduk.sold_count || 0
+                };
+
+                // LOGIKA UI ASLI KOMANDAN MULAI DARI SINI 
+                const satuanTampil = produk.unit;
+                document.getElementById('hargaProduk').innerHTML = `${produk.hargaStr} <span style="font-size:12px; font-weight:600; color:#888;">/ ${satuanTampil}</span>`;
+                
+                if (produk.wholesale_price > 0 && produk.wholesale_min_qty > 0) {
+                    const elPromo = document.getElementById('promoGrosir');
+                    elPromo.style.display = 'inline-block';
+                    elPromo.innerHTML = `<i class="fas fa-percent"></i> Beli Min ${produk.wholesale_min_qty} Harga Jadi ${formatRp(produk.wholesale_price)}/${satuanTampil}`;
+
+                    const totalSatuan = produk.harga * produk.wholesale_min_qty;
+                    const totalGrosir = produk.wholesale_price * produk.wholesale_min_qty;
+                    const hemat = totalSatuan - totalGrosir;
+                    
+                    if(hemat > 0) {
+                        const elEstimasi = document.getElementById('estimasiGrosir');
+                        elEstimasi.style.display = 'block';
+                        elEstimasi.innerHTML = `<i class="fas fa-fire" style="color:#ff3b30; font-size:14px; margin-right:5px; vertical-align:middle;"></i> <b>Trik Hemat:</b> Beli ${produk.wholesale_min_qty} ${satuanTampil} cukup bayar <b>${formatRp(totalGrosir)}</b> <i>(Kamu hemat ${formatRp(hemat)} dari harga asli ${formatRp(totalSatuan)})</i>. Yuk borong!`;
+                    }
+                }
+                
+                document.getElementById('namaProduk').innerText = produk.nama;
+                document.getElementById('descProduk').innerText = produk.deskripsi;
+                document.getElementById('txtBerat').innerHTML = `<i class="fas fa-weight-hanging mr-1"></i> ${produk.weight} Gram`;
+                document.getElementById('namaTokoAsli').innerText = produk.seller_name;
+
+                const boxVarian = document.getElementById('boxVarian');
+                if (produk.variant_title && produk.variant_options) {
+                    butuhVarian = true; 
+                    boxVarian.style.display = 'block'; 
+                    document.getElementById('judulVarian').innerHTML = `<i class="fas fa-tags"></i> ${produk.variant_title}`;
+                    
+                    const containerVarian = document.getElementById('pilihanVarianContainer');
+                    const listVarian = produk.variant_options.split(',').map(item => item.trim());
+                    
+                    listVarian.forEach(opsi => {
+                        if(opsi !== "") {
+                            let namaVarian = opsi;
+                            let stokVarian = null;
+
+                            if(opsi.includes('=')) {
+                                const pecah = opsi.split('=');
+                                namaVarian = pecah[0].trim();
+                                stokVarian = parseInt(pecah[1].trim());
+                            }
+
+                            const btn = document.createElement('div');
+                            btn.className = 'v-opt';
+
+                            if(stokVarian === 0) {
+                                btn.classList.add('habis');
+                                btn.innerHTML = `<span>${namaVarian}</span><span style="font-size:9px; color:#ff3b30; margin-top:2px;">Habis</span>`;
+                            } else {
+                                let teksStok = (stokVarian !== null && !isNaN(stokVarian)) ? `<span style="font-size:9px; color:#00AA5B; margin-top:2px;">Sisa ${stokVarian}</span>` : '';
+                                btn.innerHTML = `<span style="font-weight:900;">${namaVarian}</span>${teksStok}`;
+                                
+                                btn.addEventListener('click', function() {
+                                    document.querySelectorAll('.v-opt').forEach(b => b.classList.remove('selected'));
+                                    this.classList.add('selected');
+                                    ukuranTerpilih = namaVarian; 
+                                });
+                            }
+                            containerVarian.appendChild(btn);
+                        }
+                    });
+                }
+
+                fetchUlasanAsli();
+
+                try {
+                    daftarFoto = JSON.parse(produk.foto); 
+                    if(!Array.isArray(daftarFoto)) daftarFoto = [produk.foto];
+                } catch(e) { daftarFoto = [produk.foto]; }
+
+                const slider = document.getElementById('imageSlider');
+                const dotsContainer = document.getElementById('sliderDots');
+
+                daftarFoto.forEach((url, index) => {
+                    const img = document.createElement('img'); img.src = url; img.onclick = () => bukaFullscreen(url); slider.appendChild(img);
+                    if(daftarFoto.length > 1) {
+                        const dot = document.createElement('div'); dot.className = `dot ${index === 0 ? 'active' : ''}`; dotsContainer.appendChild(dot);
+                    }
+                });
+
+                slider.addEventListener('scroll', () => {
+                    const scrollLeft = slider.scrollLeft; const width = slider.clientWidth; const activeIndex = Math.round(scrollLeft / width);
+                    document.querySelectorAll('.dot').forEach((dot, idx) => { dot.classList.toggle('active', idx === activeIndex); });
+                });
+
+                loadSimilarProducts();
+
+            } catch(e) {
+                window.location.href = 'dashboardutama.html';
             }
-            localStorage.setItem('belidikita_cart', JSON.stringify(cart));
-            updateBadge();
-            showToast("Barang ditambahkan ke keranjang 🛒", "success");
+        }
+
+        async function fetchUlasanAsli() {
+            try {
+                const res = await fetch(`/api/reviews/${produk.id}`); 
+                if (res.ok) {
+                    const result = await res.json();
+                    if(result.success && result.data && result.data.length > 0) {
+                        document.getElementById('avgRating').innerHTML = `<i class="fas fa-star"></i> ${result.rata_rata}`;
+                        document.getElementById('realTerjual').innerHTML = `<i class="fas fa-shopping-bag mr-1"></i> ${result.terjual} Terjual`;
+                        
+                        const container = document.getElementById('reviewContainer');
+                        container.innerHTML = ''; 
+                        
+                        result.data.forEach(rev => {
+                            let starsHtml = '';
+                            for(let i=0; i<5; i++) {
+                                starsHtml += i < rev.rating ? '<i class="fas fa-star" style="color:#FFD700;"></i> ' : '<i class="far fa-star" style="color:#ddd;"></i> ';
+                            }
+                            let avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(rev.user_name)}&background=E1F5FE&color=0D47A1&rounded=true`;
+                            
+                            container.innerHTML += `
+                                <div class="review-item">
+                                    <img src="${avatarUrl}" alt="Avatar">
+                                    <div class="review-detail">
+                                        <h5>${rev.user_name}</h5>
+                                        <div class="stars">${starsHtml}</div>
+                                        <p>${rev.comment}</p>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    } else { document.getElementById('reviewContainer').innerHTML = '<p style="font-size:12px; color:#888; text-align:center; font-weight:600;">Belum ada ulasan untuk produk ini.</p>'; }
+                } else { throw new Error(); }
+            } catch(e) {
+                document.getElementById('avgRating').innerHTML = `<i class="fas fa-star"></i> 0.0`;
+                document.getElementById('realTerjual').innerHTML = `<i class="fas fa-shopping-bag mr-1"></i> ${produk.sold_count || 0} Terjual`;
+                document.getElementById('reviewContainer').innerHTML = '<p style="font-size:12px; color:#888; text-align:center; font-weight:600;">Belum ada ulasan untuk produk ini.</p>';
+            }
+        }
+
+        function bukaFullscreen(url) { document.getElementById('fullscreenImg').src = url; document.getElementById('fullscreenModal').style.display = 'flex'; }
+        function tutupFullscreen() { document.getElementById('fullscreenModal').style.display = 'none'; }
+
+        function bagikanProduk() {
+            const textBagikan = `*${produk.nama}*\n💰 Harga: ${produk.hargaStr}\n\n📝 *Deskripsi:*\n${produk.deskripsi.substring(0, 150)}...\n\n📸 *Lihat Gambar & Beli di sini:*\n${window.location.href}\n\nLink Gambar Utama: ${daftarFoto[0]}`;
+            if (navigator.share) { navigator.share({ title: produk.nama, text: textBagikan, url: window.location.href }).catch(err => console.log(err)); } 
+            else { navigator.clipboard.writeText(textBagikan); showToast("Detail & Link produk berhasil disalin!", "success"); }
+        }
+
+        // ✅ PERUBAHAN 2: UPDATE BADGE KERANJANG DARI DATABASE
+        async function updateBadge() {
+            const token = localStorage.getItem('token');
+            const badge = document.getElementById('badgeKeranjang');
+            if(!badge) return;
+            if(!token || token.startsWith('token-admin-')) { badge.innerText = "0"; return; }
+            try {
+                const res = await fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                if(result.success) { badge.innerText = result.data.reduce((sum, item) => sum + item.qty, 0); }
+            } catch(e) {}
+        }
+        updateBadge();
+
+        // ✅ PERUBAHAN 3: TAMBAH KE KERANJANG DATABASE
+        document.getElementById('btnTambahKeranjang').addEventListener('click', async () => {
+            const token = localStorage.getItem('token');
+            if (!token || token.startsWith('token-admin-')) { showToast("Silakan Login Pembeli terlebih dahulu!", "error"); setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500); return; }
+            if(butuhVarian && !ukuranTerpilih) { showToast("Silakan pilih " + produk.variant_title + " terlebih dahulu!", "error"); return; }
+
+            const btn = document.getElementById('btnTambahKeranjang');
+            btn.style.opacity = "0.7"; btn.style.pointerEvents = "none";
+
+            try {
+                const res = await fetch('/api/cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ product_id: produk.id, variant: ukuranTerpilih || '', qty: 1 })
+                });
+                const result = await res.json();
+                if(result.success) {
+                    updateBadge();
+                    showToast("Barang ditambahkan ke keranjang 🛒", "success");
+                } else { showToast("Gagal menambahkan ke keranjang.", "error"); }
+            } catch(e) { showToast("Error koneksi.", "error"); } 
+            finally { btn.style.opacity = "1"; btn.style.pointerEvents = "auto"; }
         });
 
-        document.getElementById('btnBeliLangsung').addEventListener('click', () => {
+        // ✅ PERUBAHAN 4: BELI LANGSUNG KE SESSION DATABASE
+        document.getElementById('btnBeliLangsung').addEventListener('click', async () => {
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) { showToast("Silakan Login Pembeli terlebih dahulu!", "error"); setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500); return; }
             if(butuhVarian && !ukuranTerpilih) { showToast("Silakan pilih " + produk.variant_title + " terlebih dahulu!", "error"); return; }
@@ -473,10 +676,22 @@
                 wholesale_min_qty: produk.wholesale_min_qty || 0
             }];
             
-            sessionStorage.setItem('belidikita_checkout', JSON.stringify(dataCheckout));
-            window.location.href = 'checkout.html';
+            const btn = document.getElementById('btnBeliLangsung');
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> MEMPROSES..."; btn.style.pointerEvents = "none";
+
+            try {
+                const res = await fetch('/api/checkout-session', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ items_json: JSON.stringify(dataCheckout) })
+                });
+                const result = await res.json();
+                if(result.success) { window.location.href = 'checkout.html'; } 
+                else { showToast("Gagal memproses checkout.", "error"); btn.innerHTML = "BELI SEKARANG <i class='fas fa-bolt ml-1'></i>"; btn.style.pointerEvents = "auto"; }
+            } catch(e) { showToast("Error koneksi.", "error"); btn.innerHTML = "BELI SEKARANG <i class='fas fa-bolt ml-1'></i>"; btn.style.pointerEvents = "auto"; }
         });
 
+        // ✅ PERUBAHAN 5: KLIK REKOMENDASI MENGGUNAKAN URL ID
         async function loadSimilarProducts() {
             try {
                 const res = await fetch('/api/products'); const data = await res.json();
@@ -491,15 +706,8 @@
                         const imgUrl = arrFoto[0] || 'https://via.placeholder.com/150';
                         const hargaRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.price);
 
-                        const prodObj = { 
-                            id: p.id, nama: p.title, harga: p.price, hargaStr: hargaRp, deskripsi: p.description, foto: p.media_url, weight: p.weight || 1000,
-                            unit: p.unit || 'Pcs', variant_title: p.variant_title || '', variant_options: p.variant_options || '',
-                            wholesale_price: p.wholesale_price || 0, wholesale_min_qty: p.wholesale_min_qty || 0 
-                        };
-                        const strObj = encodeURIComponent(JSON.stringify(prodObj)).replace(/'/g, "%27");
-
                         container.innerHTML += `
-                            <div class="sim-card" onclick="bukaProdukLain('${strObj}')">
+                            <div class="sim-card" onclick="bukaProdukLain(${p.id})">
                                 <img src="${imgUrl}" alt="Barang Sejenis">
                                 <div class="sim-info">
                                     <h5>${p.title}</h5>
@@ -511,8 +719,11 @@
                 }
             } catch(e) { document.getElementById('similarProductsContainer').innerHTML = '<p style="font-size:11px; color:#888;">Gagal memuat rekomendasi.</p>'; }
         }
-        function bukaProdukLain(encodedObj) { localStorage.setItem('produk_detail', decodeURIComponent(encodedObj)); window.location.reload(); }
-        loadSimilarProducts();
+        
+        function bukaProdukLain(idProdukTujuan) { window.location.href = 'detailproduk.html?id=' + idProdukTujuan; }
+        
+        // Eksekutor Utama saat halaman dibuka
+        inisialisasiHalaman();
 
     </script>
 </body>
