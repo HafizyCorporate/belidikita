@@ -9,10 +9,11 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
         
+        /* ✅ TEMA RAMADHAN HIJAU KHAS LEBARAN */
         body { 
-            background: linear-gradient(135deg, #E1F5FE 0%, #B3E5FC 100%); 
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); 
             color: #333; padding-bottom: 30px; min-height: 100vh;
-            background-image: radial-gradient(#81D4FA 1px, transparent 1px);
+            background-image: radial-gradient(#A5D6A7 1px, transparent 1px);
             background-size: 20px 20px;
         }
 
@@ -31,14 +32,14 @@
         .header-store { 
             background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
             padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;
-            box-shadow: 0 4px 15px rgba(13, 71, 161, 0.1); 
+            box-shadow: 0 4px 15px rgba(0, 105, 92, 0.1); 
             position: sticky; top: 0; z-index: 100;
-            border-bottom: 2px solid #81D4FA;
+            border-bottom: 2px solid #A5D6A7;
         }
-        .header-store i { font-size: 20px; color: #0D47A1; cursor: pointer; transition: transform 0.2s; }
+        .header-store i { font-size: 20px; color: #00695C; cursor: pointer; transition: transform 0.2s; }
         .header-store i:active { transform: scale(0.8); }
-        .search-bar { flex: 1; margin: 0 15px; background: #f4f9ff; border: 2px solid #E1F5FE; border-radius: 20px; padding: 8px 15px; display: flex; align-items: center; }
-        .search-bar input { border: none; background: transparent; outline: none; width: 100%; font-size: 12px; font-weight: 600; color: #0D47A1; margin-left: 8px; }
+        .search-bar { flex: 1; margin: 0 15px; background: #f2fcf6; border: 2px solid #E8F5E9; border-radius: 20px; padding: 8px 15px; display: flex; align-items: center; }
+        .search-bar input { border: none; background: transparent; outline: none; width: 100%; font-size: 12px; font-weight: 600; color: #00695C; margin-left: 8px; }
 
         /* --- KONTEN UTAMA --- */
         .content-wrapper { position: relative; z-index: 10; max-width: 600px; margin: 0 auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
@@ -47,31 +48,31 @@
         .store-profile-card { 
             background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
             padding: 20px; border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(13, 71, 161, 0.1); 
+            box-shadow: 0 10px 30px rgba(0, 105, 92, 0.1); 
             border: 2px solid #fff; animation: fadeUp 0.5s ease forwards;
             position: relative; overflow: hidden;
         }
-        .store-bg-accent { position: absolute; top: 0; left: 0; width: 100%; height: 70px; background: linear-gradient(135deg, #0D47A1, #81D4FA); opacity: 0.1; }
+        .store-bg-accent { position: absolute; top: 0; left: 0; width: 100%; height: 70px; background: linear-gradient(135deg, #00695C, #00AA5B); opacity: 0.15; }
         
         .store-info-top { display: flex; gap: 15px; align-items: center; position: relative; z-index: 2; }
         .store-avatar { width: 65px; height: 65px; background: linear-gradient(135deg, #FF9800, #FFD700); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 30px; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); border: 3px solid #fff; overflow: hidden;}
         .store-avatar img { width: 100%; height: 100%; object-fit: cover; }
         .store-name-box { flex: 1; }
-        .store-name-box h2 { font-size: 16px; font-weight: 800; color: #0D47A1; margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+        .store-name-box h2 { font-size: 16px; font-weight: 800; color: #00695C; margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
         .badge-mall { background: #ff3b30; color: #fff; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 800; letter-spacing: 0.5px; }
         .store-status { font-size: 11px; color: #00AA5B; font-weight: 700; }
         
-        .store-stats { display: flex; justify-content: space-around; margin-top: 20px; padding-top: 15px; border-top: 2px dashed #E1F5FE; position: relative; z-index: 2; }
+        .store-stats { display: flex; justify-content: space-around; margin-top: 20px; padding-top: 15px; border-top: 2px dashed #E8F5E9; position: relative; z-index: 2; }
         .stat-item { text-align: center; }
-        .stat-num { font-size: 15px; font-weight: 800; color: #0D47A1; }
+        .stat-num { font-size: 15px; font-weight: 800; color: #00695C; }
         .stat-label { font-size: 10px; color: #888; font-weight: 600; margin-top: 2px; }
 
-        .btn-follow { width: 100%; margin-top: 15px; background: #0D47A1; color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 5px 15px rgba(13, 71, 161, 0.3); transition: 0.2s; position: relative; z-index: 2; }
+        .btn-follow { width: 100%; margin-top: 15px; background: #00695C; color: #fff; border: none; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 5px 15px rgba(0, 105, 92, 0.3); transition: 0.2s; position: relative; z-index: 2; }
         .btn-follow:active { transform: scale(0.95); }
 
         /* 2. VOUCHER TOKO */
         .voucher-section { margin-top: 5px; animation: fadeUp 0.6s ease forwards; opacity: 0;}
-        .section-title { font-size: 14px; font-weight: 800; color: #0D47A1; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .section-title { font-size: 14px; font-weight: 800; color: #00695C; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
         
         .voucher-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; scroll-behavior: smooth; }
         .voucher-scroll::-webkit-scrollbar { display: none; }
@@ -92,18 +93,18 @@
         .v-right:active { background: rgba(0,0,0,0.2); }
         .v-right span { font-size: 11px; font-weight: 800; text-transform: uppercase; }
 
-        /* 3. TABS TOKO */
+        /* 3. TABS TOKO RINGKAS */
         .store-tabs { display: flex; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 15px; padding: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 5px; animation: fadeUp 0.7s ease forwards; opacity: 0;}
-        .tab-btn { flex: 1; padding: 12px; text-align: center; font-size: 12px; font-weight: 800; color: #888; border-radius: 10px; cursor: pointer; transition: 0.3s; }
-        .tab-btn.active { background: #E1F5FE; color: #0D47A1; }
+        .tab-btn { flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 800; color: #888; border-radius: 10px; cursor: pointer; transition: 0.3s; }
+        .tab-btn.active { background: #E8F5E9; color: #00AA5B; }
 
         /* 4. GRID PRODUK */
         .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; animation: fadeUp 0.8s ease forwards; opacity: 0; }
-        .product-card { background: rgba(255,255,255,0.9); border: 2px solid #E1F5FE; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: transform 0.2s; cursor: pointer; }
+        .product-card { background: rgba(255,255,255,0.9); border: 2px solid #E8F5E9; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: transform 0.2s; cursor: pointer; }
         .product-card:active { transform: scale(0.95); }
-        .product-card img { width: 100%; height: 160px; object-fit: cover; border-bottom: 2px solid #E1F5FE; }
+        .product-card img { width: 100%; height: 160px; object-fit: cover; border-bottom: 2px solid #E8F5E9; }
         .product-info { padding: 12px; display: flex; flex-direction: column; flex-grow: 1; }
-        .product-title { font-size: 12px; font-weight: 700; color: #0D47A1; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .product-title { font-size: 12px; font-weight: 700; color: #00695C; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .product-price { color: #FF9800; font-weight: 800; font-size: 15px; margin-bottom: 8px; }
         .p-sold-rating { display: flex; justify-content: space-between; font-size: 10px; color: #888; font-weight: 600; margin-top: auto; }
 
@@ -114,19 +115,19 @@
         .setting-box { background: #fff; padding: 25px 20px; border-radius: 20px; width: 90%; max-width: 400px; box-shadow: 0 15px 35px rgba(0,0,0,0.3); animation: popIn 0.3s ease; position: relative; max-height: 90vh; overflow-y: auto;}
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         .setting-close { position: absolute; top: 15px; right: 20px; font-size: 24px; color: #aaa; cursor: pointer; font-weight: bold; }
-        .setting-box h3 { font-size: 16px; color: #0D47A1; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 2px dashed #E1F5FE; padding-bottom: 10px;}
+        .setting-box h3 { font-size: 16px; color: #00695C; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; border-bottom: 2px dashed #E8F5E9; padding-bottom: 10px;}
         
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 11px; font-weight: 700; color: #555; margin-bottom: 5px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; outline: none; font-size: 12px; font-family: 'Montserrat', sans-serif; background: #fafcff; }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #0D47A1; background: #fff; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; outline: none; font-size: 12px; font-family: 'Montserrat', sans-serif; background: #f2fcf6; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #00AA5B; background: #fff; }
         
         .btn-save-store { width: 100%; background: #00AA5B; color: #fff; border: none; padding: 14px; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 170, 91, 0.3); transition: 0.2s; margin-top: 10px;}
         .btn-save-store:active { transform: scale(0.95); }
         .btn-save-store:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
 
         /* TOAST */
-        #customToast { visibility: hidden; min-width: 280px; margin-left: -140px; background: rgba(13, 71, 161, 0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 9999; left: 50%; bottom: -50px; font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; }
+        #customToast { visibility: hidden; min-width: 280px; margin-left: -140px; background: rgba(0, 105, 92, 0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 9999; left: 50%; bottom: -50px; font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; }
         #customToast.show { visibility: visible; opacity: 1; bottom: 40px; }
         #customToast.success { background: rgba(0, 170, 91, 0.95); border-color: #A5D6A7; }
         #customToast.error { background: rgba(255,59,48, 0.95); border-color: #ffcdd2; }
@@ -208,9 +209,7 @@
         </div>
 
         <div class="store-tabs">
-            <div class="tab-btn active">Beranda</div>
-            <div class="tab-btn">Semua Produk</div>
-            <div class="tab-btn">Kategori</div>
+            <div class="tab-btn active" style="width: 100%;"><i class="fas fa-box-open mr-1"></i> Daftar Produk</div>
         </div>
 
         <div class="product-grid" id="storeProductList">
@@ -276,7 +275,7 @@
                 btn.style.background = "#00AA5B";
             } else {
                 btn.innerHTML = "<i class='fas fa-plus'></i> Ikuti Toko";
-                btn.style.background = "#0D47A1";
+                btn.style.background = "#00695C";
             }
         }
         
@@ -322,7 +321,6 @@
 
         closeSetting.addEventListener('click', () => modalSetting.style.display = 'none');
 
-        // ✅ LOGIKA BARU: KOMPRESI AMAN ANTI MACET
         formSetting.addEventListener('submit', (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanSettingToko');
@@ -331,28 +329,24 @@
 
             const fileInput = document.getElementById('inputStoreLogoFile');
             const savedData = JSON.parse(localStorage.getItem('belidikita_store_profile')) || {};
-            let logoBase64 = savedData.logo; // Tetap pakai yang lama kalau gak upload baru
+            let logoBase64 = savedData.logo; 
 
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
                 const reader = new FileReader();
 
-                // Deteksi kalau file berhasil dibaca
                 reader.onload = function(event) {
                     const img = new Image();
-                    
-                    // Kalau gambar bermasalah
                     img.onerror = function() {
                         showToast("Format gambar tidak didukung.", "error");
                         btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan";
                         btn.disabled = false;
                     };
 
-                    // Kalau gambar sukses diload, kita kompres
                     img.onload = function() {
                         try {
                             const canvas = document.createElement('canvas');
-                            const MAX_WIDTH = 250; // Dikecilkan maksimal agar sangat aman di HP
+                            const MAX_WIDTH = 250; 
                             const scaleSize = MAX_WIDTH / img.width;
 
                             if (img.width < MAX_WIDTH) {
@@ -366,7 +360,7 @@
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-                            logoBase64 = canvas.toDataURL('image/jpeg', 0.5); // Kualitas 50%
+                            logoBase64 = canvas.toDataURL('image/jpeg', 0.5); 
                             simpanDataKeLokal(logoBase64, btn);
                         } catch (err) {
                             showToast("Browser tidak mendukung kompresi. Coba foto lain.", "error");
@@ -374,11 +368,9 @@
                             btn.disabled = false;
                         }
                     };
-                    
                     img.src = event.target.result;
                 };
 
-                // Deteksi kalau file gagal dibaca HP
                 reader.onerror = function() {
                     showToast("Gagal membaca file foto.", "error");
                     btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan";
@@ -436,7 +428,7 @@
         }
 
         // ==================================================
-        // 4. DATA PRODUK REAL & KALKULASI RATING TOKO REAL
+        // 4. DATA PRODUK REAL (MENGGUNAKAN API DATABASE)
         // ==================================================
         async function loadStoreProducts() {
             try {
@@ -462,14 +454,6 @@
                         const imgUrl = arrFoto[0] || 'https://via.placeholder.com/150';
                         const hargaRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.price);
 
-                        const prodObj = {
-                            id: p.id, nama: p.title, harga: p.price, hargaStr: hargaRp,
-                            deskripsi: p.description, foto: p.media_url, 
-                            seller_name: document.getElementById('displayStoreName').innerText, 
-                            weight: p.weight || 1000
-                        };
-                        const strObj = encodeURIComponent(JSON.stringify(prodObj));
-
                         const terjualReal = p.sold_count || 0; 
                         const ratingReal = parseFloat(p.avg_rating) || 0;
                         const tampilanRating = ratingReal > 0 ? ratingReal.toFixed(1) : "0.0";
@@ -479,8 +463,9 @@
                             produkYangPunyaRating++;
                         }
 
+                        // ✅ PERUBAHAN: Saat diklik langsung melempar ID produk (Anti Local Storage)
                         container.innerHTML += `
-                            <div class="product-card" onclick="bukaDetail('${strObj}')">
+                            <div class="product-card" onclick="bukaDetail(${p.id})">
                                 <img src="${imgUrl}" alt="Produk" loading="lazy">
                                 <div class="product-info">
                                     <h3 class="product-title">${p.title}</h3>
@@ -512,14 +497,12 @@
             }
         }
 
-        function bukaDetail(encodedObj) {
-            const decodedObj = decodeURIComponent(encodedObj);
-            localStorage.setItem('produk_detail', decodedObj);
-            window.location.href = 'detailproduk.html';
+        // ✅ FUNGSI BUKA DETAIL YANG MENGARAH KE URL
+        function bukaDetail(idProduk) {
+            window.location.href = 'detailproduk.html?id=' + idProduk;
         }
 
         loadStoreProducts();
     </script>
 </body>
 </html>
-
