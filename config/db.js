@@ -151,10 +151,11 @@ const initDB = async () => {
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_reject_reason TEXT;
     `;
 
-    // ✅ INDEXING DATABASE AGAR SUPER CEPAT
+    
+    /    // ✅ INDEXING DATABASE AGAR SUPER CEPAT
     const createIndexes = `
         CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
-        CREATE INDEX IF NOT EXISTS idx_products_title ON products USING GIN (to_tsvector('indonesian', title));
+        CREATE INDEX IF NOT EXISTS idx_products_title ON products USING GIN (to_tsvector('simple', title));
         CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
         CREATE INDEX IF NOT EXISTS idx_orders_userid ON orders(user_id);
     `;
