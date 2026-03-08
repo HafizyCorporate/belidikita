@@ -103,11 +103,13 @@ app.get('/api/products', async (req, res) => {
         let params = [];
         let paramIndex = 1;
 
+         // 1. Filter Kategori
         if (category && category !== 'Semua') {
-            baseQuery += ` AND p.category = $${paramIndex}`;
-            params.push(category);
+            baseQuery += ` AND p.description ILIKE $${paramIndex}`;
+            params.push(`%[Kategori: ${category}%`);
             paramIndex++;
         }
+
 
         if (search && search.trim() !== '') {
             baseQuery += ` AND (p.title ILIKE $${paramIndex} OR p.description ILIKE $${paramIndex})`;
