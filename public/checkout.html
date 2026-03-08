@@ -271,7 +271,7 @@
 
     <div id="customToast"></div>
 
-    <script>
+                       <script>
         function showToast(msg, type = 'info') {
             const toast = document.getElementById("customToast");
             toast.innerText = msg;
@@ -284,7 +284,6 @@
         let kotaTokoGlobal = "Bandung"; 
         let bukuAlamat = [];
         
-        // Simpan pesan WA yang sudah digenerate saat klik "Buat Pesanan"
         let pesanWAKonfirmasi = ""; 
         let timerInterval;
 
@@ -350,54 +349,80 @@
         function tutupModalPilihAlamat() { document.getElementById('modalPilihAlamat').style.display = 'none'; }
         window.pilihAlamatIni = function(index) { userInfo = bukuAlamat[index]; renderAlamatTerpilih(); tutupModalPilihAlamat(); showToast("Alamat pengiriman berhasil diubah!", "success"); }
 
-        function loadCheckoutItems() {
-            const dataStr = sessionStorage.getItem('belidikita_checkout');
-            if(!dataStr) { window.location.href = 'dashboardutama.html'; return; }
-            items = JSON.parse(dataStr);
-            subtotal = 0; totalBeratGram = 0;
+        // ✅ PERUBAHAN 1: MENGAMBIL DATA CHECKOUT DARI DATABASE SESSION
+        async function loadCheckoutItems() {
             const container = document.getElementById('checkoutItems');
-            container.innerHTML = '';
+            container.innerHTML = '<p style="text-align:center; padding: 20px;"><i class="fas fa-spinner fa-spin mr-2"></i> Menyiapkan pesanan...</p>';
             
-            items.forEach((item, index) => {
-                let hargaFinal = item.harga; let infoGrosirHTML = '';
-                if (item.wholesale_price && item.wholesale_min_qty && item.qty >= item.wholesale_min_qty) {
-                    hargaFinal = item.wholesale_price; 
-                    infoGrosirHTML = `<div class="grosir-badge"><i class="fas fa-tags"></i> Harga Grosir Aktif!</div>`;
-                    item.hargaAwalDicoret = item.harga;
-                } else { item.hargaAwalDicoret = null; }
+            try {
+                const res = await fetch('/api/checkout-session', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+
+                if(!result.success || !result.data) { window.location.href = 'dashboardutama.html'; return; }
                 
-                item.hargaTerpakai = hargaFinal; 
-                subtotal += (hargaFinal * item.qty);
-                let beratPerBarang = item.weight ? item.weight : 1000; 
-                totalBeratGram += (beratPerBarang * item.qty);
-                const tampilanHargaCorek = infoGrosirHTML ? `<span class="harga-coret">${formatRp(item.harga)}</span>` : '';
-                container.innerHTML += `
-                    <div class="product-item">
-                        <img src="${item.foto}" alt="Foto">
-                        <div class="product-detail">
-                            <h4>${item.nama}</h4>
-                            <span class="price">${formatRp(hargaFinal)} ${tampilanHargaCorek}</span>
-                            ${infoGrosirHTML}
+                items = JSON.parse(result.data);
+                if(items.length === 0) { window.location.href = 'dashboardutama.html'; return; }
+
+                subtotal = 0; totalBeratGram = 0;
+                container.innerHTML = '';
+                
+                items.forEach((item, index) => {
+                    let hargaFinal = item.harga; let infoGrosirHTML = '';
+                    if (item.wholesale_price && item.wholesale_min_qty && item.qty >= item.wholesale_min_qty) {
+                        hargaFinal = item.wholesale_price; 
+                        infoGrosirHTML = `<div class="grosir-badge"><i class="fas fa-tags"></i> Harga Grosir Aktif!</div>`;
+                        item.hargaAwalDicoret = item.harga;
+                    } else { item.hargaAwalDicoret = null; }
+                    
+                    item.hargaTerpakai = hargaFinal; 
+                    subtotal += (hargaFinal * item.qty);
+                    let beratPerBarang = item.weight ? item.weight : 1000; 
+                    totalBeratGram += (beratPerBarang * item.qty);
+                    const tampilanHargaCorek = infoGrosirHTML ? `<span class="harga-coret">${formatRp(item.harga)}</span>` : '';
+                    container.innerHTML += `
+                        <div class="product-item">
+                            <img src="${item.foto}" alt="Foto">
+                            <div class="product-detail">
+                                <h4>${item.nama}</h4>
+                                <span class="price">${formatRp(hargaFinal)} ${tampilanHargaCorek}</span>
+                                ${infoGrosirHTML}
+                            </div>
+                            <div class="qty-control-checkout">
+                                <button onclick="ubahQtyCheckout(${index}, -1)">-</button>
+                                <input type="text" value="${item.qty}" readonly>
+                                <button onclick="ubahQtyCheckout(${index}, 1)">+</button>
+                            </div>
                         </div>
-                        <div class="qty-control-checkout">
-                            <button onclick="ubahQtyCheckout(${index}, -1)">-</button>
-                            <input type="text" value="${item.qty}" readonly>
-                            <button onclick="ubahQtyCheckout(${index}, 1)">+</button>
-                        </div>
-                    </div>
-                `;
-            });
-            let totalKg = Math.ceil(totalBeratGram / 1000); if(totalKg === 0) totalKg = 1;
-            document.getElementById('infoBeratLayar').innerText = `Total: ${totalKg} kg (${totalBeratGram} gr)`;
-            hitungTotal();
+                    `;
+                });
+                let totalKg = Math.ceil(totalBeratGram / 1000); if(totalKg === 0) totalKg = 1;
+                document.getElementById('infoBeratLayar').innerText = `Total: ${totalKg} kg (${totalBeratGram} gr)`;
+                hitungTotal();
+            } catch(e) {
+                container.innerHTML = '<p style="text-align:center; color:red; padding: 20px;">Gagal memuat data checkout.</p>';
+            }
         }
 
-        window.ubahQtyCheckout = function(index, delta) {
+        // ✅ PERUBAHAN 2: UPDATE SESSIONS DATABASE SECARA REAL-TIME
+        window.ubahQtyCheckout = async function(index, delta) {
             items[index].qty += delta;
             if(items[index].qty <= 0) items.splice(index, 1);
-            if(items.length === 0) { sessionStorage.removeItem('belidikita_checkout'); window.location.href = 'dashboardutama.html'; return; }
-            sessionStorage.setItem('belidikita_checkout', JSON.stringify(items));
-            loadCheckoutItems(); resetOngkir(); 
+            
+            if(items.length === 0) { 
+                await fetch('/api/checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ items_json: '[]' }) });
+                window.location.href = 'dashboardutama.html'; 
+                return; 
+            }
+            
+            // Simpan perubahan ke Database
+            await fetch('/api/checkout-session', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ items_json: JSON.stringify(items) })
+            });
+
+            loadCheckoutItems(); 
+            resetOngkir(); 
         }
 
         function resetOngkir() {
@@ -461,13 +486,9 @@
             document.getElementById('txtTotalAkhir').innerText = formatRp(totalAkhir);
             document.getElementById('bottomTotal').innerText = formatRp(totalAkhir);
             
-            // Update tagihan di layar tunggu
             document.getElementById('tagihanFinal').innerText = formatRp(totalAkhir);
         }
 
-        // ==========================================
-        // ✅ LOGIKA PENYIMPANAN DAN COUNTDOWN TIMER
-        // ==========================================
         document.getElementById('btnBuatPesanan').addEventListener('click', async () => {
             if(userInfo.wa === "-") { document.getElementById('modalConfirmAddress').style.display = 'flex'; return; }
             const shippingSelected = document.querySelector('input[name="shipping"]:checked');
@@ -490,7 +511,6 @@
             };
 
             try {
-                // 1. SIMPAN KE DATABASE DULU
                 const res = await fetch('/api/orders', {
                     method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                     body: JSON.stringify(orderPayload)
@@ -498,7 +518,6 @@
                 const dbResult = await res.json();
 
                 if(dbResult.success) {
-                    // 2. GENERATE PESAN WA (TAPI JANGAN DIKIRIM DULU)
                     pesanWAKonfirmasi = `*INVOICE PESANAN BARU* 🛒\n*ID Pesanan:* #ORD-${dbResult.order_id}\n\n`;
                     pesanWAKonfirmasi += `*Data Penerima:*\nLabel: ${userInfo.label}\nNama: ${userInfo.nama}\nNo WA: ${userInfo.wa}\nAlamat: ${userInfo.alamat}\n\n`;
                     pesanWAKonfirmasi += `*Daftar Barang:*\n`;
@@ -514,16 +533,14 @@
                     pesanWAKonfirmasi += `*TOTAL TAGIHAN: ${formatRp(totalAkhir)}*\n\n`;
                     pesanWAKonfirmasi += `Mohon info nomor rekening / barcode pembayarannya ya Admin. Terima kasih!`;
 
-                    // Bersihkan keranjang
-                    sessionStorage.removeItem('belidikita_checkout'); 
-                    sessionStorage.removeItem('belidikita_cart'); 
+                    // ✅ PERUBAHAN 3: BERSIHKAN KERANJANG SERVER SETELAH CHECKOUT SUKSES
+                    await fetch('/api/checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ items_json: '[]' }) });
+                    await fetch('/api/cart/clear/all', { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
 
-                    // 3. SEMBUNYIKAN LAYAR CHECKOUT, MUNCULKAN LAYAR TUNGGU TIMER
                     document.getElementById('screenCheckout').style.display = 'none';
                     document.getElementById('screenPembayaran').style.display = 'flex';
-                    window.scrollTo(0,0); // Pindah ke atas
+                    window.scrollTo(0,0); 
 
-                    // 4. MULAI COUNTDOWN 10 MENIT
                     mulaiCountdown(10); 
                 }
             } catch(err) {
@@ -532,7 +549,6 @@
             }
         });
 
-        // FUNGSI TIMER (10 Menit Mundur)
         function mulaiCountdown(menit) {
             let waktuDetik = menit * 60;
             const textTimer = document.getElementById('countdownTimer');
@@ -563,29 +579,23 @@
             }, 1000);
         }
 
-        // ✅ LOGIKA BARU: KETIKA TOMBOL WA DITEKAN
         window.kirimKeWA = function() {
             if(!pesanWAKonfirmasi) return;
             const nomorAdmin = "6282240400388"; 
             const linkWA = `https://wa.me/${nomorAdmin}?text=${encodeURIComponent(pesanWAKonfirmasi)}`;
             
-            // 1. Buka WA di Tab Baru agar toko web kita tidak tertutup
             window.open(linkWA, '_blank');
             
-            // 2. BIARKAN HALAMAN INI TETAP PADA TIMER (Agar pembeli bisa lihat Total Nominal transfer)
-            // Ubah saja tombol WA-nya menjadi tombol konfirmasi
             const btnWA = document.getElementById('btnLanjutWA');
             btnWA.innerHTML = '<i class="fas fa-check-circle" style="font-size: 22px;"></i> Saya Sudah Transfer & WA Admin';
             btnWA.style.background = "#0D47A1"; 
             btnWA.style.boxShadow = "0 5px 15px rgba(13, 71, 161, 0.4)";
             
-            // 3. Jika tombol biru ini diklik lagi, langsung bawa ke profil pesanan
             btnWA.onclick = function() {
                 window.location.href = 'registrasi/profilpembeli.html';
             };
         }
 
-        // JIKA MAU KELUAR DARI RUANG TUNGGU (TANPA KE WA)
         window.batalDariRuangTunggu = function() {
             window.location.href = 'registrasi/profilpembeli.html';
         }
@@ -596,6 +606,8 @@
         }
 
         inisialisasiCheckout();
+                      
+
     </script>
 </body>
 </html>
