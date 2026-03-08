@@ -673,6 +673,62 @@
             }
         };
 
+                // ==================================================
+        // ✅ SINKRONISASI FOTO PROFIL TOKO KE SEMUA CHAT & INBOX
+        // ==================================================
+        function tampilkanFotoProfilToko() {
+            try {
+                // Ambil data dari penyimpanan browser (Setting Toko)
+                const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
+                
+                if (storeData && storeData.logo) {
+                    // Buat elemen gambar dengan ukuran pas dan membulat
+                    const imgTag = `<img src="${storeData.logo}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; border: none; outline: none;">`;
+                    
+                    // 1. Ubah logo di daftar Kotak Masuk (Inbox)
+                    document.querySelectorAll('.inbox-avatar').forEach(el => {
+                        el.innerHTML = imgTag;
+                    });
+                    
+                    // 2. Ubah logo di header Chat (Toko, Detail, Search)
+                    document.querySelectorAll('.store-avatar-chat').forEach(el => {
+                        el.innerHTML = imgTag;
+                        el.style.background = "transparent"; // Hilangkan warna background default
+                    });
+                    
+                    // 3. Ubah logo di header Chat (Khusus Dashboard Utama)
+                    const dashboardChatAdmin = document.querySelector('#modalChatAdmin .store-avatar');
+                    if(dashboardChatAdmin) {
+                        dashboardChatAdmin.innerHTML = imgTag;
+                        dashboardChatAdmin.style.background = "transparent";
+                    }
+
+                    // 4. Pastikan juga nama toko di Inbox ikut update (jika ada)
+                    if(storeData.nama) {
+                        document.querySelectorAll('#namaTokoInbox').forEach(el => {
+                            el.innerText = storeData.nama;
+                        });
+                    }
+                }
+            } catch(e) {
+                console.log("Gagal memuat foto profil toko: ", e);
+            }
+        }
+
+        // Eksekusi fungsi saat halaman dimuat
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(tampilkanFotoProfilToko, 300); // Jeda sedikit agar elemen HTML siap
+        });
+
+        // (Khusus toko.html) Jika tombol simpan setting ditekan, langsung update foto chat!
+        const tombolSimpanSetting = document.getElementById('btnSimpanSettingToko');
+        if (tombolSimpanSetting) {
+            tombolSimpanSetting.addEventListener('click', () => {
+                setTimeout(tampilkanFotoProfilToko, 1000); 
+            });
+        }
+
+
     </script>
 </body>
 </html>
