@@ -541,12 +541,11 @@
             if(typeof muatRiwayatChatToko === 'function') muatRiwayatChatToko();
         };
 
-                    // ✅ 2. FUNGSI TUTUP CHAT (MURNI TOMBOL BACK)
-        window.tutupChatToko = function() {
-            // HANYA suruh browser mundur 1 langkah (sinkron dengan tombol fisik HP)
-            // Biarkan fungsi Popstate di bawah yang otomatis mematikan layarnya
+                           window.tutupChatToko = function() {
+            // Karena sudah pakai pushState di atas, cukup mundur 1 langkah
             window.history.back(); 
         };
+
 
         async function muatRiwayatChatToko() {
             const token = localStorage.getItem('token');
@@ -824,8 +823,7 @@
         // Panggil badge saat halaman dimuat
         document.addEventListener("DOMContentLoaded", updateBadgeKeranjang);
 
-        // Fungsi bypass Inbox dan masuk ke Chat Room
-        window.bukaChatTokoLangsung = function() {
+                window.bukaChatTokoLangsung = function() {
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) {
                 showToast("Silakan login pembeli dulu untuk chat!", "error");
@@ -833,18 +831,22 @@
                 return;
             }
             
-            // Sembunyikan inbox (jika tadinya terbuka) dan langsung buka modal chat
+            const chatModal = document.getElementById('modalChatToko');
+            if (chatModal.style.display === 'flex') return; // Cegah klik dobel
+            
             const modalInbox = document.getElementById('modalInbox');
             if (modalInbox) modalInbox.style.display = 'none';
             
-            document.getElementById('modalChatToko').style.display = 'flex';
+            chatModal.style.display = 'flex';
             
-            // Panggil riwayat
+            // INI KUNCI ANTI NYASARNYA:
+            window.history.pushState({ modal: 'chat_langsung' }, "", window.location.href); 
+            
             if(typeof muatRiwayatChatToko === 'function') {
                 muatRiwayatChatToko();
             }
         };
-        
+
             
                // ==================================================
         // ✅ PENGENDALI TOMBOL BACK FISIK HP (POPSTATE SUPER KETAT)
