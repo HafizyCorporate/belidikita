@@ -189,7 +189,8 @@
         </div>
 
         
-        <div class="header-admin" id="btnChatAdmin" style="cursor: pointer; font-size: 20px; color: #0D47A1; margin-right: 12px; position: relative;" onclick="window.bukaInbox()">
+        
+                <div class="header-admin" id="btnChatAdmin" style="cursor: pointer; font-size: 20px; color: #0D47A1; margin-right: 12px; position: relative;" onclick="window.location.href='inbox.html'">
             <i class="fas fa-envelope"></i>
             <span style="position: absolute; top: -5px; right: -5px; background: #ff3b30; width: 8px; height: 8px; border-radius: 50%;"></span>
         </div>
@@ -295,53 +296,7 @@
         </div>
         <div id="kontenPesananLayar" style="padding: 0 15px 15px 15px;"></div>
     </div>
-
-    <div id="modalInbox" class="layar-penuh" style="background:#f4f7fa; z-index: 5500;">
-        <div class="katalog-header" style="border-bottom:1px solid #E1F5FE;">
-            <i class="fas fa-arrow-left" onclick="document.getElementById('modalInbox').style.display='none'"></i>
-            <h2 style="font-size: 16px;">Chat Toko</h2>
-        </div>
-        <div id="inboxList" style="padding-top: 10px;">
-            <div class="inbox-item" onclick="window.bukaRuangChat()">
-                <div class="inbox-avatar"><i class="fas fa-store"></i></div>
-                <div class="inbox-content">
-                    <div class="inbox-name">Belidikita Official</div>
-                    <div class="inbox-preview" id="inboxLastMsg">Memuat pesan terakhir...</div>
-                </div>
-                <div class="inbox-time" id="inboxLastTime">Sekarang</div>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalChatAdmin" class="chat-toko-modal" style="z-index: 6000;">
-        <div class="chat-toko-header">
-            <i class="fas fa-arrow-left btn-back" id="closeChatAdmin" onclick="window.tutupChatAdmin()"></i>
-            <div class="store-profile">
-                <div class="store-avatar"><i class="fas fa-store"></i></div>
-                <div>
-                    <h2 style="font-size: 14px; font-weight: 800; color: #333; margin: 0;">Belidikita Official</h2>
-                    <span style="font-size: 10px; color: #00AA5B;"><i class="fas fa-circle"></i> Online (Admin)</span>
-                </div>
-            </div>
-        </div>
-        <div class="chat-toko-body" id="chatAdminBody" style="background:#f4f9ff;">
-            <div class="chat-msg-store">Halo kak! Ada yang bisa dibantu terkait pesanan? 😊</div>
-        </div>
-        <div class="chat-toko-footer" style="flex-wrap: wrap; padding: 10px;">
-            <div id="chatImagePreviewContainer" style="display:none; width: 100%; margin-bottom: 10px; align-items: center; background: #f4f7fa; padding: 5px 10px; border-radius: 10px;">
-                <span style="font-size: 11px; color: #888;">Lampiran: </span>
-                <img id="chatImagePreview" style="height: 40px; border-radius: 5px; margin-left: 10px; border: 1px solid #ddd;">
-                <i class="fas fa-times-circle" style="color: #ff3b30; cursor: pointer; margin-left: 10px; font-size: 16px;" onclick="window.batalChatImage()"></i>
-            </div>
-            
-            <div style="display: flex; gap: 10px; align-items: center; width: 100%;">
-                <input type="file" id="chatAdminImage" accept="image/*" style="display: none;" onchange="window.previewChatImage(this)">
-                <label for="chatAdminImage" style="cursor: pointer; color: #00AA5B; font-size: 22px; margin: 0;"><i class="fas fa-image"></i></label>
-               <input type="text" id="chatAdminInput" enterkeyhint="send" placeholder="Ketik laporan/pesan..." onkeydown="if(event.key === 'Enter') { event.preventDefault(); window.kirimChatAdmin(); }" style="flex:1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 20px; outline: none; font-size: 13px;">
-                <button id="btnKirimAdmin" style="background:#0D47A1; width: 40px; height: 40px; border-radius: 50%; border: none; color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="window.kirimChatAdmin()"><i class="fas fa-paper-plane"></i></button>
-            </div>
-        </div>
-    </div>
+ 
 
     <div id="aiChatModal" class="chat-toko-modal" style="z-index: 6000;">
         <div class="chat-toko-header">
@@ -794,139 +749,6 @@
         };
 
 
-        window.bukaInbox = function() {
-            const token = localStorage.getItem('token');
-            if (!token || token.startsWith('token-admin-')) {
-                showToast("Silakan login dulu untuk melihat pesan!", "error");
-                setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
-                return;
-            }
-            
-            document.getElementById('modalInbox').style.display = 'flex';
-            window.history.pushState({ page: 'inbox' }, "", "");
-            
-            fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } })
-                .then(res => res.json())
-                .then(result => {
-                    const previewText = document.getElementById('inboxLastMsg');
-                    const timeText = document.getElementById('inboxLastTime');
-                    if(result.success && result.data.length > 0) {
-                        const lastMsg = result.data[result.data.length - 1];
-                        previewText.innerText = lastMsg.sender_role === 'admin' ? `Admin: ${lastMsg.message}` : `Anda: ${lastMsg.message}`;
-                        const d = new Date(lastMsg.created_at);
-                        timeText.innerText = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-                    } else {
-                        previewText.innerText = "Belum ada percakapan";
-                        timeText.innerText = "";
-                    }
-                }).catch(e => {
-                    document.getElementById('inboxLastMsg').innerText = "Gagal memuat";
-                });
-        };
-
-        window.bukaRuangChat = function() {
-            document.getElementById('modalInbox').style.display = 'none';
-            document.getElementById('modalChatAdmin').style.display = 'flex';
-            window.history.pushState({ page: 'chat_admin' }, "", "");
-            
-            const token = localStorage.getItem('token');
-            fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } })
-                .then(res => res.json())
-                .then(result => {
-                    const chatAdminBody = document.getElementById('chatAdminBody');
-                    if(result.success && result.data.length > 0) {
-                        chatAdminBody.innerHTML = '';
-                        result.data.forEach(msg => {
-                            let isUser = msg.sender_role === 'pembeli';
-                            let cssClass = isUser ? 'chat-msg-user' : 'chat-msg-store';
-                            let labelToko = msg.sender_role === 'admin' ? '<br><small style="color:#0D47A1; font-weight:bold;">- Admin -</small>' : '';
-                            chatAdminBody.innerHTML += `<div class="${cssClass}">${msg.message} ${labelToko}</div>`;
-                        });
-                    } else {
-                        chatAdminBody.innerHTML = `<div class="chat-msg-store">Halo kak! Ada yang bisa dibantu terkait pesanan? 😊</div>`;
-                    }
-                    chatAdminBody.scrollTop = chatAdminBody.scrollHeight;
-                });
-        };
-
-        window.tutupChatAdmin = function() {
-            document.getElementById('modalChatAdmin').style.display = 'none';
-            window.bukaInbox(); 
-        };
-
-        window.chatBase64Image = null;
-
-        window.previewChatImage = function(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    window.chatBase64Image = e.target.result; 
-                    document.getElementById('chatImagePreview').src = e.target.result;
-                    document.getElementById('chatImagePreviewContainer').style.display = 'flex';
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        };
-
-        window.batalChatImage = function() {
-            document.getElementById('chatAdminImage').value = '';
-            window.chatBase64Image = null;
-            document.getElementById('chatImagePreviewContainer').style.display = 'none';
-            document.getElementById('chatImagePreview').src = '';
-        };
-
-        window.kirimChatAdmin = async function() {
-            const chatAdminInput = document.getElementById('chatAdminInput');
-            const chatAdminBody = document.getElementById('chatAdminBody');
-            const teks = chatAdminInput.value.trim();
-            
-            if(!teks && !window.chatBase64Image) return; 
-            const token = localStorage.getItem('token');
-
-            let finalMessage = teks;
-            if(window.chatBase64Image) {
-                finalMessage += `<br><img src="${window.chatBase64Image}" style="max-width: 100%; border-radius: 8px; margin-top: 5px; border: 1px solid #ddd;">`;
-            }
-
-            chatAdminBody.innerHTML += `<div class="chat-msg-user">${finalMessage}</div>`;
-            chatAdminInput.value = '';
-            window.batalChatImage(); 
-            chatAdminBody.scrollTop = chatAdminBody.scrollHeight;
-
-            try {
-                await fetch('/api/chat/save', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
-                    body: JSON.stringify({ message: finalMessage, sender: 'pembeli' }) 
-                });
-
-                if(!window.sudahDapatAutoReply) {
-                    window.sudahDapatAutoReply = true; 
-                    const idKetik = "ketik-" + Date.now();
-                    chatAdminBody.innerHTML += `<div class="chat-msg-store" id="${idKetik}"><i class="fas fa-ellipsis-h fa-fade"></i> Admin sedang melihat laporan...</div>`;
-                    chatAdminBody.scrollTop = chatAdminBody.scrollHeight;
-
-                    setTimeout(async () => {
-                        const elemenKetik = document.getElementById(idKetik);
-                        if(elemenKetik) elemenKetik.remove();
-
-                        const autoReplyMsg = localStorage.getItem('belidikita_autoreply') || "Halo Kak! Terima kasih atas laporannya. Admin akan segera mengecek dan membalas pesan ini. Mohon ditunggu sebentar ya! 😊";
-                        
-                        chatAdminBody.innerHTML += `<div class="chat-msg-store">${autoReplyMsg}</div>`;
-                        chatAdminBody.scrollTop = chatAdminBody.scrollHeight;
-
-                        await fetch('/api/chat/save', { 
-                            method: 'POST', 
-                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
-                            body: JSON.stringify({ message: autoReplyMsg, sender: 'admin' }) 
-                        });
-                    }, 2000); 
-                }
-            } catch(e) {
-                console.log("Chat tersendat:", e);
-            }
-        };
-
         window.bukaChatAI = function() {
             document.getElementById('aiChatModal').style.display = 'flex';
             window.history.pushState({ page: 'chat_ai' }, "", "");
@@ -972,7 +794,7 @@
             aiBody.scrollTop = aiBody.scrollHeight;
         };
 
-        document.addEventListener("DOMContentLoaded", () => {
+                document.addEventListener("DOMContentLoaded", () => {
             window.history.pushState({ page: 'home' }, "", "");
 
             window.addEventListener('popstate', function(event) {
@@ -984,14 +806,6 @@
                 } 
                 if(document.getElementById('pesananLayarPenuh').style.display === 'flex') {
                     document.getElementById('pesananLayarPenuh').style.display = 'none';
-                    isModalOpen = true;
-                } 
-                if(document.getElementById('modalChatAdmin').style.display === 'flex') {
-                    document.getElementById('modalChatAdmin').style.display = 'none';
-                    isModalOpen = true;
-                } 
-                if(document.getElementById('modalInbox').style.display === 'flex') {
-                    document.getElementById('modalInbox').style.display = 'none';
                     isModalOpen = true;
                 } 
                 if(document.getElementById('aiChatModal').style.display === 'flex') {
