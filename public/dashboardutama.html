@@ -547,18 +547,19 @@
             printWindow.document.write(`<html><body style="font-family:Arial; padding:20px; text-align:center;"><h2>LABEL RETUR</h2><p>PESANAN: #ORD-${order.id}</p><p>Kirim balik ke: Belidikita Official (082240400388)</p><p>Alamat: Padalarang, Bandung Barat</p><script>window.onload=function(){window.print();}<\/script></body></html>`);
             printWindow.document.close();
         };
-
-        // ✅ LEMPAR PENCARIAN & FILTER LANGSUNG KE SEARCH.HTML (MESKIPUN KOTAK KOSONG)
+                // ✅ 1. FUNGSI PENCARIAN & FILTER KE SEARCH.HTML
         window.lakukanPencarianPintar = function(keyword) {
-            let kw = keyword ? keyword.trim() : ''; 
-            
-            // Ambil filter dropdown jika user pakai titik tiga
+            showToast("Mengarahkan ke Pencarian...", "info"); // Notif biar gak dikira mati
+
+            let keywordAman = keyword || ''; 
             let sortVal = document.getElementById('dashSort') ? document.getElementById('dashSort').value : 'terbaru';
             let tokoVal = document.getElementById('dashToko') ? document.getElementById('dashToko').value : '';
             let lokasiVal = document.getElementById('dashLokasi') ? document.getElementById('dashLokasi').value : '';
             
-            // Perintah langsung terbang ke search.html
-            window.location.href = `search.html?q=${encodeURIComponent(kw)}&sort=${sortVal}&toko=${tokoVal}&lokasi=${lokasiVal}`;
+            let url = `search.html?q=${encodeURIComponent(keywordAman.trim())}&sort=${sortVal}&toko=${tokoVal}&lokasi=${lokasiVal}`;
+            
+            // Paksa pindah halaman setelah 0.5 detik (Biar gak nyangkut)
+            setTimeout(() => { window.location.assign(url); }, 500);
         };
 
         window.bukaSubKategori = function(mainCat) {
@@ -597,16 +598,23 @@
             document.body.style.overflow = 'auto'; 
         };
 
-        // ✅ LEMPAR KLIK SUB-KATEGORI KE SEARCH.HTML
+                // ✅ 2. FUNGSI KLIK KATEGORI KE SEARCH.HTML
         window.saringProdukLangsung = function(mainCat, subCat) {
-            window.tutupSubKategori(); // Tutup dulu jendela pop-up kategorinya
+            showToast(`Membuka etalase ${subCat}...`, "info"); // Notif
+
+            window.tutupSubKategori(); // Tutup laci
             
+            let url = 'search.html?';
             if (subCat === 'Semua') {
-                window.location.href = 'search.html?category=' + encodeURIComponent(mainCat);
+                url += `category=${encodeURIComponent(mainCat)}`;
             } else {
-                window.location.href = 'search.html?q=' + encodeURIComponent(subCat) + '&category=' + encodeURIComponent(mainCat);
+                url += `q=${encodeURIComponent(subCat)}&category=${encodeURIComponent(mainCat)}`;
             }
+            
+            // Paksa pindah halaman setelah 0.5 detik
+            setTimeout(() => { window.location.assign(url); }, 500);
         };
+
 
         window.bukaChatAI = function() {
             document.getElementById('aiChatModal').style.display = 'flex';
