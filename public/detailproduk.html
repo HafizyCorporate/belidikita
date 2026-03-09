@@ -50,7 +50,6 @@
         .cart-wrapper { position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;}
         .cart-badge-detail { position: absolute; top: -5px; right: -8px; background: #ff3b30; color: #fff; font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 10px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(255,59,48,0.5);}
 
-        /* Jarak top margin ditambahkan agar gambar tidak tertutup header */
         .slider-container { width: 100%; position: relative; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.05); z-index: 10; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; overflow: hidden; min-height: 300px; display: flex; align-items: center; justify-content: center; margin-top: 65px;}
         .product-image-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; aspect-ratio: 1/1; width: 100%;}
         .product-image-slider::-webkit-scrollbar { display: none; }
@@ -63,13 +62,6 @@
         .content-wrapper { position: relative; z-index: 10; max-width: 600px; margin: 0 auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
         .glass-box { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); padding: 18px; border-radius: 20px; box-shadow: 0 8px 25px rgba(13, 71, 161, 0.08); border: 2px solid #fff; animation: fadeUp 0.5s ease forwards; opacity: 0; transform: translateY(20px); }
         
-        .glass-box:nth-child(1) { animation-delay: 0.1s; }
-        .glass-box:nth-child(2) { animation-delay: 0.2s; }
-        .glass-box:nth-child(3) { animation-delay: 0.3s; }
-        .glass-box:nth-child(4) { animation-delay: 0.4s; }
-        .glass-box:nth-child(5) { animation-delay: 0.5s; }
-        .glass-box:nth-child(6) { animation-delay: 0.6s; }
-        .glass-box:nth-child(7) { animation-delay: 0.7s; }
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
         .price-share-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
@@ -95,7 +87,7 @@
         .v-opt.habis { background: #eee; border-color: #ddd; color: #aaa; cursor: not-allowed; text-decoration: line-through; }
 
         .store-box { display: flex; align-items: center; gap: 12px; }
-        .store-avatar { width: 45px; height: 45px; background: linear-gradient(135deg, #FF9800, #FFD700); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 20px; box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3); }
+        .store-avatar { width: 45px; height: 45px; background: linear-gradient(135deg, #FF9800, #FFD700); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: #fff; font-size: 20px; box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3); overflow: hidden;}
         .store-info { display: flex; flex-direction: column; }
         .store-info h4 { font-size: 14px; font-weight: 800; color: #0D47A1; margin-bottom: 2px; }
         .store-info span { font-size: 10px; font-weight: 800; color: #00AA5B; background: #E8F5E9; padding: 2px 6px; border-radius: 4px; display: inline-block; width: fit-content; }
@@ -121,7 +113,6 @@
         .similar-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; scroll-behavior: smooth; }
         .similar-scroll::-webkit-scrollbar { display: none; }
         
-        /* ✅ PERBAIKAN UKURAN KARTU REKOMENDASI AGAR SAMA RATA */
         .sim-card { min-width: 140px; max-width: 140px; background: #fff; border: 2px solid #E1F5FE; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; }
         .sim-card:active { transform: scale(0.95); }
         .sim-card img { width: 100%; aspect-ratio: 1/1; height: 140px; object-fit: cover; border-bottom: 1px solid #E1F5FE; }
@@ -129,7 +120,6 @@
         .sim-info h5 { font-size: 11px; font-weight: 700; color: #0D47A1; margin-bottom: 6px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
         .sim-info span { font-size: 13px; font-weight: 800; color: #FF9800; }
 
-        /* ✅ FULLSCREEN SLIDER MANUAL */
         .fullscreen-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
         .close-fullscreen { position: absolute; top: 20px; right: 20px; color: #333; background: #fff; font-size: 24px; font-weight: bold; cursor: pointer; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.2s; z-index: 10002;}
         .close-fullscreen:active { transform: scale(0.9); }
@@ -141,14 +131,12 @@
         .fs-dot { width: 8px; height: 8px; background: rgba(255,255,255,0.4); border-radius: 50%; transition: 0.3s; }
         .fs-dot.active { background: #fff; width: 20px; border-radius: 10px; }
 
-        /* ✅ TOMBOL KERANJANG DIANGKAT KE ATAS NAVBAR (bottom: 65px) */
         .bottom-action-bar { position: fixed; bottom: 65px; left: 0; width: 100%; height: 70px; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); display: flex; box-shadow: 0 -5px 25px rgba(13, 71, 161, 0.15); z-index: 100; border-top: 1px solid #E1F5FE; border-radius: 20px 20px 0 0; padding: 10px 15px; gap: 10px; }
         .btn-add-cart { flex: 1; background: #E1F5FE; color: #0D47A1; border: 2px solid #81D4FA; border-radius: 12px; font-size: 12px; font-weight: 800; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;}
         .btn-add-cart:active { transform: scale(0.95); }
         .btn-buy-now { flex: 1.5; background: linear-gradient(135deg, #FF9800, #F57C00); color: #fff; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer; box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); text-transform: uppercase; transition: 0.2s;}
         .btn-buy-now:active { transform: scale(0.95); }
 
-        /* ✅ CSS NAVBAR BAWAH (Sama seperti Dashboard) */
         nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -5px 25px rgba(0, 105, 92, 0.15); z-index: 1000; border-top: 1px solid #E8F5E9;}
         .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 10px; font-weight: 700; transition: 0.3s; position: relative; width: 60px;}
         .nav-item i { font-size: 20px; margin-bottom: 4px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -156,26 +144,6 @@
         .nav-item.active i { transform: translateY(-5px) scale(1.1); color: #00AA5B; }
         .nav-item.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background: #00AA5B; border-radius: 50%; }
         .nav-item:active i { transform: scale(0.8); }
-
-
-         /* ✅ CSS MODAL INBOX & CHAT (DIPERBAIKI) */
-        .inbox-modal-container, .chat-toko-modal { display: none; position: fixed; z-index: 8500; left: 0; top: 0; right: 0; bottom: 0; background: #f4f7fa; flex-direction: column; animation: slideInRight 0.3s ease; }
-        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        
-        .chat-toko-header, .inbox-header { background: #fff; padding: 15px 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100;}
-        .chat-toko-header i, .inbox-header i { font-size: 20px; color: #0D47A1; cursor: pointer; transition: 0.2s; }
-        .chat-toko-header i:active, .inbox-header i:active { transform: scale(0.8); }
-        .inbox-header h2 { font-size: 16px; font-weight: 800; color: #0D47A1; margin: 0; }
-        
-        .chat-toko-header .store-profile { display: flex; align-items: center; gap: 10px; flex: 1; }
-        .chat-toko-header .store-avatar-chat { width: 35px; height: 35px; background: #0D47A1; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; overflow: hidden; }
-        .chat-toko-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        .chat-msg-store { background: #fff; color: #333; padding: 12px 15px; border-radius: 15px 15px 15px 0; max-width: 80%; align-self: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 13px; line-height: 1.5; border: 1px solid #eee; }
-        .chat-msg-user { background: #E1F5FE; color: #0D47A1; padding: 12px 15px; border-radius: 15px 15px 0 15px; max-width: 80%; align-self: flex-end; box-shadow: 0 2px 5px rgba(13, 71, 161, 0.1); font-size: 13px; line-height: 1.5; }
-        .chat-toko-footer { background: #fff; padding: 10px 15px; display: flex; gap: 10px; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .chat-toko-footer input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 20px; background: #f4f7fa; outline: none; font-size: 13px; font-family: 'Montserrat', sans-serif;}
-        .chat-toko-footer button { background: #FF9800; color: #fff; width: 40px; height: 40px; border-radius: 50%; border: none; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-
 
         #customToast { visibility: hidden; min-width: 280px; margin-left: -140px; background: rgba(13, 71, 161, 0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 9999; left: 50%; bottom: -50px; font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; }
         #customToast.show { visibility: visible; opacity: 1; bottom: 90px; }
@@ -199,7 +167,7 @@
         </div>
         
         <div class="header-icons">
-            <i class="fas fa-envelope" onclick="bukaChatToko()"></i>
+            <i class="fas fa-envelope" onclick="window.location.href='inbox.html'"></i>
             <div class="cart-wrapper" onclick="window.location.href='keranjang.html'">
                 <i class="fas fa-shopping-cart"></i>
                 <span class="cart-badge-detail" id="badgeKeranjang">0</span>
@@ -269,7 +237,7 @@
             </div>
         </div>
 
-               <div class="glass-box store-box">
+        <div class="glass-box store-box">
             <div class="store-avatar" id="displayStoreAvatarDetail"><i class="fas fa-store"></i></div>
             <div class="store-info">
                 <h4 id="namaTokoAsli">Toko Belidikita</h4>
@@ -304,27 +272,6 @@
         <button class="btn-buy-now" id="btnBeliLangsung">BELI SEKARANG <i class="fas fa-bolt ml-1"></i></button>
     </div>
 
-    <div id="modalChatToko" class="chat-toko-modal">
-        <div class="chat-toko-header">
-            <i class="fas fa-arrow-left btn-back" onclick="tutupChatToko()"></i>
-            <div class="store-profile">
-                <div class="store-avatar-chat"><i class="fas fa-store"></i></div>
-                <div>
-                    <h2 style="font-size: 14px; font-weight: 800; color: #333; margin: 0;">Belidikita Official</h2>
-                    <span style="font-size: 10px; color: #00AA5B;"><i class="fas fa-circle"></i> Online</span>
-                </div>
-            </div>
-        </div>
-        <div class="chat-toko-body" id="chatTokoBody">
-            <div class="chat-msg-store">Halo kak! Ada yang bisa dibantu mengenai produk ini? 😊</div>
-        </div>
-        
-                <div class="chat-toko-footer">
-            <input type="text" id="chatTokoInput" enterkeyhint="send" placeholder="Ketik pesan..." onkeydown="if(event.key === 'Enter') { event.preventDefault(); kirimChatToko(); }">
-            <button onclick="kirimChatToko()"><i class="fas fa-paper-plane"></i></button>
-        </div>
-    </div>
-
     <nav id="bottomNav">
         <a href="dashboardutama.html" class="nav-item">
             <i class="fas fa-mosque"></i><span>Beranda</span>
@@ -340,24 +287,6 @@
         </a>
     </nav>
     
-            <div id="modalInbox" class="inbox-modal-container">
-        <div class="inbox-header">
-            <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
-            <h2>Kotak Masuk</h2>
-        </div>
-        <div id="inboxList" style="flex: 1; overflow-y: auto; padding-top: 5px;">
-            <div onclick="window.bukaRuangChat()" style="display: flex; align-items: center; gap: 15px; padding: 15px 20px; border-bottom: 1px solid #eee; cursor: pointer; background: #fff;">
-                <div class="inbox-avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #0D47A1; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; flex-shrink: 0;"><i class="fas fa-store"></i></div>
-                <div style="flex: 1; overflow: hidden;">
-                    <div style="font-size: 14px; font-weight: 800; color: #333; margin-bottom: 4px;" id="namaTokoInbox">Belidikita Official</div>
-                    <div id="inboxLastMsg" style="font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600;">Memuat pesan terakhir...</div>
-                </div>
-                <div id="inboxLastTime" style="font-size: 10px; color: #aaa; align-self: flex-start; padding-top: 5px; font-weight: 700;">Sekarang</div>
-            </div>
-        </div>
-    </div>
-
-
     <div id="customToast"></div>
 
 
@@ -385,7 +314,6 @@
                 return; 
             }
 
-           
             try {
                 const res = await fetch(`/api/products/${idProduk}`);
                 if (!res.ok) throw new Error("Gagal mengambil data dari Server");
@@ -583,139 +511,10 @@
             else { navigator.clipboard.writeText(textBagikan); showToast("Detail & Link produk berhasil disalin!", "success"); }
         }
 
-        // ✅ LOGIKA BARU: MELEMPAR KE SEARCH.HTML
         window.eksekusiPencarianDetail = function() {
             const keyword = document.getElementById('inputSearchDetail').value.trim();
             if(keyword) {
                 window.location.href = 'search.html?q=' + encodeURIComponent(keyword);
-            }
-        };
-
-                // ✅ LOGIKA KOTAK MASUK & CHAT (Sama seperti Toko.html)
-        window.bukaChatToko = function() { // Ini dipanggil oleh icon amplop
-            const token = localStorage.getItem('token');
-            if (!token || token.startsWith('token-admin-')) {
-                showToast("Silakan login pembeli dulu untuk melihat chat!", "error");
-                setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
-                return;
-            }
-            
-            document.getElementById('modalInbox').style.display = 'flex';
-            window.history.pushState({ modal: 'inbox' }, "", window.location.href); 
-            
-            fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } })
-                .then(res => res.json())
-                .then(result => {
-                    const previewText = document.getElementById('inboxLastMsg');
-                    const timeText = document.getElementById('inboxLastTime');
-                    if(result.success && result.data.length > 0) {
-                        const lastMsg = result.data[result.data.length - 1];
-                        previewText.innerText = lastMsg.sender_role === 'admin' ? `Admin: ${lastMsg.message}` : `Anda: ${lastMsg.message}`;
-                        const d = new Date(lastMsg.created_at);
-                        timeText.innerText = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
-                    } else {
-                        previewText.innerText = "Belum ada percakapan";
-                        timeText.innerText = "";
-                    }
-                }).catch(e => {
-                    document.getElementById('inboxLastMsg').innerText = "Gagal memuat";
-                });
-        };
-
-        // Dipanggil saat mengklik list toko di dalam inbox
-        window.bukaRuangChat = function() {
-            const chatModal = document.getElementById('modalChatToko');
-            if (chatModal.style.display === 'flex') return;
-
-            document.getElementById('modalInbox').style.display = 'none';
-            chatModal.style.display = 'flex';
-            
-            // Tandai bahwa inbox pernah dibuka, supaya pas back baliknya ke inbox
-            document.getElementById('modalInbox').setAttribute('data-was-open', 'true');
-            window.history.pushState({ modal: 'chat' }, "", window.location.href); 
-            
-            muatRiwayatChatToko();
-        };
-
-        window.tutupChatToko = function() {
-            // Karena pakai pushState, cukup suruh browser mundur agar layarnya mati
-            window.history.back(); 
-        };
-
-        async function muatRiwayatChatToko() {
-            const token = localStorage.getItem('token');
-            try {
-                const res = await fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } });
-                const result = await res.json();
-                const chatBody = document.getElementById('chatTokoBody');
-                
-                if (result.success && result.data.length > 0) {
-                    chatBody.innerHTML = '';
-                    result.data.forEach(msg => {
-                        let isUser = msg.sender_role === 'pembeli';
-                        let cssClass = isUser ? 'chat-msg-user' : 'chat-msg-store';
-                        let labelAdmin = msg.sender_role === 'admin' ? '<br><small style="color:#0D47A1; font-weight:bold;">- Admin -</small>' : '';
-                        chatBody.innerHTML += `<div class="${cssClass}">${msg.message} ${labelAdmin}</div>`;
-                    });
-                } else {
-                    chatBody.innerHTML = `<div class="chat-msg-store">Halo kak! Ada yang bisa dibantu mengenai produk ini? 😊</div>`;
-                }
-                chatBody.scrollTop = chatBody.scrollHeight;
-            } catch(e) {}
-        }
-
-        window.kirimChatToko = async function() {
-            const input = document.getElementById('chatTokoInput');
-            const chatBody = document.getElementById('chatTokoBody');
-            const teks = input.value.trim();
-            if (!teks) return;
-            
-            const token = localStorage.getItem('token');
-            
-            // Tambahkan konteks produk yang sedang dilihat ke pesan
-            const pesanLengkap = `[Tanya Produk: ${produk.nama}]\n${teks}`;
-            
-            chatBody.innerHTML += `<div class="chat-msg-user">${pesanLengkap}</div>`;
-            input.value = '';
-            chatBody.scrollTop = chatBody.scrollHeight;
-
-            try {
-                await fetch('/api/chat/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ message: pesanLengkap, sender: 'pembeli' })
-                });
-
-                if(!window.sudahChatDiToko) {
-                    window.sudahChatDiToko = true;
-                    
-                    const idKetik = "ketik-" + Date.now();
-                    chatBody.innerHTML += `<div class="chat-msg-store" id="${idKetik}"><i class="fas fa-ellipsis-h fa-fade"></i> Admin mengetik...</div>`;
-                    chatBody.scrollTop = chatBody.scrollHeight;
-
-                    setTimeout(async () => {
-                        const elemenKetik = document.getElementById(idKetik);
-                        if(elemenKetik) elemenKetik.remove();
-
-                        let autoReplyMsg = "Halo Kak! Pesan Kakak sudah kami terima dan Admin akan segera mengeceknya. Mohon ditunggu ya! 😊";
-                        try {
-                            const resSet = await fetch('/api/settings/autoreply');
-                            const resultSet = await resSet.json();
-                            if(resultSet.success && resultSet.text) autoReplyMsg = resultSet.text;
-                        } catch(err) {}
-
-                        chatBody.innerHTML += `<div class="chat-msg-store">${autoReplyMsg}</div>`;
-                        chatBody.scrollTop = chatBody.scrollHeight;
-                        
-                        await fetch('/api/chat/save', { 
-                            method: 'POST', 
-                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
-                            body: JSON.stringify({ message: autoReplyMsg, sender: 'admin' }) 
-                        });
-                    }, 1500);
-                }
-            } catch(e) {
-                showToast("Gagal mengirim pesan", "error");
             }
         };
 
@@ -823,30 +622,14 @@
         
         inisialisasiHalaman();
         
-                // ==================================================
-        // ✅ PENGENDALI TOMBOL BACK FISIK HP (POPSTATE)
-        // ==================================================
         window.addEventListener('popstate', function(event) {
-            const inboxModal = document.getElementById('modalInbox');
-            const chatModal = document.getElementById('modalChatToko');
             const fsModal = document.getElementById('fullscreenModal');
-
             if(fsModal && fsModal.style.display === 'flex') {
                 fsModal.style.display = 'none';
             }
-            else if(chatModal && chatModal.style.display === 'flex') {
-                chatModal.style.display = 'none';
-                if (inboxModal && inboxModal.hasAttribute('data-was-open')) {
-                    inboxModal.style.display = 'flex';
-                    inboxModal.removeAttribute('data-was-open');
-                }
-            } 
-            else if(inboxModal && inboxModal.style.display === 'flex') {
-                inboxModal.style.display = 'none';
-            }
         });
+     
         
-        // Modifikasi fungsi buka fullscreen gambar agar pakai history back juga
         const fungsiAsliBukaFs = window.bukaFullscreen;
         window.bukaFullscreen = function(index) {
             window.history.pushState({ modal: 'fullscreen_img' }, "", window.location.href);
@@ -856,9 +639,6 @@
              window.history.back();
         };
 
-                // ==================================================
-        // ✅ MUAT PROFIL TOKO, LOKASI & WAKTU AKTIF DARI DATABASE
-        // ==================================================
         async function muatProfilTokoDB() {
             try {
                 const res = await fetch('/api/settings/all');
@@ -870,28 +650,17 @@
                     const dbLogo = data.settings.find(s => s.key_name === 'store_logo')?.value_text || '';
                     const dbLastActive = data.settings.find(s => s.key_name === 'admin_last_active')?.value_text;
 
-                    // 1. Tampilkan Nama Toko (dengan icon centang biru) dan Lokasi Pengiriman
                     document.getElementById('namaTokoAsli').innerHTML = `${dbName} <i class="fas fa-check-circle" style="color: #0D47A1; font-size: 12px;" title="Terverifikasi"></i>`;
                     const teksLokasi = document.getElementById('teksLokasiToko');
                     if(teksLokasi) teksLokasi.innerText = dbCity;
                     
-                    // Samakan nama toko di Header Chat & Inbox
-                    document.querySelectorAll('#namaTokoInbox').forEach(el => el.innerText = dbName);
-
-                    // 2. Tampilkan Foto Logo (Di Profil, Inbox, dan Chat)
                     if (dbLogo) {
                         const imgTag = `<img src="${dbLogo}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; border: none; outline: none;">`;
                         
                         const avatarDetail = document.getElementById('displayStoreAvatarDetail');
                         if(avatarDetail) avatarDetail.innerHTML = imgTag;
-                        
-                        document.querySelectorAll('.inbox-avatar, .store-avatar-chat').forEach(el => {
-                            el.innerHTML = imgTag;
-                            el.style.background = "transparent";
-                        });
                     }
 
-                    // 3. Tampilkan Waktu Terakhir Aktif
                     hitungWaktuAktifToko(dbLastActive);
                 }
             } catch (e) {
@@ -899,7 +668,6 @@
             }
         }
 
-        // Kalkulator Waktu Aktif Organik
         function hitungWaktuAktifToko(lastActiveStr) {
             const elStatus = document.getElementById('displayStoreActiveDetail');
             if (!elStatus) return;
@@ -922,9 +690,7 @@
             elStatus.innerHTML = `<i class="fas fa-circle" style="font-size: 8px;"></i> ${teksWaktu}`;
         }
         
-        // Eksekusi tarikan database saat halaman terbuka
         document.addEventListener("DOMContentLoaded", muatProfilTokoDB);
-
 
     </script>
 </body>
