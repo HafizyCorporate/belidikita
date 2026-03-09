@@ -264,17 +264,17 @@
             </div>
         </div>
 
-        <div class="glass-box store-box">
-            <div class="store-avatar"><i class="fas fa-store"></i></div>
+               <div class="glass-box store-box">
+            <div class="store-avatar" id="displayStoreAvatarDetail"><i class="fas fa-store"></i></div>
             <div class="store-info">
                 <h4 id="namaTokoAsli">Toko Belidikita</h4>
                 <div style="display: flex; gap: 5px; align-items: center; margin-top: 2px;">
-                    <span><i class="fas fa-check-circle"></i> Terverifikasi</span>
-                    <span style="background: #E8F5E9; color: #00AA5B;"><i class="fas fa-circle" style="font-size: 8px;"></i> Online saat ini</span>
+                    <span style="background: #E8F5E9; color: #00AA5B;" id="displayStoreActiveDetail"><i class="fas fa-circle" style="font-size: 8px;"></i> Menghitung...</span>
                 </div>
             </div>
             <button class="btn-visit" onclick="window.location.href='toko.html'">Kunjungi Toko</button>
         </div>
+
 
         <div class="glass-box review-box">
             <h4><i class="fas fa-comments"></i> Ulasan Pembeli Asli</h4>
@@ -334,6 +334,24 @@
             <i class="fas fa-user"></i><span>Akun</span>
         </a>
     </nav>
+    
+        <div id="modalInbox" class="layar-penuh-search" style="z-index: 7500; background: #f4f7fa; position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: none; flex-direction: column; animation: slideInRight 0.3s ease;">
+        <div class="katalog-header" style="border-bottom:1px solid #E1F5FE;">
+            <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+            <h2 style="font-size: 16px;">Kotak Masuk</h2>
+        </div>
+        <div id="inboxList" style="padding-top: 10px;">
+            <div onclick="window.bukaRuangChat()" style="display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; background: #fff;">
+                <div class="inbox-avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #0D47A1; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden;"><i class="fas fa-store"></i></div>
+                <div style="flex: 1; overflow: hidden;">
+                    <div style="font-size: 14px; font-weight: 800; color: #333; margin-bottom: 4px;" id="namaTokoInbox">Belidikita Official</div>
+                    <div id="inboxLastMsg" style="font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600;">Memuat pesan terakhir...</div>
+                </div>
+                <div id="inboxLastTime" style="font-size: 10px; color: #aaa; align-self: flex-start; padding-top: 5px; font-weight: 700;">Sekarang</div>
+            </div>
+        </div>
+    </div>
+
 
     <div id="customToast"></div>
 
@@ -362,13 +380,7 @@
                 return; 
             }
 
-            let kotaToko = "Kota Bandung";
-            try {
-                const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
-                if (storeData && storeData.kota) kotaToko = storeData.kota;
-            } catch(e) {}
-            document.getElementById('teksLokasiToko').innerText = kotaToko;
-
+           
             try {
                 const res = await fetch(`/api/products/${idProduk}`);
                 if (!res.ok) throw new Error("Gagal mengambil data dari Server");
@@ -574,20 +586,55 @@
             }
         };
 
-        // ✅ LOGIKA BARU: CHAT TOKO TERINTEGRASI
-        window.bukaChatToko = function() {
+                // ✅ LOGIKA KOTAK MASUK & CHAT (Sama seperti Toko.html)
+        window.bukaChatToko = function() { // Ini dipanggil oleh icon amplop
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) {
-                showToast("Silakan login pembeli dulu untuk chat!", "error");
+                showToast("Silakan login pembeli dulu untuk melihat chat!", "error");
                 setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
                 return;
             }
-            document.getElementById('modalChatToko').style.display = 'flex';
+            
+            document.getElementById('modalInbox').style.display = 'flex';
+            window.history.pushState({ modal: 'inbox' }, "", window.location.href); 
+            
+            fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } })
+                .then(res => res.json())
+                .then(result => {
+                    const previewText = document.getElementById('inboxLastMsg');
+                    const timeText = document.getElementById('inboxLastTime');
+                    if(result.success && result.data.length > 0) {
+                        const lastMsg = result.data[result.data.length - 1];
+                        previewText.innerText = lastMsg.sender_role === 'admin' ? `Admin: ${lastMsg.message}` : `Anda: ${lastMsg.message}`;
+                        const d = new Date(lastMsg.created_at);
+                        timeText.innerText = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+                    } else {
+                        previewText.innerText = "Belum ada percakapan";
+                        timeText.innerText = "";
+                    }
+                }).catch(e => {
+                    document.getElementById('inboxLastMsg').innerText = "Gagal memuat";
+                });
+        };
+
+        // Dipanggil saat mengklik list toko di dalam inbox
+        window.bukaRuangChat = function() {
+            const chatModal = document.getElementById('modalChatToko');
+            if (chatModal.style.display === 'flex') return;
+
+            document.getElementById('modalInbox').style.display = 'none';
+            chatModal.style.display = 'flex';
+            
+            // Tandai bahwa inbox pernah dibuka, supaya pas back baliknya ke inbox
+            document.getElementById('modalInbox').setAttribute('data-was-open', 'true');
+            window.history.pushState({ modal: 'chat' }, "", window.location.href); 
+            
             muatRiwayatChatToko();
         };
 
         window.tutupChatToko = function() {
-            document.getElementById('modalChatToko').style.display = 'none';
+            // Karena pakai pushState, cukup suruh browser mundur agar layarnya mati
+            window.history.back(); 
         };
 
         async function muatRiwayatChatToko() {
@@ -770,53 +817,109 @@
         function bukaProdukLain(idProdukTujuan) { window.location.href = 'detailproduk.html?id=' + idProdukTujuan; }
         
         inisialisasiHalaman();
+        
+                // ==================================================
+        // ✅ PENGENDALI TOMBOL BACK FISIK HP (POPSTATE)
         // ==================================================
-        // ✅ SINKRONISASI FOTO PROFIL TOKO KE SEMUA CHAT & INBOX
-        // ==================================================
-        function tampilkanFotoProfilToko() {
-            try {
-                // Ambil data dari penyimpanan browser (Setting Toko)
-                const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
-                
-                if (storeData && storeData.logo) {
-                    // Buat elemen gambar dengan ukuran pas dan membulat
-                    const imgTag = `<img src="${storeData.logo}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; border: none; outline: none;">`;
-                    
-                    // 1. Ubah logo di daftar Kotak Masuk (Inbox)
-                    document.querySelectorAll('.inbox-avatar').forEach(el => {
-                        el.innerHTML = imgTag;
-                    });
-                    
-                    // 2. Ubah logo di header Chat (Toko, Detail, Search)
-                    document.querySelectorAll('.store-avatar-chat').forEach(el => {
-                        el.innerHTML = imgTag;
-                        el.style.background = "transparent"; // Hilangkan warna background default
-                    });
-                    
-                    // 3. Ubah logo di header Chat (Khusus Dashboard Utama)
-                    const dashboardChatAdmin = document.querySelector('#modalChatAdmin .store-avatar');
-                    if(dashboardChatAdmin) {
-                        dashboardChatAdmin.innerHTML = imgTag;
-                        dashboardChatAdmin.style.background = "transparent";
-                    }
+        window.addEventListener('popstate', function(event) {
+            const inboxModal = document.getElementById('modalInbox');
+            const chatModal = document.getElementById('modalChatToko');
+            const fsModal = document.getElementById('fullscreenModal');
 
-                    // 4. Pastikan juga nama toko di Inbox ikut update (jika ada)
-                    if(storeData.nama) {
-                        document.querySelectorAll('#namaTokoInbox').forEach(el => {
-                            el.innerText = storeData.nama;
+            if(fsModal && fsModal.style.display === 'flex') {
+                fsModal.style.display = 'none';
+            }
+            else if(chatModal && chatModal.style.display === 'flex') {
+                chatModal.style.display = 'none';
+                if (inboxModal && inboxModal.hasAttribute('data-was-open')) {
+                    inboxModal.style.display = 'flex';
+                    inboxModal.removeAttribute('data-was-open');
+                }
+            } 
+            else if(inboxModal && inboxModal.style.display === 'flex') {
+                inboxModal.style.display = 'none';
+            }
+        });
+        
+        // Modifikasi fungsi buka fullscreen gambar agar pakai history back juga
+        const fungsiAsliBukaFs = window.bukaFullscreen;
+        window.bukaFullscreen = function(index) {
+            window.history.pushState({ modal: 'fullscreen_img' }, "", window.location.href);
+            fungsiAsliBukaFs(index);
+        };
+        window.tutupFullscreen = function() {
+             window.history.back();
+        };
+
+                // ==================================================
+        // ✅ MUAT PROFIL TOKO, LOKASI & WAKTU AKTIF DARI DATABASE
+        // ==================================================
+        async function muatProfilTokoDB() {
+            try {
+                const res = await fetch('/api/settings/all');
+                const data = await res.json();
+                
+                if (data.success && data.settings) {
+                    const dbName = data.settings.find(s => s.key_name === 'store_name')?.value_text || 'Belidikita Official';
+                    const dbCity = data.settings.find(s => s.key_name === 'store_city')?.value_text || 'Kota Bandung';
+                    const dbLogo = data.settings.find(s => s.key_name === 'store_logo')?.value_text || '';
+                    const dbLastActive = data.settings.find(s => s.key_name === 'admin_last_active')?.value_text;
+
+                    // 1. Tampilkan Nama Toko (dengan icon centang biru) dan Lokasi Pengiriman
+                    document.getElementById('namaTokoAsli').innerHTML = `${dbName} <i class="fas fa-check-circle" style="color: #0D47A1; font-size: 12px;" title="Terverifikasi"></i>`;
+                    const teksLokasi = document.getElementById('teksLokasiToko');
+                    if(teksLokasi) teksLokasi.innerText = dbCity;
+                    
+                    // Samakan nama toko di Header Chat & Inbox
+                    document.querySelectorAll('#namaTokoInbox').forEach(el => el.innerText = dbName);
+
+                    // 2. Tampilkan Foto Logo (Di Profil, Inbox, dan Chat)
+                    if (dbLogo) {
+                        const imgTag = `<img src="${dbLogo}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; border: none; outline: none;">`;
+                        
+                        const avatarDetail = document.getElementById('displayStoreAvatarDetail');
+                        if(avatarDetail) avatarDetail.innerHTML = imgTag;
+                        
+                        document.querySelectorAll('.inbox-avatar, .store-avatar-chat').forEach(el => {
+                            el.innerHTML = imgTag;
+                            el.style.background = "transparent";
                         });
                     }
+
+                    // 3. Tampilkan Waktu Terakhir Aktif
+                    hitungWaktuAktifToko(dbLastActive);
                 }
-            } catch(e) {
-                console.log("Gagal memuat foto profil toko: ", e);
+            } catch (e) {
+                console.log("Gagal menarik profil toko dari Database.");
             }
         }
 
-        // Eksekusi fungsi saat halaman dimuat
-        document.addEventListener("DOMContentLoaded", () => {
-            setTimeout(tampilkanFotoProfilToko, 300); // Jeda sedikit agar elemen HTML siap
-        });
+        // Kalkulator Waktu Aktif Organik
+        function hitungWaktuAktifToko(lastActiveStr) {
+            const elStatus = document.getElementById('displayStoreActiveDetail');
+            if (!elStatus) return;
+
+            if (!lastActiveStr) {
+                const dummyTime = new Date();
+                dummyTime.setMinutes(dummyTime.getMinutes() - 2); 
+                lastActiveStr = dummyTime.toISOString();
+            }
+
+            const waktuTerakhir = new Date(lastActiveStr);
+            const sekarang = new Date();
+            const selisihMenit = Math.floor((sekarang - waktuTerakhir) / (1000 * 60));
+
+            let teksWaktu = "Aktif baru saja";
+            if (selisihMenit > 0 && selisihMenit < 60) teksWaktu = `Aktif ${selisihMenit} menit lalu`;
+            else if (selisihMenit >= 60 && selisihMenit < 1440) teksWaktu = `Aktif ${Math.floor(selisihMenit / 60)} jam lalu`;
+            else if (selisihMenit >= 1440) teksWaktu = `Aktif ${Math.floor(selisihMenit / 1440)} hari lalu`;
+
+            elStatus.innerHTML = `<i class="fas fa-circle" style="font-size: 8px;"></i> ${teksWaktu}`;
+        }
         
+        // Eksekusi tarikan database saat halaman terbuka
+        document.addEventListener("DOMContentLoaded", muatProfilTokoDB);
+
 
     </script>
 </body>
