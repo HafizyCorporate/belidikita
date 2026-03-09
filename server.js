@@ -179,7 +179,7 @@ app.get('/api/chat/me', verifyToken, async (req, res) => {
 
 app.get('/api/admin/chats', verifyAdmin, async (req, res) => {
     try {
-        const result = await pool.query(`SELECT c.*, u.name as user_name FROM chats c JOIN users u ON c.user_id = u.id WHERE c.id IN (SELECT MAX(id) FROM chats GROUP BY user_id) ORDER BY c.created_at DESC`);
+        const result = await pool.query(`SELECT c.*, u.name as user_name FROM chats c JOIN users u ON c.user_id = u.id ORDER BY c.created_at DESC`);
         res.json({ success: true, data: result.rows });
     } catch (err) { res.status(500).json({ success: false }); }
 });
