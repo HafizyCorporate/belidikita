@@ -247,27 +247,7 @@
         <img src="assets/ikon_bediki.png" alt="Bediki AI" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.src='https://ui-avatars.com/api/?name=AI&background=00AA5B&color=fff'">
     </div>
 
-    <div id="katalogLayarPenuh" class="layar-penuh">
-        <div class="katalog-header">
-            <i class="fas fa-arrow-left" onclick="window.kembaliDariKatalog()"></i>
-            <h2 id="judulHalamanKategori">Hasil Pencarian</h2>
-        </div>
-        
-        <div class="katalog-tools">
-            <div class="katalog-search">
-                <i class="fas fa-search"></i>
-                <input type="text" id="inputCariKatalog" placeholder="Cari di sini lalu tekan Enter..." onkeypress="if(event.key === 'Enter') window.lakukanPencarianDariKatalog(this.value)">
-            </div>
-            <select id="filterKatalog" onchange="window.renderHasilKatalog()">
-                <option value="terbaru">Terbaru</option>
-                <option value="termurah">Termurah</option>
-                <option value="terlaris">Terlaris</option>
-            </select>
-        </div>
-
-        <div class="product-grid" id="gridHasilKategori" style="padding-top: 15px;"></div>
-    </div>
-
+    
     <div id="pesananLayarPenuh" class="layar-penuh" style="background:#f4f9ff;">
         <div class="katalog-header" style="border-bottom:1px solid #E1F5FE;">
             <i class="fas fa-arrow-left" onclick="window.tutupHalamanPesanan()"></i>
@@ -596,16 +576,20 @@
             printWindow.document.close();
         };
 
-        window.lakukanPencarianPintar = function(keyword) {
-            if(!keyword || keyword.trim() === '') return;
-            
+                // ✅ LEMPAR PENCARIAN & FILTER LANGSUNG KE SEARCH.HTML (MESKIPUN KOTAK KOSONG)
+        window.lakukanPencarianPintar = function(keyword = '') {
+            // Ambil data filter dari Dropdown
             let sortVal = document.getElementById('dashSort') ? document.getElementById('dashSort').value : 'terbaru';
             let tokoVal = document.getElementById('dashToko') ? document.getElementById('dashToko').value : '';
             let lokasiVal = document.getElementById('dashLokasi') ? document.getElementById('dashLokasi').value : '';
             
+            // Gabungkan ke dalam URL search.html
             let url = `search.html?q=${encodeURIComponent(keyword.trim())}&sort=${sortVal}&toko=${tokoVal}&lokasi=${lokasiVal}`;
+            
+            // Terbang ke search.html
             window.location.href = url;
         };
+
 
         window.lakukanPencarianDariKatalog = async function(keyword) {
             if(!keyword || keyword.trim() === '') return;
@@ -724,17 +708,22 @@
             document.body.style.overflow = 'auto'; 
         };
 
+                // ✅ LEMPAR PILIHAN KATEGORI / SUB KATEGORI KE SEARCH.HTML
         window.saringProdukLangsung = function(mainCat, subCat) {
             window.tutupSubKategori(); // Tutup laci kategori
 
             let url = 'search.html?';
             
             if (subCat === 'Semua') {
+                // Jika pilih "Semua", kita kirim parameter 'category'
                 url += `category=${encodeURIComponent(mainCat)}`;
             } else {
+                // Jika pilih sub spesifik (misal "Baju"), kita kirim parameter 'q' (pencarian teks)
+                // Ditambah category agar spesifik mencarinya di kategori tersebut
                 url += `q=${encodeURIComponent(subCat)}&category=${encodeURIComponent(mainCat)}`;
             }
 
+            // Terbang ke search.html
             window.location.href = url;
         };
 
