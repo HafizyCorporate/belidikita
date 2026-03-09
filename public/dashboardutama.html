@@ -742,11 +742,25 @@
             document.body.style.overflow = 'auto'; 
         };
 
-                window.saringProdukLangsung = function(mainCat, subCat) {
-            window.tutupSubKategori();
-            const keyword = subCat === 'Semua' ? mainCat : subCat;
-            window.location.href = 'search.html?q=' + encodeURIComponent(keyword);
+                        // ✅ LEMPAR PILIHAN KATEGORI / SUB KATEGORI KE SEARCH.HTML
+        window.saringProdukLangsung = function(mainCat, subCat) {
+            window.tutupSubKategori(); // Tutup laci kategori
+
+            let url = 'search.html?';
+            
+            if (subCat === 'Semua') {
+                // Jika pilih "Semua", kita kirim parameter 'category'
+                url += `category=${encodeURIComponent(mainCat)}`;
+            } else {
+                // Jika pilih sub spesifik (misal "Baju"), kita kirim parameter 'q' (pencarian teks)
+                // Ditambah category agar spesifik mencarinya di kategori tersebut
+                url += `q=${encodeURIComponent(subCat)}&category=${encodeURIComponent(mainCat)}`;
+            }
+
+            // Terbang ke search.html
+            window.location.href = url;
         };
+
 
 
         window.bukaChatAI = function() {
@@ -879,14 +893,14 @@
                                 labelGrosir = `<div style="position:absolute; top:5px; left:5px; background:#4CAF50; color:#fff; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;"><i class="fas fa-tags"></i> GROSIR</div>`;
                             }
 
-                                                       // ✅ TAMPILAN LOKASI & NAMA TOKO (2 BARIS RAPI)
+                            // ✅ TAMPILAN LOKASI & NAMA TOKO (BISA DIKLIK)
                             const htmlLokasiToko = `
                                 <div style="font-size: 9px; color: #888; font-weight: 600; margin-top: 6px; line-height: 1.4;">
                                     <div style="display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                         <i class="fas fa-map-marker-alt" style="color: #ff3b30;"></i> ${kotaToko}
                                     </div>
-                                    <div style="display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">
-                                        <i class="fas fa-store" style="color: #0D47A1;"></i> ${namaToko}
+                                    <div onclick="event.stopPropagation(); window.location.href='toko.html'" style="display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; cursor: pointer; color: #0D47A1;">
+                                        <i class="fas fa-store"></i> <span style="text-decoration: underline;">${namaToko}</span>
                                     </div>
                                 </div>
                             `;
