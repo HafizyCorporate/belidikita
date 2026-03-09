@@ -250,14 +250,17 @@
                 <button class="btn-submit" style="background:#1976D2;" onclick="window.simpanAutoReply()"><i class="fas fa-save"></i> Simpan Teks Auto-Reply</button>
             </div>
 
-            <div class="box" id="inboxSection" style="border-top: 4px solid #ff9800; background: #fffcf8;">
-                <h3 style="color:#ff9800;"><i class="fas fa-envelope"></i> Kotak Masuk Pembeli</h3>
+                        <div class="box" id="inboxSection" style="border-top: 4px solid #ff9800; background: #fffcf8;">
+                <h3 style="color:#ff9800; display:flex; justify-content:space-between; align-items:center;">
+                    <span><i class="fas fa-envelope"></i> Kotak Masuk Pembeli</span>
+                    <button onclick="fetchInboxAdmin()" style="background:#ff9800; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-size:11px; cursor:pointer; font-weight:bold; box-shadow: 0 2px 5px rgba(255,152,0,0.3);"><i class="fas fa-sync-alt"></i> Refresh Pesan</button>
+                </h3>
                 <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Klik pada nama pembeli di bawah ini untuk membalas pesan secara manual.</p>
                 <div class="inbox-container" id="inboxAdminList">
                     <div style="text-align:center; padding: 20px; color:#aaa;"><i class="fas fa-spinner fa-spin"></i> Memuat kotak masuk...</div>
                 </div>
             </div>
-        </div>
+
 
         <div id="kuponSection" class="box admin-section" style="border-top: 4px solid #00AA5B;">
             <h3><i class="fas fa-ticket-alt"></i> Kelola Kupon Diskon</h3>
