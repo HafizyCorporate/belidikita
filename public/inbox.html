@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kotak Masuk - Belidikita</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,800" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
+        body { background: #f4f7fa; color: #333; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* ✅ HEADER GLOBAL */
+        .app-header { background: #fff; padding: 15px 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100;}
+        .app-header i.btn-back { font-size: 20px; color: #0D47A1; cursor: pointer; transition: 0.2s; }
+        .app-header i.btn-back:active { transform: scale(0.8); }
+        .app-header h2 { font-size: 16px; font-weight: 800; color: #0D47A1; flex: 1; margin: 0; }
+        
+        .header-profile { display: flex; align-items: center; gap: 10px; flex: 1; display: none; }
+        .header-avatar { width: 35px; height: 35px; background: #0D47A1; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; overflow: hidden; }
+        .header-info h2 { font-size: 14px; font-weight: 800; color: #333; margin: 0; }
+        .header-info span { font-size: 10px; color: #00AA5B; font-weight: 700; }
+
+        /* ✅ TAMPILAN LIST INBOX */
+        #viewInboxList { flex: 1; overflow-y: auto; background: #f4f7fa; }
+        .inbox-item { display: flex; align-items: center; gap: 15px; padding: 15px 20px; border-bottom: 1px solid #E1F5FE; cursor: pointer; background: #fff; transition: 0.2s; }
+        .inbox-item:active { background: #f9f9f9; }
+        .inbox-avatar { width: 50px; height: 50px; border-radius: 50%; background: #0D47A1; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; flex-shrink: 0; }
+        .inbox-text { flex: 1; overflow: hidden; }
+        .inbox-text h4 { font-size: 14px; font-weight: 800; color: #333; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .inbox-text p { font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+        .inbox-time { font-size: 10px; color: #aaa; align-self: flex-start; padding-top: 5px; font-weight: 700; }
+
+        /* ✅ TAMPILAN RUANG CHAT */
+        #viewChatRoom { display: none; flex: 1; flex-direction: column; background: #f4f7fa; height: 100%; }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .chat-msg-store { background: #fff; color: #333; padding: 12px 15px; border-radius: 15px 15px 15px 0; max-width: 80%; align-self: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 13px; line-height: 1.5; border: 1px solid #E1F5FE; }
+        .chat-msg-user { background: #E1F5FE; color: #0D47A1; padding: 12px 15px; border-radius: 15px 15px 0 15px; max-width: 80%; align-self: flex-end; box-shadow: 0 2px 5px rgba(13, 71, 161, 0.1); font-size: 13px; line-height: 1.5; }
+        .chat-footer { background: #fff; padding: 10px 15px; display: flex; gap: 10px; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .chat-footer input { flex: 1; padding: 12px 15px; border: 1px solid #E1F5FE; border-radius: 20px; background: #fafcff; outline: none; font-size: 13px; font-family: 'Montserrat', sans-serif;}
+        .chat-footer button { background: #FF9800; color: #fff; width: 40px; height: 40px; border-radius: 50%; border: none; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3); transition: 0.2s;}
+        .chat-footer button:active { transform: scale(0.9); }
+
+        #customToast { visibility: hidden; min-width: 280px; margin-left: -140px; background: rgba(13, 71, 161, 0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 9999; left: 50%; bottom: 30px; font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.4s ease; opacity: 0; }
+        #customToast.show { visibility: visible; opacity: 1; bottom: 50px; }
+        #customToast.error { background: rgba(255, 59, 48, 0.95); border-color: #FFCDD2; }
+    </style>
+</head>
+<body>
+
+    <div class="app-header">
+        <i class="fas fa-arrow-left btn-back" id="btnBackHeader"></i>
+        
+        <h2 id="titleInbox">Kotak Masuk</h2>
+        
+        <div class="header-profile" id="titleChat">
+            <div class="header-avatar" id="chatHeaderAvatar"><i class="fas fa-store"></i></div>
+            <div class="header-info">
+                <h2 id="chatHeaderName">Belidikita Official</h2>
+                <span><i class="fas fa-circle"></i> Online</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="viewInboxList">
+        <div class="inbox-item" onclick="bukaChat()">
+            <div class="inbox-avatar" id="inboxListAvatar"><i class="fas fa-store"></i></div>
+            <div class="inbox-text">
+                <h4 id="inboxListName">Belidikita Official</h4>
+                <p id="inboxLastMsg">Memuat pesan...</p>
+            </div>
+            <div class="inbox-time" id="inboxLastTime">...</div>
+        </div>
+    </div>
+
+    <div id="viewChatRoom">
+        <div class="chat-body" id="chatBody">
+            <p style="text-align:center; font-size:12px; color:#888;"><i class="fas fa-spinner fa-spin"></i> Memuat percakapan...</p>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="chatInput" enterkeyhint="send" placeholder="Ketik pesan..." onkeydown="if(event.key === 'Enter') { event.preventDefault(); kirimPesan(); }">
+            <button onclick="kirimPesan()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <div id="customToast"></div>
+
+    <script>
+        // Cek Login
+        const token = localStorage.getItem('token');
+        if (!token || token.startsWith('token-admin-')) {
+            showToast("Silakan login pembeli terlebih dahulu!", "error");
+            setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
+        }
+
+        let storeInfo = { name: "Belidikita Official", logo: "" };
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById("customToast");
+            toast.innerText = msg; toast.className = type + " show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        // 1. TARIK PROFIL TOKO DARI DATABASE UNTUK LOGO & NAMA
+        async function fetchStoreProfile() {
+            try {
+                const res = await fetch('/api/settings/all');
+                const data = await res.json();
+                if(data.success && data.settings) {
+                    storeInfo.name = data.settings.find(s => s.key_name === 'store_name')?.value_text || "Belidikita Official";
+                    storeInfo.logo = data.settings.find(s => s.key_name === 'store_logo')?.value_text || "";
+
+                    document.getElementById('inboxListName').innerText = storeInfo.name;
+                    document.getElementById('chatHeaderName').innerText = storeInfo.name;
+
+                    if(storeInfo.logo) {
+                        const imgHtml = `<img src="${storeInfo.logo}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                        document.getElementById('inboxListAvatar').innerHTML = imgHtml;
+                        document.getElementById('chatHeaderAvatar').innerHTML = imgHtml;
+                    }
+                }
+            } catch(e) { console.log("Gagal memuat profil toko."); }
+        }
+
+        // 2. TARIK RIWAYAT CHAT (DARI API)
+        async function fetchChatData() {
+            try {
+                const res = await fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                
+                const previewMsg = document.getElementById('inboxLastMsg');
+                const previewTime = document.getElementById('inboxLastTime');
+                const chatBody = document.getElementById('chatBody');
+
+                if(result.success && result.data.length > 0) {
+                    // Update Preview Inbox (Pesan Terakhir)
+                    const lastMsg = result.data[result.data.length - 1];
+                    previewMsg.innerText = lastMsg.sender_role === 'admin' ? `Admin: ${lastMsg.message}` : `Anda: ${lastMsg.message}`;
+                    const d = new Date(lastMsg.created_at);
+                    previewTime.innerText = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+
+                    // Render Ruang Chat
+                    chatBody.innerHTML = '';
+                    result.data.forEach(msg => {
+                        let isUser = msg.sender_role === 'pembeli';
+                        let cssClass = isUser ? 'chat-msg-user' : 'chat-msg-store';
+                        let labelAdmin = msg.sender_role === 'admin' ? '<br><small style="color:#0D47A1; font-weight:bold;">- Admin -</small>' : '';
+                        chatBody.innerHTML += `<div class="${cssClass}">${msg.message} ${labelAdmin}</div>`;
+                    });
+                } else {
+                    previewMsg.innerText = "Belum ada percakapan";
+                    previewTime.innerText = "";
+                    chatBody.innerHTML = `<div class="chat-msg-store">Halo kak! Selamat datang di ${storeInfo.name}. Ada yang bisa kami bantu? 😊</div>`;
+                }
+                chatBody.scrollTop = chatBody.scrollHeight;
+            } catch(e) {
+                document.getElementById('inboxLastMsg').innerText = "Gagal memuat data.";
+            }
+        }
+
+        // 3. LOGIKA KIRIM PESAN
+        async function kirimPesan() {
+            const input = document.getElementById('chatInput');
+            const teks = input.value.trim();
+            if (!teks) return;
+
+            const chatBody = document.getElementById('chatBody');
+            chatBody.innerHTML += `<div class="chat-msg-user">${teks}</div>`;
+            input.value = '';
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            try {
+                await fetch('/api/chat/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ message: teks, sender: 'pembeli' })
+                });
+
+                // Simulasi Auto Reply jika pertama kali chat
+                if(!window.sudahChat) {
+                    window.sudahChat = true;
+                    const idKetik = "ketik-" + Date.now();
+                    chatBody.innerHTML += `<div class="chat-msg-store" id="${idKetik}"><i class="fas fa-ellipsis-h fa-fade"></i> Admin mengetik...</div>`;
+                    chatBody.scrollTop = chatBody.scrollHeight;
+
+                    setTimeout(async () => {
+                        const elKetik = document.getElementById(idKetik);
+                        if(elKetik) elKetik.remove();
+
+                        let autoReplyMsg = "Halo Kak! Pesan diterima, Admin akan segera membalas ya! 😊";
+                        try {
+                            const resSet = await fetch('/api/settings/autoreply');
+                            const resData = await resSet.json();
+                            if(resData.success && resData.text) autoReplyMsg = resData.text;
+                        } catch(err) {}
+
+                        chatBody.innerHTML += `<div class="chat-msg-store">${autoReplyMsg}</div>`;
+                        chatBody.scrollTop = chatBody.scrollHeight;
+                        
+                        await fetch('/api/chat/save', { 
+                            method: 'POST', 
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+                            body: JSON.stringify({ message: autoReplyMsg, sender: 'admin' }) 
+                        });
+                        
+                        fetchChatData(); // Refresh Inbox Preview
+                    }, 1500);
+                } else {
+                    fetchChatData(); // Refresh Inbox Preview
+                }
+            } catch(e) { showToast("Gagal mengirim", "error"); }
+        }
+
+        // 4. NAVIGASI ANTAR HALAMAN & TOMBOL BACK
+        function bukaChat() {
+            document.getElementById('viewInboxList').style.display = 'none';
+            document.getElementById('viewChatRoom').style.display = 'flex';
+            document.getElementById('titleInbox').style.display = 'none';
+            document.getElementById('titleChat').style.display = 'flex';
+            
+            // Scroll ke bawah saat dibuka
+            const chatBody = document.getElementById('chatBody');
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            // Kunci tombol back HP
+            window.history.pushState({ page: 'chat' }, "", "");
+        }
+
+        document.getElementById('btnBackHeader').addEventListener('click', () => {
+            if (document.getElementById('viewChatRoom').style.display === 'flex') {
+                window.history.back(); // Kembali ke list inbox
+            } else {
+                // Jika di halaman Inbox, kembali ke web asal (misal toko.html)
+                if(document.referrer) {
+                    window.history.back();
+                } else {
+                    window.location.href = 'dashboardutama.html';
+                }
+            }
+        });
+
+        window.addEventListener('popstate', function(event) {
+            // Jika memencet tombol kembali saat di dalam ruang chat, kembalikan ke list inbox
+            document.getElementById('viewChatRoom').style.display = 'none';
+            document.getElementById('viewInboxList').style.display = 'block';
+            document.getElementById('titleChat').style.display = 'none';
+            document.getElementById('titleInbox').style.display = 'block';
+        });
+
+        // ==========================================
+        // AUTO-RUN SAAT HALAMAN DIBUKA
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchStoreProfile();
+            fetchChatData();
+            
+            // Jika parameter URL ada ?openChat=true, langsung buka obrolannya
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.get('openChat') === 'true') {
+                bukaChat();
+            }
+        });
+
+    </script>
+</body>
+</html>
