@@ -66,19 +66,11 @@
         .product-price { color: #ff9800; font-weight: 800; font-size: 14px; }
         .product-stats { display: flex; justify-content: space-between; font-size: 10px; color: #888; font-weight: 600; margin-top: auto; padding-top: 10px; align-items: center;}
 
-        /* ✅ HALAMAN BARU UNTUK KATEGORI & PESANAN (PERBAIKAN NAVBAR) */
         .layar-penuh { position: fixed; top: 0; left: 0; right: 0; bottom: 65px; background: #f4f7fa; z-index: 5000; overflow-y: auto; display: none; flex-direction: column; animation: slideInRight 0.3s ease; }
         @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
         .katalog-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
         .katalog-header i { font-size: 20px; color: #0D47A1; cursor: pointer; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: #E1F5FE; border-radius: 50%;}
         .katalog-header h2 { font-size: 16px; font-weight: 800; color: #0D47A1; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        .katalog-tools { background: #fff; padding: 10px 15px; display: flex; gap: 10px; position: sticky; top: 60px; z-index: 99; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .katalog-search { flex: 1; position: relative; }
-        .katalog-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #888; font-size: 13px;}
-        .katalog-search input { width: 100%; padding: 10px 10px 10px 35px; border: 1px solid #E1F5FE; border-radius: 10px; font-size: 12px; outline: none; font-family: 'Montserrat', sans-serif; background: #fafcff; font-weight:600; color:#333; transition:0.2s;}
-        .katalog-search input:focus { border-color: #81D4FA; background: #fff; }
-        .katalog-tools select { padding: 10px; border: 1px solid #81D4FA; border-radius: 10px; font-size: 11px; font-weight: 800; color: #0D47A1; outline: none; font-family: 'Montserrat', sans-serif; background: #E1F5FE; cursor:pointer;}
 
         /* Animasi Jantung Berdetak & Goyang Teks */
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
@@ -388,12 +380,7 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        window.katalogDataSementara = [];
         window.allMyOrdersNav = [];
-
-        window.kembaliDariKatalog = function() {
-            document.getElementById('katalogLayarPenuh').style.display = 'none';
-        };
 
         window.tutupHalamanPesanan = function() {
             document.getElementById('pesananLayarPenuh').style.display = 'none';
@@ -576,100 +563,14 @@
             printWindow.document.close();
         };
 
-                // ✅ LEMPAR PENCARIAN & FILTER LANGSUNG KE SEARCH.HTML (MESKIPUN KOTAK KOSONG)
-        window.lakukanPencarianPintar = function(keyword = '') {
-            // Ambil data filter dari Dropdown
+        window.lakukanPencarianPintar = function(keyword) {
+            let keywordAman = keyword || ''; // Biar aman kalau kosong
             let sortVal = document.getElementById('dashSort') ? document.getElementById('dashSort').value : 'terbaru';
             let tokoVal = document.getElementById('dashToko') ? document.getElementById('dashToko').value : '';
             let lokasiVal = document.getElementById('dashLokasi') ? document.getElementById('dashLokasi').value : '';
             
-            // Gabungkan ke dalam URL search.html
-            let url = `search.html?q=${encodeURIComponent(keyword.trim())}&sort=${sortVal}&toko=${tokoVal}&lokasi=${lokasiVal}`;
-            
-            // Terbang ke search.html
+            let url = `search.html?q=${encodeURIComponent(keywordAman.trim())}&sort=${sortVal}&toko=${tokoVal}&lokasi=${lokasiVal}`;
             window.location.href = url;
-        };
-
-
-        window.lakukanPencarianDariKatalog = async function(keyword) {
-            if(!keyword || keyword.trim() === '') return;
-            const containerGrid = document.getElementById('gridHasilKategori');
-            containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:#0D47A1; grid-column:span 2; padding: 50px 20px; font-weight:bold;"><i class="fas fa-spinner fa-spin mr-2"></i> Mencari...</p>';
-            
-            try {
-                const res = await fetch(`/api/products?search=${encodeURIComponent(keyword)}&limit=50`);
-                const result = await res.json();
-                
-                window.katalogDataSementara = result.success ? result.data : [];
-                
-                if (window.katalogDataSementara.length === 0) {
-                    containerGrid.innerHTML = `<div style="text-align:center; width:100%; grid-column:span 2; padding: 50px 20px;"><i class="fas fa-box-open" style="font-size: 60px; color: #ddd; margin-bottom: 15px;"></i><p style="color:#888; font-weight:600; font-size: 13px;">Ups, "${keyword}" tidak ditemukan.</p></div>`;
-                } else {
-                    document.getElementById('judulHalamanKategori').innerText = `Hasil: "${keyword}"`;
-                    window.renderHasilKatalog();
-                }
-            } catch(e) {
-                containerGrid.innerHTML = '<p style="text-align:center; width:100%; color:red; grid-column:span 2; padding: 50px 20px;">Gagal memuat barang dari server.</p>';
-            }
-        };
-
-        window.bukaHasilPencarianPintar = function(keyword, dataProduk) {
-            document.getElementById('katalogLayarPenuh').style.display = 'flex';
-            document.getElementById('judulHalamanKategori').innerText = `Hasil: "${keyword}"`;
-            document.getElementById('inputCariKatalog').value = keyword; 
-            window.history.pushState({ page: 'katalog' }, "", "");
-            window.renderHasilKatalog(); 
-        };
-
-        window.renderHasilKatalog = function() {
-            const containerGrid = document.getElementById('gridHasilKategori');
-            const filterDrop = document.getElementById('filterKatalog');
-            let finalData = [...window.katalogDataSementara]; 
-
-            if(filterDrop) {
-                if(filterDrop.value === 'termurah') finalData.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-                else if (filterDrop.value === 'terlaris') finalData.sort((a, b) => (parseInt(b.sold_count) || 0) - (parseInt(a.sold_count) || 0));
-                else finalData.sort((a, b) => parseInt(b.id) - parseInt(a.id));
-            }
-
-            if (finalData.length > 0) {
-                containerGrid.innerHTML = '';
-                finalData.forEach(product => {
-                    const priceRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(product.price);
-                    let fotoUtama = product.media_url;
-                    try { const parsedMedia = JSON.parse(product.media_url); if (Array.isArray(parsedMedia) && parsedMedia.length > 0) fotoUtama = parsedMedia[0]; } catch(e) {} 
-
-                    const isVideo = product.media_type === 'video';
-                    const fotoBarang = isVideo ? 'https://via.placeholder.com/400x300/f4f4f4/888?text=Video' : (fotoUtama || 'https://via.placeholder.com/400x300/f4f4f4/888?text=No+Image');
-                    const mediaTag = isVideo ? `<video src="${fotoBarang}" class="product-media"></video>` : `<img src="${fotoBarang}" class="product-media" alt="${product.title}">`;
-                    
-                    const terjual = product.sold_count || 0; 
-                    const avgRating = parseFloat(product.avg_rating) || 0;
-                    const ratingHtml = avgRating > 0 ? `<i class="fas fa-star" style="color:#FFD700;"></i> ${avgRating.toFixed(1)}` : `<i class="fas fa-star" style="color:#ccc;"></i> 0.0`;
-
-                    const prodObj = { 
-                        id: product.id, foto: fotoUtama, nama: product.title, hargaStr: priceRp, 
-                        deskripsi: product.description || '', harga: product.price, weight: product.weight || 1000, 
-                        seller_name: product.seller_name || "Belidikita Official", qty: 1, unit: product.unit || 'Pcs', 
-                        variant_title: product.variant_title || '', variant_options: product.variant_options || '', 
-                        wholesale_price: product.wholesale_price || 0, wholesale_min_qty: product.wholesale_min_qty || 0 
-                    };
-                    
-                    const strObj = encodeURIComponent(JSON.stringify(prodObj)).replace(/'/g, "%27");
-
-                    let labelGrosir = '';
-                    if(product.wholesale_price > 0 && product.wholesale_min_qty > 0) labelGrosir = `<div style="position:absolute; top:5px; left:5px; background:#4CAF50; color:#fff; font-size:8px; padding:2px 6px; border-radius:4px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2); z-index:2;"><i class="fas fa-tags"></i> GROSIR</div>`;
-
-                    containerGrid.innerHTML += `
-                        <div class="product-card" onclick="window.bukaDetailGlobal('${strObj}')" style="position:relative; cursor:pointer;">
-                            ${labelGrosir}
-                            ${mediaTag}
-                            <div class="product-info"><div class="product-title">${product.title}</div><div class="product-price">${priceRp}</div><div class="product-stats"><span>${ratingHtml}</span><span>${terjual} Terjual</span></div></div>
-                        </div>`;
-                });
-            } else {
-                containerGrid.innerHTML = `<div style="text-align:center; width:100%; grid-column:span 2; padding: 50px 20px;"><i class="fas fa-box-open" style="font-size: 60px; color: #ddd; margin-bottom: 15px;"></i><p style="color:#888; font-weight:600; font-size: 13px;">Ups, barang tidak ditemukan.</p></div>`;
-            }
         };
 
         window.bukaSubKategori = function(mainCat) {
@@ -708,22 +609,14 @@
             document.body.style.overflow = 'auto'; 
         };
 
-                // ✅ LEMPAR PILIHAN KATEGORI / SUB KATEGORI KE SEARCH.HTML
         window.saringProdukLangsung = function(mainCat, subCat) {
-            window.tutupSubKategori(); // Tutup laci kategori
-
+            window.tutupSubKategori(); // Tutup laci
             let url = 'search.html?';
-            
             if (subCat === 'Semua') {
-                // Jika pilih "Semua", kita kirim parameter 'category'
                 url += `category=${encodeURIComponent(mainCat)}`;
             } else {
-                // Jika pilih sub spesifik (misal "Baju"), kita kirim parameter 'q' (pencarian teks)
-                // Ditambah category agar spesifik mencarinya di kategori tersebut
                 url += `q=${encodeURIComponent(subCat)}&category=${encodeURIComponent(mainCat)}`;
             }
-
-            // Terbang ke search.html
             window.location.href = url;
         };
 
@@ -778,10 +671,6 @@
             window.addEventListener('popstate', function(event) {
                 let isModalOpen = false;
                 
-                if(document.getElementById('katalogLayarPenuh').style.display === 'flex') {
-                    document.getElementById('katalogLayarPenuh').style.display = 'none';
-                    isModalOpen = true;
-                } 
                 if(document.getElementById('pesananLayarPenuh').style.display === 'flex') {
                     document.getElementById('pesananLayarPenuh').style.display = 'none';
                     isModalOpen = true;
@@ -994,3 +883,6 @@
     </script>
 </body>
 </html>
+
+
+Sudah betul ya ini? Tapi satu lagi ada tulisan lihat semua barang itu arahkan juga dong ke search html jangan ke kotak bawah tapi langsung buka search html dan tampilkan semha barang tidak ada yg difilter
