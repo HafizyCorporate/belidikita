@@ -154,9 +154,24 @@ const verifyAdmin = (req, res, next) => {
 // 🟢 API KOTAK MASUK & LIVE CHAT TOKO
 // ==========================================
 app.post('/api/chat/save', verifyToken, async (req, res) => {
-    const { message, sender } = req.body; 
-    try { await pool.query("INSERT INTO chats (user_id, sender_role, message) VALUES ($1, $2, $3)", [req.user.id, sender, message]); res.json({ success: true }); } catch (err) { res.status(500).json({ success: false }); }
+    const { message, sender, target_user } = req.body; 
+    
+    // Logika Pintar: Jika yang mengirim adalah 'admin', maka pesannya dilempar ke laci ID pembeli (target_user)
+    // Jika yang mengirim adalah 'pembeli', maka pesannya dilempar ke laci ID miliknya sendiri (req.user.id)
+    const pemilikChatId = (sender === 'admin' && target_user) ? target_user : req.user.id;
+
+    try { 
+        await pool.query(
+            "INSERT INTO chats (user_id, sender_role, message) VALUES ($1, $2, $3)", 
+            [pemilikChatId, sender, message]
+        ); 
+        res.json({ success: true }); 
+    } catch (err) { 
+        console.error("Gagal simpan chat:", err);
+        res.status(500).json({ success: false }); 
+    }
 });
+
 
 app.get('/api/chat/me', verifyToken, async (req, res) => {
     try { const result = await pool.query("SELECT * FROM chats WHERE user_id = $1 ORDER BY created_at ASC", [req.user.id]); res.json({ success: true, data: result.rows }); } catch (err) { res.status(500).json({ success: false }); }
