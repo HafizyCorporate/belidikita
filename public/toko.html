@@ -517,6 +517,8 @@
             muatRiwayatChatToko();
         };
 
+       
+        // ✅ 1. FUNGSI BUKA CHAT (ANTI NYASAR)
         window.bukaChatTokoLangsung = function() {
             const token = localStorage.getItem('token');
             if (!token || token.startsWith('token-admin-')) {
@@ -524,21 +526,28 @@
                 setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
                 return;
             }
+
+            const chatModal = document.getElementById('modalChatToko');
+            // Cegah double-klik yang bikin tombol back error
+            if (chatModal.style.display === 'flex') return;
+
             const modalInbox = document.getElementById('modalInbox');
             if (modalInbox) modalInbox.style.display = 'none';
             
-            document.getElementById('modalChatToko').style.display = 'flex';
-            window.history.pushState({ modal: 'chat_langsung' }, "", ""); // Kunci Tombol Back
+            chatModal.style.display = 'flex';
+            // Kunci kuat-kuat di halaman toko.html saat ini
+            window.history.pushState({ modal: 'chat_langsung' }, "", window.location.href); 
             
             if(typeof muatRiwayatChatToko === 'function') muatRiwayatChatToko();
         };
 
+                    // ✅ 2. FUNGSI TUTUP CHAT (MURNI TOMBOL BACK)
         window.tutupChatToko = function() {
-            document.getElementById('modalChatToko').style.display = 'none';
-            window.history.back(); // Trigger popstate
+            // HANYA suruh browser mundur 1 langkah (sinkron dengan tombol fisik HP)
+            // Biarkan fungsi Popstate di bawah yang otomatis mematikan layarnya
+            window.history.back(); 
         };
 
-            
         async function muatRiwayatChatToko() {
             const token = localStorage.getItem('token');
             try {
@@ -836,8 +845,9 @@
             }
         };
         
-                // ==================================================
-        // ✅ PENGENDALI TOMBOL BACK FISIK HP (POPSTATE)
+            
+               // ==================================================
+        // ✅ PENGENDALI TOMBOL BACK FISIK HP (POPSTATE SUPER KETAT)
         // ==================================================
         window.addEventListener('popstate', function(event) {
             const searchModal = document.getElementById('searchLayarPenuh');
@@ -845,24 +855,21 @@
             const chatModal = document.getElementById('modalChatToko');
             const settingModal = document.getElementById('modalSettingToko');
 
-            if(searchModal && searchModal.style.display === 'flex') {
-                searchModal.style.display = 'none';
-            } 
-            else if(chatModal && chatModal.style.display === 'flex') {
+            // Saat dipencet BACK HP, matikan semua modal secara serentak dan paksa!
+            if(searchModal && searchModal.style.display === 'flex') searchModal.style.display = 'none';
+            
+            if(chatModal && chatModal.style.display === 'flex') {
                 chatModal.style.display = 'none';
-                // Jika masuk dari inbox, kembalikan ke inbox. Jika direct, tutup total.
                 if (inboxModal && inboxModal.hasAttribute('data-was-open')) {
                     inboxModal.style.display = 'flex';
                     inboxModal.removeAttribute('data-was-open');
                 }
             } 
-            else if(inboxModal && inboxModal.style.display === 'flex') {
-                inboxModal.style.display = 'none';
-            }
-            else if(settingModal && settingModal.style.display === 'flex') {
-                settingModal.style.display = 'none';
-            }
+            
+            if(inboxModal && inboxModal.style.display === 'flex') inboxModal.style.display = 'none';
+            if(settingModal && settingModal.style.display === 'flex') settingModal.style.display = 'none';
         });
+        
 
         // Modifikasi fungsi pencarian agar dikunci tombol back-nya
         const fungsiAsliPencarian = window.lakukanPencarianKhususToko;
