@@ -158,11 +158,15 @@
         .nav-item:active i { transform: scale(0.8); }
 
 
-        /* ✅ CSS CHAT MODAL TOKO */
-        .chat-toko-modal { display: none; position: fixed; z-index: 8000; left: 0; top: 0; right: 0; bottom: 0; background: #f4f7fa; flex-direction: column; animation: slideInRight 0.3s ease; }
+         /* ✅ CSS MODAL INBOX & CHAT (DIPERBAIKI) */
+        .inbox-modal-container, .chat-toko-modal { display: none; position: fixed; z-index: 8500; left: 0; top: 0; right: 0; bottom: 0; background: #f4f7fa; flex-direction: column; animation: slideInRight 0.3s ease; }
         @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        .chat-toko-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .chat-toko-header i.btn-back { font-size: 20px; color: #0D47A1; cursor: pointer; }
+        
+        .chat-toko-header, .inbox-header { background: #fff; padding: 15px 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100;}
+        .chat-toko-header i, .inbox-header i { font-size: 20px; color: #0D47A1; cursor: pointer; transition: 0.2s; }
+        .chat-toko-header i:active, .inbox-header i:active { transform: scale(0.8); }
+        .inbox-header h2 { font-size: 16px; font-weight: 800; color: #0D47A1; margin: 0; }
+        
         .chat-toko-header .store-profile { display: flex; align-items: center; gap: 10px; flex: 1; }
         .chat-toko-header .store-avatar-chat { width: 35px; height: 35px; background: #0D47A1; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; overflow: hidden; }
         .chat-toko-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
@@ -171,6 +175,7 @@
         .chat-toko-footer { background: #fff; padding: 10px 15px; display: flex; gap: 10px; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .chat-toko-footer input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 20px; background: #f4f7fa; outline: none; font-size: 13px; font-family: 'Montserrat', sans-serif;}
         .chat-toko-footer button { background: #FF9800; color: #fff; width: 40px; height: 40px; border-radius: 50%; border: none; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
 
         #customToast { visibility: hidden; min-width: 280px; margin-left: -140px; background: rgba(13, 71, 161, 0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 9999; left: 50%; bottom: -50px; font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; }
         #customToast.show { visibility: visible; opacity: 1; bottom: 90px; }
@@ -335,14 +340,14 @@
         </a>
     </nav>
     
-        <div id="modalInbox" class="layar-penuh-search" style="z-index: 7500; background: #f4f7fa; position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: none; flex-direction: column; animation: slideInRight 0.3s ease;">
-        <div class="katalog-header" style="border-bottom:1px solid #E1F5FE;">
+            <div id="modalInbox" class="inbox-modal-container">
+        <div class="inbox-header">
             <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
-            <h2 style="font-size: 16px;">Kotak Masuk</h2>
+            <h2>Kotak Masuk</h2>
         </div>
-        <div id="inboxList" style="padding-top: 10px;">
-            <div onclick="window.bukaRuangChat()" style="display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; background: #fff;">
-                <div class="inbox-avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #0D47A1; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden;"><i class="fas fa-store"></i></div>
+        <div id="inboxList" style="flex: 1; overflow-y: auto; padding-top: 5px;">
+            <div onclick="window.bukaRuangChat()" style="display: flex; align-items: center; gap: 15px; padding: 15px 20px; border-bottom: 1px solid #eee; cursor: pointer; background: #fff;">
+                <div class="inbox-avatar" style="width: 50px; height: 50px; border-radius: 50%; background: #0D47A1; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 24px; overflow: hidden; flex-shrink: 0;"><i class="fas fa-store"></i></div>
                 <div style="flex: 1; overflow: hidden;">
                     <div style="font-size: 14px; font-weight: 800; color: #333; margin-bottom: 4px;" id="namaTokoInbox">Belidikita Official</div>
                     <div id="inboxLastMsg" style="font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600;">Memuat pesan terakhir...</div>
