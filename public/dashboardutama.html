@@ -728,7 +728,29 @@
                 }
             }).catch(e => console.log("Gagal memuat promo banner"));
 
+                        // ✅ SISTEM SPLASH SCREEN (ANTI STUCK & SKIP KALAU KLIK BACK)
+            function tutupSplash() {
+                if(document.getElementById('splashScreen')) document.getElementById('splashScreen').style.display = 'none';
+                if(document.getElementById('topHeader')) document.getElementById('topHeader').classList.remove('hidden');
+                if(document.getElementById('mainContent')) document.getElementById('mainContent').classList.remove('hidden');
+                if(document.getElementById('bottomNav')) document.getElementById('bottomNav').classList.remove('hidden');
+                document.body.classList.remove('no-scroll');
+            }
+
+            if (sessionStorage.getItem('sudahBukaApp')) {
+                tutupSplash(); // Kalau back dari pencarian, langsung skip animasi
+            } else {
+                setTimeout(() => {
+                    tutupSplash();
+                    sessionStorage.setItem('sudahBukaApp', 'true');
+                }, 3500); // Putar animasi 3.5 detik untuk pertama kali buka
+            }
+
+            // OBAT ANTI MACET (Memaksa masuk dalam 4 detik bagaimanapun kondisinya)
+            setTimeout(tutupSplash, 4000);
+
             window.history.pushState({ page: 'home' }, "", "");
+
 
             window.addEventListener('popstate', function(event) {
 
