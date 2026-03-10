@@ -703,7 +703,7 @@
         };
 
 
-                             // ✅ AMBIL BANNER PROMO DARI SERVER (DIKEMBALIKAN SEPERTI ASLI DI FOTO)
+                                // ✅ AMBIL BANNER PROMO DARI SERVER (KUNCI MATI JADI BANNER PENDEK)
             fetch('/api/promos').then(res => res.json()).then(result => {
                 if (result.success && result.data && result.data.length > 0) {
                     const slider = document.getElementById('promoSlider');
@@ -716,8 +716,8 @@
                     slider.style.scrollBehavior = 'smooth';
                     
                     result.data.forEach(promo => {
-                        // Dikembalikan ke format asli tanpa batasan aneh-aneh
-                        slider.innerHTML += `<div class="slide" style="min-width:100%; padding:0; overflow:hidden; border-radius:15px; scroll-snap-align:start;"><img src="${promo.media_url}" style="width:100%; height:auto; display:block;"></div>`;
+                        // Tinggi dikunci 140px, gambar tidak akan gepeng melainkan di-crop rapi menyesuaikan bingkai
+                        slider.innerHTML += `<div class="slide" style="min-width:100%; height:140px; padding:0; overflow:hidden; border-radius:15px; scroll-snap-align:start; position:relative; background:#eee;"><img src="${promo.media_url}" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;"></div>`;
                     });
 
                     // Logika Slider Berjalan Otomatis tiap 3 detik
@@ -730,7 +730,7 @@
                     }, 3000);
                 }
             }).catch(e => console.log("Gagal memuat promo banner"));
-         
+
             document.addEventListener("DOMContentLoaded", () => {   // <--- TAMBAHKAN BARIS INI DI SINI
 
             // ✅ SISTEM SPLASH SCREEN (ANTI STUCK & SKIP KALAU KLIK BACK)
