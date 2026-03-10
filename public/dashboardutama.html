@@ -355,9 +355,13 @@
         </div>
     </div>
 
-    <div id="customToast"></div>
+        <div id="customToast"></div>
+    
+    <div id="loadingScreen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.85); backdrop-filter: blur(5px); z-index:9999; flex-direction:column; justify-content:center; align-items:center;">
+        <i class="fas fa-spinner fa-spin" style="font-size: 50px; color: #0D47A1; margin-bottom: 15px;"></i>
+        <h3 style="color: #0D47A1; font-weight: 800;">Mohon tunggu...</h3>
+    </div>
 
-  
 
     <script>
         function showToast(msg, type = 'info') {
@@ -551,9 +555,9 @@
             printWindow.document.close();
         };
                 
-                            // ✅ FUNGSI PENCARIAN (FIXED)
+                     // ✅ FUNGSI PENCARIAN (PAKAI LOADING SCREEN)
         window.lakukanPencarianPintar = function(keyword) {
-            showToast("Mencari barang...", "info"); 
+            document.getElementById('loadingScreen').style.display = 'flex'; // Munculkan Loading
             
             let kw = keyword ? keyword.trim() : '';
             let sortVal = document.getElementById('dashSort') ? document.getElementById('dashSort').value : 'terbaru';
@@ -562,13 +566,13 @@
             
             let url = `search.html?q=${encodeURIComponent(kw)}&sort=${sortVal}&toko=${tokoVal}&lokasi=${lokasiVal}`;
             
-            setTimeout(() => { window.location.href = url; }, 300);
+            setTimeout(() => { window.location.href = url; }, 500);
         };
 
-        // ✅ FUNGSI KLIK KATEGORI (FIXED)
+        // ✅ FUNGSI KLIK KATEGORI (PAKAI LOADING SCREEN)
         window.saringProdukLangsung = function(mainCat, subCat) {
-            showToast(`Membuka etalase ${subCat}...`, "info"); 
             window.tutupSubKategori(); 
+            document.getElementById('loadingScreen').style.display = 'flex'; // Munculkan Loading
             
             let url = 'search.html?';
             if (subCat === 'Semua') {
@@ -577,8 +581,9 @@
                 url += `q=${encodeURIComponent(subCat)}&category=${encodeURIComponent(mainCat)}`;
             }
             
-            setTimeout(() => { window.location.href = url; }, 300);
+            setTimeout(() => { window.location.href = url; }, 500);
         };
+
     
                 
                 
@@ -682,14 +687,25 @@
         };
 
                 document.addEventListener("DOMContentLoaded", () => {
-            // ✅ OBAT ANTI STUCK ANIMASI SPLASH SCREEN
+                        // ✅ KEMBALIKAN DURASI ANIMASI SPLASH SCREEN (3.5 DETIK)
             setTimeout(() => {
                 if(document.getElementById('splashScreen')) document.getElementById('splashScreen').style.display = 'none';
                 if(document.getElementById('topHeader')) document.getElementById('topHeader').classList.remove('hidden');
                 if(document.getElementById('mainContent')) document.getElementById('mainContent').classList.remove('hidden');
                 if(document.getElementById('bottomNav')) document.getElementById('bottomNav').classList.remove('hidden');
                 document.body.classList.remove('no-scroll');
-            }, 1500);
+            }, 3500);
+
+            // ✅ AMBIL BANNER PROMO DARI SERVER
+            fetch('/api/promos').then(res => res.json()).then(result => {
+                if (result.success && result.data && result.data.length > 0) {
+                    const slider = document.getElementById('promoSlider');
+                    slider.innerHTML = ''; // Kosongkan banner default
+                    result.data.forEach(promo => {
+                        slider.innerHTML += `<div class="slide" style="padding:0; overflow:hidden; border-radius:15px;"><img src="${promo.media_url}" style="width:100%; height:100%; object-fit:cover;"></div>`;
+                    });
+                }
+            }).catch(e => console.log("Gagal memuat promo banner"));
 
             window.history.pushState({ page: 'home' }, "", "");
 
