@@ -131,15 +131,15 @@
     <header id="topHeader" class="hidden">
         <div class="header-logo-box"><img src="assets/nama_logo_kamu.png" alt="Logo" class="main-logo-header"></div>
         
-                <div class="header-search" style="display: flex; align-items: center; background: #f4f9ff; border: 2px solid #E1F5FE; border-radius: 20px; padding: 5px 15px; margin: 0 15px; flex: 1; position: relative;">
-            <i class="fas fa-search" style="color: #888; font-size: 13px; cursor:pointer;" onclick="window.lakukanPencarianPintar()"></i>
+                        <div class="header-search" style="display: flex; align-items: center; background: #f4f9ff; border: 2px solid #E1F5FE; border-radius: 20px; padding: 5px 15px; margin: 0 15px; flex: 1; position: relative;">
+            <i class="fas fa-search" style="color: #888; font-size: 13px; cursor:pointer;" onclick="window.lakukanPencarianPintar(document.getElementById('searchInputDashboard').value)"></i>
             
-            <input type="text" id="searchInputDashboard" placeholder="Cari barang..." onkeydown="if(event.key === 'Enter') { event.preventDefault(); window.lakukanPencarianPintar(); }" style="border: none; background: transparent; outline: none; width: 100%; font-size: 12px; font-weight: 600; color: #333; margin-left: 8px;">
+            <input type="text" id="searchInputDashboard" placeholder="Cari barang..." onkeypress="if(event.key === 'Enter') window.lakukanPencarianPintar(this.value)" style="border: none; background: transparent; outline: none; width: 100%; font-size: 12px; font-weight: 600; color: #333; margin-left: 8px;">
             
             <div style="width: 1px; height: 15px; background: #ddd; margin: 0 8px;"></div>
             
             <i class="fas fa-ellipsis-v" style="color: #0D47A1; font-size: 14px; cursor: pointer; padding: 5px;" onclick="document.getElementById('filterDashboardBox').style.display = document.getElementById('filterDashboardBox').style.display === 'none' ? 'block' : 'none'"></i>
-            
+
             <div id="filterDashboardBox" style="display: none; position: absolute; top: 40px; right: 0; background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.15); border-radius: 12px; padding: 15px; width: 200px; z-index: 2000; border: 1px solid #E1F5FE;">
                 <div style="margin-bottom: 10px;">
                     <label style="font-size: 10px; font-weight: bold; color: #888;">Urutkan</label>
@@ -167,8 +167,8 @@
                         <option value="Yogyakarta">Yogyakarta</option>
                     </select>
                 </div>
-                <button type="button" onclick="window.lakukanPencarianPintar()" style="width: 100%; background: #0D47A1; color: #fff; border: none; padding: 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer;">Cari & Filter</button>
-            </div>
+                <button type="button" onclick="window.lakukanPencarianPintar(document.getElementById('searchInputDashboard').value)" style="width: 100%; background: #0D47A1; color: #fff; border: none; padding: 10px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer;">Cari & Filter</button>
+    </div>
         </div>
 
 
@@ -551,31 +551,23 @@
             printWindow.document.close();
         };
                 
-                        // ✅ 1. JAVASCRIPT PENCARIAN (DIPAKSA PINDAH HALAMAN)
-        window.lakukanPencarianPintar = function() {
-            // Munculkan notif agar tahu tombol bereaksi
+                            // ✅ FUNGSI PENCARIAN (FIXED)
+        window.lakukanPencarianPintar = function(keyword) {
             showToast("Mencari barang...", "info"); 
             
-            // Ambil text dari input
-            let inputField = document.getElementById('searchInputDashboard');
-            let kw = inputField ? inputField.value.trim() : ''; 
-            
+            let kw = keyword ? keyword.trim() : '';
             let sortVal = document.getElementById('dashSort') ? document.getElementById('dashSort').value : 'terbaru';
             let tokoVal = document.getElementById('dashToko') ? document.getElementById('dashToko').value : '';
             let lokasiVal = document.getElementById('dashLokasi') ? document.getElementById('dashLokasi').value : '';
             
             let url = `search.html?q=${encodeURIComponent(kw)}&sort=${sortVal}&toko=${tokoVal}&lokasi=${lokasiVal}`;
             
-            // Menggunakan assign dengan sedikit delay agar animasi selesai
-            setTimeout(() => {
-                window.location.assign(url);
-            }, 300);
+            setTimeout(() => { window.location.href = url; }, 300);
         };
 
-        // ✅ 2. JAVASCRIPT SUB-KATEGORI (DIPAKSA PINDAH HALAMAN)
+        // ✅ FUNGSI KLIK KATEGORI (FIXED)
         window.saringProdukLangsung = function(mainCat, subCat) {
             showToast(`Membuka etalase ${subCat}...`, "info"); 
-            
             window.tutupSubKategori(); 
             
             let url = 'search.html?';
@@ -585,12 +577,9 @@
                 url += `q=${encodeURIComponent(subCat)}&category=${encodeURIComponent(mainCat)}`;
             }
             
-            // Menggunakan assign dengan sedikit delay
-            setTimeout(() => {
-                window.location.assign(url);
-            }, 300);
+            setTimeout(() => { window.location.href = url; }, 300);
         };
-
+    
                 
                 
         window.bukaSubKategori = function(mainCat) {
@@ -692,10 +681,20 @@
             aiBody.scrollTop = aiBody.scrollHeight;
         };
 
-        document.addEventListener("DOMContentLoaded", () => {
+                document.addEventListener("DOMContentLoaded", () => {
+            // ✅ OBAT ANTI STUCK ANIMASI SPLASH SCREEN
+            setTimeout(() => {
+                if(document.getElementById('splashScreen')) document.getElementById('splashScreen').style.display = 'none';
+                if(document.getElementById('topHeader')) document.getElementById('topHeader').classList.remove('hidden');
+                if(document.getElementById('mainContent')) document.getElementById('mainContent').classList.remove('hidden');
+                if(document.getElementById('bottomNav')) document.getElementById('bottomNav').classList.remove('hidden');
+                document.body.classList.remove('no-scroll');
+            }, 1500);
+
             window.history.pushState({ page: 'home' }, "", "");
 
             window.addEventListener('popstate', function(event) {
+
                 let isModalOpen = false;
                 
                 if(document.getElementById('pesananLayarPenuh').style.display === 'flex') {
