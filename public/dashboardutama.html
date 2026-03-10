@@ -726,10 +726,13 @@
                         slider.scrollTo({ left: slider.clientWidth * slideIndex, behavior: 'smooth' });
                     }, 3000);
                 }
-            }).catch(e => console.log("Gagal memuat promo banner"));
+                        }).catch(e => console.log("Gagal memuat promo banner"));
 
-                        // ✅ SISTEM SPLASH SCREEN (ANTI STUCK & SKIP KALAU KLIK BACK)
+            document.addEventListener("DOMContentLoaded", () => {   // <--- TAMBAHKAN BARIS INI DI SINI
+
+            // ✅ SISTEM SPLASH SCREEN (ANTI STUCK & SKIP KALAU KLIK BACK)
             function tutupSplash() {
+
                 if(document.getElementById('splashScreen')) document.getElementById('splashScreen').style.display = 'none';
                 if(document.getElementById('topHeader')) document.getElementById('topHeader').classList.remove('hidden');
                 if(document.getElementById('mainContent')) document.getElementById('mainContent').classList.remove('hidden');
