@@ -569,10 +569,14 @@
             setTimeout(() => { window.location.href = url; }, 500);
         };
 
-        // ✅ FUNGSI KLIK KATEGORI (PAKAI LOADING SCREEN)
+                // ✅ FUNGSI KLIK KATEGORI (MURNI PAKAI LOADING SCREEN)
         window.saringProdukLangsung = function(mainCat, subCat) {
             window.tutupSubKategori(); 
-            document.getElementById('loadingScreen').style.display = 'flex'; // Munculkan Loading
+            
+            // Munculkan Loading Screen
+            if(document.getElementById('loadingScreen')) {
+                document.getElementById('loadingScreen').style.display = 'flex';
+            }
             
             let url = 'search.html?';
             if (subCat === 'Semua') {
@@ -581,11 +585,9 @@
                 url += `q=${encodeURIComponent(subCat)}&category=${encodeURIComponent(mainCat)}`;
             }
             
-            setTimeout(() => { window.location.href = url; }, 500);
+            setTimeout(() => { window.location.href = url; }, 300);
         };
 
-    
-                
                 
         window.bukaSubKategori = function(mainCat) {
             document.getElementById('judulSubKategori').innerHTML = `<i class="fas fa-tags" style="color:#FF9800;"></i> Etalase ${mainCat}`;
@@ -686,15 +688,35 @@
             aiBody.scrollTop = aiBody.scrollHeight;
         };
 
-                document.addEventListener("DOMContentLoaded", () => {
-                        // ✅ KEMBALIKAN DURASI ANIMASI SPLASH SCREEN (3.5 DETIK)
-            setTimeout(() => {
+                        // ✅ MATIKAN LOADING SCREEN JIKA USER TEKAN TOMBOL "BACK" DARI HP
+        window.addEventListener('pageshow', function(event) {
+            if(document.getElementById('loadingScreen')) {
+                document.getElementById('loadingScreen').style.display = 'none';
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // ✅ LOGIKA SKIP ANIMASI (JIKA KLIK BACK ATAU SUDAH DIBUKA SEBELUMNYA)
+            if (sessionStorage.getItem('splashSudahMuter')) {
+                // Langsung masuk tanpa animasi
                 if(document.getElementById('splashScreen')) document.getElementById('splashScreen').style.display = 'none';
                 if(document.getElementById('topHeader')) document.getElementById('topHeader').classList.remove('hidden');
                 if(document.getElementById('mainContent')) document.getElementById('mainContent').classList.remove('hidden');
                 if(document.getElementById('bottomNav')) document.getElementById('bottomNav').classList.remove('hidden');
                 document.body.classList.remove('no-scroll');
-            }, 3500);
+            } else {
+                // Putar animasi 3.5 detik KHUSUS PERTAMA KALI BUKA WEB
+                setTimeout(() => {
+                    if(document.getElementById('splashScreen')) document.getElementById('splashScreen').style.display = 'none';
+                    if(document.getElementById('topHeader')) document.getElementById('topHeader').classList.remove('hidden');
+                    if(document.getElementById('mainContent')) document.getElementById('mainContent').classList.remove('hidden');
+                    if(document.getElementById('bottomNav')) document.getElementById('bottomNav').classList.remove('hidden');
+                    document.body.classList.remove('no-scroll');
+                    sessionStorage.setItem('splashSudahMuter', 'true'); // Simpan ingatan
+                }, 3500);
+            }
+
 
             // ✅ AMBIL BANNER PROMO DARI SERVER
             fetch('/api/promos').then(res => res.json()).then(result => {
