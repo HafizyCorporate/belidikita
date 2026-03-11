@@ -73,8 +73,9 @@
             
             btn.innerText = "Memeriksa...";
 
-            try {
-                const res = await fetch('/api/login', {
+                        try {
+                // ✅ Tembak ke API Khusus Admin yang baru kita buat di server.js
+                const res = await fetch('/api/admin/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: usernameInput, password: passwordInput })
