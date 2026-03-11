@@ -67,36 +67,12 @@ app.post('/api/google-login', googleLogin);
 app.post('/api/forgot-password', forgotPassword);
 app.post('/api/reset-password', resetPassword);
 
+// 🟢 JALUR 1: LOGIN KHUSUS PEMBELI (Hanya mencari role biasa)
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body; 
-    
     try {
-        // 1. CEK DULU KE DATABASE: Apakah ini Admin Versacy / Farid?
-        const adminCheck = await pool.query("SELECT * FROM users WHERE role = 'superadmin' AND name = $1", [username]);
-        
-        if (adminCheck.rows.length > 0) {
-            const admin = adminCheck.rows[0];
-            
-            // Cek kecocokan password dari database
-            if (password !== admin.password) {
-                return res.status(401).json({ success: false, message: "🚨 Akses Ditolak! Password Admin Salah." });
-            }
-            
-            // Buat token admin yang mustahil ditebak (Anti-Hack)
-            const randomCode = Math.random().toString(36).substring(2) + Date.now().toString(36);
-            const adminToken = `token-admin-${admin.name}-${randomCode}`;
-            
-            // GEMBOK DATABASE: Hapus sesi admin ini yang nyangkut di device lain (1 Akun = 1 Device)
-            await pool.query("DELETE FROM active_sessions WHERE user_id = $1", [admin.id]);
-            
-            // Pasang sesi baru di Database
-            await pool.query("INSERT INTO active_sessions (user_id, token) VALUES ($1, $2)", [admin.id, adminToken]);
-
-            return res.json({ success: true, message: `Selamat datang kembali, Bos ${admin.name}!`, token: adminToken });
-        }
-
-        // 2. JIKA BUKAN ADMIN (LOGIN PEMBELI BIASA VIA EMAIL)
-        const user = await pool.query('SELECT * FROM users WHERE email = $1', [username]);
+        // Blokir jika Superadmin mencoba masuk lewat form pembeli
+        const user = await pool.query("SELECT * FROM users WHERE email = $1 AND role != 'superadmin'", [username]);
         if (user.rows.length === 0) return res.status(401).json({ success: false, message: "Email atau password salah!" });
 
         const validPassword = await bcrypt.compare(password, user.rows[0].password);
@@ -107,8 +83,37 @@ app.post('/api/login', async (req, res) => {
 
         res.json({ success: true, message: "Login berhasil!", token: token });
     } catch (err) { 
-        console.error("Login Error:", err);
+        console.error("Login Error Pembeli:", err);
         res.status(500).json({ success: false, message: "Server Error saat login." }); 
+    }
+});
+
+// 🔴 JALUR 2: LOGIN KHUSUS ADMIN (Hanya mencari role superadmin)
+app.post('/api/admin/login', async (req, res) => {
+    const { username, password } = req.body; 
+    try {
+        // HANYA cari di database yang rolenya 'superadmin'
+        const adminCheck = await pool.query("SELECT * FROM users WHERE role = 'superadmin' AND name = $1", [username]);
+        
+        if (adminCheck.rows.length === 0) {
+            return res.status(403).json({ success: false, message: "🚨 Akses Ditolak! Jalur ini KHUSUS Admin." });
+        }
+        
+        const admin = adminCheck.rows[0];
+        if (password !== admin.password) {
+            return res.status(401).json({ success: false, message: "🚨 Password Admin Salah." });
+        }
+        
+        const randomCode = Math.random().toString(36).substring(2) + Date.now().toString(36);
+        const adminToken = `token-admin-${admin.name}-${randomCode}`;
+        
+        await pool.query("DELETE FROM active_sessions WHERE user_id = $1", [admin.id]);
+        await pool.query("INSERT INTO active_sessions (user_id, token) VALUES ($1, $2)", [admin.id, adminToken]);
+
+        return res.json({ success: true, message: `Selamat datang, Bos ${admin.name}!`, token: adminToken });
+    } catch (err) { 
+        console.error("Login Error Admin:", err);
+        res.status(500).json({ success: false, message: "Server Error saat login Admin." }); 
     }
 });
 
