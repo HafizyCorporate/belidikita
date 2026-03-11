@@ -95,13 +95,12 @@ header {
 
 /* === 4. KONTEN UTAMA === */
 main { margin-top: 85px !important; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; min-height: 100vh; position: relative; z-index: 10; }
-.slider-container { width: 100%; overflow: hidden; position: relative; padding: 15px; background: transparent; }
-.slider-wrapper { display: flex; transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); width: 300%; }
-.slide { width: 33.33%; min-height: 130px; border-radius: 20px; padding: 20px; color: #fff; display: flex; flex-direction: column; justify-content: center; margin-right: 15px; box-shadow: 0 10px 20px rgba(13, 71, 161, 0.2); position: relative; overflow: hidden; border: 2px solid rgba(255,255,255,0.3); }
-/* Ornamen slide */
-.slide::after { content: '\f66f'; font-family: "Font Awesome 6 Free"; font-weight: 900; position: absolute; right: -10px; bottom: -20px; font-size: 100px; opacity: 0.15; transform: rotate(-15deg); }
-.slide h3 { font-size: 20px; margin-bottom: 5px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
-.slide p { font-size: 13px; opacity: 0.9; font-weight: 600; }
+/* ✅ SETTINGAN SLIDER BANNER PROMO (FOTO ELEGAN & TIDAK PEANG) */
+.slider-container { width: 100%; overflow: hidden; position: relative; padding: 15px 15px 0 15px; background: transparent; box-sizing: border-box; }
+.slider-wrapper { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; scroll-behavior: smooth; }
+.slider-wrapper::-webkit-scrollbar { display: none; }
+.slide { min-width: 100%; aspect-ratio: 21/9; max-height: 150px; border-radius: 15px; overflow: hidden; scroll-snap-align: start; position: relative; padding: 0; box-shadow: 0 5px 15px rgba(0,0,0,0.08); background: #f4f9ff; }
+.slide img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
 
 .scroll-section { padding: 15px 0 15px 15px; background: transparent; }
 .section-header { display: flex; justify-content: space-between; align-items: center; padding-right: 15px; margin-bottom: 15px; }
