@@ -294,7 +294,7 @@
             }
         }
 
-                       // ✅ FUNGSI FILTER BERLAPIS PINTAR (ANTI ERROR & SUPER AKURAT)
+                 // ✅ FUNGSI FILTER BERLAPIS PINTAR (SUPER KEBAL & FLEKSIBEL)
         window.terapkanFilter = function() {
             const grid = document.getElementById('gridHasil');
             const sort = document.getElementById('filterSort').value;
@@ -303,7 +303,7 @@
 
             let filteredData = [...dataSemuaProduk];
 
-            // 1. TAHAP PERTAMA: KUNCI KATEGORI INDUK
+            // 1. TAHAP PERTAMA: KUNCI KATEGORI INDUK (DIJAMIN GAK NYASAR)
             if (paramKategori) {
                 let catKw = paramKategori.toLowerCase().trim(); 
 
@@ -312,21 +312,25 @@
                     let title = (p.title || "").toLowerCase();
                     let catDB = (p.category || "").toLowerCase();
                     
-                    // Deteksi Super Akurat: Cari teks "[kategori: rumah tangga" 
-                    let isKategoriTepat = desc.includes(`[kategori: ${catKw}`);
+                    // Cara Pintar 1: Kita perintahkan mesin membongkar isi kurung [Kategori: ...]
+                    let matchTag = false;
+                    let ekstrakTag = desc.match(/\[kategori:\s*(.*?)\]/);
+                    if (ekstrakTag) {
+                        // Jika di dalam kurung ada kata "rumah tangga", langsung loloskan!
+                        matchTag = ekstrakTag[1].includes(catKw);
+                    }
                     
-                    // Fallback jika ada barang lama yang deskripsinya belum diedit
-                    let isKategoriLama = catDB.includes(catKw) || title.includes(catKw);
+                    // Cara Pintar 2: Fallback (Jaga-jaga buat barang yang diedit manual tanpa tag)
+                    let isFallback = desc.includes(catKw) || title.includes(catKw) || catDB.includes(catKw);
 
-                    return isKategoriTepat || isKategoriLama;
+                    return matchTag || isFallback;
                 });
             }
 
-            // 2. TAHAP KEDUA: CARI SUB-KATEGORI / KATA KUNCI SPESIFIK
+            // 2. TAHAP KEDUA: CARI SUB-KATEGORI (CONTOH: "DISPENSER")
             if (kataKunci) {
                 let cleanKw = kataKunci.toLowerCase().replace(/[\/\-\&,()]/g, ' ');
-                
-                // Buang kata basa-basi biar gak nyasar
+                // Bersihkan kata-kata pengganggu
                 cleanKw = cleanKw.replace(/\b(semua|produk|kategori|barang)\b/g, '').trim(); 
                 
                 let kwArray = cleanKw.split(' ').filter(w => w.trim().length > 2); 
@@ -337,12 +341,11 @@
                         let title = (p.title || "").toLowerCase();
                         let desc = (p.description || "").toLowerCase();
                         
-                        // Cek apakah kata "dispenser" ada di judul atau di deskripsinya
+                        // Karena tag kategorinya juga ikut masuk di deskripsi, mesin pasti menemukan sub-kategorinya di sini!
                         return kwArray.some(word => title.includes(word) || desc.includes(word));
                     });
                 }
             }
-         
 
             if(toko === 'official') {
 
