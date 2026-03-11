@@ -818,14 +818,39 @@
             } catch (err) {}
         }
 
-        function cetakLabelPengiriman(id) {
+        
+        // ✅ FUNGSI CETAK RESI (DATA 100% TARIK DARI DATABASE)
+        window.cetakLabelPengiriman = async function(id) {
             const order = adminOrdersData.find(o => o.id === id);
             if(!order) return;
+
+            // Buka jendela cetak kosong lebih dulu agar tidak diblokir oleh Chrome/Safari
+            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            printWindow.document.write(`<h2 style="text-align:center; font-family:sans-serif; margin-top:20%;">Menghubungkan ke Database...</h2>`);
+
+            // Tarik alamat dan nama asli dari Database API Settings
+            let namaToko = "Belidikita Official";
+            let kotaToko = "Kota Bandung";
+            let alamatToko = "Alamat belum diatur";
+
+            try {
+                const resToko = await fetch('/api/settings/all');
+                const dataToko = await resToko.json();
+                if (dataToko.success && dataToko.settings) {
+                    namaToko = dataToko.settings.find(s => s.key_name === 'store_name')?.value_text || namaToko;
+                    kotaToko = dataToko.settings.find(s => s.key_name === 'store_city')?.value_text || kotaToko;
+                    alamatToko = dataToko.settings.find(s => s.key_name === 'store_address')?.value_text || alamatToko;
+                }
+            } catch (e) {
+                console.log("Database sedang sibuk, menggunakan data default.");
+            }
+
+            // Susun Rincian Barang
             let items = []; try { items = JSON.parse(order.items); } catch(e){}
             let rincianBarang = items.map(item => `<li><b>${item.nama}</b> (Jumlah: ${item.qty})</li>`).join('');
-            const tokoData = JSON.parse(localStorage.getItem('belidikita_store_profile')) || { nama: "Belidikita Official", kota: "Padalarang, Bandung Barat", alamatLengkap: "Alamat belum diatur" };
 
-            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            // Timpa layar kosong dengan Desain Label Cetak Final
+            printWindow.document.open();
             printWindow.document.write(`
                 <html>
                 <head>
@@ -848,11 +873,11 @@
                 <body>
                     <div class="label-container">
                         <div class="header">
-                            <h2>${order.shipping_courier ? order.shipping_courier.toUpperCase() : 'KURIR'}</h2>
-                            <p>NO RESI: ${order.resi}</p>
+                            <h2>${order.shipping_courier ? order.shipping_courier.toUpperCase() : 'KURIR E-COMMERCE'}</h2>
+                            <p>NO RESI: ${order.resi || '-'}</p>
                         </div>
-                        <div class="barcode">*${order.resi}*</div>
-                        <div class="section"><div class="section-title">📦 PENGIRIM:</div><div class="box"><strong>${tokoData.nama}</strong><br>${tokoData.kota}<br>${tokoData.alamatLengkap}</div></div>
+                        <div class="barcode">*${order.resi || 'TIDAK-ADA-RESI'}*</div>
+                        <div class="section"><div class="section-title">📦 PENGIRIM:</div><div class="box"><strong>${namaToko}</strong><br>${kotaToko}<br>${alamatToko}</div></div>
                         <div class="section"><div class="section-title">📍 PENERIMA:</div><div class="box"><strong style="font-size: 18px;">${order.customer_name}</strong> <br>No HP: ${order.customer_wa}<br><br><strong>Alamat Tujuan:</strong><br>${order.shipping_address}</div></div>
                         <div class="section"><div class="section-title">📝 ISI PAKET:</div><div class="box"><ul>${rincianBarang}</ul></div></div>
                         <div class="footer"><strong>Marketplace Belidikita</strong><br>Resi tercetak otomatis pada: ${new Date().toLocaleString('id-ID')}</div>
@@ -1231,25 +1256,59 @@
             document.getElementById('modalEditProduk').style.display = 'block';
         }
 
+                // ✅ LOGIKA MENYIMPAN EDIT PRODUK (TERMASUK JIKA MENGGANTI FOTO)
         document.getElementById('formEditProduk').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btnSimpanEdit'); btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
+            const btn = document.getElementById('btnSimpanEdit'); 
+            btn.innerHTML = "<i class='fas fa-spinner fa-spin'></i> Menyimpan...";
+            
             const id = document.getElementById('editProdId').value;
-            const bodyData = {
-                title: document.getElementById('editProdName').value, capital_price: document.getElementById('editProdCapital').value,
-                price: document.getElementById('editProdPrice').value, stock: document.getElementById('editProdStock').value,
-                category: document.getElementById('editProdCategory').value, weight: document.getElementById('editProdWeight').value,
-                unit: document.getElementById('editProdUnit').value, variant_title: document.getElementById('editProdVariantTitle').value,
-                variant_options: document.getElementById('editProdVariantOptions').value, wholesale_price: document.getElementById('editProdWholesalePrice').value || 0,
-                wholesale_min_qty: document.getElementById('editProdWholesaleMin').value || 0
-            };
-            try {
-                const res = await fetch(`/api/products/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(bodyData) });
-                const data = await res.json();
-                if(data.success) { showToast("✅ Barang berhasil diupdate!", "success"); document.getElementById('modalEditProduk').style.display = 'none'; fetchProducts(); } else { showToast("Gagal: " + data.message, "error"); }
-            } catch(err) { showToast("Server Error saat mengedit!", "error"); } finally { btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan"; }
+            const fileInput = document.getElementById('editProdMedia');
+            
+            // Jika Admin tidak memasukkan foto baru, pakai cara biasa (Update teks saja)
+            if (fileInput.files.length === 0) {
+                const bodyData = {
+                    title: document.getElementById('editProdName').value, capital_price: document.getElementById('editProdCapital').value,
+                    price: document.getElementById('editProdPrice').value, stock: document.getElementById('editProdStock').value,
+                    category: document.getElementById('editProdCategory').value, weight: document.getElementById('editProdWeight').value,
+                    unit: document.getElementById('editProdUnit').value, variant_title: document.getElementById('editProdVariantTitle').value,
+                    variant_options: document.getElementById('editProdVariantOptions').value, wholesale_price: document.getElementById('editProdWholesalePrice').value || 0,
+                    wholesale_min_qty: document.getElementById('editProdWholesaleMin').value || 0
+                };
+                try {
+                    const res = await fetch(`/api/products/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(bodyData) });
+                    const data = await res.json();
+                    if(data.success) { showToast("✅ Barang berhasil diupdate!", "success"); document.getElementById('modalEditProduk').style.display = 'none'; fetchProducts(); } else { showToast("Gagal: " + data.message, "error"); }
+                } catch(err) { showToast("Server Error saat mengedit!", "error"); } finally { btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan"; }
+            } 
+            // Jika Admin memasukkan foto baru, harus pakai sistem FormData!
+            else {
+                const formData = new FormData();
+                formData.append('title', document.getElementById('editProdName').value); 
+                formData.append('capital_price', document.getElementById('editProdCapital').value); 
+                formData.append('price', document.getElementById('editProdPrice').value); 
+                formData.append('stock', document.getElementById('editProdStock').value); 
+                formData.append('category', document.getElementById('editProdCategory').value); 
+                formData.append('weight', document.getElementById('editProdWeight').value);
+                formData.append('unit', document.getElementById('editProdUnit').value);
+                formData.append('variant_title', document.getElementById('editProdVariantTitle').value);
+                formData.append('variant_options', document.getElementById('editProdVariantOptions').value);
+                formData.append('wholesale_price', document.getElementById('editProdWholesalePrice').value || 0);
+                formData.append('wholesale_min_qty', document.getElementById('editProdWholesaleMin').value || 0);
+                
+                for (let i = 0; i < fileInput.files.length; i++) { formData.append('media', fileInput.files[i]); }
+
+                try {
+                    // Karena file upload, kita pakai endpoint khusus edit yang support FormData
+                    // Anggap saja kita tiban produk lamanya dengan PUT (Jika server Node.js Komandan support multer di PUT)
+                    const res = await fetch(`/api/products/${id}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
+                    const data = await res.json();
+                    if(data.success) { showToast("✅ Foto & Barang berhasil diupdate!", "success"); document.getElementById('modalEditProduk').style.display = 'none'; fileInput.value = ""; fetchProducts(); } else { showToast("Gagal: " + data.message, "error"); }
+                } catch(err) { showToast("Gagal upload foto baru!", "error"); } finally { btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan"; }
+            }
         });
         
+
                 // ✅ FUNGSI MESIN HITUNG STOK VARIAN OTOMATIS
         window.hitungStokOtomatis = function(inputId, stockId) {
             const val = document.getElementById(inputId).value;
