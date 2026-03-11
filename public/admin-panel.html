@@ -256,13 +256,11 @@
                     <button onclick="fetchInboxAdmin()" style="background:#ff9800; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-size:11px; cursor:pointer; font-weight:bold; box-shadow: 0 2px 5px rgba(255,152,0,0.3);"><i class="fas fa-sync-alt"></i> Refresh Pesan</button>
                 </h3>
                 <p style="font-size:11px; color:#666; margin-bottom:15px;"><i class="fas fa-info-circle"></i> Klik pada nama pembeli di bawah ini untuk membalas pesan secara manual.</p>
-                <div class="inbox-container" id="inboxAdminList">
+                                <div class="inbox-container" id="inboxAdminList">
                     <div style="text-align:center; padding: 20px; color:#aaa;"><i class="fas fa-spinner fa-spin"></i> Memuat kotak masuk...</div>
                 </div>
             </div>
-
-
-        <div id="kuponSection" class="box admin-section" style="border-top: 4px solid #00AA5B;">
+        </div> <div id="kuponSection" class="box admin-section" style="border-top: 4px solid #00AA5B;">
             <h3><i class="fas fa-ticket-alt"></i> Kelola Kupon Diskon</h3>
             <form id="formUploadKupon" style="margin-bottom: 20px;">
                 <div class="grid-2">
@@ -614,11 +612,13 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3500);
         }
 
-        const token = localStorage.getItem('token');
+                // Token ditarik dari memori sementara (musnah saat tab ditutup)
+        const token = sessionStorage.getItem('token');
         if (!token) { 
             showToast("Sesi habis! Silakan login.", "error"); 
             setTimeout(() => window.location.href = 'login.html', 1500);
         }
+
 
         // ✅ FUNGSI MESIN PENARIK LACI (TAB SWITCHER)
         window.switchTab = function(tabId, element) {
@@ -659,13 +659,14 @@
             window.location.href = 'toko.html'; 
         }
 
-        const doLogout = (e) => {
+                const doLogout = (e) => {
             e.preventDefault();
-            localStorage.removeItem('token'); 
+            sessionStorage.removeItem('token'); // Hapus token dari memori sementara
             sessionStorage.setItem('skipSplash', 'true'); 
             showToast("Mengarahkan ke Halaman Utama...", "success");
             setTimeout(() => window.location.href = 'dashboardutama.html', 1000);
         };
+
         document.getElementById('btnKeluarPC').addEventListener('click', doLogout);
 
         const kamusAdminKategori = {
