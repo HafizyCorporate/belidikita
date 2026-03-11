@@ -13,7 +13,7 @@
         /* ✅ TEMA RAMADHAN HIJAU KHAS LEBARAN */
         body { 
             background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%); 
-            color: #333; padding-bottom: 30px; min-height: 100vh;
+            color: #333; min-height: 100vh;
             background-image: radial-gradient(#A5D6A7 1px, transparent 1px);
             background-size: 20px 20px;
         }
@@ -73,7 +73,7 @@
         .content-wrapper { position: relative; z-index: 10; max-width: 600px; margin: 120px auto 0 auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
         .search-title { font-size: 14px; font-weight: 800; color: #00695C; display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.8); padding: 10px 15px; border-radius: 12px; border: 1px dashed #A5D6A7;}
         
-        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 80px; }
         .product-card { background: rgba(255,255,255,0.9); border: 2px solid #E8F5E9; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: transform 0.2s; position: relative;}
         .product-card:active { transform: scale(0.95); }
         .product-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-bottom: 2px solid #E8F5E9; cursor: pointer; }
@@ -90,19 +90,14 @@
         .empty-state h3 { color: #ff3b30; font-weight: 800; font-size: 16px; margin-bottom: 5px; }
         .empty-state p { color: #888; font-size: 12px; font-weight: 600; }
 
-        /* ✅ CSS CHAT MODAL TEMA RAMADHAN */
-        .chat-toko-modal { display: none; position: fixed; z-index: 8000; left: 0; top: 0; right: 0; bottom: 0; background: #f4f7fa; flex-direction: column; animation: slideInRight 0.3s ease; }
-        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        .chat-toko-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .chat-toko-header i.btn-back { font-size: 20px; color: #00695C; cursor: pointer; }
-        .chat-toko-header .store-profile { display: flex; align-items: center; gap: 10px; flex: 1; }
-        .chat-toko-header .store-avatar-chat { width: 35px; height: 35px; background: #00695C; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; overflow: hidden; }
-        .chat-toko-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-        .chat-msg-store { background: #fff; color: #333; padding: 12px 15px; border-radius: 15px 15px 15px 0; max-width: 80%; align-self: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 13px; line-height: 1.5; border: 1px solid #eee; }
-        .chat-msg-user { background: #E8F5E9; color: #00695C; padding: 12px 15px; border-radius: 15px 15px 0 15px; max-width: 80%; align-self: flex-end; box-shadow: 0 2px 5px rgba(0, 105, 92, 0.1); font-size: 13px; line-height: 1.5; }
-        .chat-toko-footer { background: #fff; padding: 10px 15px; display: flex; gap: 10px; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .chat-toko-footer input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 20px; background: #f4f7fa; outline: none; font-size: 13px; font-family: 'Montserrat', sans-serif;}
-        .chat-toko-footer button { background: #FF9800; color: #fff; width: 40px; height: 40px; border-radius: 50%; border: none; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        /* ✅ CSS NAVBAR BAWAH */
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -5px 25px rgba(0, 105, 92, 0.15); z-index: 1000; border-top: 1px solid #E8F5E9; border-radius: 20px 20px 0 0;}
+        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 10px; font-weight: 700; transition: 0.3s; position: relative; width: 60px;}
+        .nav-item i { font-size: 20px; margin-bottom: 4px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .nav-item.active { color: #00695C; }
+        .nav-item.active i { transform: translateY(-5px) scale(1.1); color: #00AA5B; }
+        .nav-item.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background: #00AA5B; border-radius: 50%; }
+        .nav-item:active i { transform: scale(0.8); }
 
         /* TOAST */
         #customToast { visibility: hidden; min-width: 280px; margin-left: -140px; background: rgba(0, 105, 92, 0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 9999; left: 50%; bottom: -50px; font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; }
@@ -118,14 +113,14 @@
     </div>
 
     <div class="top-header-search">
-        <i class="fas fa-arrow-left btn-back" onclick="window.location.href='dashboardutama.html'"></i>
+        <i class="fas fa-arrow-left btn-back" onclick="window.history.back()"></i>
         <div class="search-bar-active">
             <i class="fas fa-search" style="color: #00695C; font-size: 14px;" onclick="eksekusiPencarian()"></i>
             <input type="text" id="inputSearch" placeholder="Cari barang..." onkeypress="if(event.key === 'Enter') eksekusiPencarian()">
         </div>
         
         <div class="header-icons">
-            <i class="fas fa-envelope" onclick="bukaChatToko()"></i>
+            <i class="fas fa-envelope" onclick="window.location.href='inbox.html'"></i>
             <div class="cart-wrapper" onclick="window.location.href='keranjang.html'">
                 <i class="fas fa-shopping-cart"></i>
                 <span class="cart-badge-search" id="badgeKeranjang">0</span>
@@ -154,11 +149,11 @@
     </div>
 
     <div class="content-wrapper">
-        <div class="search-title" id="judulPencarian"><i class="fas fa-spinner fa-spin"></i> Sedang mencari...</div>
+        <div class="search-title" id="judulPencarian"><i class="fas fa-spinner fa-spin"></i> Memuat Etalase...</div>
         <div class="product-grid" id="gridHasil"></div>
     </div>
 
-        <nav id="bottomNav">
+    <nav id="bottomNav">
         <a href="dashboardutama.html" class="nav-item">
             <i class="fas fa-mosque"></i><span>Beranda</span>
         </a>
@@ -173,27 +168,6 @@
         </a>
     </nav>
 
-
-    <div id="modalChatToko" class="chat-toko-modal">
-        <div class="chat-toko-header">
-            <i class="fas fa-arrow-left btn-back" onclick="tutupChatToko()"></i>
-            <div class="store-profile">
-                <div class="store-avatar-chat"><i class="fas fa-store"></i></div>
-                <div>
-                    <h2 style="font-size: 14px; font-weight: 800; color: #333; margin: 0;" id="chatTokoName">Belidikita Official</h2>
-                    <span style="font-size: 10px; color: #00AA5B;"><i class="fas fa-circle"></i> Online</span>
-                </div>
-            </div>
-        </div>
-        <div class="chat-toko-body" id="chatTokoBody">
-            <div class="chat-msg-store">Halo kak! Ada yang bisa dibantu? 😊</div>
-        </div>
-        <div class="chat-toko-footer">
-            <input type="text" id="chatTokoInput" enterkeyhint="send" placeholder="Ketik pesan..." onkeydown="if(event.key === 'Enter') { event.preventDefault(); kirimChatToko(); }">
-            <button onclick="kirimChatToko()"><i class="fas fa-paper-plane"></i></button>
-        </div>
-    </div>
-
     <div id="customToast"></div>
 
     <script>
@@ -206,33 +180,36 @@
 
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
 
-        // Ambil kata kunci dan parameter dari URL
+        // ✅ AMBIL SEMUA PARAMETER DARI URL (Kategori, Kata Kunci, Sort)
         const urlParams = new URLSearchParams(window.location.search);
         let kataKunci = urlParams.get('q');
+        let paramKategori = urlParams.get('category');
         let paramSort = urlParams.get('sort');
+        let paramLokasi = urlParams.get('lokasi');
         
-        let dataPencarianGlobal = []; // Menyimpan data asli dari database
-
-        // AMBIL DATA TOKO DARI LOCAL STORAGE UNTUK LABEL TAMPILAN
+        let dataSemuaProduk = []; // Menyimpan SELURUH data produk
         let namaTokoGlobal = "Belidikita Official";
         let kotaTokoGlobal = "Kota Bandung";
+
+        // AMBIL DATA TOKO DARI LOCAL STORAGE 
         try {
             const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
             if (storeData && storeData.nama) namaTokoGlobal = storeData.nama;
             if (storeData && storeData.kota) kotaTokoGlobal = storeData.kota;
-            document.getElementById('chatTokoName').innerText = namaTokoGlobal; // Update Nama di Modal Chat
         } catch (e) {}
 
-        // Sinkronisasi dropdown jika ada parameter sort dari dashboard
+        // KETIKA HALAMAN DIMUAT
         document.addEventListener("DOMContentLoaded", () => {
-            if (paramSort) {
-                const sortDropdown = document.getElementById('filterSort');
-                if (sortDropdown) sortDropdown.value = paramSort;
-            }
-            updateBadge(); // Update badge keranjang saat halaman load
+            // Set input dan dropdown sesuai URL
+            if (kataKunci) document.getElementById('inputSearch').value = kataKunci;
+            if (paramSort) document.getElementById('filterSort').value = paramSort;
+            if (paramLokasi) document.getElementById('filterLokasi').value = paramLokasi;
+            
+            updateBadge(); 
+            ambilSemuaDataProduk(); 
         });
 
-        // ✅ LOGIKA UPDATE BADGE KERANJANG
+        // ✅ UPDATE BADGE KERANJANG
         async function updateBadge() {
             const token = localStorage.getItem('token');
             const badge = document.getElementById('badgeKeranjang');
@@ -245,158 +222,81 @@
             } catch(e) {}
         }
 
-        // ✅ LOGIKA CHAT TOKO TERINTEGRASI
-        window.bukaChatToko = function() {
-            const token = localStorage.getItem('token');
-            if (!token || token.startsWith('token-admin-')) {
-                showToast("Silakan login pembeli dulu untuk chat!", "error");
-                setTimeout(() => window.location.href = 'registrasi/loginpembeli.html', 1500);
-                return;
-            }
-            document.getElementById('modalChatToko').style.display = 'flex';
-            muatRiwayatChatToko();
-        };
-
-        window.tutupChatToko = function() {
-            document.getElementById('modalChatToko').style.display = 'none';
-        };
-
-        async function muatRiwayatChatToko() {
-            const token = localStorage.getItem('token');
-            try {
-                const res = await fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } });
-                const result = await res.json();
-                const chatBody = document.getElementById('chatTokoBody');
-                
-                if (result.success && result.data.length > 0) {
-                    chatBody.innerHTML = '';
-                    result.data.forEach(msg => {
-                        let isUser = msg.sender_role === 'pembeli';
-                        let cssClass = isUser ? 'chat-msg-user' : 'chat-msg-store';
-                        let labelAdmin = msg.sender_role === 'admin' ? '<br><small style="color:#00695C; font-weight:bold;">- Admin -</small>' : '';
-                        chatBody.innerHTML += `<div class="${cssClass}">${msg.message} ${labelAdmin}</div>`;
-                    });
-                } else {
-                    chatBody.innerHTML = `<div class="chat-msg-store">Halo kak! Ada yang bisa dibantu mencari barang? 😊</div>`;
-                }
-                chatBody.scrollTop = chatBody.scrollHeight;
-            } catch(e) {}
-        }
-
-        window.kirimChatToko = async function() {
-            const input = document.getElementById('chatTokoInput');
-            const chatBody = document.getElementById('chatTokoBody');
-            const teks = input.value.trim();
-            if (!teks) return;
-            
-            const token = localStorage.getItem('token');
-            
-            chatBody.innerHTML += `<div class="chat-msg-user">${teks}</div>`;
-            input.value = '';
-            chatBody.scrollTop = chatBody.scrollHeight;
-
-            try {
-                await fetch('/api/chat/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ message: teks, sender: 'pembeli' })
-                });
-
-                if(!window.sudahChatDiToko) {
-                    window.sudahChatDiToko = true;
-                    
-                    const idKetik = "ketik-" + Date.now();
-                    chatBody.innerHTML += `<div class="chat-msg-store" id="${idKetik}"><i class="fas fa-ellipsis-h fa-fade"></i> Admin mengetik...</div>`;
-                    chatBody.scrollTop = chatBody.scrollHeight;
-
-                    setTimeout(async () => {
-                        const elemenKetik = document.getElementById(idKetik);
-                        if(elemenKetik) elemenKetik.remove();
-
-                        let autoReplyMsg = "Halo Kak! Pesan Kakak sudah kami terima dan Admin akan segera mengeceknya. Mohon ditunggu ya! 😊";
-                        try {
-                            const resSet = await fetch('/api/settings/autoreply');
-                            const resultSet = await resSet.json();
-                            if(resultSet.success && resultSet.text) autoReplyMsg = resultSet.text;
-                        } catch(err) {}
-
-                        chatBody.innerHTML += `<div class="chat-msg-store">${autoReplyMsg}</div>`;
-                        chatBody.scrollTop = chatBody.scrollHeight;
-                        
-                        await fetch('/api/chat/save', { 
-                            method: 'POST', 
-                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
-                            body: JSON.stringify({ message: autoReplyMsg, sender: 'admin' }) 
-                        });
-                    }, 1500);
-                }
-            } catch(e) {
-                showToast("Gagal mengirim pesan", "error");
-            }
-        };
-
-        // FUNGSI PENCARIAN UTAMA
-        async function muatPencarian(keyword) {
+        // ✅ MESIN PENCARI SAPU JAGAT (AMBIL SEMUA, FILTER DI SINI)
+        async function ambilSemuaDataProduk() {
             const grid = document.getElementById('gridHasil');
             const judul = document.getElementById('judulPencarian');
             
-            if(!keyword || keyword.trim() === '') {
-                judul.innerHTML = `<i class="fas fa-info-circle"></i> Ketik sesuatu untuk mencari`;
-                grid.innerHTML = '';
-                return;
+            // Set Judul Awal
+            if(paramKategori && !kataKunci) {
+                judul.innerHTML = `<i class="fas fa-tags"></i> Etalase ${paramKategori}`;
+            } else if (kataKunci) {
+                judul.innerHTML = `<i class="fas fa-search"></i> Hasil untuk: "${kataKunci}"`;
+            } else {
+                judul.innerHTML = `<i class="fas fa-box-open"></i> Menampilkan Semua Produk`;
             }
 
-            document.getElementById('inputSearch').value = keyword;
-            judul.innerHTML = `<i class="fas fa-search"></i> Hasil untuk: "${keyword}"`;
             grid.innerHTML = '<div style="text-align:center; grid-column:span 2; padding:30px; color:#00695C; font-weight:bold;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
 
             try {
-                const res = await fetch(`/api/products?search=${encodeURIComponent(keyword)}&limit=100`);
+                // Tarik SELURUH data produk (limit dibesarkan agar semua dapet)
+                const res = await fetch('/api/products?limit=500');
                 const result = await res.json();
 
                 if(result.success && result.data.length > 0) {
-                    dataPencarianGlobal = result.data; // Simpan data mentah
-                    terapkanFilter(); // Render dengan filter aktif
+                    dataSemuaProduk = result.data; 
+                    terapkanFilter(); // Jalankan filter
                 } else {
                     grid.innerHTML = `
                         <div class="empty-state">
                             <i class="fas fa-box-open"></i>
-                            <h3>Produk ini belum tersedia 🥺</h3>
-                            <p>Coba gunakan kata kunci yang lain atau cari kategori yang mirip.</p>
+                            <h3>Toko Masih Kosong 🥺</h3>
+                            <p>Belum ada produk yang dijual saat ini.</p>
                         </div>
                     `;
                 }
             } catch(e) {
-                grid.innerHTML = '<div class="empty-state"><p style="color:red;">Gagal terhubung ke Database Pencarian.</p></div>';
+                grid.innerHTML = '<div class="empty-state"><p style="color:red;">Gagal terhubung ke Server Belidikita.</p></div>';
             }
         }
 
-        // FUNGSI FILTER DAN SORTIR
+        // ✅ LOGIKA FILTERING SUPER AKURAT
         window.terapkanFilter = function() {
             const grid = document.getElementById('gridHasil');
             const sort = document.getElementById('filterSort').value;
             const toko = document.getElementById('filterToko').value;
             const lokasi = document.getElementById('filterLokasi').value;
 
-            // Copy data asli agar tidak rusak saat di-filter
-            let filteredData = [...dataPencarianGlobal];
+            // 1. Mulai dari semua data
+            let filteredData = [...dataSemuaProduk];
 
-            // 1. Filter Toko (Official)
-            if(toko === 'official') {
-                filteredData = filteredData.filter(p => true); // Di FASE 1 ini, kita anggap semua Official
+            // 2. Filter Kategori (Jika dari klik Kategori/Sub)
+            if(paramKategori) {
+                filteredData = filteredData.filter(p => {
+                    let cat = (p.category || "").toLowerCase();
+                    return cat.includes(paramKategori.toLowerCase());
+                });
+            }
+
+            // 3. Filter Kata Kunci (Bisa mendeteksi judul, kategori, dan deskripsi)
+            if(kataKunci) {
+                let kw = kataKunci.toLowerCase();
+                filteredData = filteredData.filter(p => {
+                    let title = (p.title || "").toLowerCase();
+                    let cat = (p.category || "").toLowerCase();
+                    let desc = (p.description || "").toLowerCase();
+                    return title.includes(kw) || cat.includes(kw) || desc.includes(kw);
+                });
             }
             
-            // 2. Filter Lokasi
+            // 4. Filter Lokasi
             if(lokasi !== '') {
-                // Cek apakah kota toko mengandung kata dari filter lokasi
-                if(kotaTokoGlobal.toLowerCase().includes(lokasi.toLowerCase())) {
-                    filteredData = filteredData.filter(p => true);
-                } else {
-                    filteredData = []; // Kosongkan jika lokasi toko tidak cocok dengan filter
+                if(!kotaTokoGlobal.toLowerCase().includes(lokasi.toLowerCase())) {
+                    filteredData = []; // Kosongkan jika lokasi toko tidak cocok dengan dropdown
                 }
             }
 
-            // 3. Sortir (Urutkan)
+            // 5. Sortir (Urutkan)
             if(sort === 'termurah') {
                 filteredData.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
             } else if(sort === 'terlaris') {
@@ -406,14 +306,14 @@
                 filteredData.sort((a, b) => parseInt(b.id) - parseInt(a.id));
             }
 
-            // Render ke Layar
+            // 6. RENDER KE LAYAR
             grid.innerHTML = '';
             if(filteredData.length === 0) {
                 grid.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-filter" style="color:#FF9800; font-size:40px;"></i>
-                        <h3 style="color:#FF9800; margin-top:10px;">Gak Ketemu Nih</h3>
-                        <p>Coba ubah pengaturan lokasi atau toko Anda.</p>
+                        <h3 style="color:#FF9800; margin-top:10px;">Barang Gak Ketemu Nih</h3>
+                        <p>Coba gunakan kata kunci yang lebih umum.</p>
                     </div>
                 `;
                 return;
@@ -428,7 +328,6 @@
                 const ratingReal = parseFloat(p.avg_rating) || 0;
                 const tampilanRating = ratingReal > 0 ? ratingReal.toFixed(1) : "0.0";
 
-                // ✅ Label Lokasi & Toko Dinamis (BISA DIKLIK KE TOKO)
                 const htmlLokasiToko = `
                     <div class="p-store-link" onclick="event.stopPropagation(); window.location.href='toko.html'">
                         <i class="fas fa-map-marker-alt" style="color: #00AA5B;"></i> ${kotaTokoGlobal} | <i class="fas fa-check-circle" style="color: #00695C;"></i> ${namaTokoGlobal} <i class="fas fa-chevron-right" style="margin-left:auto; font-size:8px;"></i>
@@ -452,78 +351,24 @@
             });
         }
 
-        // Jika ada enter dari dalam halaman ini, muat ulang pencariannya
+        // ✅ FUNGSI SAAT TOMBOL ENTER DIKTEKAN DI KOTAK PENCARIAN
         function eksekusiPencarian() {
             const val = document.getElementById('inputSearch').value.trim();
             if(val) {
-                // Update URL agar bisa di-back, hilangkan parameter filter lama jika ada
-                window.history.pushState({}, '', `search.html?q=${encodeURIComponent(val)}`);
-                muatPencarian(val);
-            }
-        }
-
-        // Jalankan pencarian pertama kali halaman dibuka
-        muatPencarian(kataKunci);
-
-                /* ✅ CSS NAVBAR BAWAH (Sama seperti Dashboard) */
-        nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -5px 25px rgba(0, 105, 92, 0.15); z-index: 1000; border-top: 1px solid #E8F5E9; border-radius: 20px 20px 0 0;}
-        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 10px; font-weight: 700; transition: 0.3s; position: relative; width: 60px;}
-        .nav-item i { font-size: 20px; margin-bottom: 4px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .nav-item.active { color: #00695C; }
-        .nav-item.active i { transform: translateY(-5px) scale(1.1); color: #00AA5B; }
-        .nav-item.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background: #00AA5B; border-radius: 50%; }
-        .nav-item:active i { transform: scale(0.8); }
-        
-        /* Penyesuaian agar grid hasil tidak tertutup navbar */
-        .product-grid { padding-bottom: 80px; }
-
-                // ==================================================
-        // ✅ SINKRONISASI FOTO PROFIL TOKO KE SEMUA CHAT & INBOX
-        // ==================================================
-        function tampilkanFotoProfilToko() {
-            try {
-                // Ambil data dari penyimpanan browser (Setting Toko)
-                const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
+                // Update variabel global
+                kataKunci = val;
+                paramKategori = null; // Reset kategori jika mencari manual
                 
-                if (storeData && storeData.logo) {
-                    // Buat elemen gambar dengan ukuran pas dan membulat
-                    const imgTag = `<img src="${storeData.logo}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; border: none; outline: none;">`;
-                    
-                    // 1. Ubah logo di daftar Kotak Masuk (Inbox)
-                    document.querySelectorAll('.inbox-avatar').forEach(el => {
-                        el.innerHTML = imgTag;
-                    });
-                    
-                    // 2. Ubah logo di header Chat (Toko, Detail, Search)
-                    document.querySelectorAll('.store-avatar-chat').forEach(el => {
-                        el.innerHTML = imgTag;
-                        el.style.background = "transparent"; // Hilangkan warna background default
-                    });
-                    
-                    // 3. Ubah logo di header Chat (Khusus Dashboard Utama)
-                    const dashboardChatAdmin = document.querySelector('#modalChatAdmin .store-avatar');
-                    if(dashboardChatAdmin) {
-                        dashboardChatAdmin.innerHTML = imgTag;
-                        dashboardChatAdmin.style.background = "transparent";
-                    }
-
-                    // 4. Pastikan juga nama toko di Inbox ikut update (jika ada)
-                    if(storeData.nama) {
-                        document.querySelectorAll('#namaTokoInbox').forEach(el => {
-                            el.innerText = storeData.nama;
-                        });
-                    }
-                }
-            } catch(e) {
-                console.log("Gagal memuat foto profil toko: ", e);
+                // Ubah URL secara diam-diam agar rapi dan bisa di-back
+                window.history.pushState({}, '', `search.html?q=${encodeURIComponent(val)}`);
+                
+                // Update Judul
+                document.getElementById('judulPencarian').innerHTML = `<i class="fas fa-search"></i> Hasil untuk: "${val}"`;
+                
+                // Terapkan filter ulang
+                terapkanFilter();
             }
         }
-
-        // Eksekusi fungsi saat halaman dimuat
-        document.addEventListener("DOMContentLoaded", () => {
-            setTimeout(tampilkanFotoProfilToko, 300); // Jeda sedikit agar elemen HTML siap
-        }
-
     </script>
 </body>
 </html>
