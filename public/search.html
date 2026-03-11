@@ -37,7 +37,8 @@
             padding: 0 15px; z-index: 1000; box-shadow: 0 2px 10px rgba(0, 105, 92, 0.1); 
             border-bottom: 2px solid #A5D6A7; 
         }
-        .top-header-search i.btn-back { font-size: 20px; color: #00695C; cursor: pointer; transition: 0.2s; }
+        .top-header-search a { text-decoration: none; display: flex; align-items: center; }
+        .top-header-search i.btn-back { font-size: 20px; color: #00695C; transition: 0.2s; }
         .top-header-search i.btn-back:active { transform: scale(0.8); }
         
         .search-bar-active { 
@@ -50,8 +51,9 @@
         }
         
         .header-icons { display: flex; gap: 15px; align-items: center; }
-        .header-icons i { font-size: 20px; color: #00695C; cursor: pointer; }
-        .cart-wrapper { position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;}
+        .header-icons i { font-size: 20px; color: #00695C; transition: 0.2s; }
+        .header-icons i:active { transform: scale(0.8); }
+        .cart-wrapper { position: relative; display: flex; align-items: center; justify-content: center; }
         .cart-badge-search { position: absolute; top: -5px; right: -8px; background: #ff3b30; color: #fff; font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 10px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(255,59,48,0.5);}
 
         /* --- FILTER PENCARIAN --- */
@@ -98,12 +100,6 @@
         .nav-item.active i { transform: translateY(-5px) scale(1.1); color: #00AA5B; }
         .nav-item.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background: #00AA5B; border-radius: 50%; }
         .nav-item:active i { transform: scale(0.8); }
-
-        /* TOAST */
-        #customToast { visibility: hidden; min-width: 280px; margin-left: -140px; background: rgba(0, 105, 92, 0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 9999; left: 50%; bottom: -50px; font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; }
-        #customToast.show { visibility: visible; opacity: 1; bottom: 90px; }
-        #customToast.success { background: rgba(0, 170, 91, 0.95); border-color: #A5D6A7; }
-        #customToast.error { background: rgba(255, 59, 48, 0.95); border-color: #FFCDD2; }
     </style>
 </head>
 <body>
@@ -113,18 +109,19 @@
     </div>
 
     <div class="top-header-search">
-        <i class="fas fa-arrow-left btn-back" onclick="window.history.back()"></i>
+        <a href="dashboardutama.html"><i class="fas fa-arrow-left btn-back"></i></a>
+        
         <div class="search-bar-active">
-            <i class="fas fa-search" style="color: #00695C; font-size: 14px;" onclick="eksekusiPencarian()"></i>
+            <i class="fas fa-search" style="color: #00695C; font-size: 14px; cursor: pointer;" onclick="eksekusiPencarian()"></i>
             <input type="text" id="inputSearch" placeholder="Cari barang..." onkeypress="if(event.key === 'Enter') eksekusiPencarian()">
         </div>
         
         <div class="header-icons">
-            <i class="fas fa-envelope" onclick="window.location.href='inbox.html'"></i>
-            <div class="cart-wrapper" onclick="window.location.href='keranjang.html'">
+            <a href="inbox.html"><i class="fas fa-envelope"></i></a>
+            <a href="keranjang.html" class="cart-wrapper">
                 <i class="fas fa-shopping-cart"></i>
                 <span class="cart-badge-search" id="badgeKeranjang">0</span>
-            </div>
+            </a>
         </div>
     </div>
 
@@ -139,17 +136,65 @@
             <option value="official">✅ Official Store</option>
         </select>
         <select id="filterLokasi" onchange="terapkanFilter()">
-            <option value="">📍 Semua Kota</option>
-            <option value="Bandung">Bandung</option>
-            <option value="Jakarta">Jakarta</option>
-            <option value="Surabaya">Surabaya</option>
-            <option value="Semarang">Semarang</option>
-            <option value="Yogyakarta">Yogyakarta</option>
+            <option value="">📍 Seluruh Indonesia</option>
+            <optgroup label="Pulau Sumatera">
+                <option value="Aceh">Aceh</option>
+                <option value="Medan">Medan (Sumut)</option>
+                <option value="Padang">Padang (Sumbar)</option>
+                <option value="Pekanbaru">Pekanbaru (Riau)</option>
+                <option value="Batam">Batam (Kepri)</option>
+                <option value="Palembang">Palembang (Sumsel)</option>
+                <option value="Bandar Lampung">Lampung</option>
+                <option value="Bengkulu">Bengkulu</option>
+                <option value="Jambi">Jambi</option>
+                <option value="Bangka Belitung">Bangka Belitung</option>
+            </optgroup>
+            <optgroup label="Pulau Jawa">
+                <option value="Jakarta">DKI Jakarta</option>
+                <option value="Bandung">Bandung (Jabar)</option>
+                <option value="Bekasi">Bekasi (Jabar)</option>
+                <option value="Bogor">Bogor (Jabar)</option>
+                <option value="Depok">Depok (Jabar)</option>
+                <option value="Tangerang">Tangerang (Banten)</option>
+                <option value="Semarang">Semarang (Jateng)</option>
+                <option value="Surakarta">Solo (Jateng)</option>
+                <option value="Yogyakarta">DI Yogyakarta</option>
+                <option value="Surabaya">Surabaya (Jatim)</option>
+                <option value="Malang">Malang (Jatim)</option>
+            </optgroup>
+            <optgroup label="Bali & Nusa Tenggara">
+                <option value="Bali">Bali (Denpasar)</option>
+                <option value="Mataram">NTB (Mataram)</option>
+                <option value="Kupang">NTT (Kupang)</option>
+            </optgroup>
+            <optgroup label="Pulau Kalimantan">
+                <option value="Pontianak">Kalbar (Pontianak)</option>
+                <option value="Balikpapan">Kaltim (Balikpapan)</option>
+                <option value="Samarinda">Kaltim (Samarinda)</option>
+                <option value="Banjarmasin">Kalsel (Banjarmasin)</option>
+                <option value="Palangkaraya">Kalteng (Palangkaraya)</option>
+                <option value="Tarakan">Kaltara (Tarakan)</option>
+            </optgroup>
+            <optgroup label="Pulau Sulawesi">
+                <option value="Makassar">Sulsel (Makassar)</option>
+                <option value="Manado">Sulut (Manado)</option>
+                <option value="Palu">Sulteng (Palu)</option>
+                <option value="Kendari">Sultra (Kendari)</option>
+                <option value="Gorontalo">Gorontalo</option>
+                <option value="Mamuju">Sulbar (Mamuju)</option>
+            </optgroup>
+            <optgroup label="Maluku & Papua">
+                <option value="Ambon">Maluku (Ambon)</option>
+                <option value="Ternate">Maluku Utara (Ternate)</option>
+                <option value="Jayapura">Papua (Jayapura)</option>
+                <option value="Sorong">Papua Barat Daya (Sorong)</option>
+                <option value="Manokwari">Papua Barat (Manokwari)</option>
+            </optgroup>
         </select>
     </div>
 
     <div class="content-wrapper">
-        <div class="search-title" id="judulPencarian"><i class="fas fa-spinner fa-spin"></i> Memuat Etalase...</div>
+        <div class="search-title" id="judulPencarian"><i class="fas fa-spinner fa-spin"></i> Menghubungkan ke Database...</div>
         <div class="product-grid" id="gridHasil"></div>
     </div>
 
@@ -168,48 +213,34 @@
         </a>
     </nav>
 
-    <div id="customToast"></div>
-
     <script>
-        function showToast(msg, type = 'info') {
-            const toast = document.getElementById("customToast");
-            toast.innerText = msg;
-            toast.className = type + " show";
-            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
-        }
-
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
 
-        // ✅ AMBIL SEMUA PARAMETER DARI URL (Kategori, Kata Kunci, Sort)
+        // AMBIL PARAMETER DARI DASHBOARD
         const urlParams = new URLSearchParams(window.location.search);
         let kataKunci = urlParams.get('q');
         let paramKategori = urlParams.get('category');
         let paramSort = urlParams.get('sort');
+        let paramToko = urlParams.get('toko');
         let paramLokasi = urlParams.get('lokasi');
         
-        let dataSemuaProduk = []; // Menyimpan SELURUH data produk
+        let dataSemuaProduk = []; 
+        
+        // DEFAULT FALLBACK JIKA DATABASE GAGAL
         let namaTokoGlobal = "Belidikita Official";
         let kotaTokoGlobal = "Kota Bandung";
 
-        // AMBIL DATA TOKO DARI LOCAL STORAGE 
-        try {
-            const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
-            if (storeData && storeData.nama) namaTokoGlobal = storeData.nama;
-            if (storeData && storeData.kota) kotaTokoGlobal = storeData.kota;
-        } catch (e) {}
-
-        // KETIKA HALAMAN DIMUAT
         document.addEventListener("DOMContentLoaded", () => {
-            // Set input dan dropdown sesuai URL
+            // Pasang filter sesuai kiriman URL
             if (kataKunci) document.getElementById('inputSearch').value = kataKunci;
             if (paramSort) document.getElementById('filterSort').value = paramSort;
+            if (paramToko) document.getElementById('filterToko').value = paramToko;
             if (paramLokasi) document.getElementById('filterLokasi').value = paramLokasi;
             
             updateBadge(); 
-            ambilSemuaDataProduk(); 
+            ambilDataDatabase(); // Eksekusi Tarik Data
         });
 
-        // ✅ UPDATE BADGE KERANJANG
         async function updateBadge() {
             const token = localStorage.getItem('token');
             const badge = document.getElementById('badgeKeranjang');
@@ -222,12 +253,11 @@
             } catch(e) {}
         }
 
-        // ✅ MESIN PENCARI SAPU JAGAT (AMBIL SEMUA, FILTER DI SINI)
-        async function ambilSemuaDataProduk() {
+        // ✅ MESIN PENCARI MENGAMBIL DATA DARI DATABASE API SERVER
+        async function ambilDataDatabase() {
             const grid = document.getElementById('gridHasil');
             const judul = document.getElementById('judulPencarian');
             
-            // Set Judul Awal
             if(paramKategori && !kataKunci) {
                 judul.innerHTML = `<i class="fas fa-tags"></i> Etalase ${paramKategori}`;
             } else if (kataKunci) {
@@ -236,49 +266,47 @@
                 judul.innerHTML = `<i class="fas fa-box-open"></i> Menampilkan Semua Produk`;
             }
 
-            grid.innerHTML = '<div style="text-align:center; grid-column:span 2; padding:30px; color:#00695C; font-weight:bold;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
-
             try {
-                // Tarik SELURUH data produk (limit dibesarkan agar semua dapet)
-                const res = await fetch('/api/products?limit=500');
+                // 1. TARIK NAMA & KOTA TOKO DARI DATABASE SETTING SEBELUM RENDER PRODUK
+                try {
+                    const resToko = await fetch('/api/settings/all');
+                    const dataToko = await resToko.json();
+                    if (dataToko.success && dataToko.settings) {
+                        const dbName = dataToko.settings.find(s => s.key_name === 'store_name')?.value_text;
+                        const dbCity = dataToko.settings.find(s => s.key_name === 'store_city')?.value_text;
+                        if(dbName) namaTokoGlobal = dbName;
+                        if(dbCity) kotaTokoGlobal = dbCity;
+                    }
+                } catch(e) { console.log("Info: Memakai fallback lokal karena API setting belum siap"); }
+
+                // 2. TARIK SEMUA DATA PRODUK DARI DATABASE
+                const res = await fetch('/api/products?limit=1000');
                 const result = await res.json();
 
                 if(result.success && result.data.length > 0) {
                     dataSemuaProduk = result.data; 
-                    terapkanFilter(); // Jalankan filter
+                    terapkanFilter(); // Saring setelah sukses ditarik
                 } else {
-                    grid.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-box-open"></i>
-                            <h3>Toko Masih Kosong 🥺</h3>
-                            <p>Belum ada produk yang dijual saat ini.</p>
-                        </div>
-                    `;
+                    grid.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i><h3>Toko Masih Kosong 🥺</h3><p>Belum ada produk yang dijual saat ini.</p></div>`;
                 }
             } catch(e) {
-                grid.innerHTML = '<div class="empty-state"><p style="color:red;">Gagal terhubung ke Server Belidikita.</p></div>';
+                grid.innerHTML = '<div class="empty-state"><p style="color:red;">Gagal terhubung ke Database Belidikita.</p></div>';
             }
         }
 
-        // ✅ LOGIKA FILTERING SUPER AKURAT
+        // ✅ FUNGSI FILTER BERLAPIS
         window.terapkanFilter = function() {
             const grid = document.getElementById('gridHasil');
             const sort = document.getElementById('filterSort').value;
             const toko = document.getElementById('filterToko').value;
             const lokasi = document.getElementById('filterLokasi').value;
 
-            // 1. Mulai dari semua data
             let filteredData = [...dataSemuaProduk];
 
-            // 2. Filter Kategori (Jika dari klik Kategori/Sub)
             if(paramKategori) {
-                filteredData = filteredData.filter(p => {
-                    let cat = (p.category || "").toLowerCase();
-                    return cat.includes(paramKategori.toLowerCase());
-                });
+                filteredData = filteredData.filter(p => (p.category || "").toLowerCase().includes(paramKategori.toLowerCase()));
             }
 
-            // 3. Filter Kata Kunci (Bisa mendeteksi judul, kategori, dan deskripsi)
             if(kataKunci) {
                 let kw = kataKunci.toLowerCase();
                 filteredData = filteredData.filter(p => {
@@ -289,33 +317,31 @@
                 });
             }
             
-            // 4. Filter Lokasi
-            if(lokasi !== '') {
-                if(!kotaTokoGlobal.toLowerCase().includes(lokasi.toLowerCase())) {
-                    filteredData = []; // Kosongkan jika lokasi toko tidak cocok dengan dropdown
-                }
+            if(toko === 'official') {
+                filteredData = filteredData.filter(p => true); 
             }
 
-            // 5. Sortir (Urutkan)
+            // CEK LOKASI PRODUK (Prioritas: Lokasi Asli Produk -> Lokasi Global Toko)
+            if(lokasi !== '') {
+                filteredData = filteredData.filter(p => {
+                    let productCity = (p.location || p.kota || kotaTokoGlobal).toLowerCase();
+                    return productCity.includes(lokasi.toLowerCase());
+                });
+            }
+
+            // SORTIR TERLARIS / TERMURAH
             if(sort === 'termurah') {
                 filteredData.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
             } else if(sort === 'terlaris') {
                 filteredData.sort((a, b) => (parseInt(b.sold_count) || 0) - (parseInt(a.sold_count) || 0));
             } else {
-                // Terbaru (Default ID terbesar)
                 filteredData.sort((a, b) => parseInt(b.id) - parseInt(a.id));
             }
 
-            // 6. RENDER KE LAYAR
+            // MUNCULKAN HASIL
             grid.innerHTML = '';
             if(filteredData.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-filter" style="color:#FF9800; font-size:40px;"></i>
-                        <h3 style="color:#FF9800; margin-top:10px;">Barang Gak Ketemu Nih</h3>
-                        <p>Coba gunakan kata kunci yang lebih umum.</p>
-                    </div>
-                `;
+                grid.innerHTML = `<div class="empty-state"><i class="fas fa-filter" style="color:#FF9800; font-size:40px;"></i><h3 style="color:#FF9800; margin-top:10px;">Barang Gak Ketemu Nih</h3><p>Coba gunakan kata kunci atau ubah provinsi/kota Anda.</p></div>`;
                 return;
             }
 
@@ -328,9 +354,12 @@
                 const ratingReal = parseFloat(p.avg_rating) || 0;
                 const tampilanRating = ratingReal > 0 ? ratingReal.toFixed(1) : "0.0";
 
+                // Menampilkan lokasi yang diikat langsung ke barang tsb atau fallback ke kota toko
+                let displayKota = p.location || p.kota || kotaTokoGlobal;
+
                 const htmlLokasiToko = `
                     <div class="p-store-link" onclick="event.stopPropagation(); window.location.href='toko.html'">
-                        <i class="fas fa-map-marker-alt" style="color: #00AA5B;"></i> ${kotaTokoGlobal} | <i class="fas fa-check-circle" style="color: #00695C;"></i> ${namaTokoGlobal} <i class="fas fa-chevron-right" style="margin-left:auto; font-size:8px;"></i>
+                        <i class="fas fa-map-marker-alt" style="color: #00AA5B;"></i> ${displayKota} | <i class="fas fa-check-circle" style="color: #00695C;"></i> ${namaTokoGlobal} <i class="fas fa-chevron-right" style="margin-left:auto; font-size:8px;"></i>
                     </div>
                 `;
 
@@ -351,21 +380,13 @@
             });
         }
 
-        // ✅ FUNGSI SAAT TOMBOL ENTER DIKTEKAN DI KOTAK PENCARIAN
         function eksekusiPencarian() {
             const val = document.getElementById('inputSearch').value.trim();
             if(val) {
-                // Update variabel global
                 kataKunci = val;
-                paramKategori = null; // Reset kategori jika mencari manual
-                
-                // Ubah URL secara diam-diam agar rapi dan bisa di-back
+                paramKategori = null; 
                 window.history.pushState({}, '', `search.html?q=${encodeURIComponent(val)}`);
-                
-                // Update Judul
                 document.getElementById('judulPencarian').innerHTML = `<i class="fas fa-search"></i> Hasil untuk: "${val}"`;
-                
-                // Terapkan filter ulang
                 terapkanFilter();
             }
         }
