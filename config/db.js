@@ -12,7 +12,6 @@ const pool = new Pool({
 });
 
 const initDB = async () => {
-    // Kita jalankan query secara berurutan agar jika 1 gagal, kita tahu yang mana.
     
     const createTables = `
         CREATE TABLE IF NOT EXISTS users ( id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL, email VARCHAR(100) UNIQUE NOT NULL, password VARCHAR(255), otp VARCHAR(10), is_verified BOOLEAN DEFAULT FALSE, google_id VARCHAR(255), role VARCHAR(20) DEFAULT 'pembeli', avatar_url VARCHAR(255), bio TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP );
@@ -96,7 +95,6 @@ const initDB = async () => {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
-        -- ✅ PENGGANTI LOCAL STORAGE: KERANJANG BELANJA
         CREATE TABLE IF NOT EXISTS carts (
             id SERIAL PRIMARY KEY,
             user_id INT REFERENCES users(id) ON DELETE CASCADE,
@@ -106,7 +104,6 @@ const initDB = async () => {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
-        -- ✅ PENGGANTI SESSION STORAGE: ANTRIAN CHECKOUT SEMENTARA
         CREATE TABLE IF NOT EXISTS checkout_sessions (
             id SERIAL PRIMARY KEY,
             user_id INT REFERENCES users(id) ON DELETE CASCADE UNIQUE,
@@ -114,15 +111,21 @@ const initDB = async () => {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
-        -- ✅ PENGGANTI LOCAL STORAGE ADMIN: PENGATURAN TOKO (Auto Reply dll)
         CREATE TABLE IF NOT EXISTS store_settings (
             id SERIAL PRIMARY KEY,
             setting_key VARCHAR(50) UNIQUE NOT NULL,
             setting_value TEXT
         );
+
+        -- ✅ TABEL BARU: KONTROL LOGIN LANGSUNG DARI DATABASE
+        CREATE TABLE IF NOT EXISTS active_sessions (
+            id SERIAL PRIMARY KEY,
+            user_id INT REFERENCES users(id) ON DELETE CASCADE,
+            token TEXT UNIQUE NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
     `;
 
-    // Modifikasi tabel jika ada kolom baru (Tanpa menghapus data lama)
     const alterTables = `
         ALTER TABLE products ADD COLUMN IF NOT EXISTS category VARCHAR(50) DEFAULT 'biasa';
         ALTER TABLE products ADD COLUMN IF NOT EXISTS capital_price DECIMAL(12,2) DEFAULT 0;
@@ -151,12 +154,12 @@ const initDB = async () => {
         ALTER TABLE orders ADD COLUMN IF NOT EXISTS return_reject_reason TEXT;
     `;
 
-        // ✅ INDEXING DATABASE AGAR SUPER CEPAT
     const createIndexes = `
         CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
         CREATE INDEX IF NOT EXISTS idx_products_title ON products USING GIN (to_tsvector('simple', title));
         CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
         CREATE INDEX IF NOT EXISTS idx_orders_userid ON orders(user_id);
+        CREATE INDEX IF NOT EXISTS idx_active_sessions_token ON active_sessions(token);
     `;
 
     try {
@@ -165,19 +168,29 @@ const initDB = async () => {
         await pool.query(alterTables);
         await pool.query(createIndexes); 
         
-        // Suntikkan default Auto Reply agar tidak kosong saat admin pertama kali buka
+        // Suntikkan default Auto Reply
         await pool.query(`
             INSERT INTO store_settings (setting_key, setting_value) 
             VALUES ('autoreply', 'Halo Kak! Pesan diterima. Admin akan segera merespon.') 
             ON CONFLICT (setting_key) DO NOTHING;
         `);
 
-        console.log("✅ SUKSES! Database 'belidikita' siap dengan Keranjang Server-Side!");
+        // ✅ SUNTIKKAN 2 USER SPESIFIK (VERSACY & FARID) SEBAGAI SUPER ADMIN
+        // Catatan: Email ini hanya sebagai "ID unik" agar tidak bentrok di Database.
+        // Password kita simpan langsung agar bisa dicocokkan di backend login.
+        await pool.query(`
+            INSERT INTO users (name, email, password, role, is_verified) 
+            VALUES 
+            ('Versacy', 'versacy@admin.com', '08556545', 'superadmin', true),
+            ('Farid', 'farid@admin.com', '11223344', 'superadmin', true)
+            ON CONFLICT (email) DO UPDATE 
+            SET password = EXCLUDED.password, role = 'superadmin', name = EXCLUDED.name;
+        `);
+
+        console.log("✅ SUKSES! Database siap. Tabel Sesi Aktif dan 2 Akses Admin telah dikunci!");
     } catch (err) {
         console.error("❌ GAGAL MEMBANGUN TABEL:", err.message);
     }
 };
 
 module.exports = { pool, initDB };
-
-   
