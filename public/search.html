@@ -294,7 +294,7 @@
             }
         }
 
-                 // ✅ FUNGSI FILTER BERLAPIS PINTAR (SUPER KEBAL & FLEKSIBEL)
+                         // ✅ FUNGSI FILTER BERLAPIS PINTAR (HYBRID: TAG + KAMUS PENYELAMAT BARANG LAMA)
         window.terapkanFilter = function() {
             const grid = document.getElementById('gridHasil');
             const sort = document.getElementById('filterSort').value;
@@ -303,34 +303,55 @@
 
             let filteredData = [...dataSemuaProduk];
 
-            // 1. TAHAP PERTAMA: KUNCI KATEGORI INDUK (DIJAMIN GAK NYASAR)
+            // 1. TAHAP PERTAMA: KUNCI KATEGORI INDUK
             if (paramKategori) {
                 let catKw = paramKategori.toLowerCase().trim(); 
+
+                // KAMUS PENYELAMAT: Kalau barang lama belum ada tag [Kategori], mesin akan melacak lewat nama barangnya!
+                const kamusAlias = {
+                    'sembako': ['beras', 'minyak', 'gula', 'mie', 'telur', 'galon', 'gas', 'kopi', 'teh'], // "air" Dihapus agar dispenser aman!
+                    'fashion': ['baju', 'celana', 'jaket', 'hijab', 'sepatu', 'tas', 'pakaian', 'kaos', 'kemeja', 'gamis', 'tunik', 'rok', 'pria', 'wanita', 'anak'],
+                    'elektronik': ['hp', 'charger', 'headset', 'powerbank', 'smartwatch', 'kabel', 'handphone', 'audio', 'earphone', 'tv', 'televisi'],
+                    'rumah': ['dapur', 'dispenser', 'rice cooker', 'blender', 'kebersihan', 'sapu', 'panci', 'piring', 'gelas', 'wajan', 'setrika', 'kipas'],
+                    'beauty': ['skincare', 'makeup', 'parfum', 'bodycare', 'haircare', 'kosmetik', 'lipstik', 'bedak', 'serum', 'lotion'],
+                    'bayi': ['popok', 'susu', 'bayi', 'stroller', 'ibu', 'botol'],
+                    'komputer': ['keyboard', 'mouse', 'laptop', 'flashdisk', 'harddisk', 'pc', 'monitor', 'printer', 'ssd'],
+                    'otomotif': ['oli', 'motor', 'mobil', 'helm', 'ban', 'lampu', 'spion', 'wiper', 'busi', 'velg'],
+                    'olahraga': ['olahraga', 'gym', 'jersey', 'tenda', 'sepeda', 'raket', 'bola', 'barbel'],
+                    'makanan': ['snack', 'frozen', 'kopi', 'minuman', 'makanan', 'kue', 'cemilan', 'roti', 'coklat', 'keripik'],
+                    'buku': ['buku', 'novel', 'atk', 'kantor', 'sekolah', 'kertas', 'pulpen', 'pensil', 'komik'],
+                    'mainan': ['mainan', 'action figure', 'puzzle', 'musik', 'boneka', 'lego', 'game', 'robot'],
+                    'ibadah': ['sajadah', 'mukena', 'sarung', 'quran', 'tasbih', 'peci', 'muslim', 'koko']
+                };
+
+                let aliasWords = [catKw]; 
+                for (let key in kamusAlias) {
+                    if (catKw.includes(key)) {
+                        aliasWords = aliasWords.concat(kamusAlias[key]);
+                    }
+                }
 
                 filteredData = filteredData.filter(p => {
                     let desc = (p.description || "").toLowerCase();
                     let title = (p.title || "").toLowerCase();
-                    let catDB = (p.category || "").toLowerCase();
                     
-                    // Cara Pintar 1: Kita perintahkan mesin membongkar isi kurung [Kategori: ...]
+                    // Prioritas 1: Cek Tag Kategori Resmi (Buat barang yang baru di-upload/edit)
                     let matchTag = false;
                     let ekstrakTag = desc.match(/\[kategori:\s*(.*?)\]/);
                     if (ekstrakTag) {
-                        // Jika di dalam kurung ada kata "rumah tangga", langsung loloskan!
                         matchTag = ekstrakTag[1].includes(catKw);
                     }
                     
-                    // Cara Pintar 2: Fallback (Jaga-jaga buat barang yang diedit manual tanpa tag)
-                    let isFallback = desc.includes(catKw) || title.includes(catKw) || catDB.includes(catKw);
+                    // Prioritas 2: Jika gak ada Tag, tembak pakai Kamus Penyelamat
+                    let matchAlias = aliasWords.some(word => title.includes(word) || desc.includes(word));
 
-                    return matchTag || isFallback;
+                    return matchTag || matchAlias;
                 });
             }
 
-            // 2. TAHAP KEDUA: CARI SUB-KATEGORI (CONTOH: "DISPENSER")
+            // 2. TAHAP KEDUA: CARI KATA KUNCI (Contoh: mencari "Dispenser" di dalam Rumah Tangga)
             if (kataKunci) {
                 let cleanKw = kataKunci.toLowerCase().replace(/[\/\-\&,()]/g, ' ');
-                // Bersihkan kata-kata pengganggu
                 cleanKw = cleanKw.replace(/\b(semua|produk|kategori|barang)\b/g, '').trim(); 
                 
                 let kwArray = cleanKw.split(' ').filter(w => w.trim().length > 2); 
@@ -340,8 +361,6 @@
                     filteredData = filteredData.filter(p => {
                         let title = (p.title || "").toLowerCase();
                         let desc = (p.description || "").toLowerCase();
-                        
-                        // Karena tag kategorinya juga ikut masuk di deskripsi, mesin pasti menemukan sub-kategorinya di sini!
                         return kwArray.some(word => title.includes(word) || desc.includes(word));
                     });
                 }
