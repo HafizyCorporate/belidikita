@@ -521,7 +521,7 @@
                     </div>
                 </div>
 
-                <div class="grid-2" style="background: #E8F5E9; padding: 10px; border-radius: 8px; border-left: 4px solid #4CAF50; margin-bottom: 12px;">
+                                <div class="grid-2" style="background: #E8F5E9; padding: 10px; border-radius: 8px; border-left: 4px solid #4CAF50; margin-bottom: 12px;">
                     <div class="form-group" style="margin-bottom:0;">
                         <label style="color:#2E7D32;">Harga Grosir Baru</label>
                         <input type="number" id="editProdWholesalePrice" value="0">
@@ -532,8 +532,36 @@
                     </div>
                 </div>
 
+                <div class="grid-2" style="background: #f4f9ff; padding: 15px; border-radius: 12px; border: 1px dashed #81D4FA; margin-bottom: 12px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="color:#0D47A1;"><i class="fas fa-list"></i> Kategori Produk</label>
+                        <select id="editMainCategory" required onchange="ubahEditSubKategori()">
+                            <option value="">-- Pilih Kategori --</option>
+                            <option value="Sembako">Sembako & Kebutuhan Rumah</option>
+                            <option value="Fashion">Fashion</option>
+                            <option value="Elektronik">Elektronik</option>
+                            <option value="Rumah Tangga">Peralatan Rumah Tangga</option>
+                            <option value="Beauty">Beauty & Skincare</option>
+                            <option value="Ibu & Bayi">Ibu & Bayi</option>
+                            <option value="Komputer">Komputer & Aksesoris</option>
+                            <option value="Otomotif">Otomotif</option>
+                            <option value="Olahraga">Olahraga & Outdoor</option>
+                            <option value="Makanan">Makanan & Minuman</option>
+                            <option value="Buku">Buku & Alat Tulis</option>
+                            <option value="Mainan">Mainan & Hobi</option>
+                            <option value="Ibadah">Perlengkapan Ibadah</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="color:#0D47A1;"><i class="fas fa-tags"></i> Sub Kategori</label>
+                        <select id="editSubCategory" required>
+                            <option value="">-- Pilih Sub Kategori --</option>
+                        </select>
+                    </div>
+                </div>
              
                 <div class="grid-3" style="background:#f4f7fa; padding:10px; border-radius:8px; border-left: 4px solid #1976D2; margin-bottom: 12px;">
+
                     <div class="form-group" style="margin-bottom:0;">
                         <label>Satuan</label>
                         <input type="text" id="editProdUnit" required>
@@ -568,6 +596,10 @@
                 <div class="form-group">
                     <label>Berat Barang (Gram)</label>
                     <input type="number" id="editProdWeight" required>
+                </div>
+                                <div class="form-group">
+                    <label>Deskripsi Barang</label>
+                    <textarea id="editProdDesc" rows="3" required></textarea>
                 </div>
                 <button type="submit" class="btn-submit" id="btnSimpanEdit" style="background: #ff9800;"><i class="fas fa-save"></i> Simpan Perubahan</button>
             </form>
@@ -685,9 +717,19 @@
             'Ibadah': ['Sajadah', 'Mukena', 'Sarung', 'Al-Qur’an']
         };
 
-        function ubahSubKategori() {
+                function ubahSubKategori() {
             const main = document.getElementById('mainCategory').value;
             const subSelect = document.getElementById('subCategory');
+            subSelect.innerHTML = '<option value="">-- Pilih Sub Kategori --</option>';
+            if(main && kamusAdminKategori[main]) {
+                kamusAdminKategori[main].forEach(sub => { subSelect.innerHTML += `<option value="${sub}">${sub}</option>`; });
+            }
+        }
+
+        // ✅ TAMBAHAN: Fungsi untuk form edit
+        function ubahEditSubKategori() {
+            const main = document.getElementById('editMainCategory').value;
+            const subSelect = document.getElementById('editSubCategory');
             subSelect.innerHTML = '<option value="">-- Pilih Sub Kategori --</option>';
             if(main && kamusAdminKategori[main]) {
                 kamusAdminKategori[main].forEach(sub => { subSelect.innerHTML += `<option value="${sub}">${sub}</option>`; });
@@ -920,7 +962,7 @@
                             <td style="color:#00AA5B; font-weight:bold;">${stok}</td>
                             <td style="color:#ff5722; font-weight:bold;">${priceRp} / ${satuan} ${infoGrosir}</td>
                             <td>
-                                <button class="btn-aksi btn-edit" onclick="bukaEditProduk(${prod.id}, '${prod.title.replace(/'/g, "\\'")}', ${prod.capital_price || 0}, ${prod.price}, ${stok}, '${prod.category}', ${weight}, '${satuan}', '${prod.variant_title || ''}', '${prod.variant_options || ''}', ${prod.wholesale_price || 0}, ${prod.wholesale_min_qty || 0})"><i class="fas fa-edit"></i> Edit</button>
+                                <button class="btn-aksi btn-edit" onclick="bukaEditProduk(${prod.id}, '${prod.title.replace(/'/g, "\\'")}', ${prod.capital_price || 0}, ${prod.price}, ${stok}, '${prod.category}', ${weight}, '${satuan}', '${prod.variant_title || ''}', '${prod.variant_options || ''}', ${prod.wholesale_price || 0}, ${prod.wholesale_min_qty || 0}, '${encodeURIComponent(prod.description || '')}')"><i class="fas fa-edit"></i> Edit</button>
                                 <button class="btn-aksi btn-hapus" onclick="konfirmasiHapus('products', ${prod.id})"><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>`;
@@ -1240,13 +1282,14 @@
             } catch(err) {} finally { btn.innerHTML = "<i class='fas fa-cloud-upload-alt'></i> Pasang Banner Promo"; }
         });
 
-        function bukaEditProduk(id, title, capital, price, stock, category, weight, unit, varTitle, varOptions, wsPrice, wsMin) {
+                // ✅ BUKA MODAL EDIT DAN PECAH KATEGORINYA
+        function bukaEditProduk(id, title, capital, price, stock, category, weight, unit, varTitle, varOptions, wsPrice, wsMin, descEncoded) {
             document.getElementById('editProdId').value = id; 
             document.getElementById('editProdName').value = title;
             document.getElementById('editProdCapital').value = capital; 
             document.getElementById('editProdPrice').value = price;
             document.getElementById('editProdStock').value = stock; 
-            document.getElementById('editProdCategory').value = category;
+            document.getElementById('editProdCategory').value = category; 
             document.getElementById('editProdWeight').value = weight;
             document.getElementById('editProdUnit').value = unit || 'Pcs';
             document.getElementById('editProdVariantTitle').value = varTitle || '';
@@ -1254,10 +1297,29 @@
             document.getElementById('editProdWholesalePrice').value = wsPrice || 0;
             document.getElementById('editProdWholesaleMin').value = wsMin || 0;
 
+            // Ekstrak Kategori Asli dari Deskripsi
+            let descAsli = descEncoded ? decodeURIComponent(descEncoded) : '';
+            let mainCat = ''; let subCat = '';
+
+            const catMatch = descAsli.match(/\[Kategori: (.*?) - (.*?)\]/);
+            if (catMatch) {
+                mainCat = catMatch[1];
+                subCat = catMatch[2];
+                // Hapus tulisan [Kategori: ...] agar tidak numpuk di Textarea
+                descAsli = descAsli.replace(/\[Kategori: .*? - .*?\]\n\n/, ''); 
+                descAsli = descAsli.replace(/\[Kategori: .*? - .*?\]\n/, '');
+                descAsli = descAsli.replace(/\[Kategori: .*? - .*?\]/, '');
+            }
+
+            document.getElementById('editMainCategory').value = mainCat;
+            ubahEditSubKategori(); // Panggil agar Dropdown SubKategori otomatis terisi
+            document.getElementById('editSubCategory').value = subCat;
+            document.getElementById('editProdDesc').value = descAsli.trim();
+
             document.getElementById('modalEditProduk').style.display = 'block';
         }
 
-                // ✅ LOGIKA MENYIMPAN EDIT PRODUK (TERMASUK JIKA MENGGANTI FOTO)
+        // ✅ SIMPAN PERUBAHAN EDIT
         document.getElementById('formEditProduk').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSimpanEdit'); 
@@ -1266,7 +1328,9 @@
             const id = document.getElementById('editProdId').value;
             const fileInput = document.getElementById('editProdMedia');
             
-            // Jika Admin tidak memasukkan foto baru, pakai cara biasa (Update teks saja)
+            // Gabungkan kembali Kategori ke dalam Deskripsi
+            const finalDesc = `[Kategori: ${document.getElementById('editMainCategory').value} - ${document.getElementById('editSubCategory').value}]\n\n${document.getElementById('editProdDesc').value}`;
+
             if (fileInput.files.length === 0) {
                 const bodyData = {
                     title: document.getElementById('editProdName').value, capital_price: document.getElementById('editProdCapital').value,
@@ -1274,7 +1338,8 @@
                     category: document.getElementById('editProdCategory').value, weight: document.getElementById('editProdWeight').value,
                     unit: document.getElementById('editProdUnit').value, variant_title: document.getElementById('editProdVariantTitle').value,
                     variant_options: document.getElementById('editProdVariantOptions').value, wholesale_price: document.getElementById('editProdWholesalePrice').value || 0,
-                    wholesale_min_qty: document.getElementById('editProdWholesaleMin').value || 0
+                    wholesale_min_qty: document.getElementById('editProdWholesaleMin').value || 0,
+                    description: finalDesc // ✅ Tambahan dikirim ke Server
                 };
                 try {
                     const res = await fetch(`/api/products/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(bodyData) });
@@ -1282,7 +1347,6 @@
                     if(data.success) { showToast("✅ Barang berhasil diupdate!", "success"); document.getElementById('modalEditProduk').style.display = 'none'; fetchProducts(); } else { showToast("Gagal: " + data.message, "error"); }
                 } catch(err) { showToast("Server Error saat mengedit!", "error"); } finally { btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan"; }
             } 
-            // Jika Admin memasukkan foto baru, harus pakai sistem FormData!
             else {
                 const formData = new FormData();
                 formData.append('title', document.getElementById('editProdName').value); 
@@ -1296,18 +1360,18 @@
                 formData.append('variant_options', document.getElementById('editProdVariantOptions').value);
                 formData.append('wholesale_price', document.getElementById('editProdWholesalePrice').value || 0);
                 formData.append('wholesale_min_qty', document.getElementById('editProdWholesaleMin').value || 0);
+                formData.append('description', finalDesc); // ✅ Tambahan dikirim ke Server
                 
                 for (let i = 0; i < fileInput.files.length; i++) { formData.append('media', fileInput.files[i]); }
 
                 try {
-                    // Karena file upload, kita pakai endpoint khusus edit yang support FormData
-                    // Anggap saja kita tiban produk lamanya dengan PUT (Jika server Node.js Komandan support multer di PUT)
                     const res = await fetch(`/api/products/${id}`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` }, body: formData });
                     const data = await res.json();
                     if(data.success) { showToast("✅ Foto & Barang berhasil diupdate!", "success"); document.getElementById('modalEditProduk').style.display = 'none'; fileInput.value = ""; fetchProducts(); } else { showToast("Gagal: " + data.message, "error"); }
                 } catch(err) { showToast("Gagal upload foto baru!", "error"); } finally { btn.innerHTML = "<i class='fas fa-save'></i> Simpan Perubahan"; }
             }
         });
+
         
 
                 // ✅ FUNGSI MESIN HITUNG STOK VARIAN OTOMATIS
