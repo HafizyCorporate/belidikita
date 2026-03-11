@@ -294,7 +294,7 @@
             }
         }
 
-                    // ✅ FUNGSI FILTER BERLAPIS PINTAR (DENGAN KAMUS ALIAS KATEGORI)
+                        // ✅ FUNGSI FILTER BERLAPIS PINTAR (KUNCI KATEGORI KETAT ANTI BOCOR)
         window.terapkanFilter = function() {
             const grid = document.getElementById('gridHasil');
             const sort = document.getElementById('filterSort').value;
@@ -303,66 +303,41 @@
 
             let filteredData = [...dataSemuaProduk];
 
-            // LOGIKA PINTAR GABUNGAN: KATEGORI + KATA KUNCI
-            if (paramKategori || kataKunci) {
-                let catKw = (paramKategori || "").toLowerCase();
+            // 1. TAHAP PERTAMA: KUNCI KATEGORI SECARA KETAT (Agar tidak bocor ke kategori lain)
+            if (paramKategori) {
+                let catKw = paramKategori.toLowerCase();
                 
-                // 💡 KAMUS PINTAR: Agar "Semua Fashion" menarik barang meski judulnya cuma "Kemeja"
-                const kamusAlias = {
-                    'sembako': ['beras', 'minyak', 'gula', 'mie', 'telur', 'air', 'galon', 'gas', 'sembako', 'kopi', 'teh'],
-                    'fashion': ['baju', 'celana', 'jaket', 'jacket', 'hijab', 'sepatu', 'tas', 'pakaian', 'fashion', 'kaos', 'kemeja', 'gamis', 'tunik', 'rok', 'pria', 'wanita', 'anak'],
-                    'elektronik': ['hp', 'charger', 'headset', 'powerbank', 'smartwatch', 'elektronik', 'kabel', 'handphone', 'audio', 'earphone'],
-                    'rumah': ['dapur', 'dispenser', 'rice cooker', 'blender', 'kebersihan', 'sapu', 'panci', 'rumah', 'piring', 'gelas', 'wajan', 'setrika'],
-                    'beauty': ['skincare', 'makeup', 'parfum', 'bodycare', 'haircare', 'kosmetik', 'kecantikan', 'lipstik', 'bedak', 'serum', 'lotion'],
-                    'bayi': ['popok', 'susu', 'bayi', 'baby', 'stroller', 'mainan bayi', 'ibu', 'botol bayi'],
-                    'komputer': ['keyboard', 'mouse', 'laptop', 'flashdisk', 'harddisk', 'pc', 'monitor', 'komputer', 'printer', 'ssd'],
-                    'otomotif': ['oli', 'motor', 'mobil', 'helm', 'ban', 'lampu', 'otomotif', 'spion', 'wiper', 'busi', 'velg'],
-                    'olahraga': ['olahraga', 'gym', 'jersey', 'tenda', 'botol', 'sepeda', 'raket', 'bola', 'sepatu sport', 'barbel'],
-                    'makanan': ['snack', 'frozen', 'kopi', 'minuman', 'makanan', 'kue', 'cemilan', 'roti', 'coklat', 'keripik'],
-                    'buku': ['buku', 'novel', 'atk', 'kantor', 'sekolah', 'kertas', 'pulpen', 'pensil', 'komik'],
-                    'mainan': ['mainan', 'action figure', 'puzzle', 'musik', 'boneka', 'lego', 'mobil', 'game', 'robot'],
-                    'ibadah': ['sajadah', 'mukena', 'sarung', 'quran', 'tasbih', 'peci', 'ibadah', 'muslim', 'koko', 'hijab']
-                };
-
-                // Kumpulkan semua kata alias yang cocok dengan kategori yang di-klik
-                let aliasWords = [catKw]; 
-                for (let key in kamusAlias) {
-                    if (catKw.includes(key)) {
-                        aliasWords = aliasWords.concat(kamusAlias[key]);
-                    }
-                }
-
-                // Siapkan Kata Kunci Sub-Kategori / Pencarian Bebas
-                let kwArray = [];
-                if (kataKunci) {
-                    let cleanKw = kataKunci.toLowerCase().replace(/[\/\-\&,()]/g, ' ');
-                    kwArray = cleanKw.split(' ').filter(w => w.trim().length > 2); 
-                    if (kwArray.length === 0) kwArray = [kataKunci.toLowerCase().trim()];
-                }
-
                 filteredData = filteredData.filter(p => {
-                    let title = (p.title || "").toLowerCase();
                     let cat = (p.category || "").toLowerCase();
                     let desc = (p.description || "").toLowerCase();
                     
-                    // CEK KATEGORI INDUK: Apakah produk ini punya salah satu kata dari Kamus Alias?
-                    let matchKategori = aliasWords.some(word => title.includes(word) || cat.includes(word) || desc.includes(word));
+                    // Karena di Admin Panel kita sudah menyuntikkan [Kategori: Sembako - Beras] ke dalam deskripsi, 
+                    // Kita bisa melacaknya dengan sangat akurat tanpa nyasar ke judul barang lain!
+                    let matchDescCat = desc.includes(`[kategori: ${catKw}`);
+                    let matchMainCat = cat.includes(catKw);
                     
-                    // CEK KATA KUNCI SPESIFIK (Sub-Kategori)
-                    let matchKataKunci = false;
-                    if (kwArray.length > 0) {
-                        matchKataKunci = kwArray.some(word => title.includes(word) || cat.includes(word) || desc.includes(word));
-                    }
-
-                    if (paramKategori && kataKunci) {
-                        return matchKataKunci; // Kondisi A: Klik Sub-Kategori (Misal: Jaket)
-                    } else if (paramKategori && !kataKunci) {
-                        return matchKategori;  // Kondisi B: Klik "Semua Produk Fashion" (Pakai Kamus Alias)
-                    } else if (!paramKategori && kataKunci) {
-                        return matchKataKunci; // Kondisi C: Pencarian lewat kotak Search
-                    }
-                    return true;
+                    return matchDescCat || matchMainCat;
                 });
+            }
+
+            // 2. TAHAP KEDUA: CARI KATA KUNCI (Cari barang di DALAM kategori yang sudah dikunci tadi)
+            if (kataKunci) {
+                let cleanKw = kataKunci.toLowerCase().replace(/[\/\-\&,()]/g, ' ');
+                // Abaikan kata-kata umum seperti "semua" atau "produk" agar pencarian sub-kategori lebih akurat
+                cleanKw = cleanKw.replace(/\b(semua|produk)\b/g, '').trim(); 
+                
+                let kwArray = cleanKw.split(' ').filter(w => w.trim().length > 2); 
+                if (kwArray.length === 0 && cleanKw.length > 0) kwArray = [cleanKw];
+
+                if (kwArray.length > 0) {
+                    filteredData = filteredData.filter(p => {
+                        let title = (p.title || "").toLowerCase();
+                        let cat = (p.category || "").toLowerCase();
+                        let desc = (p.description || "").toLowerCase();
+                        
+                        return kwArray.some(word => title.includes(word) || cat.includes(word) || desc.includes(word));
+                    });
+                }
             }
 
             if(toko === 'official') {
