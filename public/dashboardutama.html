@@ -720,14 +720,25 @@
                         slider.innerHTML += `<div class="slide" style="min-width:100%; height:140px; padding:0; overflow:hidden; border-radius:15px; scroll-snap-align:start; background:#f4f9ff; display:flex; justify-content:center; align-items:center;"><img src="${promo.media_url}" style="width:100%; height:100%; object-fit:contain;"></div>`;
                     });
 
-                    // Logika Slider Berjalan Otomatis tiap 3 detik
-                    let slideIndex = 0;
-                    const totalSlides = result.data.length;
-                    setInterval(() => {
-                        if(!slider) return;
-                        slideIndex = (slideIndex + 1) % totalSlides;
-                        slider.scrollTo({ left: slider.clientWidth * slideIndex, behavior: 'smooth' });
-                    }, 3000);
+                                        // ✅ LOGIKA SLIDER OTOMATIS (DIPERLAMBAT & LEBIH HALUS)
+                    if (result.data.length > 1) {
+                        let slideIndex = 0;
+                        setInterval(() => {
+                            if(!slider) return;
+                            
+                            slideIndex++;
+                            
+                            // Jika sudah mentok di gambar terakhir, kembali pelan-pelan ke awal
+                            if (slideIndex >= result.data.length) {
+                                slideIndex = 0;
+                                slider.scrollTo({ left: 0, behavior: 'smooth' });
+                            } else {
+                                // Geser ke banner berikutnya
+                                slider.scrollTo({ left: slider.clientWidth * slideIndex, behavior: 'smooth' });
+                            }
+                        }, 4500); // Jeda 4,5 detik agar pembeli sempat baca promonya
+                    }
+
                 }
             }).catch(e => console.log("Gagal memuat promo banner"));
 
