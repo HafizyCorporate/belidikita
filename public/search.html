@@ -294,7 +294,7 @@
             }
         }
 
-        // ✅ FUNGSI FILTER BERLAPIS
+        // ✅ FUNGSI FILTER BERLAPIS PINTAR
         window.terapkanFilter = function() {
             const grid = document.getElementById('gridHasil');
             const sort = document.getElementById('filterSort').value;
@@ -303,27 +303,43 @@
 
             let filteredData = [...dataSemuaProduk];
 
-            if(paramKategori) {
-                filteredData = filteredData.filter(p => (p.category || "").toLowerCase().includes(paramKategori.toLowerCase()));
-            }
-
-                        if(kataKunci) {
-                // Bersihkan simbol aneh dan pecah jadi array kata
-                let cleanKw = kataKunci.toLowerCase().replace(/[\/\-\&,]/g, ' ');
-                let kwArray = cleanKw.split(' ').filter(w => w.trim().length > 2); // Ambil kata > 2 huruf
-                if(kwArray.length === 0) kwArray = [kataKunci.toLowerCase().trim()]; // Fallback kata pendek
+            // LOGIKA PINTAR GABUNGAN: KATEGORI + KATA KUNCI
+            if (paramKategori || kataKunci) {
+                let catKw = (paramKategori || "").toLowerCase();
+                
+                let kwArray = [];
+                if (kataKunci) {
+                    // Bersihkan karakter aneh seperti ( / & , ) dan pecah jadi array per-kata
+                    let cleanKw = kataKunci.toLowerCase().replace(/[\/\-\&,()]/g, ' ');
+                    kwArray = cleanKw.split(' ').filter(w => w.trim().length > 2); // Ambil kata > 2 huruf
+                    if (kwArray.length === 0) kwArray = [kataKunci.toLowerCase().trim()];
+                }
 
                 filteredData = filteredData.filter(p => {
                     let title = (p.title || "").toLowerCase();
                     let cat = (p.category || "").toLowerCase();
                     let desc = (p.description || "").toLowerCase();
                     
-                    // Filter lolos jika ada SALAH SATU kata kunci di dalam judul, kategori, atau deskripsi
-                    return kwArray.some(word => title.includes(word) || cat.includes(word) || desc.includes(word));
+                    // Cek Kecocokan Kategori Induk (Cari di kolom kategori ATAU judul)
+                    let matchKategori = cat.includes(catKw) || title.includes(catKw);
+                    
+                    // Cek Kecocokan Sub-Kategori / Kata Kunci (Apakah ada SALAH SATU kata yang cocok?)
+                    let matchKataKunci = kwArray.some(word => title.includes(word) || cat.includes(word) || desc.includes(word));
+
+                    if (paramKategori && kataKunci) {
+                        // KONDISI A: Klik Sub-Kategori (Misal Fashion -> Baju pria / wanita / anak)
+                        return matchKataKunci;
+                    } else if (paramKategori && !kataKunci) {
+                        // KONDISI B: Klik Kategori Induk -> "Semua Produk Fashion"
+                        return matchKategori;
+                    } else if (!paramKategori && kataKunci) {
+                        // KONDISI C: Ketik manual di kotak pencarian
+                        return matchKataKunci;
+                    }
+                    return true;
                 });
             }
 
-            
             if(toko === 'official') {
                 filteredData = filteredData.filter(p => true); 
             }
