@@ -69,12 +69,33 @@ app.post('/api/reset-password', resetPassword);
 
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body; 
-    const admins = [{ username: "Versacy", password: "08556645" }, { username: "Farid", password: "11223344" }];
-    const validAdmin = admins.find(a => a.username === username && a.password === password);
-
-    if (validAdmin) return res.json({ success: true, message: `Selamat datang, Admin ${validAdmin.username}!`, token: `token-admin-${validAdmin.username}` });
-
+    
     try {
+        // 1. CEK DULU KE DATABASE: Apakah ini Admin Versacy / Farid?
+        const adminCheck = await pool.query("SELECT * FROM users WHERE role = 'superadmin' AND name = $1", [username]);
+        
+        if (adminCheck.rows.length > 0) {
+            const admin = adminCheck.rows[0];
+            
+            // Cek kecocokan password dari database
+            if (password !== admin.password) {
+                return res.status(401).json({ success: false, message: "🚨 Akses Ditolak! Password Admin Salah." });
+            }
+            
+            // Buat token admin yang mustahil ditebak (Anti-Hack)
+            const randomCode = Math.random().toString(36).substring(2) + Date.now().toString(36);
+            const adminToken = `token-admin-${admin.name}-${randomCode}`;
+            
+            // GEMBOK DATABASE: Hapus sesi admin ini yang nyangkut di device lain (1 Akun = 1 Device)
+            await pool.query("DELETE FROM active_sessions WHERE user_id = $1", [admin.id]);
+            
+            // Pasang sesi baru di Database
+            await pool.query("INSERT INTO active_sessions (user_id, token) VALUES ($1, $2)", [admin.id, adminToken]);
+
+            return res.json({ success: true, message: `Selamat datang kembali, Bos ${admin.name}!`, token: adminToken });
+        }
+
+        // 2. JIKA BUKAN ADMIN (LOGIN PEMBELI BIASA VIA EMAIL)
         const user = await pool.query('SELECT * FROM users WHERE email = $1', [username]);
         if (user.rows.length === 0) return res.status(401).json({ success: false, message: "Email atau password salah!" });
 
@@ -85,7 +106,10 @@ app.post('/api/login', async (req, res) => {
         const token = jwt.sign({ id: user.rows[0].id, role: user.rows[0].role }, JWT_SECRET, { expiresIn: '7d' });
 
         res.json({ success: true, message: "Login berhasil!", token: token });
-    } catch (err) { res.status(500).json({ success: false, message: "Server Error saat login." }); }
+    } catch (err) { 
+        console.error("Login Error:", err);
+        res.status(500).json({ success: false, message: "Server Error saat login." }); 
+    }
 });
 
 app.post('/api/ai/search', askAI);
@@ -144,11 +168,33 @@ app.get('/api/products', async (req, res) => {
 app.get('/api/promos', getPromos); 
 app.get('/api/forum', getPosts);          
 
-const verifyAdmin = (req, res, next) => {
+// ✅ MIDDLEWARE PERTAHANAN ADMIN (WAJIB CEK DATABASE)
+const verifyAdmin = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    if (authHeader && authHeader.startsWith('Bearer token-admin-')) { req.user = { id: 1, role: 'admin' }; return next(); }
+    
+    if (authHeader && authHeader.startsWith('Bearer token-admin-')) { 
+        const token = authHeader.split(' ')[1];
+        
+        try {
+            // CEK KE DATABASE: Apakah token admin ini terdaftar di buku tamu?
+            const checkSession = await pool.query('SELECT * FROM active_sessions WHERE token = $1', [token]);
+            
+            if (checkSession.rows.length === 0) {
+                return res.status(403).json({ success: false, message: "🚨 PENYUSUP DIBLOKIR: Sesi Admin tidak valid atau Anda telah login di perangkat lain!" });
+            }
+            
+            // Lolos Verifikasi Database, Berikan Akses Spesial Admin
+            req.user = { id: checkSession.rows[0].user_id, role: 'admin' }; 
+            return next(); 
+        } catch(err) {
+            return res.status(500).json({ success: false, message: "Server error mengecek gembok sesi."});
+        }
+    }
+    
+    // Jika bukan token admin, lempar ke verifikasi pembeli biasa
     verifyToken(req, res, next);
 };
+
 
 // ==========================================
 // 🟢 API KOTAK MASUK & LIVE CHAT TOKO
