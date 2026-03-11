@@ -364,7 +364,7 @@
     </div>
 
 
-    <script>
+        <script>
         function showToast(msg, type = 'info') {
             const toast = document.getElementById("customToast");
             if(!toast) return;
@@ -555,10 +555,9 @@
             printWindow.document.write(`<html><body style="font-family:Arial; padding:20px; text-align:center;"><h2>LABEL RETUR</h2><p>PESANAN: #ORD-${order.id}</p><p>Kirim balik ke: Belidikita Official (082240400388)</p><p>Alamat: Padalarang, Bandung Barat</p><script>window.onload=function(){window.print();}<\/script></body></html>`);
             printWindow.document.close();
         };
-                
-                    // ✅ 1. FUNGSI PENCARIAN (PAKAI LOADING SCREEN)
+
+        // ✅ 1. FUNGSI PENCARIAN (PAKAI LOADING SCREEN)
         window.lakukanPencarianPintar = function(keyword) {
-            // INI KUNCINYA: Tarik HTML loadingScreen dan munculkan ke layar
             if(document.getElementById('loadingScreen')) {
                 document.getElementById('loadingScreen').style.display = 'flex';
             }
@@ -573,11 +572,10 @@
             setTimeout(() => { window.location.href = url; }, 300);
         };
 
-        // ✅ 2. FUNGSI KLIK KATEGORI (PAKAI LOADING SCREEN)
+        // ✅ 2. FUNGSI KLIK KATEGORI (PAKAI LOADING SCREEN MUTER)
         window.saringProdukLangsung = function(mainCat, subCat) {
             window.tutupSubKategori(); 
             
-            // INI KUNCINYA: Tarik HTML loadingScreen dan munculkan ke layar
             if(document.getElementById('loadingScreen')) {
                 document.getElementById('loadingScreen').style.display = 'flex';
             }
@@ -594,13 +592,11 @@
 
         // ✅ 3. ANTI-NYANGKUT SAAT KLIK TOMBOL BACK DI HP
         window.addEventListener('pageshow', function(event) {
-            // Jika user menekan tombol 'Back' dari search.html, loading layarnya kita matikan lagi
             if(document.getElementById('loadingScreen')) {
                 document.getElementById('loadingScreen').style.display = 'none';
             }
         });
       
-                
         window.bukaSubKategori = function(mainCat) {
             document.getElementById('judulSubKategori').innerHTML = `<i class="fas fa-tags" style="color:#FF9800;"></i> Etalase ${mainCat}`;
             const container = document.getElementById('listSubKategori');
@@ -635,26 +631,6 @@
         window.tutupSubKategori = function() {
             document.getElementById('modalSubKategori').style.display = 'none';
             document.body.style.overflow = 'auto'; 
-        };
-
-                        // ✅ FUNGSI KLIK KATEGORI (MUNCULKAN LOADING MUTER)
-        window.saringProdukLangsung = function(mainCat, subCat) {
-            window.tutupSubKategori(); // Tutup laci
-            
-            // Munculkan Loading Muter (Toast dibuang)
-            if(document.getElementById('loadingScreen')) {
-                document.getElementById('loadingScreen').style.display = 'flex';
-            }
-            
-            let url = 'search.html?';
-            if (subCat === 'Semua') {
-                url += `category=${encodeURIComponent(mainCat)}`;
-            } else {
-                url += `q=${encodeURIComponent(subCat)}&category=${encodeURIComponent(mainCat)}`;
-            }
-            
-            // Pindah halaman
-            setTimeout(() => { window.location.assign(url); }, 300);
         };
 
         window.bukaChatAI = function() {
@@ -702,45 +678,45 @@
             aiBody.scrollTop = aiBody.scrollHeight;
         };
 
+        window.klikIkonAdmin = function() {
+            const token = localStorage.getItem('token');
+            if (token && token.startsWith('token-admin-')) {
+                document.getElementById('modalConfirmAdmin').style.display = 'flex';
+            } else {
+                showToast("Mengarahkan ke Gerbang Admin...", "info");
+                setTimeout(() => {
+                    window.location.href = 'login.html'; 
+                }, 1000);
+            }
+        };
 
-                                 // ✅ AMBIL BANNER PROMO DARI SERVER (GAMBAR DIPAKSA MEMENUHI JENDELA)
-            fetch('/api/promos').then(res => res.json()).then(result => {
-                if (result.success && result.data && result.data.length > 0) {
-                    const slider = document.getElementById('promoSlider');
-                    slider.innerHTML = ''; 
+        function tampilkanFotoProfilToko() {
+            try {
+                const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
+                
+                if (storeData && storeData.logo) {
+                    const imgTag = `<img src="${storeData.logo}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; border: none; outline: none;">`;
                     
-                    slider.style.display = 'flex';
-                    slider.style.overflowX = 'auto';
-                    slider.style.scrollSnapType = 'x mandatory';
-                    slider.style.scrollbarWidth = 'none'; 
-                    slider.style.scrollBehavior = 'smooth';
+                    document.querySelectorAll('.inbox-avatar').forEach(el => {
+                        el.innerHTML = imgTag;
+                    });
                     
-                    result.data.forEach(promo => {
-                        // Memaksa gambar ditarik (stretch) memenuhi kotak tanpa sisa ruang & tidak terpotong
-                        slider.innerHTML += `<div class="slide" style="min-width:100%; height:150px; padding:0; overflow:hidden; border-radius:15px; scroll-snap-align:start;"><img src="${promo.media_url}" style="width:100%; height:100%; object-fit:fill;"></div>`;
-                    });           
-
-                      // ✅ LOGIKA SLIDER OTOMATIS (ANTI SKIP & SINKRON DENGAN LAYAR)
-                    if (result.data.length > 1) {
-                        setInterval(() => {
-                            if(!slider) return;
-                            let currentIndex = Math.round(slider.scrollLeft / slider.clientWidth);
-                            let nextIndex = currentIndex + 1;
-                            if (nextIndex >= result.data.length) {
-                                nextIndex = 0;
-                            }
-                            slider.scrollTo({ left: slider.clientWidth * nextIndex, behavior: 'smooth' });
-                        }, 4000); 
-                    }
+                    document.querySelectorAll('.store-avatar-chat').forEach(el => {
+                        el.innerHTML = imgTag;
+                        el.style.background = "transparent"; 
+                    });
                 }
-            }).catch(e => console.log("Gagal memuat promo banner"));
-                }
+            } catch(e) {}
+        }
 
-            document.addEventListener("DOMContentLoaded", () => {   // <--- TAMBAHKAN BARIS INI DI SINI
 
-            // ✅ SISTEM SPLASH SCREEN (ANTI STUCK & SKIP KALAU KLIK BACK)
+        // ====================================================================
+        // ✅ SEMUA FUNGSI SAAT HALAMAN DIMUAT (LOAD) DITETAPKAN DI SINI
+        // ====================================================================
+        document.addEventListener("DOMContentLoaded", () => {   
+
+            // 1. SISTEM SPLASH SCREEN (ANTI STUCK & SKIP KALAU KLIK BACK)
             function tutupSplash() {
-
                 if(document.getElementById('splashScreen')) document.getElementById('splashScreen').style.display = 'none';
                 if(document.getElementById('topHeader')) document.getElementById('topHeader').classList.remove('hidden');
                 if(document.getElementById('mainContent')) document.getElementById('mainContent').classList.remove('hidden');
@@ -759,14 +735,12 @@
 
             // OBAT ANTI MACET (Memaksa masuk dalam 4 detik bagaimanapun kondisinya)
             setTimeout(tutupSplash, 4000);
-
             window.history.pushState({ page: 'home' }, "", "");
 
 
+            // 2. FUNGSI TOMBOL BACK (POPSTATE)
             window.addEventListener('popstate', function(event) {
-
                 let isModalOpen = false;
-                
                 if(document.getElementById('pesananLayarPenuh').style.display === 'flex') {
                     document.getElementById('pesananLayarPenuh').style.display = 'none';
                     isModalOpen = true;
@@ -785,6 +759,41 @@
                 }
             });
 
+
+            // 3. FUNGSI AMBIL PROMO (GAMBAR SLIDER 16:9)
+            fetch('/api/promos').then(res => res.json()).then(result => {
+                if (result.success && result.data && result.data.length > 0) {
+                    const slider = document.getElementById('promoSlider');
+                    slider.innerHTML = ''; 
+                    
+                    slider.style.display = 'flex';
+                    slider.style.overflowX = 'auto';
+                    slider.style.scrollSnapType = 'x mandatory';
+                    slider.style.scrollbarWidth = 'none'; 
+                    slider.style.scrollBehavior = 'smooth';
+                    
+                    result.data.forEach(promo => {
+                        // Memaksa gambar ditarik (stretch) memenuhi kotak
+                        slider.innerHTML += `<div class="slide" style="min-width:100%; height:150px; padding:0; overflow:hidden; border-radius:15px; scroll-snap-align:start;"><img src="${promo.media_url}" style="width:100%; height:100%; object-fit:fill;"></div>`;
+                    });           
+
+                    // LOGIKA SLIDER OTOMATIS
+                    if (result.data.length > 1) {
+                        setInterval(() => {
+                            if(!slider) return;
+                            let currentIndex = Math.round(slider.scrollLeft / slider.clientWidth);
+                            let nextIndex = currentIndex + 1;
+                            if (nextIndex >= result.data.length) {
+                                nextIndex = 0;
+                            }
+                            slider.scrollTo({ left: slider.clientWidth * nextIndex, behavior: 'smooth' });
+                        }, 4000); 
+                    }
+                }
+            }).catch(e => console.log("Gagal memuat promo banner"));
+
+
+            // 4. FUNGSI AMBIL PRODUK BERANDA
             async function loadProdukBeranda() {
                 try {
                     let namaToko = "Belidikita Official";
@@ -922,43 +931,11 @@
             
             window.bukaDetailTunggal = window.bukaDetailGlobal; 
 
+            // PANGGIL SEMUANYA
             loadProdukBeranda();
-        });
-        
-        window.klikIkonAdmin = function() {
-            const token = localStorage.getItem('token');
-            if (token && token.startsWith('token-admin-')) {
-                document.getElementById('modalConfirmAdmin').style.display = 'flex';
-            } else {
-                showToast("Mengarahkan ke Gerbang Admin...", "info");
-                setTimeout(() => {
-                    window.location.href = 'login.html'; 
-                }, 1000);
-            }
-        };
-
-        function tampilkanFotoProfilToko() {
-            try {
-                const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
-                
-                if (storeData && storeData.logo) {
-                    const imgTag = `<img src="${storeData.logo}" style="width: 100%; height: 100%; object-fit: cover; border-radius: inherit; border: none; outline: none;">`;
-                    
-                    document.querySelectorAll('.inbox-avatar').forEach(el => {
-                        el.innerHTML = imgTag;
-                    });
-                    
-                    document.querySelectorAll('.store-avatar-chat').forEach(el => {
-                        el.innerHTML = imgTag;
-                        el.style.background = "transparent"; 
-                    });
-                }
-            } catch(e) {}
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
             setTimeout(tampilkanFotoProfilToko, 300); 
-        });
+
+        }); // AKHIR DARI DOMContentLoaded
 
     </script>
 </body>
