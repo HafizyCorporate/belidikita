@@ -294,7 +294,7 @@
             }
         }
 
-                // ✅ FUNGSI FILTER BERLAPIS PINTAR (DENGAN KAMUS ALIAS KATEGORI)
+                    // ✅ FUNGSI FILTER BERLAPIS PINTAR (DENGAN KAMUS ALIAS KATEGORI)
         window.terapkanFilter = function() {
             const grid = document.getElementById('gridHasil');
             const sort = document.getElementById('filterSort').value;
@@ -386,6 +386,7 @@
             } else {
                 filteredData.sort((a, b) => parseInt(b.id) - parseInt(a.id));
             }
+
 
             // MUNCULKAN HASIL
             grid.innerHTML = '';
