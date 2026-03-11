@@ -294,7 +294,7 @@
             }
         }
 
-        // ✅ FUNGSI FILTER BERLAPIS PINTAR
+                // ✅ FUNGSI FILTER BERLAPIS PINTAR (DENGAN KAMUS ALIAS KATEGORI)
         window.terapkanFilter = function() {
             const grid = document.getElementById('gridHasil');
             const sort = document.getElementById('filterSort').value;
@@ -307,11 +307,36 @@
             if (paramKategori || kataKunci) {
                 let catKw = (paramKategori || "").toLowerCase();
                 
+                // 💡 KAMUS PINTAR: Agar "Semua Fashion" menarik barang meski judulnya cuma "Kemeja"
+                const kamusAlias = {
+                    'sembako': ['beras', 'minyak', 'gula', 'mie', 'telur', 'air', 'galon', 'gas', 'sembako', 'kopi', 'teh'],
+                    'fashion': ['baju', 'celana', 'jaket', 'jacket', 'hijab', 'sepatu', 'tas', 'pakaian', 'fashion', 'kaos', 'kemeja', 'gamis', 'tunik', 'rok', 'pria', 'wanita', 'anak'],
+                    'elektronik': ['hp', 'charger', 'headset', 'powerbank', 'smartwatch', 'elektronik', 'kabel', 'handphone', 'audio', 'earphone'],
+                    'rumah': ['dapur', 'dispenser', 'rice cooker', 'blender', 'kebersihan', 'sapu', 'panci', 'rumah', 'piring', 'gelas', 'wajan', 'setrika'],
+                    'beauty': ['skincare', 'makeup', 'parfum', 'bodycare', 'haircare', 'kosmetik', 'kecantikan', 'lipstik', 'bedak', 'serum', 'lotion'],
+                    'bayi': ['popok', 'susu', 'bayi', 'baby', 'stroller', 'mainan bayi', 'ibu', 'botol bayi'],
+                    'komputer': ['keyboard', 'mouse', 'laptop', 'flashdisk', 'harddisk', 'pc', 'monitor', 'komputer', 'printer', 'ssd'],
+                    'otomotif': ['oli', 'motor', 'mobil', 'helm', 'ban', 'lampu', 'otomotif', 'spion', 'wiper', 'busi', 'velg'],
+                    'olahraga': ['olahraga', 'gym', 'jersey', 'tenda', 'botol', 'sepeda', 'raket', 'bola', 'sepatu sport', 'barbel'],
+                    'makanan': ['snack', 'frozen', 'kopi', 'minuman', 'makanan', 'kue', 'cemilan', 'roti', 'coklat', 'keripik'],
+                    'buku': ['buku', 'novel', 'atk', 'kantor', 'sekolah', 'kertas', 'pulpen', 'pensil', 'komik'],
+                    'mainan': ['mainan', 'action figure', 'puzzle', 'musik', 'boneka', 'lego', 'mobil', 'game', 'robot'],
+                    'ibadah': ['sajadah', 'mukena', 'sarung', 'quran', 'tasbih', 'peci', 'ibadah', 'muslim', 'koko', 'hijab']
+                };
+
+                // Kumpulkan semua kata alias yang cocok dengan kategori yang di-klik
+                let aliasWords = [catKw]; 
+                for (let key in kamusAlias) {
+                    if (catKw.includes(key)) {
+                        aliasWords = aliasWords.concat(kamusAlias[key]);
+                    }
+                }
+
+                // Siapkan Kata Kunci Sub-Kategori / Pencarian Bebas
                 let kwArray = [];
                 if (kataKunci) {
-                    // Bersihkan karakter aneh seperti ( / & , ) dan pecah jadi array per-kata
                     let cleanKw = kataKunci.toLowerCase().replace(/[\/\-\&,()]/g, ' ');
-                    kwArray = cleanKw.split(' ').filter(w => w.trim().length > 2); // Ambil kata > 2 huruf
+                    kwArray = cleanKw.split(' ').filter(w => w.trim().length > 2); 
                     if (kwArray.length === 0) kwArray = [kataKunci.toLowerCase().trim()];
                 }
 
@@ -320,27 +345,28 @@
                     let cat = (p.category || "").toLowerCase();
                     let desc = (p.description || "").toLowerCase();
                     
-                    // Cek Kecocokan Kategori Induk (Cari di kolom kategori ATAU judul)
-                    let matchKategori = cat.includes(catKw) || title.includes(catKw);
+                    // CEK KATEGORI INDUK: Apakah produk ini punya salah satu kata dari Kamus Alias?
+                    let matchKategori = aliasWords.some(word => title.includes(word) || cat.includes(word) || desc.includes(word));
                     
-                    // Cek Kecocokan Sub-Kategori / Kata Kunci (Apakah ada SALAH SATU kata yang cocok?)
-                    let matchKataKunci = kwArray.some(word => title.includes(word) || cat.includes(word) || desc.includes(word));
+                    // CEK KATA KUNCI SPESIFIK (Sub-Kategori)
+                    let matchKataKunci = false;
+                    if (kwArray.length > 0) {
+                        matchKataKunci = kwArray.some(word => title.includes(word) || cat.includes(word) || desc.includes(word));
+                    }
 
                     if (paramKategori && kataKunci) {
-                        // KONDISI A: Klik Sub-Kategori (Misal Fashion -> Baju pria / wanita / anak)
-                        return matchKataKunci;
+                        return matchKataKunci; // Kondisi A: Klik Sub-Kategori (Misal: Jaket)
                     } else if (paramKategori && !kataKunci) {
-                        // KONDISI B: Klik Kategori Induk -> "Semua Produk Fashion"
-                        return matchKategori;
+                        return matchKategori;  // Kondisi B: Klik "Semua Produk Fashion" (Pakai Kamus Alias)
                     } else if (!paramKategori && kataKunci) {
-                        // KONDISI C: Ketik manual di kotak pencarian
-                        return matchKataKunci;
+                        return matchKataKunci; // Kondisi C: Pencarian lewat kotak Search
                     }
                     return true;
                 });
             }
 
             if(toko === 'official') {
+
                 filteredData = filteredData.filter(p => true); 
             }
 
