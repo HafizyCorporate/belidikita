@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pencarian Produk - Belidikita</title>
+    <title>Pesan Masuk - Belidikita</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,800" rel="stylesheet">
@@ -29,81 +29,68 @@
         .lantern.right { right: 80%; animation: swing 4s ease-in-out infinite alternate-reverse; width: 25px; height: 40px; }
         @keyframes swing { 0% { transform: rotate(10deg); } 100% { transform: rotate(-10deg); } }
 
-        /* --- HEADER PENCARIAN AKTIF + IKON --- */
-        .top-header-search { 
+        /* --- HEADER KOTAK MASUK --- */
+        .top-header-inbox { 
             position: fixed; top: 0; left: 0; width: 100%; height: 65px; 
             background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); 
             display: flex; align-items: center; justify-content: space-between; 
-            padding: 0 15px; z-index: 1000; box-shadow: 0 2px 10px rgba(0, 105, 92, 0.1); 
+            padding: 0 20px; z-index: 1000; box-shadow: 0 2px 10px rgba(0, 105, 92, 0.1); 
             border-bottom: 2px solid #A5D6A7; 
         }
-        .top-header-search i.btn-back { font-size: 20px; color: #00695C; cursor: pointer; transition: 0.2s; }
-        .top-header-search i.btn-back:active { transform: scale(0.8); }
-        
-        .search-bar-active { 
-            flex: 1; margin: 0 15px; background: #f2fcf6; border: 2px solid #00AA5B; 
-            border-radius: 20px; padding: 8px 15px; display: flex; align-items: center; 
-        }
-        .search-bar-active input { 
-            border: none; background: transparent; outline: none; width: 100%; 
-            font-size: 13px; font-weight: 700; color: #00695C; margin-left: 8px; 
-        }
-        
-        .header-icons { display: flex; gap: 15px; align-items: center; }
-        .header-icons i { font-size: 20px; color: #00695C; cursor: pointer; }
-        .cart-wrapper { position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;}
-        .cart-badge-search { position: absolute; top: -5px; right: -8px; background: #ff3b30; color: #fff; font-size: 9px; font-weight: 800; padding: 2px 5px; border-radius: 10px; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(255,59,48,0.5);}
+        .top-header-inbox a { text-decoration: none; display: flex; align-items: center; color: #00695C; font-size: 20px; }
+        .top-header-inbox h2 { font-size: 16px; font-weight: 800; color: #00695C; flex: 1; text-align: center; }
+        .spacer { width: 20px; } /* Untuk menyeimbangkan header di tengah */
 
-        /* --- FILTER PENCARIAN --- */
-        .filter-container-search {
-            display: flex; gap: 8px; overflow-x: auto; padding: 10px 15px;
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            position: fixed; top: 65px; left: 0; width: 100%; z-index: 999; scrollbar-width: none;
-        }
-        .filter-container-search::-webkit-scrollbar { display: none; }
-        .filter-container-search select {
-            padding: 8px 12px; border: 1px solid #A5D6A7; border-radius: 20px;
-            font-size: 11px; font-weight: 800; color: #00695C; outline: none;
-            background: #f2fcf6; cursor: pointer; white-space: nowrap; flex-shrink: 0;
-            appearance: none; -webkit-appearance: none;
-        }
-
-        /* --- GRID PRODUK --- */
-        .content-wrapper { position: relative; z-index: 10; max-width: 600px; margin: 120px auto 0 auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
-        .search-title { font-size: 14px; font-weight: 800; color: #00695C; display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.8); padding: 10px 15px; border-radius: 12px; border: 1px dashed #A5D6A7;}
+        /* --- LIST PESAN (DAFTAR CHAT) --- */
+        .inbox-wrapper { position: relative; z-index: 10; max-width: 600px; margin: 85px auto 0 auto; padding: 0 15px 90px 15px; display: flex; flex-direction: column; gap: 12px; }
         
-        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding-bottom: 80px; }
-        .product-card { background: rgba(255,255,255,0.9); border: 2px solid #E8F5E9; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: transform 0.2s; position: relative;}
-        .product-card:active { transform: scale(0.95); }
-        .product-card img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-bottom: 2px solid #E8F5E9; cursor: pointer; }
-        .product-info { padding: 12px; display: flex; flex-direction: column; flex-grow: 1; }
-        .product-title { font-size: 12px; font-weight: 700; color: #00695C; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; cursor: pointer;}
-        .product-price { color: #FF9800; font-weight: 800; font-size: 15px; margin-bottom: 8px; }
-        
-        .p-store-link { font-size: 9px; color: #888; font-weight: 600; margin-top: 4px; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; border-top: 1px dashed #E8F5E9; padding-top: 8px; transition: 0.2s; }
-        .p-store-link:hover { color: #00AA5B; }
-        .p-sold-rating { display: flex; justify-content: space-between; font-size: 10px; color: #888; font-weight: 600; margin-top: 8px; }
+        .inbox-card {
+            background: rgba(255, 255, 255, 0.95); border: 2px solid #E8F5E9; border-radius: 15px;
+            padding: 15px; display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s;
+        }
+        .inbox-card:active { transform: scale(0.97); }
+        .inbox-avatar {
+            width: 50px; height: 50px; border-radius: 50%; background: #00695C; color: #fff;
+            display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; overflow: hidden; border: 2px solid #A5D6A7;
+        }
+        .inbox-info { flex: 1; overflow: hidden; }
+        .inbox-name { font-size: 14px; font-weight: 800; color: #00695C; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+        .inbox-last-msg { font-size: 12px; color: #666; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .inbox-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+        .inbox-time { font-size: 10px; color: #888; font-weight: 700; }
+        .inbox-badge { background: #ff3b30; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 10px; display: none; }
 
-        .empty-state { text-align: center; padding: 50px 20px; background: rgba(255,255,255,0.9); border-radius: 15px; border: 1px dashed #A5D6A7; grid-column: span 2; }
+        .empty-state { text-align: center; padding: 50px 20px; background: rgba(255,255,255,0.9); border-radius: 15px; border: 1px dashed #A5D6A7; }
         .empty-state i { font-size: 60px; color: #ddd; margin-bottom: 15px; }
         .empty-state h3 { color: #ff3b30; font-weight: 800; font-size: 16px; margin-bottom: 5px; }
-        .empty-state p { color: #888; font-size: 12px; font-weight: 600; }
+        .empty-state p { color: #888; font-size: 12px; font-weight: 600; line-height: 1.5; margin-bottom: 20px;}
+        .empty-state button { background: linear-gradient(135deg, #00AA5B, #00c853); color: #fff; border: none; padding: 12px 25px; border-radius: 20px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 10px rgba(0, 170, 91, 0.3); }
 
-        /* ✅ CSS NAVBAR BAWAH */
+        /* ✅ CSS NAVBAR BAWAH (SAMA DENGAN SEARCH & DASHBOARD) */
         nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -5px 25px rgba(0, 105, 92, 0.15); z-index: 1000; border-top: 1px solid #E8F5E9; border-radius: 20px 20px 0 0;}
         .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 10px; font-weight: 700; transition: 0.3s; position: relative; width: 60px;}
         .nav-item i { font-size: 20px; margin-bottom: 4px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .nav-item.active { color: #00695C; }
         .nav-item.active i { transform: translateY(-5px) scale(1.1); color: #00AA5B; }
         .nav-item.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background: #00AA5B; border-radius: 50%; }
-        .nav-item:active i { transform: scale(0.8); }
 
-        /* TOAST */
+        /* ✅ CSS RUANG CHAT (MODAL) */
+        .chat-toko-modal { display: none; position: fixed; z-index: 8000; left: 0; top: 0; right: 0; bottom: 0; background: #f4f7fa; flex-direction: column; animation: slideInRight 0.3s ease; }
+        @keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .chat-toko-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .chat-toko-header i.btn-back { font-size: 20px; color: #00695C; cursor: pointer; }
+        .chat-toko-header .store-profile { display: flex; align-items: center; gap: 10px; flex: 1; }
+        .chat-toko-header .store-avatar-chat { width: 35px; height: 35px; background: #00695C; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; overflow: hidden; }
+        .chat-toko-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .chat-msg-store { background: #fff; color: #333; padding: 12px 15px; border-radius: 15px 15px 15px 0; max-width: 80%; align-self: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 13px; line-height: 1.5; border: 1px solid #eee; }
+        .chat-msg-user { background: #E8F5E9; color: #00695C; padding: 12px 15px; border-radius: 15px 15px 0 15px; max-width: 80%; align-self: flex-end; box-shadow: 0 2px 5px rgba(0, 105, 92, 0.1); font-size: 13px; line-height: 1.5; }
+        .chat-toko-footer { background: #fff; padding: 10px 15px; display: flex; gap: 10px; align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .chat-toko-footer input { flex: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 20px; background: #f4f7fa; outline: none; font-size: 13px; font-family: 'Montserrat', sans-serif;}
+        .chat-toko-footer button { background: #FF9800; color: #fff; width: 40px; height: 40px; border-radius: 50%; border: none; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
         #customToast { visibility: hidden; min-width: 280px; margin-left: -140px; background: rgba(0, 105, 92, 0.95); backdrop-filter: blur(10px); color: #fff; text-align: center; border: 2px solid rgba(255,255,255,0.2); border-radius: 30px; padding: 16px 20px; position: fixed; z-index: 9999; left: 50%; bottom: -50px; font-size: 13px; font-weight: 800; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; }
         #customToast.show { visibility: visible; opacity: 1; bottom: 90px; }
-        #customToast.success { background: rgba(0, 170, 91, 0.95); border-color: #A5D6A7; }
-        #customToast.error { background: rgba(255, 59, 48, 0.95); border-color: #FFCDD2; }
     </style>
 </head>
 <body>
@@ -112,112 +99,14 @@
         <div class="lantern left"></div><div class="lantern right"></div>
     </div>
 
-    <div class="top-header-search">
-        <i class="fas fa-arrow-left btn-back" onclick="window.history.back()"></i>
-        <div class="search-bar-active">
-            <i class="fas fa-search" style="color: #00695C; font-size: 14px;" onclick="eksekusiPencarian()"></i>
-            <input type="text" id="inputSearch" placeholder="Cari barang..." onkeypress="if(event.key === 'Enter') eksekusiPencarian()">
-        </div>
-        
-        <div class="header-icons">
-            <i class="fas fa-envelope" onclick="window.location.href='inbox.html'"></i>
-            <div class="cart-wrapper" onclick="window.location.href='keranjang.html'">
-                <i class="fas fa-shopping-cart"></i>
-                <span class="cart-badge-search" id="badgeKeranjang">0</span>
-            </div>
-        </div>
+    <div class="top-header-inbox">
+        <a href="dashboardutama.html"><i class="fas fa-arrow-left btn-back"></i></a>
+        <h2>Pesan Masuk</h2>
+        <div class="spacer"></div>
     </div>
 
-    <div class="filter-container-search">
-        <select id="filterSort" onchange="terapkanFilter()">
-            <option value="terbaru">🆕 Terbaru</option>
-            <option value="termurah">🏷️ Termurah</option>
-            <option value="terlaris">🔥 Terlaris</option>
-        </select>
-        <select id="filterToko" onchange="terapkanFilter()">
-            <option value="">🏪 Semua Toko</option>
-            <option value="official">✅ Official Store</option>
-        </select>
-        <select id="filterLokasi" onchange="terapkanFilter()">
-            <option value="">📍 Semua Kota se-Indonesia</option>
-            <optgroup label="DKI Jakarta">
-                <option value="Jakarta Barat">Jakarta Barat</option>
-                <option value="Jakarta Pusat">Jakarta Pusat</option>
-                <option value="Jakarta Selatan">Jakarta Selatan</option>
-                <option value="Jakarta Timur">Jakarta Timur</option>
-                <option value="Jakarta Utara">Jakarta Utara</option>
-            </optgroup>
-            <optgroup label="Jawa Barat">
-                <option value="Bandung">Bandung</option>
-                <option value="Bekasi">Bekasi</option>
-                <option value="Bogor">Bogor</option>
-                <option value="Cimahi">Cimahi</option>
-                <option value="Cirebon">Cirebon</option>
-                <option value="Depok">Depok</option>
-                <option value="Garut">Garut</option>
-                <option value="Sukabumi">Sukabumi</option>
-                <option value="Tasikmalaya">Tasikmalaya</option>
-            </optgroup>
-            <optgroup label="Jawa Tengah & DIY">
-                <option value="Yogyakarta">Yogyakarta</option>
-                <option value="Sleman">Sleman</option>
-                <option value="Bantul">Bantul</option>
-                <option value="Semarang">Semarang</option>
-                <option value="Surakarta">Surakarta (Solo)</option>
-                <option value="Magelang">Magelang</option>
-                <option value="Tegal">Tegal</option>
-                <option value="Banyumas">Banyumas (Purwokerto)</option>
-            </optgroup>
-            <optgroup label="Jawa Timur">
-                <option value="Surabaya">Surabaya</option>
-                <option value="Malang">Malang</option>
-                <option value="Sidoarjo">Sidoarjo</option>
-                <option value="Kediri">Kediri</option>
-                <option value="Jember">Jember</option>
-                <option value="Madiun">Madiun</option>
-                <option value="Banyuwangi">Banyuwangi</option>
-            </optgroup>
-            <optgroup label="Banten">
-                <option value="Tangerang">Tangerang</option>
-                <option value="Tangerang Selatan">Tangerang Selatan</option>
-                <option value="Serang">Serang</option>
-                <option value="Cilegon">Cilegon</option>
-            </optgroup>
-            <optgroup label="Sumatera">
-                <option value="Medan">Medan</option>
-                <option value="Palembang">Palembang</option>
-                <option value="Padang">Padang</option>
-                <option value="Pekanbaru">Pekanbaru</option>
-                <option value="Batam">Batam</option>
-                <option value="Bandar Lampung">Bandar Lampung</option>
-                <option value="Bengkulu">Bengkulu</option>
-            </optgroup>
-            <optgroup label="Kalimantan & Sulawesi">
-                <option value="Balikpapan">Balikpapan</option>
-                <option value="Pontianak">Pontianak</option>
-                <option value="Samarinda">Samarinda</option>
-                <option value="Banjarmasin">Banjarmasin</option>
-                <option value="Makassar">Makassar</option>
-                <option value="Manado">Manado</option>
-            </optgroup>
-            <optgroup label="Bali & Nusa Tenggara">
-                <option value="Denpasar">Denpasar</option>
-                <option value="Badung">Badung</option>
-                <option value="Mataram">Mataram</option>
-                <option value="Kupang">Kupang</option>
-            </optgroup>
-            <optgroup label="Maluku & Papua">
-                <option value="Ambon">Ambon</option>
-                <option value="Ternate">Ternate</option>
-                <option value="Jayapura">Jayapura</option>
-                <option value="Sorong">Sorong</option>
-            </optgroup>
-        </select>
-    </div>
-
-    <div class="content-wrapper">
-        <div class="search-title" id="judulPencarian"><i class="fas fa-spinner fa-spin"></i> Memuat Etalase...</div>
-        <div class="product-grid" id="gridHasil"></div>
+    <div class="inbox-wrapper" id="inboxContainer">
+        <div style="text-align:center; padding:30px; color:#00695C; font-weight:bold;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top:10px; font-size:12px;">Memuat pesan...</p></div>
     </div>
 
     <nav id="bottomNav">
@@ -235,6 +124,25 @@
         </a>
     </nav>
 
+    <div id="modalChatToko" class="chat-toko-modal">
+        <div class="chat-toko-header">
+            <i class="fas fa-arrow-left btn-back" onclick="tutupChatToko()"></i>
+            <div class="store-profile">
+                <div class="store-avatar-chat" id="headerAvatarChat"><i class="fas fa-store"></i></div>
+                <div>
+                    <h2 style="font-size: 14px; font-weight: 800; color: #333; margin: 0;" id="chatTokoName">Belidikita Official</h2>
+                    <span style="font-size: 10px; color: #00AA5B;"><i class="fas fa-circle"></i> Online</span>
+                </div>
+            </div>
+        </div>
+        <div class="chat-toko-body" id="chatTokoBody">
+            </div>
+        <div class="chat-toko-footer">
+            <input type="text" id="chatTokoInput" enterkeyhint="send" placeholder="Ketik pesan..." onkeydown="if(event.key === 'Enter') { event.preventDefault(); kirimChatToko(); }">
+            <button onclick="kirimChatToko()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
     <div id="customToast"></div>
 
     <script>
@@ -245,202 +153,178 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-        const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
-
-        // ✅ AMBIL SEMUA PARAMETER DARI URL (Kategori, Kata Kunci, Sort, Lokasi, Toko)
-        const urlParams = new URLSearchParams(window.location.search);
-        let kataKunci = urlParams.get('q');
-        let paramKategori = urlParams.get('category');
-        let paramSort = urlParams.get('sort');
-        let paramToko = urlParams.get('toko');
-        let paramLokasi = urlParams.get('lokasi');
-        
-        let dataSemuaProduk = []; // Menyimpan SELURUH data produk
         let namaTokoGlobal = "Belidikita Official";
-        let kotaTokoGlobal = "Kota Bandung";
+        let logoTokoGlobal = "";
 
-        // AMBIL DATA TOKO DARI LOCAL STORAGE 
-        try {
-            const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
-            if (storeData && storeData.nama) namaTokoGlobal = storeData.nama;
-            if (storeData && storeData.kota) kotaTokoGlobal = storeData.kota;
-        } catch (e) {}
-
-        // KETIKA HALAMAN DIMUAT
         document.addEventListener("DOMContentLoaded", () => {
-            // Set input dan dropdown sesuai URL dari Dashboard
-            if (kataKunci) document.getElementById('inputSearch').value = kataKunci;
-            if (paramSort) document.getElementById('filterSort').value = paramSort;
-            if (paramToko) document.getElementById('filterToko').value = paramToko;
-            if (paramLokasi) document.getElementById('filterLokasi').value = paramLokasi;
-            
-            updateBadge(); 
-            ambilSemuaDataProduk(); 
+            tarikDataProfilToko();
+            muatDaftarInbox();
         });
 
-        // ✅ UPDATE BADGE KERANJANG
-        async function updateBadge() {
-            const token = localStorage.getItem('token');
-            const badge = document.getElementById('badgeKeranjang');
-            if(!badge) return;
-            if(!token || token.startsWith('token-admin-')) { badge.innerText = "0"; return; }
+        // 1. TARIK PROFIL TOKO (Untuk Nama & Foto Profil)
+        async function tarikDataProfilToko() {
             try {
-                const res = await fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } });
-                const result = await res.json();
-                if(result.success) { badge.innerText = result.data.reduce((sum, item) => sum + item.qty, 0); }
-            } catch(e) {}
-        }
-
-        // ✅ MESIN PENCARI SAPU JAGAT (AMBIL SEMUA, FILTER DI SINI)
-        async function ambilSemuaDataProduk() {
-            const grid = document.getElementById('gridHasil');
-            const judul = document.getElementById('judulPencarian');
-            
-            // Set Judul Awal
-            if(paramKategori && !kataKunci) {
-                judul.innerHTML = `<i class="fas fa-tags"></i> Etalase ${paramKategori}`;
-            } else if (kataKunci) {
-                judul.innerHTML = `<i class="fas fa-search"></i> Hasil untuk: "${kataKunci}"`;
-            } else {
-                judul.innerHTML = `<i class="fas fa-box-open"></i> Menampilkan Semua Produk`;
-            }
-
-            grid.innerHTML = '<div style="text-align:center; grid-column:span 2; padding:30px; color:#00695C; font-weight:bold;"><i class="fas fa-spinner fa-spin fa-2x"></i></div>';
-
-            try {
-                // Tarik SELURUH data produk
-                const res = await fetch('/api/products?limit=500');
-                const result = await res.json();
-
-                if(result.success && result.data.length > 0) {
-                    dataSemuaProduk = result.data; 
-                    terapkanFilter(); // Jalankan filter
-                } else {
-                    grid.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-box-open"></i>
-                            <h3>Toko Masih Kosong 🥺</h3>
-                            <p>Belum ada produk yang dijual saat ini.</p>
-                        </div>
-                    `;
+                // Tarik dari LocalStorage dulu
+                const storeData = JSON.parse(localStorage.getItem('belidikita_store_profile'));
+                if (storeData) {
+                    if (storeData.nama) namaTokoGlobal = storeData.nama;
+                    if (storeData.logo) logoTokoGlobal = storeData.logo;
                 }
-            } catch(e) {
-                grid.innerHTML = '<div class="empty-state"><p style="color:red;">Gagal terhubung ke Server Belidikita.</p></div>';
-            }
+                
+                // Pastikan nama di Header Modal Chat berubah
+                document.getElementById('chatTokoName').innerText = namaTokoGlobal;
+                
+            } catch (e) {}
         }
 
-        // ✅ LOGIKA FILTERING SUPER AKURAT & SINKRON
-        window.terapkanFilter = function() {
-            const grid = document.getElementById('gridHasil');
-            const sort = document.getElementById('filterSort').value;
-            const toko = document.getElementById('filterToko').value;
-            const lokasi = document.getElementById('filterLokasi').value;
+        // 2. MUAT DAFTAR INBOX
+        async function muatDaftarInbox() {
+            const container = document.getElementById('inboxContainer');
+            const token = localStorage.getItem('token');
 
-            let filteredData = [...dataSemuaProduk];
-
-            // 1. Eksekusi Kategori (Jika dari Dashboard)
-            if(paramKategori) {
-                filteredData = filteredData.filter(p => (p.category || "").toLowerCase().includes(paramKategori.toLowerCase()));
-            }
-
-            // 2. Eksekusi Kata Kunci (Nyapu Judul, Kategori, Deskripsi)
-            if(kataKunci) {
-                let kw = kataKunci.toLowerCase();
-                filteredData = filteredData.filter(p => {
-                    let title = (p.title || "").toLowerCase();
-                    let cat = (p.category || "").toLowerCase();
-                    let desc = (p.description || "").toLowerCase();
-                    return title.includes(kw) || cat.includes(kw) || desc.includes(kw);
-                });
-            }
-            
-            // 3. Eksekusi Tipe Toko (Saat ini kita anggap semua dari Official Store)
-            if(toko === 'official') {
-                filteredData = filteredData.filter(p => true); 
-            }
-
-            // 4. Eksekusi Lokasi (Cari dari data produk, jika tidak ada pakai lokasi toko global)
-            if(lokasi !== '') {
-                filteredData = filteredData.filter(p => {
-                    // Anggap jika properti kota produk tidak diatur, dia ikut kotaTokoGlobal
-                    let productCity = (p.location || p.kota || kotaTokoGlobal).toLowerCase();
-                    return productCity.includes(lokasi.toLowerCase());
-                });
-            }
-
-            // 5. Eksekusi Pengurutan (Terbaru, Termurah, Terlaris)
-            if(sort === 'termurah') {
-                // Mengurutkan dari Harga terkecil ke terbesar
-                filteredData.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
-            } else if(sort === 'terlaris') {
-                // Mengurutkan dari Jumlah Terjual tertinggi ke terendah
-                filteredData.sort((a, b) => (parseInt(b.sold_count) || 0) - (parseInt(a.sold_count) || 0));
-            } else {
-                // Terbaru = Urut berdasarkan ID terbaru/terbesar
-                filteredData.sort((a, b) => parseInt(b.id) - parseInt(a.id));
-            }
-
-            // RENDER KE LAYAR
-            grid.innerHTML = '';
-            if(filteredData.length === 0) {
-                grid.innerHTML = `
+            if (!token || token.startsWith('token-admin-')) {
+                container.innerHTML = `
                     <div class="empty-state">
-                        <i class="fas fa-filter" style="color:#FF9800; font-size:40px;"></i>
-                        <h3 style="color:#FF9800; margin-top:10px;">Barang Gak Ketemu Nih</h3>
-                        <p>Coba gunakan kata kunci atau atur ulang filter Anda.</p>
+                        <i class="fas fa-envelope-open-text"></i>
+                        <h3>Ups, Kamu Belum Login!</h3>
+                        <p>Login dulu yuk buat mulai ngobrol sama Admin toko dan nanya-nanya produk.</p>
+                        <button onclick="window.location.href='registrasi/loginpembeli.html'">Login Sekarang</button>
                     </div>
                 `;
                 return;
             }
 
-            filteredData.forEach(p => {
-                let arrFoto = [];
-                try { arrFoto = JSON.parse(p.media_url); if (!Array.isArray(arrFoto)) arrFoto = [p.media_url];} catch(e) { arrFoto = [p.media_url]; }
-                const imgUrl = arrFoto[0] || 'https://via.placeholder.com/150';
-                const hargaRp = formatRp(p.price);
-                const terjualReal = p.sold_count || 0; 
-                const ratingReal = parseFloat(p.avg_rating) || 0;
-                const tampilanRating = ratingReal > 0 ? ratingReal.toFixed(1) : "0.0";
+            try {
+                const res = await fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                
+                let lastMessage = "Halo kak! Ada yang bisa dibantu mencari barang? 😊";
+                let lastTime = "Sekarang";
 
-                // Jika properti kota di dalam produk ada, gunakan itu. Jika tidak, gunakan kota global toko
-                let displayKota = p.location || p.kota || kotaTokoGlobal;
+                if (result.success && result.data.length > 0) {
+                    const msgData = result.data[result.data.length - 1]; // Ambil pesan terakhir
+                    lastMessage = msgData.message;
+                    lastTime = new Date(msgData.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                }
 
-                const htmlLokasiToko = `
-                    <div class="p-store-link" onclick="event.stopPropagation(); window.location.href='toko.html'">
-                        <i class="fas fa-map-marker-alt" style="color: #00AA5B;"></i> ${displayKota} | <i class="fas fa-check-circle" style="color: #00695C;"></i> ${namaTokoGlobal} <i class="fas fa-chevron-right" style="margin-left:auto; font-size:8px;"></i>
-                    </div>
-                `;
+                // Render Foto Profil Toko Jika Ada
+                let htmlAvatar = logoTokoGlobal 
+                    ? `<img src="${logoTokoGlobal}" style="width:100%; height:100%; object-fit:cover;">` 
+                    : `<i class="fas fa-store"></i>`;
 
-                grid.innerHTML += `
-                    <div class="product-card">
-                        <img src="${imgUrl}" alt="Produk" loading="lazy" onclick="window.location.href='detailproduk.html?id=${p.id}'">
-                        <div class="product-info">
-                            <h3 class="product-title" onclick="window.location.href='detailproduk.html?id=${p.id}'">${p.title}</h3>
-                            <div class="product-price" onclick="window.location.href='detailproduk.html?id=${p.id}'">${hargaRp}</div>
-                            ${htmlLokasiToko}
-                            <div class="p-sold-rating">
-                                <span><i class="fas fa-star" style="color:#FFD700;"></i> ${tampilanRating}</span>
-                                <span>${terjualReal} Terjual</span>
-                            </div>
+                container.innerHTML = `
+                    <div class="inbox-card" onclick="bukaChatToko()">
+                        <div class="inbox-avatar">${htmlAvatar}</div>
+                        <div class="inbox-info">
+                            <h4 class="inbox-name">${namaTokoGlobal} <i class="fas fa-check-circle" style="color:#00AA5B; font-size:10px;"></i></h4>
+                            <p class="inbox-last-msg">${lastMessage}</p>
+                        </div>
+                        <div class="inbox-meta">
+                            <span class="inbox-time">${lastTime}</span>
                         </div>
                     </div>
                 `;
-            });
-        }
-
-        // ✅ FUNGSI SAAT TOMBOL ENTER DIKTEKAN DI KOTAK PENCARIAN
-        function eksekusiPencarian() {
-            const val = document.getElementById('inputSearch').value.trim();
-            if(val) {
-                kataKunci = val;
-                paramKategori = null; // Reset kategori jika mencari manual
-                
-                window.history.pushState({}, '', `search.html?q=${encodeURIComponent(val)}`);
-                document.getElementById('judulPencarian').innerHTML = `<i class="fas fa-search"></i> Hasil untuk: "${val}"`;
-                
-                terapkanFilter();
+            } catch(e) {
+                container.innerHTML = `<div class="empty-state"><p style="color:red;">Gagal memuat pesan. Periksa koneksi internet Anda.</p></div>`;
             }
         }
+
+        // 3. FUNGSI BUKA RUANG CHAT
+        window.bukaChatToko = function() {
+            document.getElementById('modalChatToko').style.display = 'flex';
+            
+            // Set foto profil di header chat
+            const headerAvatar = document.getElementById('headerAvatarChat');
+            if(logoTokoGlobal) {
+                headerAvatar.innerHTML = `<img src="${logoTokoGlobal}" style="width:100%; height:100%; object-fit:cover;">`;
+                headerAvatar.style.background = "transparent";
+                headerAvatar.style.border = "none";
+            }
+
+            muatRiwayatChatToko();
+        };
+
+        window.tutupChatToko = function() {
+            document.getElementById('modalChatToko').style.display = 'none';
+            muatDaftarInbox(); // Update tulisan di list depan saat chat ditutup
+        };
+
+        // 4. MUAT ISI CHAT
+        async function muatRiwayatChatToko() {
+            const token = localStorage.getItem('token');
+            const chatBody = document.getElementById('chatTokoBody');
+            chatBody.innerHTML = '<div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-spin" style="color:#00695C;"></i></div>';
+
+            try {
+                const res = await fetch('/api/chat/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                
+                if (result.success && result.data.length > 0) {
+                    chatBody.innerHTML = '';
+                    result.data.forEach(msg => {
+                        let isUser = msg.sender_role === 'pembeli';
+                        let cssClass = isUser ? 'chat-msg-user' : 'chat-msg-store';
+                        let labelAdmin = msg.sender_role === 'admin' ? '<br><small style="color:#00AA5B; font-weight:bold;">- Admin -</small>' : '';
+                        chatBody.innerHTML += `<div class="${cssClass}">${msg.message} ${labelAdmin}</div>`;
+                    });
+                } else {
+                    chatBody.innerHTML = `<div class="chat-msg-store">Halo kak! Ada yang bisa dibantu? 😊</div>`;
+                }
+                chatBody.scrollTop = chatBody.scrollHeight;
+            } catch(e) {}
+        }
+
+        // 5. KIRIM PESAN
+        window.kirimChatToko = async function() {
+            const input = document.getElementById('chatTokoInput');
+            const chatBody = document.getElementById('chatTokoBody');
+            const teks = input.value.trim();
+            if (!teks) return;
+            
+            const token = localStorage.getItem('token');
+            
+            chatBody.innerHTML += `<div class="chat-msg-user">${teks}</div>`;
+            input.value = '';
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            try {
+                await fetch('/api/chat/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ message: teks, sender: 'pembeli' })
+                });
+
+                // Efek Balasan Otomatis
+                if(!window.sudahChatDiToko) {
+                    window.sudahChatDiToko = true;
+                    const idKetik = "ketik-" + Date.now();
+                    chatBody.innerHTML += `<div class="chat-msg-store" id="${idKetik}"><i class="fas fa-ellipsis-h fa-fade"></i> Admin mengetik...</div>`;
+                    chatBody.scrollTop = chatBody.scrollHeight;
+
+                    setTimeout(async () => {
+                        if(document.getElementById(idKetik)) document.getElementById(idKetik).remove();
+
+                        let autoReplyMsg = "Halo Kak! Pesan Kakak sudah masuk. Admin akan segera membalas ya, mohon ditunggu. 😊";
+                        try {
+                            const resSet = await fetch('/api/settings/autoreply');
+                            const resultSet = await resSet.json();
+                            if(resultSet.success && resultSet.text) autoReplyMsg = resultSet.text;
+                        } catch(err) {}
+
+                        chatBody.innerHTML += `<div class="chat-msg-store">${autoReplyMsg}</div>`;
+                        chatBody.scrollTop = chatBody.scrollHeight;
+                        
+                        await fetch('/api/chat/save', { 
+                            method: 'POST', 
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, 
+                            body: JSON.stringify({ message: autoReplyMsg, sender: 'admin' }) 
+                        });
+                    }, 1500);
+                }
+            } catch(e) {
+                showToast("Gagal mengirim pesan", "error");
+            }
+        };
     </script>
 </body>
 </html>
