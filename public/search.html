@@ -307,15 +307,22 @@
                 filteredData = filteredData.filter(p => (p.category || "").toLowerCase().includes(paramKategori.toLowerCase()));
             }
 
-            if(kataKunci) {
-                let kw = kataKunci.toLowerCase();
+                        if(kataKunci) {
+                // Bersihkan simbol aneh dan pecah jadi array kata
+                let cleanKw = kataKunci.toLowerCase().replace(/[\/\-\&,]/g, ' ');
+                let kwArray = cleanKw.split(' ').filter(w => w.trim().length > 2); // Ambil kata > 2 huruf
+                if(kwArray.length === 0) kwArray = [kataKunci.toLowerCase().trim()]; // Fallback kata pendek
+
                 filteredData = filteredData.filter(p => {
                     let title = (p.title || "").toLowerCase();
                     let cat = (p.category || "").toLowerCase();
                     let desc = (p.description || "").toLowerCase();
-                    return title.includes(kw) || cat.includes(kw) || desc.includes(kw);
+                    
+                    // Filter lolos jika ada SALAH SATU kata kunci di dalam judul, kategori, atau deskripsi
+                    return kwArray.some(word => title.includes(word) || cat.includes(word) || desc.includes(word));
                 });
             }
+
             
             if(toko === 'official') {
                 filteredData = filteredData.filter(p => true); 
