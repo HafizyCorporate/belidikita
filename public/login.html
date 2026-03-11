@@ -82,10 +82,11 @@
                 
                 const data = await res.json();
                 
-                if(data.success) {
-                    localStorage.setItem('token', data.token);
+                     if(data.success) {
+                    sessionStorage.setItem('token', data.token);
                     // Panggil pop-up cantik Hijau
                     showToast(data.message, "success"); 
+
                     btn.innerText = "Berhasil!";
                     
                     // ✅ INI YANG DIUBAH: Pindah halaman ke admin-panel.html
