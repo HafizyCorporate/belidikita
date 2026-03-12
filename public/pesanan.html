@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pesanan Saya - Belidikita</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,800" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; }
+        body { background: #f4f9ff; padding-bottom: 80px; color: #333; }
+        
+        .katalog-header { background: #fff; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #E1F5FE;}
+        .katalog-header i { font-size: 20px; color: #0D47A1; cursor: pointer; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: #E1F5FE; border-radius: 50%; transition: 0.2s;}
+        .katalog-header i:active { transform: scale(0.8); }
+        .katalog-header h2 { font-size: 16px; font-weight: 800; color: #0D47A1; flex: 1; }
+
+        .tabs-container { display: flex; overflow-x: auto; gap: 15px; padding: 15px; background: #fff; margin-bottom: 10px; scrollbar-width: none; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
+        .tabs-container::-webkit-scrollbar { display: none; }
+        .tab-pesanan { white-space: nowrap; font-size: 11px; font-weight: 800; color: #888; padding: 8px 15px; border-radius: 20px; background: #f4f7fa; cursor: pointer; transition: 0.2s; border: 1px solid #eee;}
+        .tab-pesanan.active { background: #0D47A1; color: #fff; border-color: #0D47A1; box-shadow: 0 4px 10px rgba(13, 71, 161, 0.3); }
+
+        .glass-card { background: #fff; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid #E1F5FE;}
+        .mr-1 { margin-right: 5px; } .mr-2 { margin-right: 10px; } .ml-2 { margin-left: 10px; }
+
+        /* NAVBAR BAWAH */
+        nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: rgba(255,255,255,0.95); backdrop-filter: blur(15px); display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -5px 25px rgba(0, 105, 92, 0.15); z-index: 1000; border-top: 1px solid #E8F5E9; border-radius: 20px 20px 0 0;}
+        .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 10px; font-weight: 700; transition: 0.3s; position: relative; width: 60px;}
+        .nav-item i { font-size: 20px; margin-bottom: 4px; transition: transform 0.3s; }
+        .nav-item.active { color: #00695C; }
+        .nav-item.active i { transform: translateY(-5px) scale(1.1); color: #00AA5B; }
+        .nav-item.active::after { content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; background: #00AA5B; border-radius: 50%; }
+
+        #customToast { visibility: hidden; min-width: 250px; margin-left: -125px; background-color: #333; color: #fff; text-align: center; border-radius: 25px; padding: 16px; position: fixed; z-index: 9999; left: 50%; bottom: 80px; font-size: 13px; font-weight: 600; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: opacity 0.3s; opacity: 0; }
+        #customToast.show { visibility: visible; opacity: 1; }
+        #customToast.success { background-color: #00AA5B; }
+        #customToast.error { background-color: #ff3b30; }
+    </style>
+</head>
+<body>
+
+    <div class="katalog-header">
+        <i class="fas fa-arrow-left" onclick="window.history.back()"></i>
+        <h2>Pesanan Saya</h2>
+    </div>
+
+    <div class="tabs-container" id="navFilterPesanan">
+        <div class="tab-pesanan active" onclick="window.filterPesananNav('Semua', this)">Semua</div>
+        <div class="tab-pesanan" onclick="window.filterPesananNav('Menunggu Pembayaran', this)">Belum Bayar</div>
+        <div class="tab-pesanan" onclick="window.filterPesananNav('Diproses', this)">Dikemas</div>
+        <div class="tab-pesanan" onclick="window.filterPesananNav('Dikirim', this)">Dikirim</div>
+        <div class="tab-pesanan" onclick="window.filterPesananNav('Terkirim', this)">Terkirim</div>
+        <div class="tab-pesanan" onclick="window.filterPesananNav('Selesai', this)">Selesai</div>
+        <div class="tab-pesanan" onclick="window.filterPesananNav('Retur', this)">Retur</div>
+    </div>
+
+    <div id="kontenPesananLayar" style="padding: 0 15px;">
+        <p style="text-align:center; padding:50px; font-weight:bold; color:#0D47A1;"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat pesanan...</p>
+    </div>
+
+    <div id="modalReturNav" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,40,80,0.7); backdrop-filter:blur(5px); align-items:center; justify-content:center; padding: 20px;">
+        <div style="background:#fff; padding:25px 20px; border-radius:20px; width:100%; max-width:400px; position:relative; border: 3px solid #ff3b30;">
+            <button onclick="document.getElementById('modalReturNav').style.display='none'" style="position:absolute; right:15px; top:15px; background:#ffebee; color:#ff3b30; border:none; width:35px; height:35px; border-radius:50%; font-size:18px; font-weight:bold; cursor:pointer;"><i class="fas fa-times"></i></button>
+            <h2 style="color:#ff3b30; font-size:20px; margin-bottom:15px; font-weight:800; text-align:center;"><i class="fas fa-box-open mr-2"></i> Ajukan Retur</h2>
+            <form id="formReturNav">
+                <input type="hidden" id="returOrderIdNav">
+                <div style="margin-bottom:15px;">
+                    <label style="display:block; font-size:11px; font-weight:800; color:#0D47A1; margin-bottom:5px;">Alasan Kerusakan</label>
+                    <textarea id="returReasonNav" rows="3" style="width:100%; padding:12px; border:2px solid #E1F5FE; border-radius:12px; outline:none; font-size:13px; font-weight:600;" required></textarea>
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block; font-size:11px; font-weight:800; color:#0D47A1; margin-bottom:5px;">Bukti Video / Foto</label>
+                    <input type="file" id="returProofNav" accept="video/*, image/*" style="width:100%; padding:10px; border:2px dashed #B3E5FC; border-radius:12px; font-size:12px; font-weight:600;" required>
+                </div>
+                <button type="submit" id="btnSubmitReturNav" style="width:100%; padding:14px; background:#ff3b30; color:#fff; border:none; border-radius:12px; font-weight:800; cursor:pointer;"><i class="fas fa-paper-plane mr-1"></i> KIRIM RETUR</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalUlasanNav" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,40,80,0.7); backdrop-filter:blur(5px); align-items:center; justify-content:center; padding: 20px;">
+        <div style="background:#fff; padding:25px 20px; border-radius:20px; width:100%; max-width:400px; position:relative; border: 3px solid #FFD700;">
+            <button onclick="document.getElementById('modalUlasanNav').style.display='none'" style="position:absolute; right:15px; top:15px; background:#FFFDE7; color:#FF9800; border:none; width:35px; height:35px; border-radius:50%; font-size:18px; font-weight:bold; cursor:pointer;"><i class="fas fa-times"></i></button>
+            <h2 style="color:#FF9800; font-size:20px; margin-bottom:5px; font-weight:800; text-align:center;"><i class="fas fa-star"></i> Nilai Produk</h2>
+            <form id="formUlasanNav">
+                <input type="hidden" id="ulasanProductIdNav">
+                <div style="text-align:center; margin-bottom:15px; font-size:30px; color:#ddd;" id="starContainerNav">
+                    <i class="fas fa-star" onclick="window.pilihBintangNav(1)" style="cursor:pointer; color:#FFD700;"></i>
+                    <i class="fas fa-star" onclick="window.pilihBintangNav(2)" style="cursor:pointer; color:#FFD700;"></i>
+                    <i class="fas fa-star" onclick="window.pilihBintangNav(3)" style="cursor:pointer; color:#FFD700;"></i>
+                    <i class="fas fa-star" onclick="window.pilihBintangNav(4)" style="cursor:pointer; color:#FFD700;"></i>
+                    <i class="fas fa-star" onclick="window.pilihBintangNav(5)" style="cursor:pointer; color:#FFD700;"></i>
+                </div>
+                <input type="hidden" id="ulasanRatingNav" value="5">
+                <div style="margin-bottom:20px;">
+                    <textarea id="ulasanKomentarNav" rows="3" style="width:100%; padding:12px; border:2px solid #E1F5FE; border-radius:12px; outline:none; font-size:13px; font-weight:600;" placeholder="Ceritakan kepuasanmu..." required></textarea>
+                </div>
+                <button type="submit" id="btnSubmitUlasanNav" style="width:100%; padding:14px; background:#FF9800; color:#fff; border:none; border-radius:12px; font-weight:800; cursor:pointer;"><i class="fas fa-paper-plane mr-1"></i> KIRIM ULASAN</button>
+            </form>
+        </div>
+    </div>
+
+    <nav id="bottomNav">
+        <a href="dashboardutama.html" class="nav-item"><i class="fas fa-mosque"></i><span>Beranda</span></a>
+        <a href="#" class="nav-item"><i class="fas fa-play-circle"></i><span>Video</span></a>
+        <a href="pesanan.html" class="nav-item active"><i class="fas fa-receipt"></i><span>Pesanan</span></a>
+        <a href="registrasi/profilpembeli.html" class="nav-item"><i class="fas fa-user"></i><span>Akun</span></a>
+    </nav>
+
+    <div id="customToast"></div>
+
+    <script>
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById("customToast");
+            if(!toast) return;
+            toast.innerText = msg;
+            toast.className = type + " show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        window.allMyOrdersNav = [];
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const kontenPesanan = document.getElementById('kontenPesananLayar');
+            const token = localStorage.getItem('token');
+            
+            if (!token || token.startsWith('token-admin-')) {
+                kontenPesanan.innerHTML = `
+                    <div style="text-align:center; padding: 50px 20px; margin-top:20px;">
+                        <i class="fas fa-heart" style="font-size: 60px; color: #ff4757; margin-bottom: 20px;"></i>
+                        <h3 style="color:#0D47A1; font-weight:800; margin-bottom:10px;">Halo Orang Baik! ✨</h3>
+                        <p style="color:#666; font-size:13px; line-height:1.6; margin-bottom:25px;">Yuk, login dulu untuk melihat riwayat belanjaanmu.</p>
+                        <button onclick="window.location.href='registrasi/loginpembeli.html'" style="background:linear-gradient(135deg, #0D47A1, #1976D2); color:white; border:none; padding:14px 30px; border-radius:25px; font-weight:800; cursor:pointer; width:100%;">Login Sekarang</button>
+                    </div>`;
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/orders/me', { headers: { 'Authorization': `Bearer ${token}` } });
+                const result = await res.json();
+                if (result.success) {
+                    window.allMyOrdersNav = result.data;
+                    window.filterPesananNav('Semua', document.querySelector('.tab-pesanan')); 
+                }
+            } catch (error) {
+                kontenPesanan.innerHTML = '<p style="color:red; text-align:center; padding:20px;">Gagal terhubung ke server.</p>';
+            }
+        });
+
+        window.filterPesananNav = function(statusFilter, elemenTab) {
+            if(elemenTab) {
+                document.querySelectorAll('.tab-pesanan').forEach(tab => tab.classList.remove('active'));
+                elemenTab.classList.add('active');
+            }
+            const containerRiwayat = document.getElementById('kontenPesananLayar');
+            containerRiwayat.innerHTML = ''; 
+
+            let dataFiltered = window.allMyOrdersNav;
+            if(statusFilter !== 'Semua') {
+                dataFiltered = window.allMyOrdersNav.filter(o => {
+                    let dbStatus = (o.status || 'Menunggu Pembayaran').trim(); 
+                    if (statusFilter === 'Menunggu Pembayaran') return dbStatus === 'Pending' || dbStatus === 'Menunggu Pembayaran' || dbStatus === '';
+                    if (statusFilter === 'Diproses') return dbStatus === 'Diproses' || dbStatus === 'Dikemas';
+                    if (statusFilter === 'Retur') return dbStatus.includes('Retur');
+                    return dbStatus === statusFilter;
+                });
+            }
+
+            if(dataFiltered.length > 0) {
+                dataFiltered.forEach(order => {
+                    let items = []; try { items = JSON.parse(order.items); } catch(e) {}
+                    const barangPertama = items.length > 0 ? items[0] : { id: 0, foto: 'https://via.placeholder.com/150', nama: 'Barang', qty: 1, harga_final: 0 };
+                    
+                    let rawStatus = (order.status || 'Menunggu Pembayaran').trim();
+                    let displayStatus = rawStatus;
+                    if(rawStatus === 'Pending' || rawStatus === '') displayStatus = 'Menunggu Pembayaran';
+                    if(rawStatus === 'Diproses') displayStatus = 'Dikemas';
+
+                    let statusColor = "#ff9800"; let iconStatus = "fa-clock";
+                    if(displayStatus === 'Dikemas') { statusColor = "#0D47A1"; iconStatus = "fa-box"; }
+                    if(displayStatus === 'Dikirim') { statusColor = "#9c27b0"; iconStatus = "fa-shipping-fast"; }
+                    if(displayStatus === 'Terkirim') { statusColor = "#00838F"; iconStatus = "fa-box-open"; }
+                    if(displayStatus === 'Selesai') { statusColor = "#00AA5B"; iconStatus = "fa-check-circle"; }
+                    if(displayStatus.includes('Retur')) { statusColor = "#ff3b30"; iconStatus = "fa-undo"; }
+
+                    const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(order.total_price);
+
+                    let btnAksiHtml = '';
+                    if (displayStatus === 'Terkirim') {
+                        btnAksiHtml += `<button onclick="window.bukaModalReturNav(${order.id})" style="width:100%; padding:8px; margin-top:10px; background:#fff; color:#ff3b30; border:1px solid #ff3b30; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;"><i class="fas fa-undo mr-1"></i> Ajukan Retur</button>`;
+                        btnAksiHtml += `<button onclick="window.terimaPesananNav(${order.id})" style="width:100%; padding:10px; margin-top:8px; background:#0D47A1; color:#fff; border:none; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;"><i class="fas fa-box-open mr-1"></i> Pesanan Diterima (Selesai)</button>`;
+                    }
+                    if (displayStatus === 'Selesai') {
+                        btnAksiHtml += `<button onclick="window.bukaModalUlasanNav(${barangPertama.id})" style="width:100%; padding:10px; margin-top:10px; background:#0D47A1; color:#fff; border:none; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;"><i class="fas fa-star text-yellow-400 mr-1"></i> Nilai Pesanan</button>`;
+                    }
+                    if (displayStatus === 'Retur Diterima' || displayStatus === 'Retur Diproses') {
+                        btnAksiHtml += `<button onclick="window.cetakResiReturNav(${order.id})" style="width:100%; padding:10px; margin-top:10px; background:#ffebee; color:#ff3b30; border:1px solid #ffCDD2; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;"><i class="fas fa-print mr-1"></i> Cetak Label Retur</button>`;
+                    }
+
+                    const statusAman = ['Selesai', 'Dibatalkan', 'Dibatalkan (Expired)', 'Retur Ditolak'];
+                    if (statusAman.some(s => displayStatus.includes(s))) {
+                        btnAksiHtml += `<button onclick="window.hapusPesananNav(${order.id})" style="width:100%; padding:8px; margin-top:8px; background:#f4f7fa; color:#888; border:none; border-radius:8px; font-size:10px; font-weight:bold; cursor:pointer;"><i class="fas fa-trash-alt mr-1"></i> Sembunyikan</button>`;
+                    }
+
+                    containerRiwayat.innerHTML += `
+                        <div class="glass-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #eee; padding-bottom:8px; margin-bottom:10px;">
+                                <span onclick="window.location.href='toko.html'" style="font-size:11px; font-weight:800; color:#0D47A1; cursor:pointer; text-decoration:underline;"><i class="fas fa-store"></i> Belidikita Official</span>
+                                <span style="font-size:9px; font-weight:800; color:${statusColor}; background:${statusColor}15; padding:4px 8px; border-radius:6px; text-transform:uppercase;"><i class="fas ${iconStatus}"></i> ${displayStatus}</span>
+                            </div>
+                            <div style="display:flex; gap:10px; align-items:flex-start;">
+                                <img src="${barangPertama.foto}" style="width:50px; height:50px; object-fit:cover; border-radius:8px; border:1px solid #eee;">
+                                <div style="flex:1;">
+                                    <h4 style="font-size:11px; font-weight:bold; color:#333; margin-bottom:2px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${barangPertama.nama}</h4>
+                                    <div style="display:flex; justify-content:space-between; margin-top:5px;">
+                                        <span style="font-size:10px; color:#888;">x${barangPertama.qty}</span>
+                                        <span style="font-size:11px; font-weight:bold; color:#0D47A1;">${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(barangPertama.harga_final)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top:10px; padding-top:10px; border-top:1px solid #f4f7fa; display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-size:10px; color:#666;">Total Tagihan</span>
+                                <span style="font-size:13px; font-weight:800; color:#ff5722;">${formatRp}</span>
+                            </div>
+                            ${btnAksiHtml}
+                        </div>
+                    `;
+                });
+            } else {
+                containerRiwayat.innerHTML = `<div style="text-align:center; padding: 50px 20px; opacity:0.6;"><i class="fas fa-shopping-bag" style="font-size: 50px; color: #0D47A1; margin-bottom: 10px;"></i><p style="font-size:11px; font-weight:bold; color:#555;">Belum ada pesanan di kategori ini.</p></div>`;
+            }
+        };
+
+        window.terimaPesananNav = async function(idOrder) {
+            if(!confirm("Yakin pesanan sudah selesai?")) return;
+            const token = localStorage.getItem('token');
+            try {
+                await fetch(`/api/orders/${idOrder}/receive`, { method: 'PUT', headers: { 'Authorization': `Bearer ${token}` } });
+                showToast("Pesanan Selesai!", "success"); 
+                setTimeout(() => window.location.reload(), 1000);
+            } catch(e) { showToast("Gagal", "error"); }
+        };
+
+        window.hapusPesananNav = async function(idOrder) {
+            if(!confirm("Sembunyikan riwayat?")) return;
+            const token = localStorage.getItem('token');
+            try {
+                await fetch(`/api/orders/${idOrder}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                showToast("Riwayat disembunyikan", "success"); 
+                setTimeout(() => window.location.reload(), 1000);
+            } catch(e) { showToast("Gagal", "error"); }
+        };
+
+        window.bukaModalReturNav = function(idOrder) {
+            document.getElementById('returOrderIdNav').value = idOrder;
+            document.getElementById('modalReturNav').style.display = 'flex';
+        };
+
+        window.bukaModalUlasanNav = function(idProd) {
+            document.getElementById('ulasanProductIdNav').value = idProd;
+            document.getElementById('modalUlasanNav').style.display = 'flex';
+        };
+
+        window.pilihBintangNav = function(bintang) {
+            document.getElementById('ulasanRatingNav').value = bintang;
+            const stars = document.getElementById('starContainerNav').children;
+            for(let i=0; i<stars.length; i++) stars[i].style.color = i < bintang ? '#FFD700' : '#ddd';
+        };
+
+        window.cetakResiReturNav = function(idOrder) {
+            const order = window.allMyOrdersNav.find(o => o.id === idOrder);
+            if(!order) return;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`<html><body style="font-family:Arial; padding:20px; text-align:center;"><h2>LABEL RETUR</h2><p>PESANAN: #ORD-${order.id}</p><p>Kirim balik ke: Belidikita Official</p><script>window.onload=function(){window.print();}<\/script></body></html>`);
+            printWindow.document.close();
+        };
+    </script>
+</body>
+</html>
