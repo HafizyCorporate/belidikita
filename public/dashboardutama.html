@@ -174,9 +174,10 @@
             <i class="fas fa-envelope"></i>
             <span style="position: absolute; top: -5px; right: -5px; background: #ff3b30; width: 8px; height: 8px; border-radius: 50%;"></span>
         </div>
-        <div class="header-admin" id="adminLoginIcon" style="cursor: pointer;" onclick="window.klikIkonAdmin()"><i class="fas fa-user-shield"></i></div>
-        <div class="header-cart" style="cursor: pointer;" onclick="window.location.href='keranjang.html'"><i class="fas fa-shopping-cart"></i><span class="cart-badge">0</span></div>
+                <div class="header-admin" id="adminLoginIcon" style="cursor: pointer;" onclick="window.klikIkonAdmin()"><i class="fas fa-user-shield"></i></div>
+        <div class="header-cart" style="cursor: pointer;" onclick="window.location.href='keranjang.html'"><i class="fas fa-shopping-cart"></i><span class="cart-badge" id="badgeKeranjangUtama">0</span></div>
     </header>
+
 
     <main id="mainContent" class="hidden">
         <div class="slider-container">
@@ -590,12 +591,14 @@
             setTimeout(() => { window.location.href = url; }, 300);
         };
 
-        // ✅ 3. ANTI-NYANGKUT SAAT KLIK TOMBOL BACK DI HP
+                // ✅ 3. ANTI-NYANGKUT & UPDATE KERANJANG SAAT KLIK TOMBOL BACK DI HP
         window.addEventListener('pageshow', function(event) {
             if(document.getElementById('loadingScreen')) {
                 document.getElementById('loadingScreen').style.display = 'none';
             }
+            if(typeof window.updateBadgeKeranjang === 'function') window.updateBadgeKeranjang();
         });
+
       
         window.bukaSubKategori = function(mainCat) {
             document.getElementById('judulSubKategori').innerHTML = `<i class="fas fa-tags" style="color:#FF9800;"></i> Etalase ${mainCat}`;
@@ -930,11 +933,35 @@
                 window.location.href = `detailproduk.html?id=${idProduk}`;
             };
             
-            window.bukaDetailTunggal = window.bukaDetailGlobal; 
+                        window.bukaDetailTunggal = window.bukaDetailGlobal; 
+
+            // ✅ MESIN PENARIK JUMLAH BARANG DI KERANJANG
+            window.updateBadgeKeranjang = async function() {
+                const token = localStorage.getItem('token'); 
+                const badge = document.getElementById('badgeKeranjangUtama');
+                if(!badge) return;
+
+                // Jika belum login atau yang login Admin, biarkan 0
+                if(!token || token.startsWith('token-admin-')) { 
+                    badge.innerText = "0"; 
+                    return; 
+                }
+
+                try {
+                    const res = await fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } });
+                    const result = await res.json();
+                    if(result.success) { 
+                        // Hitung total qty dari semua barang di keranjang
+                        const totalQty = result.data.reduce((sum, item) => sum + item.qty, 0);
+                        badge.innerText = totalQty; 
+                    }
+                } catch(e) { console.log("Gagal memuat angka keranjang"); }
+            };
 
             // PANGGIL SEMUANYA
             loadProdukBeranda();
             setTimeout(tampilkanFotoProfilToko, 300); 
+            window.updateBadgeKeranjang(); // ✅ Eksekusi tarik data keranjang!
 
         }); // AKHIR DARI DOMContentLoaded
 
