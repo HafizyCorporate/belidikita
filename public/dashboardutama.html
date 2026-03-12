@@ -958,10 +958,26 @@
                 } catch(e) { console.log("Gagal memuat angka keranjang"); }
             };
 
-            // PANGGIL SEMUANYA
+               // PANGGIL SEMUANYA
             loadProdukBeranda();
             setTimeout(tampilkanFotoProfilToko, 300); 
             window.updateBadgeKeranjang(); // ✅ Eksekusi tarik data keranjang!
+
+            // ==========================================
+            // ✅ TAMBAHAN: SENSOR PEMBUKA PESANAN OTOMATIS
+            // ==========================================
+            const cekUrl = new URLSearchParams(window.location.search);
+            if (cekUrl.get('openPesanan') === 'true') {
+                // Hapus tulisan ?openPesanan=true dari link atas agar bersih
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Beri jeda setengah detik sampai halaman stabil, lalu tembak buka laci Pesanan!
+                setTimeout(() => {
+                    if (typeof window.bukaHalamanPesanan === 'function') {
+                        window.bukaHalamanPesanan();
+                    }
+                }, 500); 
+            }
 
         }); // AKHIR DARI DOMContentLoaded
 
