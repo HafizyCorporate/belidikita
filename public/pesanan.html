@@ -155,8 +155,7 @@
             setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
         }
 
-                window.allMyOrdersNav = [];
-        window.allProductsDB = []; // 📦 Gudang untuk nyimpen foto asli dari database
+                     window.allMyOrdersNav = [];
 
         document.addEventListener("DOMContentLoaded", async () => {
             const kontenPesanan = document.getElementById('kontenPesananLayar');
@@ -174,18 +173,10 @@
             }
 
             try {
-                // 1. Tarik Data Pesanan Dulu
+                // 🚀 HANYA Tarik Data Pesanan Saja (Sangat Cepat!)
                 const resOrders = await fetch('/api/orders/me', { headers: { 'Authorization': `Bearer ${token}` } });
                 const resultOrders = await resOrders.json();
                 
-                // 2. Tarik Data Produk Asli Dari Database (Buat nyontek fotonya)
-                const resProducts = await fetch('/api/products?limit=1000');
-                const resultProducts = await resProducts.json();
-
-                if (resultProducts.success) {
-                    window.allProductsDB = resultProducts.data;
-                }
-
                 if (resultOrders.success) {
                     window.allMyOrdersNav = resultOrders.data;
                     window.filterPesananNav('Semua', document.querySelector('.tab-pesanan')); 
@@ -195,13 +186,13 @@
             }
         });
 
-        window.filterPesananNav = function(statusFilter, elemenTab) {
+        window.filterPesananNav = async function(statusFilter, elemenTab) {
             if(elemenTab) {
                 document.querySelectorAll('.tab-pesanan').forEach(tab => tab.classList.remove('active'));
                 elemenTab.classList.add('active');
             }
             const containerRiwayat = document.getElementById('kontenPesananLayar');
-            containerRiwayat.innerHTML = ''; 
+            containerRiwayat.innerHTML = '<p style="text-align:center; padding:30px; font-weight:bold; color:#0D47A1;"><i class="fas fa-spinner fa-spin mr-2"></i> Memuat pesanan...</p>';
 
             let dataFiltered = window.allMyOrdersNav;
             if(statusFilter !== 'Semua') {
@@ -215,24 +206,26 @@
             }
 
             if(dataFiltered.length > 0) {
-                dataFiltered.forEach(order => {
+                let htmlKonten = ''; // Kumpulkan semua HTML dulu biar gak kedap-kedip
+
+                for (const order of dataFiltered) {
                     let items = []; try { items = JSON.parse(order.items); } catch(e) {}
                     const barangPertama = items.length > 0 ? items[0] : { id: 0, foto: 'https://via.placeholder.com/150', nama: 'Barang', qty: 1, harga_final: 0 };
                     
-                    // 🔍 CARI FOTO ASLI DARI DATABASE PRODUK
-                    let fotoAsliDB = barangPertama.foto; // Default pakai foto dari keranjang
-                    const produkDiDB = window.allProductsDB.find(p => p.id == barangPertama.id);
-                    if (produkDiDB && produkDiDB.media_url) {
-                        try {
-                            // Cek apakah fotonya disimpen dalam bentuk Array JSON
-                            let arrFoto = JSON.parse(produkDiDB.media_url);
+                    // 🔍 TARIK FOTO ASLI (SATU PER SATU DARI API SECARA ASYNCHRONOUS)
+                    let fotoAsliDB = barangPertama.foto; 
+                    try {
+                        // Tembak langsung id barangnya tanpa membebani server
+                        const resProd = await fetch(`/api/products/${barangPertama.id}`);
+                        const dataProd = await resProd.json();
+                        if (dataProd.success && dataProd.data && dataProd.data.media_url) {
+                            let arrFoto = JSON.parse(dataProd.data.media_url);
                             if (Array.isArray(arrFoto) && arrFoto.length > 0) {
-                                fotoAsliDB = arrFoto[0]; // Ambil foto pertama
+                                fotoAsliDB = arrFoto[0];
                             }
-                        } catch (e) {
-                            // Kalau cuma string biasa
-                            fotoAsliDB = produkDiDB.media_url;
                         }
+                    } catch (e) {
+                        console.log("Pakai foto fallback untuk order " + order.id);
                     }
 
                     let rawStatus = (order.status || 'Menunggu Pembayaran').trim();
@@ -266,7 +259,7 @@
                         btnAksiHtml += `<button onclick="window.hapusPesananNav(${order.id})" style="width:100%; padding:8px; margin-top:8px; background:#f4f7fa; color:#888; border:none; border-radius:8px; font-size:10px; font-weight:bold; cursor:pointer;"><i class="fas fa-trash-alt mr-1"></i> Sembunyikan</button>`;
                     }
 
-                    containerRiwayat.innerHTML += `
+                    htmlKonten += `
                         <div class="glass-card">
                             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #eee; padding-bottom:8px; margin-bottom:10px;">
                                 <span onclick="window.location.href='toko.html'" style="font-size:11px; font-weight:800; color:#0D47A1; cursor:pointer; text-decoration:underline;"><i class="fas fa-store"></i> Belidikita Official</span>
@@ -289,53 +282,13 @@
                             ${btnAksiHtml}
                         </div>
                     `;
-                });
+                }
+                containerRiwayat.innerHTML = htmlKonten; // Render sekaligus di akhir proses!
             } else {
                 containerRiwayat.innerHTML = `<div style="text-align:center; padding: 50px 20px; opacity:0.6;"><i class="fas fa-shopping-bag" style="font-size: 50px; color: #0D47A1; margin-bottom: 10px;"></i><p style="font-size:11px; font-weight:bold; color:#555;">Belum ada pesanan di kategori ini.</p></div>`;
             }
         };
-
-                    if (displayStatus === 'Selesai') {
-                        btnAksiHtml += `<button onclick="window.bukaModalUlasanNav(${barangPertama.id})" style="width:100%; padding:10px; margin-top:10px; background:#0D47A1; color:#fff; border:none; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;"><i class="fas fa-star text-yellow-400 mr-1"></i> Nilai Pesanan</button>`;
-                    }
-                    if (displayStatus === 'Retur Diterima' || displayStatus === 'Retur Diproses') {
-                        btnAksiHtml += `<button onclick="window.cetakResiReturNav(${order.id})" style="width:100%; padding:10px; margin-top:10px; background:#ffebee; color:#ff3b30; border:1px solid #ffCDD2; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;"><i class="fas fa-print mr-1"></i> Cetak Label Retur</button>`;
-                    }
-
-                    const statusAman = ['Selesai', 'Dibatalkan', 'Dibatalkan (Expired)', 'Retur Ditolak'];
-                    if (statusAman.some(s => displayStatus.includes(s))) {
-                        btnAksiHtml += `<button onclick="window.hapusPesananNav(${order.id})" style="width:100%; padding:8px; margin-top:8px; background:#f4f7fa; color:#888; border:none; border-radius:8px; font-size:10px; font-weight:bold; cursor:pointer;"><i class="fas fa-trash-alt mr-1"></i> Sembunyikan</button>`;
-                    }
-
-                    containerRiwayat.innerHTML += `
-                        <div class="glass-card">
-                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #eee; padding-bottom:8px; margin-bottom:10px;">
-                                <span onclick="window.location.href='toko.html'" style="font-size:11px; font-weight:800; color:#0D47A1; cursor:pointer; text-decoration:underline;"><i class="fas fa-store"></i> Belidikita Official</span>
-                                <span style="font-size:9px; font-weight:800; color:${statusColor}; background:${statusColor}15; padding:4px 8px; border-radius:6px; text-transform:uppercase;"><i class="fas ${iconStatus}"></i> ${displayStatus}</span>
-                            </div>
-                            <div style="display:flex; gap:10px; align-items:flex-start;">
-                                <img src="${barangPertama.foto}" style="width:50px; height:50px; object-fit:cover; border-radius:8px; border:1px solid #eee;">
-                                <div style="flex:1;">
-                                    <h4 style="font-size:11px; font-weight:bold; color:#333; margin-bottom:2px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${barangPertama.nama}</h4>
-                                    <div style="display:flex; justify-content:space-between; margin-top:5px;">
-                                        <span style="font-size:10px; color:#888;">x${barangPertama.qty}</span>
-                                        <span style="font-size:11px; font-weight:bold; color:#0D47A1;">${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(barangPertama.harga_final)}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div style="margin-top:10px; padding-top:10px; border-top:1px solid #f4f7fa; display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-size:10px; color:#666;">Total Tagihan</span>
-                                <span style="font-size:13px; font-weight:800; color:#ff5722;">${formatRp}</span>
-                            </div>
-                            ${btnAksiHtml}
-                        </div>
-                    `;
-                });
-            } else {
-                containerRiwayat.innerHTML = `<div style="text-align:center; padding: 50px 20px; opacity:0.6;"><i class="fas fa-shopping-bag" style="font-size: 50px; color: #0D47A1; margin-bottom: 10px;"></i><p style="font-size:11px; font-weight:bold; color:#555;">Belum ada pesanan di kategori ini.</p></div>`;
-            }
-        };
-
+   
         window.terimaPesananNav = async function(idOrder) {
             if(!confirm("Yakin pesanan sudah selesai?")) return;
             const token = localStorage.getItem('token');
