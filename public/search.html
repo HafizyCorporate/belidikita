@@ -294,7 +294,7 @@
             }
         }
 
-                         // ✅ FUNGSI FILTER BERLAPIS PINTAR (HYBRID: TAG + KAMUS PENYELAMAT BARANG LAMA)
+                           // ✅ FUNGSI FILTER BERLAPIS PINTAR (SUPER DISIPLIN ANTI CAMPUR ADUK)
         window.terapkanFilter = function() {
             const grid = document.getElementById('gridHasil');
             const sort = document.getElementById('filterSort').value;
@@ -307,21 +307,20 @@
             if (paramKategori) {
                 let catKw = paramKategori.toLowerCase().trim(); 
 
-                // KAMUS PENYELAMAT: Kalau barang lama belum ada tag [Kategori], mesin akan melacak lewat nama barangnya!
                 const kamusAlias = {
-                    'sembako': ['beras', 'minyak', 'gula', 'mie', 'telur', 'galon', 'gas', 'kopi', 'teh'], // "air" Dihapus agar dispenser aman!
-                    'fashion': ['baju', 'celana', 'jaket', 'hijab', 'sepatu', 'tas', 'pakaian', 'kaos', 'kemeja', 'gamis', 'tunik', 'rok', 'pria', 'wanita', 'anak'],
-                    'elektronik': ['hp', 'charger', 'headset', 'powerbank', 'smartwatch', 'kabel', 'handphone', 'audio', 'earphone', 'tv', 'televisi'],
-                    'rumah': ['dapur', 'dispenser', 'rice cooker', 'blender', 'kebersihan', 'sapu', 'panci', 'piring', 'gelas', 'wajan', 'setrika', 'kipas'],
-                    'beauty': ['skincare', 'makeup', 'parfum', 'bodycare', 'haircare', 'kosmetik', 'lipstik', 'bedak', 'serum', 'lotion'],
-                    'bayi': ['popok', 'susu', 'bayi', 'stroller', 'ibu', 'botol'],
-                    'komputer': ['keyboard', 'mouse', 'laptop', 'flashdisk', 'harddisk', 'pc', 'monitor', 'printer', 'ssd'],
-                    'otomotif': ['oli', 'motor', 'mobil', 'helm', 'ban', 'lampu', 'spion', 'wiper', 'busi', 'velg'],
+                    'sembako': ['beras', 'minyak', 'gula', 'mie', 'telur', 'galon', 'gas', 'kopi', 'teh', 'sembako'],
+                    'fashion': ['baju', 'celana', 'jaket', 'hijab', 'sepatu', 'tas', 'pakaian', 'kaos', 'kemeja', 'gamis', 'tunik', 'rok', 'fashion'],
+                    'elektronik': ['hp', 'charger', 'headset', 'powerbank', 'smartwatch', 'kabel', 'handphone', 'audio', 'earphone', 'tv', 'elektronik'],
+                    'rumah': ['dapur', 'dispenser', 'rice cooker', 'blender', 'kebersihan', 'sapu', 'panci', 'piring', 'gelas', 'wajan', 'setrika', 'kipas', 'rumah tangga'],
+                    'beauty': ['skincare', 'makeup', 'parfum', 'bodycare', 'haircare', 'kosmetik', 'lipstik', 'bedak', 'serum', 'lotion', 'beauty'],
+                    'bayi': ['popok', 'susu', 'bayi', 'stroller', 'ibu', 'botol', 'ibu & bayi'],
+                    'komputer': ['keyboard', 'mouse', 'laptop', 'flashdisk', 'harddisk', 'pc', 'monitor', 'printer', 'ssd', 'komputer'],
+                    'otomotif': ['oli', 'motor', 'mobil', 'helm', 'ban', 'lampu', 'spion', 'wiper', 'busi', 'velg', 'otomotif'],
                     'olahraga': ['olahraga', 'gym', 'jersey', 'tenda', 'sepeda', 'raket', 'bola', 'barbel'],
                     'makanan': ['snack', 'frozen', 'kopi', 'minuman', 'makanan', 'kue', 'cemilan', 'roti', 'coklat', 'keripik'],
                     'buku': ['buku', 'novel', 'atk', 'kantor', 'sekolah', 'kertas', 'pulpen', 'pensil', 'komik'],
                     'mainan': ['mainan', 'action figure', 'puzzle', 'musik', 'boneka', 'lego', 'game', 'robot'],
-                    'ibadah': ['sajadah', 'mukena', 'sarung', 'quran', 'tasbih', 'peci', 'muslim', 'koko']
+                    'ibadah': ['sajadah', 'mukena', 'sarung', 'quran', 'tasbih', 'peci', 'muslim', 'koko', 'ibadah']
                 };
 
                 let aliasWords = [catKw]; 
@@ -334,22 +333,30 @@
                 filteredData = filteredData.filter(p => {
                     let desc = (p.description || "").toLowerCase();
                     let title = (p.title || "").toLowerCase();
+                    let catDB = (p.category || "").toLowerCase();
                     
-                    // Prioritas 1: Cek Tag Kategori Resmi (Buat barang yang baru di-upload/edit)
-                    let matchTag = false;
-                    let ekstrakTag = desc.match(/\[kategori:\s*(.*?)\]/);
-                    if (ekstrakTag) {
-                        matchTag = ekstrakTag[1].includes(catKw);
-                    }
-                    
-                    // Prioritas 2: Jika gak ada Tag, tembak pakai Kamus Penyelamat
-                    let matchAlias = aliasWords.some(word => title.includes(word) || desc.includes(word));
+                    let adaTagResmi = desc.includes("[kategori:");
 
-                    return matchTag || matchAlias;
+                    if (adaTagResmi) {
+                        // 🔒 KUNCI MATI: Kalau barang ini sudah ada Tag Kategori dari Admin Panel, 
+                        // MESIN HARUS PERCAYA TAG INI 100%. DILARANG Keras pakai Kamus Alias.
+                        let matchTag = false;
+                        let ekstrakTag = desc.match(/\[kategori:\s*(.*?)\]/);
+                        if (ekstrakTag) {
+                            matchTag = ekstrakTag[1].includes(catKw);
+                        }
+                        return matchTag;
+                    } else {
+                        // 🛠️ BARANG LAMA (Belum ada tag resmi): Pakai Kamus Alias.
+                        // TAPI DILARANG KERAS MENCARI DI DESKRIPSI (Agar kata 'anak kos' gak narik Dispenser ke Fashion).
+                        // Cukup cari di Judul Barang dan Kategori Database saja.
+                        let matchAlias = aliasWords.some(word => title.includes(word) || catDB.includes(word));
+                        return matchAlias;
+                    }
                 });
             }
 
-            // 2. TAHAP KEDUA: CARI KATA KUNCI (Contoh: mencari "Dispenser" di dalam Rumah Tangga)
+            // 2. TAHAP KEDUA: CARI SUB-KATEGORI (Cari "Dispenser" di dalam Rumah Tangga)
             if (kataKunci) {
                 let cleanKw = kataKunci.toLowerCase().replace(/[\/\-\&,()]/g, ' ');
                 cleanKw = cleanKw.replace(/\b(semua|produk|kategori|barang)\b/g, '').trim(); 
@@ -361,10 +368,12 @@
                     filteredData = filteredData.filter(p => {
                         let title = (p.title || "").toLowerCase();
                         let desc = (p.description || "").toLowerCase();
+                        // Kalau mencari sub-kategori/bebas, baru boleh cari di seluruh judul dan deskripsi
                         return kwArray.some(word => title.includes(word) || desc.includes(word));
                     });
                 }
             }
+
 
             if(toko === 'official') {
 
