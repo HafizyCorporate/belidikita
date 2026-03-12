@@ -804,20 +804,29 @@
             hitungWaktuAktifToko(lastActiveStr);
         }
 
-        function hitungWaktuAktifToko(lastActiveStr) {
+                function hitungWaktuAktifToko(lastActiveStr) {
             const elStatus = document.getElementById('displayStoreActive');
             if (!elStatus) return;
 
-            // Jika belum pernah login, set seolah 2 menit lalu
+            let waktuTerakhir;
+            
             if (!lastActiveStr) {
-                const dummyTime = new Date();
-                dummyTime.setMinutes(dummyTime.getMinutes() - 2); 
-                lastActiveStr = dummyTime.toISOString();
+                // Jika data kosong, anggap baru saja aktif
+                waktuTerakhir = new Date();
+                waktuTerakhir.setMinutes(waktuTerakhir.getMinutes() - 2); 
+            } else {
+                // Membaca data waktu dari server (Terkadang ada 'Z' di belakang yang bikin kacau zona waktu)
+                waktuTerakhir = new Date(lastActiveStr);
             }
 
-            const waktuTerakhir = new Date(lastActiveStr);
+            // Ambil waktu lokal pembeli saat ini (Di HP/PC masing-masing)
             const sekarang = new Date();
-            const selisihMenit = Math.floor((sekarang - waktuTerakhir) / (1000 * 60));
+            
+            // Konversi selisihnya menjadi satuan Menit (Apapun zona waktunya, selisih matematis tidak pernah bohong)
+            let selisihMenit = Math.floor((sekarang.getTime() - waktuTerakhir.getTime()) / (1000 * 60));
+
+            // Jika selisihnya mines (karena server lebih maju dari lokal), bulatkan jadi 0 saja (Baru saja)
+            if (selisihMenit < 0) selisihMenit = 0;
 
             let teksWaktu = "Aktif baru saja";
             if (selisihMenit > 0 && selisihMenit < 60) teksWaktu = `Aktif ${selisihMenit} menit lalu`;
@@ -826,6 +835,7 @@
 
             elStatus.innerText = teksWaktu;
         }
+
 
         // Panggil fungsi gabungan ini saat web pertama kali dimuat
         document.addEventListener("DOMContentLoaded", muatProfilTokoDB);
